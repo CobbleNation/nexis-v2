@@ -18,6 +18,8 @@ import { differenceInDays, addMonths, addYears, parseISO, isValid, format } from
 import { MetricSuggestionResponse } from '@/lib/ai/types';
 import { MetricCreationWizard } from '@/components/metrics/MetricCreationWizard';
 import { useOnboarding } from '@/components/onboarding/OnboardingProvider';
+import { useSubscription } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 interface GoalCreationWizardProps {
     initialTitle?: string;
@@ -33,6 +35,10 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
     const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState(1);
+
+    const { HAS_FULL_AI } = useSubscription()?.limits || { HAS_FULL_AI: false };
+    const [showUpgrade, setShowUpgrade] = useState(false);
+    const [upgradeContext, setUpgradeContext] = useState({ title: '', description: '' });
 
 
 
@@ -510,12 +516,22 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={handleAISuggestMetrics}
+                                                onClick={() => {
+                                                    if (!HAS_FULL_AI) {
+                                                        setUpgradeContext({
+                                                            title: "AI Підказки Метрик",
+                                                            description: "Не знаєте, як виміряти успіх? AI проаналізує вашу ціль і запропонує ідеальні метрики. Доступно у Pro."
+                                                        });
+                                                        setShowUpgrade(true);
+                                                    } else {
+                                                        handleAISuggestMetrics();
+                                                    }
+                                                }}
                                                 disabled={isSuggestingMetrics}
                                                 className="text-amber-600 hover:text-amber-700 h-8 text-xs font-bold bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-200 dark:border-amber-900"
                                             >
                                                 {isSuggestingMetrics ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                                                {isSuggestingMetrics ? "Шукаю..." : "AI Підказка"}
+                                                {isSuggestingMetrics ? "Шукаю..." : "AI Підказка (Pro)"}
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => { setWizardInitialState({}); setIsMetricWizardOpen(true); }} className="text-primary hover:text-primary/80 h-8 text-xs font-bold bg-indigo-50 dark:bg-indigo-950/20 hover:bg-indigo-100 dark:hover:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900">
                                                 + Створити нову метрику
@@ -765,6 +781,12 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                     </Button>
                 )}
             </div>
+            <UpgradeModal
+                open={showUpgrade}
+                onOpenChange={setShowUpgrade}
+                title={upgradeContext.title}
+                description={upgradeContext.description}
+            />
         </div >
     );
 }

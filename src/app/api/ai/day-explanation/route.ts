@@ -1,6 +1,5 @@
-
-import { GOAL_BREAKDOWN_SYSTEM_PROMPT } from '@/lib/ai/prompts';
-import { GoalBreakdownResponse } from '@/lib/ai/types';
+import { DAY_EXPLANATION_SYSTEM_PROMPT } from '@/lib/ai/prompts';
+import { DayExplanationResponse } from '@/lib/ai/types';
 import OpenAI from 'openai';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
@@ -14,41 +13,48 @@ const openai = new OpenAI({
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
-        const { goalTitle, goalDescription, area } = body;
-
         // 1. Auth & Pro Check
         const cookieStore = await cookies();
         const token = cookieStore.get('access_token')?.value;
 
-        if (!token) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        if (!token) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+        }
 
         const payload = await verifyJWT(token);
-        if (!payload || !payload.userId) return new Response(JSON.stringify({ error: 'Invalid Token' }), { status: 401 });
+        if (!payload || !payload.userId) {
+            return new Response(JSON.stringify({ error: 'Invalid Token' }), { status: 401 });
+        }
 
         const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
 
-        if (!user || user.subscriptionTier !== 'pro') {
+        if (!user) {
+            return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
+        }
+
+        if (user.subscriptionTier !== 'pro') {
             return new Response(JSON.stringify({ error: 'Pro subscription required' }), { status: 403 });
         }
 
-
-        if (!goalTitle) {
-            return new Response('Goal title is required', { status: 400 });
-        }
+        // 2. Parse Input
+        const body = await req.json();
+        const { date, mood, focus, activities, notes } = body;
 
         const userPrompt = `
-Goal Title: ${goalTitle}
-Description: ${goalDescription || 'No description provided'}
-Area: ${area || 'General'}
+Date: ${date}
+Mood: ${mood}/10
+Focus Areas: ${Array.isArray(focus) ? focus.join(', ') : focus}
+Activities: ${Array.isArray(activities) ? activities.join(', ') : activities}
+Journal Notes: ${notes || 'None'}
 
-Break this goal down into actionable sub-tasks following the system instructions.
+Analyze this day mostly based on the mood and notes.
 `;
 
+        // 3. AI Generation
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
-                { role: "system", content: GOAL_BREAKDOWN_SYSTEM_PROMPT },
+                { role: "system", content: DAY_EXPLANATION_SYSTEM_PROMPT },
                 { role: "user", content: userPrompt }
             ],
             response_format: { type: "json_object" },
@@ -61,12 +67,12 @@ Break this goal down into actionable sub-tasks following the system instructions
             throw new Error('No content received from OpenAI');
         }
 
-        const result: GoalBreakdownResponse = JSON.parse(content);
+        const result: DayExplanationResponse = JSON.parse(content);
 
         return Response.json(result);
 
     } catch (error: any) {
-        console.error('AI Breakdown API Error:', error);
+        console.error('Day Explanation API Error:', error);
         return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }

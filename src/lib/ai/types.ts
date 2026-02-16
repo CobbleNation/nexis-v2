@@ -92,3 +92,9 @@ export interface MetricSuggestionResponse {
         targetValueSuggestion?: number;
     }[];
 }
+
+export interface DayExplanationResponse {
+    explanation: string;
+    insight: string;
+    theme: string;
+}
