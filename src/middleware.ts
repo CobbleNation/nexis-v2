@@ -9,10 +9,15 @@ export async function middleware(request: NextRequest) {
 
     // 1. Allow public paths
     if (pathname === '/' || PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
-        // If user is already logged in and tries to visit login/register, redirect to app
+        // If user is already logged in and tries to visit login/register, verify token first
         const token = request.cookies.get('access_token')?.value;
         if (token && (pathname === '/login' || pathname === '/register')) {
-            return NextResponse.redirect(new URL('/overview', request.url));
+            // VERIFY token before redirecting. Simply checking existence causes loops if token is invalid/expired.
+            const payload = await verifyJWT(token);
+            if (payload) {
+                return NextResponse.redirect(new URL('/overview', request.url));
+            }
+            // If token is invalid, let them stay on /login (and theoretically we could clear cookie here, but next() is enough)
         }
         return NextResponse.next();
     }
