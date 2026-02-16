@@ -14,7 +14,7 @@ const eventSchema = z.object({
     entityId: z.string().optional().nullable(),
     plan: z.enum(['free', 'pro']).optional().nullable(),
     source: z.enum(['web', 'mobile', 'admin']).optional().nullable(),
-    metadata: z.record(z.any()).optional().nullable(),
+    metadata: z.record(z.string(), z.any()).optional().nullable(),
 });
 
 export async function POST(req: Request) {
