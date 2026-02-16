@@ -94,7 +94,7 @@ export const DailyRecapCard: React.FC<DailyRecapCardProps> = ({ onOpenJournal })
                             </p>
 
                             {/* Analysis Block */}
-                            {isPro ? (
+                            {isPro && (
                                 <div
                                     onClick={todayJournal ? handleAnalyzeDay : onOpenJournal}
                                     className="mt-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center gap-3 cursor-pointer hover:bg-indigo-500/20 transition-colors group"
@@ -109,19 +109,6 @@ export const DailyRecapCard: React.FC<DailyRecapCardProps> = ({ onOpenJournal })
                                         <div className="text-xs text-indigo-200/60">
                                             {todayJournal ? "AI знайде прихований зміст подій" : "Спочатку запишіть думки"}
                                         </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div
-                                    onClick={() => setShowUpgrade(true)}
-                                    className="mt-4 p-3 bg-white/5 border border-white/10 rounded-lg flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-colors group"
-                                >
-                                    <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300">
-                                        <Lock className="w-4 h-4" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-bold text-white group-hover:text-indigo-200 transition-colors">Пояснення дня (Locked)</div>
-                                        <div className="text-xs text-indigo-200/60">Чому сьогодні був саме такий день?</div>
                                     </div>
                                 </div>
                             )}
@@ -152,15 +139,6 @@ export const DailyRecapCard: React.FC<DailyRecapCardProps> = ({ onOpenJournal })
                         >
                             <PenTool className="w-4 h-4 text-indigo-600 transition-transform group-hover:rotate-12" />
                             <span>Заповнити Журнал</span>
-                        </button>
-                    )}
-
-                    {!isPro && (
-                        <button
-                            onClick={() => setShowUpgrade(true)}
-                            className="flex items-center justify-center gap-2 px-5 py-2 text-xs font-medium text-indigo-200 hover:text-white transition-colors"
-                        >
-                            <span>Розблокувати аналіз</span>
                         </button>
                     )}
                 </div>
