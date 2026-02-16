@@ -11,9 +11,13 @@ interface DailyReviewResponse {
     focusForTomorrow: string[];
 }
 
+import { useSubscription } from '@/hooks/useSubscription';
+
 export function DailyReviewDialog() {
+    const { isPro } = useSubscription() || { isPro: false };
     const { state } = useData();
     const [isOpen, setIsOpen] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
     const [review, setReview] = useState<DailyReviewResponse | null>(null);
 
@@ -57,6 +61,8 @@ export function DailyReviewDialog() {
             generateReview();
         }
     }, [isOpen]);
+
+    if (!isPro) return null;
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
