@@ -93,20 +93,18 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 <div className="text-[10px] font-bold text-muted-foreground/40 mb-3 px-4 uppercase tracking-widest">Головне Меню</div>
                 {NAV_ITEMS.map((item) => {
                     const isActive = pathname.startsWith(item.href);
-                    // Match IDs with OnboardingOverlay
                     const navId = `sidebar-nav-${item.href.replace('/', '')}`;
-                    // @ts-ignore
                     const hasChildren = item.children && item.children.length > 0;
                     const showChildren = isActive && hasChildren;
 
                     return (
-                        <div key={item.href} className="flex flex-col">
+                        <div key={item.href} className="flex flex-col mb-1">
                             <Link
                                 href={item.href}
                                 onClick={onNavigate}
                                 id={navId}
                                 className={cn(
-                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1",
+                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                                     isActive
                                         ? "bg-sidebar-accent shadow-sm text-orange-600 ring-1 ring-sidebar-border"
                                         : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
@@ -117,23 +115,24 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                             </Link>
 
                             {showChildren && (
-                                <div className="ml-9 border-l-2 border-slate-100 dark:border-slate-800 pl-2 space-y-1 mb-2 animate-in slide-in-from-left-2 duration-200">
-                                    {/* @ts-ignore */}
-                                    {item.children.map((child) => (
-                                        <Link
-                                            key={child.href}
-                                            href={child.href}
-                                            onClick={onNavigate}
-                                            className={cn(
-                                                "block px-3 py-1.5 rounded-md text-sm transition-colors",
-                                                pathname === child.href || pathname + window.location.search === child.href // Simple check, might need hydration fix
-                                                    ? "text-orange-600 font-medium"
-                                                    : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
-                                            )}
-                                        >
-                                            {child.name}
-                                        </Link>
-                                    ))}
+                                <div className="mt-1 ml-9 space-y-1 border-l-2 border-slate-200 dark:border-slate-800 pl-2">
+                                    {item.children!.map((child) => {
+                                        const isChildActive = pathname === child.href || (typeof window !== 'undefined' && window.location.href.includes(child.href.split('?')[1]));
+
+                                        return (
+                                            <Link
+                                                key={child.href}
+                                                href={child.href}
+                                                onClick={onNavigate}
+                                                className={cn(
+                                                    "block px-3 py-1.5 rounded-md text-sm transition-colors text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50",
+                                                    isChildActive && "text-orange-600 font-medium"
+                                                )}
+                                            >
+                                                {child.name}
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
