@@ -4,7 +4,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Inbox, List, RefreshCw, Zap, Plus, Settings, Calendar, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useData } from '@/lib/store';
 import { InboxView } from '@/components/actions/InboxView';
 import { TasksView } from '@/components/actions/TasksView';
@@ -13,12 +13,8 @@ import { FocusView } from '@/components/actions/FocusView';
 import { HabitsView } from '@/components/actions/HabitsView';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-
-// Note: AddActionDialog might need updates, but for now we focus on the structure.
-
-export default function ActionsPage() {
+function ActionsPageContent() {
     const { state } = useData();
-    const activeArea = state.areas.find(a => a.id === state.selectedAreaId);
     const router = useRouter();
     const searchParams = useSearchParams();
     const activeTab = searchParams.get('tab') || 'tasks';
@@ -49,23 +45,26 @@ export default function ActionsPage() {
                                 {state.period === 'day' && 'Сьогодні'}
                                 {state.period === 'week' && 'Цей Тиждень'}
                                 {state.period === 'month' && 'Цей Місяць'}
+                                {state.period === 'quarter' && 'Цей Квартал'}
                                 {state.period === 'year' && 'Цей Рік'}
                             </span>
                         </div>
-                        {activeArea ? (
-                            <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium border border-transparent", activeArea.color.replace('bg-', 'bg-').replace('500', '100'), activeArea.color.replace('bg-', 'text-').replace('500', '700'))}>
-                                <Layers className="w-3.5 h-3.5" />
-                                <span>{activeArea.title}</span>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100/80 dark:bg-secondary/50 text-slate-600 dark:text-muted-foreground text-sm font-medium border border-slate-200/50 dark:border-border">
-                                <Layers className="w-3.5 h-3.5" />
-                                <span>Всі Сфери</span>
-                            </div>
-                        )}
+                        <div className="bg-slate-200 dark:bg-border h-4 w-[1px]" />
+                        <span className="text-sm text-muted-foreground">
+                            {new Date().toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        </span>
                     </div>
                 </div>
-                {/* Global Quick Add is handled by Cmd+K basically, but we can have local add */}
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Налаштування
+                    </Button>
+                    <Button onClick={() => { }} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Нова Дія
+                    </Button>
+                </div>
             </div>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col space-y-6">
@@ -134,26 +133,36 @@ export default function ActionsPage() {
                     )}
                 </div>
 
-                <TabsContent value="inbox" className="flex-1 min-h-0 pt-4">
-                    <InboxView />
-                </TabsContent>
+                <div className="flex-1 min-h-0 overflow-hidden">
+                    <TabsContent value="inbox" className="h-full m-0 data-[state=active]:flex flex-col">
+                        <InboxView />
+                    </TabsContent>
 
-                <TabsContent value="tasks" className="flex-1 min-h-0 pt-4">
-                    <TasksView filter={taskFilter} />
-                </TabsContent>
+                    <TabsContent value="tasks" className="h-full m-0 data-[state=active]:flex flex-col">
+                        <TasksView filter={taskFilter} onFilterChange={setTaskFilter} />
+                    </TabsContent>
 
-                <TabsContent value="routines" className="flex-1 min-h-0 pt-4">
-                    <RoutinesView />
-                </TabsContent>
+                    <TabsContent value="routines" className="h-full m-0 data-[state=active]:flex flex-col">
+                        <RoutinesView />
+                    </TabsContent>
 
-                <TabsContent value="habits" className="flex-1 min-h-0 pt-4">
-                    <HabitsView />
-                </TabsContent>
+                    <TabsContent value="habits" className="h-full m-0 data-[state=active]:flex flex-col">
+                        <HabitsView />
+                    </TabsContent>
 
-                <TabsContent value="focus" className="flex-1 min-h-0 pt-4">
-                    <FocusView />
-                </TabsContent>
+                    <TabsContent value="focus" className="h-full m-0 data-[state=active]:flex flex-col">
+                        <FocusView />
+                    </TabsContent>
+                </div>
             </Tabs>
         </div>
+    );
+}
+
+export default function ActionsPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center h-full">Loading...</div>}>
+            <ActionsPageContent />
+        </Suspense>
     );
 }
