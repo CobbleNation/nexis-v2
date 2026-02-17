@@ -29,11 +29,17 @@ export async function middleware(request: NextRequest) {
 
     // Check for Access Token
     const accessToken = request.cookies.get('access_token')?.value;
+    const refreshToken = request.cookies.get('refresh_token')?.value;
 
     // NOTE: In a real "memory-only" access token architecture, middleware might not see it if it's in headers.
     // But we implemented it as HttpOnly cookie in `auth-utils.ts` for this reason - Middleware support.
 
     if (!accessToken) {
+        // If we have a refresh token, let the client handle the refresh
+        if (refreshToken) {
+            return NextResponse.next();
+        }
+
         // If it's an API call, return 401
         if (pathname.startsWith('/api/')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -45,11 +51,16 @@ export async function middleware(request: NextRequest) {
     }
 
     // Verify token and check role for Admin routes
-    console.log('[Middleware] Verifying token for:', pathname);
+    // console.log('[Middleware] Verifying token for:', pathname);
     const payload = await verifyJWT(accessToken);
-    console.log('[Middleware] Token verified, payload:', payload ? 'valid' : 'invalid');
+    // console.log('[Middleware] Token verified, payload:', payload ? 'valid' : 'invalid');
 
     if (!payload) {
+        // If access token is invalid but we have a refresh token, let the client handle it
+        if (refreshToken) {
+            return NextResponse.next();
+        }
+
         // Invalid Token
         if (pathname.startsWith('/api/')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

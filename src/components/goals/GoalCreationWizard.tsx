@@ -723,8 +723,8 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                             type="number"
                                             placeholder="0"
                                             value={metricStartValue}
-                                            readOnly
-                                            className="h-11 bg-slate-100 dark:bg-secondary/50 border-slate-200 dark:border-border text-slate-500 cursor-not-allowed dark:text-muted-foreground"
+                                            onChange={e => setMetricStartValue(e.target.value)}
+                                            className="h-11 bg-white dark:bg-card border-slate-200 dark:border-border text-slate-900 dark:text-foreground font-semibold"
                                         />
                                     </div>
                                     <div className="space-y-2">

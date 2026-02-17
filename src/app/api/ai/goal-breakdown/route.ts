@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
         const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
 
-        if (!user || user.subscriptionTier !== 'pro') {
+        if (!user || (user.subscriptionTier !== 'pro' && user.role !== 'admin')) {
             return new Response(JSON.stringify({ error: 'Pro subscription required' }), { status: 403 });
         }
 

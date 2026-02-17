@@ -15,6 +15,7 @@ interface User {
     onboardingCompleted?: boolean;
     cardLast4?: string;
     cardToken?: string;
+    role?: 'user' | 'admin' | 'manager' | 'support';
 }
 
 interface AuthContextType {

@@ -32,7 +32,7 @@ export async function POST(req: Request) {
             return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
         }
 
-        if (user.subscriptionTier !== 'pro') {
+        if (user.subscriptionTier !== 'pro' && user.role !== 'admin') {
             return new Response(JSON.stringify({ error: 'Pro subscription required' }), { status: 403 });
         }
 
