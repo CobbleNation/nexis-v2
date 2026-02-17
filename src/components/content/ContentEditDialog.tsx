@@ -127,7 +127,7 @@ export function ContentEditDialog({ open, onOpenChange, type, initialData }: Con
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[700px] h-[80vh] sm:h-[600px] flex flex-col p-0 gap-0 overflow-hidden bg-white dark:bg-card border-none ring-1 ring-slate-900/5 dark:ring-border shadow-2xl">
+            <DialogContent className="w-[95%] sm:max-w-[700px] h-[80vh] sm:h-[600px] flex flex-col p-0 gap-0 overflow-hidden bg-white dark:bg-card border-none ring-1 ring-slate-900/5 dark:ring-border shadow-2xl">
 
                 {/* Header */}
                 <DialogHeader className="p-4 border-b border-slate-100 dark:border-border flex flex-row items-center justify-between space-y-0 bg-slate-50/50 dark:bg-card/50">

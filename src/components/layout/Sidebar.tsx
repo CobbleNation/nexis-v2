@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import {
     LayoutDashboard,
     History,
@@ -22,13 +22,52 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { SidebarUpsell } from '@/components/layout/SidebarUpsell';
 
-const NAV_ITEMS = [
+import { LucideIcon } from 'lucide-react';
+
+interface NavItem {
+    name: string;
+    href: string;
+    icon: LucideIcon;
+    children?: { name: string; href: string }[];
+}
+
+const NAV_ITEMS: NavItem[] = [
     { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
     { name: 'Розклад', href: '/timeline', icon: History },
     { name: 'Сфери', href: '/areas', icon: Activity },
-    { name: 'Завдання', href: '/actions', icon: CheckSquare },
-    { name: 'Цілі та Проекти', href: '/goals', icon: Target },
-    { name: 'Контент', href: '/content', icon: Library },
+    {
+        name: 'Завдання',
+        href: '/actions',
+        icon: CheckSquare,
+        children: [
+            { name: 'Вхідні', href: '/actions?tab=inbox' },
+            { name: 'Завдання', href: '/actions?tab=tasks' },
+            { name: 'Рутина', href: '/actions?tab=routines' },
+            { name: 'Звички', href: '/actions?tab=habits' },
+            { name: 'Фокус', href: '/actions?tab=focus' },
+        ]
+    },
+    {
+        name: 'Цілі та Проекти',
+        href: '/goals',
+        icon: Target,
+        children: [
+            { name: 'Активні Цілі', href: '/goals?tab=goals' },
+            { name: 'Проекти', href: '/goals?tab=projects' },
+            { name: 'Історія', href: '/goals?tab=history' },
+        ]
+    },
+    {
+        name: 'Контент',
+        href: '/content',
+        icon: Library,
+        children: [
+            { name: 'Нотатки', href: '/content?tab=notes' },
+            { name: 'Журнал', href: '/content?tab=journal' },
+            { name: 'Файли', href: '/content?tab=files' },
+            { name: 'Бібліотека', href: '/content?tab=library' },
+        ]
+    },
     { name: 'Аналітика', href: '/insights', icon: Lightbulb },
     { name: 'Налаштування', href: '/settings', icon: Settings },
 ];
@@ -56,22 +95,48 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     const isActive = pathname.startsWith(item.href);
                     // Match IDs with OnboardingOverlay
                     const navId = `sidebar-nav-${item.href.replace('/', '')}`;
+                    // @ts-ignore
+                    const hasChildren = item.children && item.children.length > 0;
+                    const showChildren = isActive && hasChildren;
+
                     return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={onNavigate}
-                            id={navId}
-                            className={cn(
-                                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1",
-                                isActive
-                                    ? "bg-sidebar-accent shadow-sm text-orange-600 ring-1 ring-sidebar-border"
-                                    : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
+                        <div key={item.href} className="flex flex-col">
+                            <Link
+                                href={item.href}
+                                onClick={onNavigate}
+                                id={navId}
+                                className={cn(
+                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1",
+                                    isActive
+                                        ? "bg-sidebar-accent shadow-sm text-orange-600 ring-1 ring-sidebar-border"
+                                        : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
+                                )}
+                            >
+                                <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-orange-600" : "text-muted-foreground/70 group-hover:text-orange-500")} />
+                                {item.name}
+                            </Link>
+
+                            {showChildren && (
+                                <div className="ml-9 border-l-2 border-slate-100 dark:border-slate-800 pl-2 space-y-1 mb-2 animate-in slide-in-from-left-2 duration-200">
+                                    {/* @ts-ignore */}
+                                    {item.children.map((child) => (
+                                        <Link
+                                            key={child.href}
+                                            href={child.href}
+                                            onClick={onNavigate}
+                                            className={cn(
+                                                "block px-3 py-1.5 rounded-md text-sm transition-colors",
+                                                pathname === child.href || pathname + window.location.search === child.href // Simple check, might need hydration fix
+                                                    ? "text-orange-600 font-medium"
+                                                    : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                                            )}
+                                        >
+                                            {child.name}
+                                        </Link>
+                                    ))}
+                                </div>
                             )}
-                        >
-                            <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-orange-600" : "text-muted-foreground/70 group-hover:text-orange-500")} />
-                            {item.name}
-                        </Link>
+                        </div>
                     );
                 })}
             </nav>

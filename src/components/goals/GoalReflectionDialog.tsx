@@ -47,7 +47,7 @@ export function GoalReflectionDialog({ goal, isOpen, onClose, onConfirm }: GoalR
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-[500px] bg-white dark:bg-card border-none shadow-2xl rounded-2xl overflow-hidden p-0">
+            <DialogContent className="w-[95%] sm:max-w-[500px] bg-white dark:bg-card border-none shadow-2xl rounded-2xl overflow-hidden p-0 max-h-[90vh] overflow-y-auto">
                 <DialogTitle className="sr-only">Рефлексія цілі: {goal.title}</DialogTitle>
                 <div className={cn(
                     "p-8 text-center border-b transition-colors duration-300",

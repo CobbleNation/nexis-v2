@@ -107,7 +107,7 @@ export function GlobalSearch() {
     ];
 
     return (
-        <div ref={containerRef} className="relative flex-1 max-w-2xl mx-12">
+        <div ref={containerRef} className="relative flex-1 max-w-2xl mx-2 md:mx-12">
             <div className={cn(
                 "relative group transition-all duration-300",
                 isOpen ? "z-50" : "z-10"

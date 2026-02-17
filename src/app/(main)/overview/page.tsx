@@ -3,6 +3,7 @@
 import { useFilteredData, useData } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ContextState } from '@/components/overview/ContextState';
+import { MobileContextControls } from '@/components/features/MobileContextControls';
 import { DailyRecapCard } from '@/components/features/DailyRecapCard';
 import { OverviewDay } from '@/components/overview/OverviewDay';
 import { OverviewWeek } from '@/components/overview/OverviewWeek';
@@ -60,6 +61,7 @@ export default function OverviewPage() {
 
             {/* 1. Context State Header */}
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+                <MobileContextControls />
                 <ContextState
                     score={contextScore}
                     metrics={metrics}

@@ -130,7 +130,7 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[95%] sm:max-w-2xl h-auto sm:h-[600px] p-0 gap-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-card rounded-xl sm:rounded-xl ring-1 ring-slate-900/5 dark:ring-border/20 transition-all duration-200 flex flex-col">
+            <DialogContent className="w-[95%] sm:max-w-2xl h-[90vh] sm:h-[600px] p-0 gap-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-card rounded-xl sm:rounded-xl ring-1 ring-slate-900/5 dark:ring-border/20 transition-all duration-200 flex flex-col">
                 <DialogHeader className="sr-only">
                     <DialogTitle>{getLabel()}</DialogTitle>
                 </DialogHeader>

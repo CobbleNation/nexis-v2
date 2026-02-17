@@ -99,7 +99,7 @@ export function OverviewWeek({ filteredActions, filteredGoals, activeArea, activ
                     <Link
                         key={i}
                         href="/timeline" // Ideally filter by date if supported
-                        className="flex flex-col items-center gap-3 group relative w-12 md:w-16 transition-all hover:-translate-y-1 block"
+                        className="flex flex-col items-center gap-2 group relative w-9 sm:w-12 md:w-16 transition-all hover:-translate-y-1 block"
                     >
                         <div className="relative w-full bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-end overflow-hidden h-40">
                             <motion.div

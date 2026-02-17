@@ -229,7 +229,7 @@ export function Header() {
     };
 
     return (
-        <header id="header-container" className="h-16 border-b border-border/50 px-6 flex items-center justify-between bg-background/50 backdrop-blur-md sticky top-0 z-30 transition-all">
+        <header id="header-container" className="h-16 border-b border-border/50 px-4 md:px-6 flex items-center justify-between bg-background/50 backdrop-blur-md sticky top-0 z-30 transition-all">
             {/* Quick Add Modal (Global) */}
             <QuickAddModal
                 open={isQuickAddOpen}
@@ -240,7 +240,7 @@ export function Header() {
             />
 
             {/* Left: Breadcrumbs */}
-            <div className="flex items-center gap-3 text-sm px-2">
+            <div className="hidden md:flex items-center gap-3 text-sm px-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground/60 overflow-hidden">
                     <Link href="/" className="hover:text-foreground transition-colors flex items-center">
                         <Home className="h-4 w-4" />

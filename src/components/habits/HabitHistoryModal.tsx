@@ -35,7 +35,7 @@ export function HabitHistoryModal({ habit, open, onOpenChange }: HabitHistoryMod
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[90vh] sm:h-[800px] overflow-y-auto bg-slate-50 dark:bg-card/95 backdrop-blur-xl border-slate-200 dark:border-border p-6 rounded-3xl">
+            <DialogContent className="w-[95%] max-w-4xl h-[90vh] sm:h-[800px] overflow-y-auto bg-slate-50 dark:bg-card/95 backdrop-blur-xl border-slate-200 dark:border-border p-6 rounded-3xl">
                 <DialogHeader className="mb-6">
                     <DialogTitle className="text-3xl font-bold flex items-center gap-3">
                         <span className="bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 p-2 rounded-xl">

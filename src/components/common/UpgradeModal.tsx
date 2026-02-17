@@ -25,7 +25,7 @@ export function UpgradeModal({ open, onOpenChange, title, description }: Upgrade
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md p-0 overflow-hidden border-none shadow-2xl">
+            <DialogContent className="w-[95%] max-w-md p-0 overflow-hidden border-none shadow-2xl">
                 {/* Header Background */}
                 <div className="bg-zinc-900 dark:bg-zinc-950 p-8 text-white text-center relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-10 opacity-5 transform rotate-12">

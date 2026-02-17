@@ -123,7 +123,7 @@ export function VoiceOverlay({ isOpen, onClose }: VoiceOverlayProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(val) => !val && onClose()}>
-            <DialogContent className="sm:max-w-[400px] bg-white dark:bg-card border-none shadow-2xl rounded-3xl overflow-hidden p-0">
+            <DialogContent className="w-[95%] sm:max-w-[400px] bg-white dark:bg-card border-none shadow-2xl rounded-3xl overflow-hidden p-0">
                 <DialogTitle className="sr-only">Голосовий Асистент</DialogTitle>
 
                 <div className="flex flex-col items-center justify-center p-8 min-h-[350px] relative transition-all duration-300">

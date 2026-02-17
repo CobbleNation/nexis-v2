@@ -11,6 +11,7 @@ import { TasksView } from '@/components/actions/TasksView';
 import { RoutinesView } from '@/components/actions/RoutinesView';
 import { FocusView } from '@/components/actions/FocusView';
 import { HabitsView } from '@/components/actions/HabitsView';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 
 // Note: AddActionDialog might need updates, but for now we focus on the structure.
@@ -18,7 +19,15 @@ import { HabitsView } from '@/components/actions/HabitsView';
 export default function ActionsPage() {
     const { state } = useData();
     const activeArea = state.areas.find(a => a.id === state.selectedAreaId);
-    const [activeTab, setActiveTab] = useState<string>('tasks');
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'tasks';
+
+    const handleTabChange = (val: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tab', val);
+        router.push(`/actions?${params.toString()}`);
+    };
     const [taskFilter, setTaskFilter] = useState<'current' | 'active' | 'completed' | 'deferred'>('current');
 
     // Counters
@@ -59,7 +68,7 @@ export default function ActionsPage() {
                 {/* Global Quick Add is handled by Cmd+K basically, but we can have local add */}
             </div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col space-y-6">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col space-y-6">
                 <div className="flex flex-col sticky top-0 z-20 bg-slate-50/95 dark:bg-background/95 backdrop-blur-sm -mx-4 px-4 md:-mx-8 md:px-8 border-b border-slate-200/50 dark:border-border">
                     <div className="flex justify-between items-center py-4">
                         <TabsList id="tasks-tabs" className="bg-white dark:bg-card p-1.5 gap-2 shadow-sm border border-slate-200 dark:border-border rounded-2xl h-auto overflow-x-auto justify-start w-full md:w-auto no-scrollbar">

@@ -206,7 +206,7 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
 
                     {/* Move to Project Modal */}
                     <Dialog open={isMoveOpen} onOpenChange={setIsMoveOpen}>
-                        <DialogContent className="sm:max-w-[400px]">
+                        <DialogContent className="w-[95%] sm:max-w-[400px]">
                             <DialogHeader>
                                 <DialogTitle>Оберіть проект</DialogTitle>
                             </DialogHeader>

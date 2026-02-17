@@ -16,7 +16,7 @@ interface FocusInfluencersModalProps {
 export function FocusInfluencersModal({ open, onOpenChange, drivers, isLoading }: FocusInfluencersModalProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="w-[95%] sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         <Zap className="w-5 h-5 text-amber-500" />

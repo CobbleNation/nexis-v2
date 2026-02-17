@@ -75,7 +75,7 @@ export function DailyReviewDialog() {
                     AI Аналіз Дня
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md bg-white dark:bg-card border-none shadow-2xl overflow-hidden p-0 gap-0">
+            <DialogContent className="w-[95%] sm:max-w-md bg-white dark:bg-card border-none shadow-2xl overflow-hidden p-0 gap-0 max-h-[90vh] overflow-y-auto">
                 <div className="sr-only">
                     <DialogTitle>AI Аналіз Дня</DialogTitle>
                     <DialogDescription>

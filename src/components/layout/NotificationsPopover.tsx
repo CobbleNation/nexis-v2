@@ -55,7 +55,7 @@ export function NotificationsPopover() {
                     )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[380px] p-0 mr-4 rounded-2xl shadow-xl border-border/50 bg-background/95 backdrop-blur-xl" align="end">
+            <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[380px] p-0 mr-4 rounded-2xl shadow-xl border-border/50 bg-background/95 backdrop-blur-xl" align="end">
                 <div className="flex items-center justify-between p-4 border-b border-border/50">
                     <h4 className="font-semibold text-sm">Сповіщення</h4>
                     <div className="flex gap-1">

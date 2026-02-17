@@ -32,6 +32,15 @@ function ContentPageContent() {
     const { isPro, tier } = useSubscription();
     const [upgradeOpen, setUpgradeOpen] = useState(false);
 
+    const currentTab = searchParams.get('tab') || 'notes';
+
+    const handleTabChange = (val: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tab', val);
+        params.delete('id'); // Clear ID when switching tabs
+        router.push(`/content?${params.toString()}`);
+    };
+
     // Dialog State
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedType, setSelectedType] = useState<ContentType>('note');
@@ -88,7 +97,7 @@ function ContentPageContent() {
                 </div>
             </div>
 
-            <Tabs defaultValue="notes" className="flex-1 flex flex-col space-y-6">
+            <Tabs value={currentTab} onValueChange={handleTabChange} className="flex-1 flex flex-col space-y-6">
                 <div className="flex justify-between items-center bg-white/50 dark:bg-card/50 p-2 rounded-2xl border border-slate-100 dark:border-border backdrop-blur-sm">
                     <TabsList id="content-tabs" className="bg-transparent p-0 gap-2">
                         <TabsTrigger value="notes" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground">
