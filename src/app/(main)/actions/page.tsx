@@ -138,7 +138,7 @@ function ActionsPageContent() {
                     </TabsContent>
 
                     <TabsContent value="tasks" className="h-full m-0 data-[state=active]:flex flex-col">
-                        <TasksView filter={taskFilter} onFilterChange={setTaskFilter} />
+                        <TasksView filter={taskFilter} />
                     </TabsContent>
 
                     <TabsContent value="routines" className="h-full m-0 data-[state=active]:flex flex-col">
