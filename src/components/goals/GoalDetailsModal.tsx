@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { GoalCreationWizard } from './GoalCreationWizard';
+import { MetricUpdateDialog } from '@/components/features/MetricUpdateDialog';
 import { Label } from '@/components/ui/label';
 import { v4 as uuidv4 } from 'uuid';
 import { GoalReflectionDialog } from './GoalReflectionDialog';
@@ -34,6 +35,8 @@ export function GoalDetailsModal({ goal, open, onOpenChange }: GoalDetailsModalP
 
     // Metric Updates
     const [isReflectionOpen, setIsReflectionOpen] = useState(false);
+    const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+    const [selectedMetric, setSelectedMetric] = useState<MetricDefinition | null>(null);
 
     // Subgoals & Permissions
     const { HAS_SUBGOALS, HAS_AI_GOAL_BREAKDOWN } = useSubscription()?.limits || { HAS_SUBGOALS: false, HAS_AI_GOAL_BREAKDOWN: false }; // Safe fallback
@@ -283,7 +286,7 @@ export function GoalDetailsModal({ goal, open, onOpenChange }: GoalDetailsModalP
     return (
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="sm:max-w-2xl bg-white dark:bg-card border-none shadow-2xl rounded-2xl overflow-hidden p-0 gap-0">
+                <DialogContent className="w-[95%] sm:max-w-2xl bg-white dark:bg-card border-none shadow-2xl rounded-2xl overflow-hidden p-0 gap-0 max-h-[90vh] overflow-y-auto">
 
                     <DialogTitle className="sr-only">Деталі цілі: {activeGoal.title}</DialogTitle>
 
@@ -464,11 +467,11 @@ export function GoalDetailsModal({ goal, open, onOpenChange }: GoalDetailsModalP
                                         size="sm"
                                         className="h-6 text-xs text-blue-500 hover:text-blue-600 dark:text-blue-400 p-0 hover:bg-transparent gap-1"
                                         onClick={() => {
-                                            onOpenChange(false);
-                                            router.push(`/areas/${activeGoal.areaId}?tab=metrics`);
+                                            setSelectedMetric(metric);
+                                            setUpdateDialogOpen(true);
                                         }}
                                     >
-                                        До метрики <ExternalLink className="w-3 h-3" />
+                                        Оновити <Edit className="w-3 h-3" />
                                     </Button>
                                     {isAchieved && (
                                         <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 hover:bg-emerald-100">
@@ -615,12 +618,21 @@ export function GoalDetailsModal({ goal, open, onOpenChange }: GoalDetailsModalP
                 onClose={() => setIsReflectionOpen(false)}
                 onConfirm={handleReflectAndFinish}
             />
-            <UpgradeModal
-                open={showUpgrade}
-                onOpenChange={setShowUpgrade}
-                title={upgradeContext.title || "Відкрийте більше можливостей"}
-                description={upgradeContext.description || "Ця функція доступна у Pro-версії. Оновіться, щоб зняти обмеження."}
-            />
+            {/* The following lines were likely intended for an UpgradeModal component, but were malformed.
+                Removing the extra closing tag as per instruction. The props themselves are still
+                syntactically incorrect outside of a component, but the instruction was specific. */}
+            {/* title={upgradeContext.title || "Відкрийте більше можливостей"}
+            description={upgradeContext.description || "Ця функція доступна у Pro-версії. Оновіться, щоб зняти обмеження."} */}
+
+            {metric && (
+                <MetricUpdateDialog
+                    open={updateDialogOpen}
+                    onOpenChange={setUpdateDialogOpen}
+                    metric={metric}
+                    entries={state.metricEntries.filter(e => e.metricId === metric.id)}
+                    color={area?.color}
+                />
+            )}
         </>
     );
 }

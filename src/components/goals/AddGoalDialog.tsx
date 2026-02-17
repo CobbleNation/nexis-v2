@@ -55,7 +55,7 @@ export function AddGoalDialog({ trigger, isOpen, onOpenChange, initialTitle, ini
                         </Button>
                     )}
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[700px] p-0 gap-0 overflow-hidden rounded-2xl h-[600px] bg-white">
+                <DialogContent className="w-[95%] sm:max-w-[700px] p-0 gap-0 overflow-hidden rounded-2xl h-[90vh] sm:h-[600px] bg-white">
                     <GoalCreationWizard
                         initialTitle={initialTitle}
                         initialAreaId={initialAreaId}
