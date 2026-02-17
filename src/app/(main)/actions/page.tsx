@@ -45,7 +45,6 @@ function ActionsPageContent() {
                                 {state.period === 'day' && 'Сьогодні'}
                                 {state.period === 'week' && 'Цей Тиждень'}
                                 {state.period === 'month' && 'Цей Місяць'}
-                                {state.period === 'quarter' && 'Цей Квартал'}
                                 {state.period === 'year' && 'Цей Рік'}
                             </span>
                         </div>
