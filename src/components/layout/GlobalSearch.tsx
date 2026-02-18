@@ -121,7 +121,7 @@ export function GlobalSearch() {
                 {/* Search Bar */}
                 <div className={cn(
                     "relative flex items-center bg-white/90 dark:bg-secondary/50 border border-slate-200/50 dark:border-border/50 backdrop-blur-xl transition-all overflow-hidden",
-                    isOpen ? "rounded-t-2xl shadow-lg border-b-0 bg-white dark:bg-card" : "rounded-2xl shadow-sm hover:shadow-md h-12"
+                    isOpen ? "rounded-t-lg shadow-lg border-b-0 bg-white dark:bg-card" : "rounded-lg shadow-sm hover:shadow-md h-12"
                 )}>
                     <Search className={cn(
                         "ml-4 h-5 w-5 transition-colors",

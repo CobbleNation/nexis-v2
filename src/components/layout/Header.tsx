@@ -14,6 +14,8 @@ import { ContextState } from '@/components/overview/ContextState';
 import { calculateFocusLevel } from '@/lib/metrics';
 import { useMemo } from 'react';
 
+import { GlobalSearch } from '@/components/layout/GlobalSearch';
+
 export function Header() {
     const pathname = usePathname();
     const { user } = useAuth();
@@ -31,21 +33,9 @@ export function Header() {
     return (
         <div className="sticky top-0 z-40 w-full bg-background/50 backdrop-blur-md border-b border-border/40">
             <header className="flex h-16 items-center justify-between gap-4 px-6 md:px-8">
-                {/* Search Bar - Pill Shape */}
-                <div className="flex-1 max-w-xl">
-                    <div className="relative group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <Input
-                            placeholder="Пошук (скоро)"
-                            className="w-full pl-10 pr-4 h-10 rounded-full bg-white border-none shadow-sm ring-1 ring-border/50 hover:ring-primary/20 focus-visible:ring-primary transition-all duration-300"
-                        />
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                                <span className="text-xs">⌘</span>F
-                            </kbd>
-                        </div>
-                    </div>
-                </div>
+                {/* Search Bar - Global Search Component */}
+                <GlobalSearch />
+
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3">

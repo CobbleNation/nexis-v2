@@ -24,8 +24,9 @@ export default function TimelinePage() {
     const { state } = useData();
     const { isPro, tier } = useSubscription();
     // Use global state.period instead of URL params for Topbar sync
-    const viewMode = (state.period as ViewMode) || 'day';
-    const currentViewMode = viewMode;
+    // BUT user requested in-page switcher, so we prioritize local state initialized from global
+    const [viewModeLocal, setViewModeLocal] = useState<ViewMode>((state.period as ViewMode) || 'day');
+    const currentViewMode = viewModeLocal;
 
     const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -70,12 +71,32 @@ export default function TimelinePage() {
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Розклад</h2>
                     <p className="text-muted-foreground">
-                        {currentViewMode === 'day' ? 'План на день' :
-                            currentViewMode === 'week' ? 'Навантаження тижня' :
-                                currentViewMode === 'month' ? 'Масштаб місяця' : 'Стратегія року'}
+                        {currentViewMode === 'day' && 'План на день'}
+                        {currentViewMode === 'week' && 'Навантаження тижня'}
+                        {currentViewMode === 'month' && 'Масштаб місяця'}
+                        {currentViewMode === 'year' && 'Стратегія року'}
                     </p>
                 </div>
-                {/* Switcher removed as per request (handled by Topbar) */}
+
+                <div className="bg-muted/50 p-1 rounded-xl flex items-center gap-1">
+                    {(['day', 'week', 'month', 'year'] as const).map((mode) => (
+                        <button
+                            key={mode}
+                            onClick={() => setViewModeLocal(mode)}
+                            className={cn(
+                                "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                                currentViewMode === mode
+                                    ? "bg-white dark:bg-card text-primary shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            )}
+                        >
+                            {mode === 'day' && 'День'}
+                            {mode === 'week' && 'Тиждень'}
+                            {mode === 'month' && 'Місяць'}
+                            {mode === 'year' && 'Рік'}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="flex items-center justify-between bg-card p-2 rounded-2xl border border-border shrink-0 shadow-sm">

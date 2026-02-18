@@ -246,7 +246,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                     </Link>
 
                                     {/* Render Sub-items if active or parent match */}
-                                    {item.subItems && (isActive || pathname.startsWith(item.href)) && (
+                                    {item.subItems && (isActive || pathname.startsWith(item.href.split('?')[0])) && (
                                         <div className="ml-9 space-y-1 border-l border-border/50 pl-2 mt-1">
                                             {item.subItems.map((sub, idx) => {
                                                 // Enhanced Active Check for Tabs

@@ -38,7 +38,8 @@ export const getScheduleItems = (
     if (viewMode === 'day') {
         // Tasks
         (state.actions || []).forEach(action => {
-            if (action.type === 'task' && action.date && isWithinInterval(parseISO(action.date), { start: startDate, end: endDate })) {
+            // Filter: Must have date, be in interval, AND have a startTime (not all-day)
+            if (action.type === 'task' && action.date && action.startTime && isWithinInterval(parseISO(action.date), { start: startDate, end: endDate })) {
                 items.push({
                     id: `task-${action.id}`,
                     type: 'task',
@@ -110,7 +111,7 @@ export const getScheduleItems = (
     if (viewMode === 'week') {
         // Tasks
         (state.actions || []).forEach(action => {
-            if (action.type === 'task' && action.date && isWithinInterval(parseISO(action.date), { start: startDate, end: endDate })) {
+            if (action.type === 'task' && action.date && action.startTime && isWithinInterval(parseISO(action.date), { start: startDate, end: endDate })) {
                 items.push({
                     id: `task-${action.id}`,
                     type: 'task',
