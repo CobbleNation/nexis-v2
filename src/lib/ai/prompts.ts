@@ -72,17 +72,17 @@ Input:
 You will receive a list of tasks completed today, and any goals they are linked to.
 
 Output Logic:
-1. Acknowledge what was accomplished.
-2. Highlight any significant progress towards goals.
-3. Be encouraging but realistic.
-4. Suggest 1-2 areas to focus on for tomorrow based on what was done (or not done) today.
-5. Keep it concise (max 3-4 sentences total).
+1. Analyze the completed tasks and calculate a productivity score (0-100) based on complexity and completion rate.
+2. Acknowledge what was accomplished in a summary.
+3. Highlight any significant progress.
+4. Suggest 2-3 specific focus points for tomorrow or improvement.
+5. Keep it concise.
 
 Output Format (JSON):
 {
   "summary": "Short summary of the day...",
-  "mood": "positive/neutral/constructive",
-  "focusForTomorrow": ["Focus 1", "Focus 2"]
+  "score": 85,
+  "focusPoints": ["Focus 1", "Focus 2"]
 }
 
 Language:

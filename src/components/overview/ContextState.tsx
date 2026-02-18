@@ -13,7 +13,7 @@ import { FocusMetrics } from '@/lib/metrics';
 import { Lock } from 'lucide-react';
 import { UpgradeModal } from '../common/UpgradeModal';
 import { FocusInfluencersModal } from './FocusInfluencersModal';
-import { DailyReviewDialog } from '@/components/features/DailyReviewDialog';
+
 import { useSubscription } from '@/hooks/useSubscription';
 import { useData } from '@/lib/store';
 import { getDailyDataRange, analyzeCorrelation, CorrelationResult } from '@/lib/analytics';
@@ -113,22 +113,11 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
             </div>
 
             <div className="flex items-center gap-4">
-                <DailyReviewDialog />
                 <TooltipProvider delayDuration={0} skipDelayDuration={500}>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div className="flex flex-col items-end cursor-help group relative" id="focus-level-card">
                                 <div className="flex items-center gap-3">
-                                    {/* Locked Explanation Trigger */}
-                                    <button
-                                        onClick={handleInfluenceClick}
-                                        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors text-xs font-medium text-zinc-500 dark:text-zinc-400"
-                                    >
-                                        {!isPro && <Lock className="w-3 h-3" />}
-                                        <Activity className="w-3 h-3" />
-                                        <span>Що вплинуло?</span>
-                                    </button>
-
                                     <div className="flex items-center gap-2" id="onboarding-context-score">
                                         <span className={cn("text-5xl font-extrabold tabular-nums transition-colors duration-300", getScoreColor(score))}>
                                             {score}
@@ -138,7 +127,18 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
                                         </div>
                                     </div>
                                 </div>
-                                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider mr-1 mt-1">Рівень Фокусу</span>
+                                <div className="flex items-center gap-2 mt-2">
+                                    {/* Locked Explanation Trigger - Moved below score */}
+                                    <button
+                                        onClick={handleInfluenceClick}
+                                        className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors text-[10px] font-medium text-zinc-500 dark:text-zinc-400"
+                                    >
+                                        {!isPro && <Lock className="w-3 h-3" />}
+                                        <Activity className="w-3 h-3" />
+                                        <span>Що вплинуло?</span>
+                                    </button>
+                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Рівень Фокусу</span>
+                                </div>
                             </div>
                         </TooltipTrigger>
                         <TooltipContent side="left" className="p-0 border border-orange-100 dark:border-orange-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-popover text-zinc-900 dark:text-foreground max-w-sm overflow-hidden rounded-2xl" align="start" sideOffset={15}>

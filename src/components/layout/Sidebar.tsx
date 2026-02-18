@@ -14,6 +14,7 @@ import {
     LogOut,
     Layers,
     Sparkles,
+    Lightbulb, // Added Lightbulb
     Zap,
     Plus,
     ChevronDown,
@@ -27,6 +28,7 @@ import { useState } from 'react';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { DailyReviewDialog } from '@/components/features/DailyReviewDialog';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { GoalBreakdownModal } from '@/components/features/ai/GoalBreakdownModal';
 
 // Navigation Groups
 interface NavItem {
@@ -53,7 +55,8 @@ const navGroups: NavGroup[] = [
     {
         title: 'AI Інструменти',
         items: [
-            { name: 'AI Коуч', href: '#ai-daily-review', icon: Brain, isAction: true, actionId: 'daily-review' },
+            { name: 'Аналіз Дня', href: '#ai-daily-review', icon: Lightbulb, isAction: true, actionId: 'daily-review' },
+            { name: 'Розбиття Цілей', href: '#ai-goal-breakdown', icon: Target, isAction: true, actionId: 'goal-breakdown' },
         ]
     },
     {
@@ -139,21 +142,39 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
                         {group.items.map((item) => {
                             // Special handling for Action items (like AI Modal)
-                            if (item.isAction && item.actionId === 'daily-review') {
-                                return (
-                                    <div key={item.name} className="px-1">
-                                        <DailyReviewDialog customTrigger={
-                                            <button
-                                                className={cn(
-                                                    "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10"
-                                                )}
-                                            >
-                                                <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                                <span>{item.name}</span>
-                                            </button>
-                                        } />
-                                    </div>
-                                );
+                            if (item.isAction) {
+                                if (item.actionId === 'daily-review') {
+                                    return (
+                                        <div key={item.name} className="px-1">
+                                            <DailyReviewDialog customTrigger={
+                                                <button
+                                                    className={cn(
+                                                        "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10"
+                                                    )}
+                                                >
+                                                    <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                                                    <span>{item.name}</span>
+                                                </button>
+                                            } />
+                                        </div>
+                                    );
+                                }
+                                if (item.actionId === 'goal-breakdown') {
+                                    return (
+                                        <div key={item.name} className="px-1">
+                                            <GoalBreakdownModal customTrigger={
+                                                <button
+                                                    className={cn(
+                                                        "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/10"
+                                                    )}
+                                                >
+                                                    <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                                                    <span>{item.name}</span>
+                                                </button>
+                                            } />
+                                        </div>
+                                    );
+                                }
                             }
 
                             const isActive = pathname.startsWith(item.href);

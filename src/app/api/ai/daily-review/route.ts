@@ -41,7 +41,16 @@ export async function POST(req: NextRequest) {
         }
 
         const data = JSON.parse(responseContent);
-        return NextResponse.json(data);
+
+        // Inject counts
+        const completedCount = completedTasks?.length || 0;
+        const totalCount = (completedTasks?.length || 0) + (pendingTasks?.length || 0);
+
+        return NextResponse.json({
+            ...data,
+            completedCount,
+            totalCount
+        });
 
     } catch (error) {
         console.error("AI Daily Review Error:", error);
