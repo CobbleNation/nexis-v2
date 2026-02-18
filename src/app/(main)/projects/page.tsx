@@ -1,3 +1,5 @@
+'use client';
+
 import { useData } from '@/lib/store';
 import Link from 'next/link';
 import { Plus, Folder, MoreHorizontal, Calendar, Clock, Layers } from 'lucide-react';
