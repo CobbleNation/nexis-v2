@@ -56,62 +56,61 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 210 20% 98%; /* #F8F9FB - Soft Grayish White */
+    --foreground: 152 69% 10%; /* Very dark green/black */
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 152 69% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 152 69% 10%;
 
-    --primary: 24.6 95% 53.1%;
-    /* Orange */
-    --primary-foreground: 210 40% 98%;
+    --primary: 152 69% 19%; /* #0F5132 - Deep Forest Green */
+    --primary-foreground: 0 0% 100%; /* White */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 152 30% 90%; /* Light Green Tint */
+    --secondary-foreground: 152 69% 19%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 20% 90%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 152 40% 96%;
+    --accent-foreground: 152 69% 19%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 24.6 95% 53.1%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 152 69% 19%;
 
-    --radius: 0.75rem;
+    --radius: 1.5rem; /* 24px - Highly rounded */
 
-    --sidebar: 210 40% 98%;
-    --sidebar-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 215 16% 47%;
+    --sidebar-border: 214 32% 91%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 152 50% 5%; /* Very dark green/black */
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 152 50% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 152 50% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 24.6 95% 53.1%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 152 60% 45%; /* Brighter Green for Dark Mode */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 152 30% 20%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 152 30% 20%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 152 30% 20%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
