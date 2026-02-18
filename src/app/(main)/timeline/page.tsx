@@ -78,21 +78,21 @@ export default function TimelinePage() {
                 {/* Switcher removed as per request (handled by Topbar) */}
             </div>
 
-            <div className="flex items-center justify-between bg-white dark:bg-card p-2 rounded-2xl border border-slate-100 dark:border-border shrink-0 shadow-sm">
-                <Button variant="ghost" size="icon" onClick={() => navigate('prev')} className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-secondary">
+            <div className="flex items-center justify-between bg-card p-2 rounded-2xl border border-border shrink-0 shadow-sm">
+                <Button variant="ghost" size="icon" onClick={() => navigate('prev')} className="h-8 w-8 hover:bg-secondary">
                     <ChevronLeft className="h-4 w-4" />
                 </Button>
 
                 <div className="flex items-center gap-3">
-                    <span className="font-bold text-lg min-w-[150px] text-center capitalize">
+                    <span className="font-bold text-lg min-w-[150px] text-center capitalize text-foreground">
                         {getTitle()}
                     </span>
-                    <Button variant="outline" size="sm" onClick={goToToday} className="h-7 text-xs px-2 border-border/60 hover:bg-secondary/50">
+                    <Button variant="outline" size="sm" onClick={goToToday} className="h-7 text-xs px-2 border-border hover:bg-secondary">
                         Сьогодні
                     </Button>
                 </div>
 
-                <Button variant="ghost" size="icon" onClick={() => navigate('next')} className="h-8 w-8 hover:bg-slate-50 dark:hover:bg-secondary">
+                <Button variant="ghost" size="icon" onClick={() => navigate('next')} className="h-8 w-8 hover:bg-secondary">
                     <ChevronRight className="h-4 w-4" />
                 </Button>
             </div>

@@ -53,19 +53,19 @@ function GoalsContent() {
 
             <Tabs value={currentTab} onValueChange={(val) => router.push(`/goals?tab=${val}`)} className="space-y-6">
                 <TabsList id="goals-list" className="bg-transparent p-0 gap-6">
-                    <TabsTrigger value="goals" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-orange-600 dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-orange-500 dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground">
+                    <TabsTrigger value="goals" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
                         Активні Цілі
-                        <span className="bg-slate-100 dark:bg-primary-foreground/20 text-slate-600 dark:text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                        <span className="bg-secondary text-secondary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                             {activeGoals.length}
                         </span>
                     </TabsTrigger>
-                    <TabsTrigger value="projects" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-orange-600 dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-orange-500 dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground">
+                    <TabsTrigger value="projects" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
                         Проекти
-                        <span className="bg-slate-100 dark:bg-primary-foreground/20 text-slate-600 dark:text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                        <span className="bg-secondary text-secondary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                             {filteredProjects.filter(p => p.status !== 'completed').length}
                         </span>
                     </TabsTrigger>
-                    <TabsTrigger value="history" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-orange-600 dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-orange-500 dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground">Історія (Архів)</TabsTrigger>
+                    <TabsTrigger value="history" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">Історія (Архів)</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="goals" className="space-y-8">

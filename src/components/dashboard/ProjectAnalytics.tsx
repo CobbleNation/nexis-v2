@@ -1,27 +1,27 @@
 'use client';
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
-
-const data = [
-    { name: 'S', value: 30 },
-    { name: 'M', value: 45 },
-    { name: 'T', value: 35 },
-    { name: 'W', value: 60 },
-    { name: 'T', value: 40 },
-    { name: 'F', value: 35 },
-    { name: 'S', value: 40 },
-];
-
-const Pattern = ({ id }: { id: string }) => (
-    <pattern id={id} width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-        <line x1="0" y1="0" x2="0" y2="8" stroke="currentColor" strokeWidth="2" className="text-muted-foreground/20" />
-    </pattern>
-);
+import { useData } from '@/lib/store';
 
 export function ProjectAnalytics() {
+    const { state } = useData();
+
+    // Calculate weekly completion data (mock logic based on real actions for now, or just static structure if no historical data)
+    // In a real app, this would come from an analytics endpoint. 
+    // For now, we'll map day names to Ukrainian.
+    const data = [
+        { name: 'Нд', value: 30 },
+        { name: 'Пн', value: 45 },
+        { name: 'Вт', value: 35 },
+        { name: 'Ср', value: 60 },
+        { name: 'Чт', value: 40 },
+        { name: 'Пт', value: 35 },
+        { name: 'Сб', value: 40 },
+    ];
+
     return (
         <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-border">
-            <h3 className="text-lg font-bold mb-6 text-foreground">Project Analytics</h3>
+            <h3 className="text-lg font-bold mb-6 text-foreground">Аналітика Проєктів</h3>
             <div className="h-[200px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data}>
@@ -47,7 +47,6 @@ export function ProjectAnalytics() {
                             fill="var(--primary)"
                             radius={[20, 20, 20, 20]}
                             barSize={32}
-                        // Custom rendering logic ideally, or use CSS shapes
                         />
                     </BarChart>
                 </ResponsiveContainer>

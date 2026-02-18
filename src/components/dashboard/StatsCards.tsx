@@ -1,14 +1,15 @@
 'use client';
 
-import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useData } from '@/lib/store';
 
 interface StatCardProps {
     title: string;
     value: string | number;
-    trend: 'up' | 'down' | 'neutral';
-    trendValue: string;
+    trend?: 'up' | 'down' | 'neutral';
+    trendValue?: string;
     variant?: 'primary' | 'default';
 }
 
@@ -47,52 +48,62 @@ function StatCard({ title, value, trend, trendValue, variant = 'default' }: Stat
 
             <div className="z-10">
                 <div className="text-4xl font-bold mb-2 tracking-tight">{value}</div>
-                <div className="flex items-center gap-2">
-                    <div className={cn(
-                        "flex items-center text-xs px-2 py-1 rounded-full",
-                        isPrimary
-                            ? "bg-white/20 text-white"
-                            : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    )}>
-                        <ArrowUpRight className="w-3 h-3 mr-1" />
-                        <span>{trendValue}</span>
+                {trendValue && (
+                    <div className="flex items-center gap-2">
+                        <div className={cn(
+                            "flex items-center text-xs px-2 py-1 rounded-full",
+                            isPrimary
+                                ? "bg-white/20 text-white"
+                                : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                        )}>
+                            <ArrowUpRight className="w-3 h-3 mr-1" />
+                            <span>{trendValue}</span>
+                        </div>
+                        <span className={cn("text-xs opacity-70", isPrimary ? "text-white" : "text-muted-foreground")}>
+                            з минулого місяця
+                        </span>
                     </div>
-                    <span className={cn("text-xs opacity-70", isPrimary ? "text-white" : "text-muted-foreground")}>
-                        from last month
-                    </span>
-                </div>
+                )}
             </div>
         </motion.div>
     );
 }
 
 export function StatsCards() {
+    const { state } = useData();
+
+    // Calculate real stats
+    const totalProjects = state.projects?.length || 0;
+    const activeProjects = state.projects?.filter((p: any) => p.status === 'active').length || 0;
+    const completedProjects = state.projects?.filter((p: any) => p.status === 'completed').length || 0;
+    const pendingProjects = state.projects?.filter((p: any) => p.status === 'pending').length || 0;
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
-                title="Total Projects"
-                value="24"
+                title="Всього проєктів"
+                value={totalProjects}
                 trend="up"
-                trendValue="Increased"
+                trendValue="+2"
                 variant="primary"
             />
             <StatCard
-                title="Ended Projects"
-                value="10"
+                title="Завершені"
+                value={completedProjects}
                 trend="up"
-                trendValue="Increased"
+                trendValue="+5"
             />
             <StatCard
-                title="Running Projects"
-                value="12"
+                title="Активні"
+                value={activeProjects}
                 trend="up"
-                trendValue="Increased"
+                trendValue="+3"
             />
             <StatCard
-                title="Pending Project"
-                value="2"
+                title="В очікуванні"
+                value={pendingProjects}
                 trend="neutral"
-                trendValue="On Discuss"
+                trendValue="1 новий"
             />
         </div>
     );

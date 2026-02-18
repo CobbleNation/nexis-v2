@@ -167,8 +167,8 @@ function ContentPageContent() {
                             <div className="h-16 w-16 bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-4">
                                 <FileText className="h-8 w-8" />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-700 dark:text-foreground">Тут будуть ваші ідеї</h3>
-                            <p className="max-w-sm mt-2">Використовуйте кнопку <span className="font-bold text-orange-600 dark:text-orange-400">+ Додати</span> зверху, щоб створити нотатку.</p>
+                            <h3 className="font-bold text-lg text-foreground">Тут будуть ваші ідеї</h3>
+                            <p className="max-w-sm mt-2">Використовуйте кнопку <span className="font-bold text-primary">+ Додати</span> зверху, щоб створити нотатку.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -222,8 +222,8 @@ function ContentPageContent() {
                             <div className="h-16 w-16 bg-purple-50 dark:bg-purple-500/10 text-purple-500 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-4">
                                 <BookOpen className="h-8 w-8" />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-700 dark:text-foreground">Журнал пустий</h3>
-                            <p className="max-w-sm mt-2">Використовуйте кнопку <span className="font-bold text-orange-600 dark:text-orange-400">+ Додати</span> зверху, щоб створити запис.</p>
+                            <h3 className="font-bold text-lg text-foreground">Журнал пустий</h3>
+                            <p className="max-w-sm mt-2">Використовуйте кнопку <span className="font-bold text-primary">+ Додати</span> зверху, щоб створити запис.</p>
                         </div>
                     ) : (
                         <div className="space-y-8 relative pl-8 border-l-2 border-slate-100 dark:border-border ml-4">
@@ -254,8 +254,8 @@ function ContentPageContent() {
                             <div className="h-16 w-16 bg-amber-50 dark:bg-amber-500/10 text-amber-500 dark:text-amber-400 rounded-2xl flex items-center justify-center mb-4">
                                 <Folder className="h-8 w-8" />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-700 dark:text-foreground">Немає файлів</h3>
-                            <p className="max-w-sm mt-2">Використовуйте кнопку <span className="font-bold text-orange-600 dark:text-orange-400">+ Додати</span> зверху, щоб завантажити файл.</p>
+                            <h3 className="font-bold text-lg text-foreground">Немає файлів</h3>
+                            <p className="max-w-sm mt-2">Використовуйте кнопку <span className="font-bold text-primary">+ Додати</span> зверху, щоб завантажити файл.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">

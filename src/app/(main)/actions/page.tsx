@@ -61,25 +61,25 @@ function ActionsPageContent() {
                 <div className="flex flex-col sticky top-0 z-20 bg-slate-50/95 dark:bg-background/95 backdrop-blur-sm -mx-4 px-4 md:-mx-8 md:px-8 border-b border-slate-200/50 dark:border-border">
                     <div className="flex justify-between items-center py-4">
                         <TabsList id="tasks-tabs" className="bg-white dark:bg-card p-1.5 gap-2 shadow-sm border border-slate-200 dark:border-border rounded-2xl h-auto overflow-x-auto justify-start w-full md:w-auto no-scrollbar">
-                            <TabsTrigger value="inbox" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-orange-500 data-[state=active]:text-white dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-orange-500/20">
+                            <TabsTrigger value="inbox" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-primary/20">
                                 <Inbox className="h-4 w-4" /> Вхідні
                                 <span className="bg-white/20 text-current text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                     {inboxCount}
                                 </span>
                             </TabsTrigger>
-                            <TabsTrigger value="tasks" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-orange-500 data-[state=active]:text-white dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-orange-500/20">
+                            <TabsTrigger value="tasks" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-primary/20">
                                 <List className="h-4 w-4" /> Завдання
                                 <span className="bg-white/20 text-current text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                     {activeTasksCount}
                                 </span>
                             </TabsTrigger>
-                            <TabsTrigger value="routines" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-orange-500 data-[state=active]:text-white dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-orange-500/20">
+                            <TabsTrigger value="routines" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-primary/20">
                                 <RefreshCw className="h-4 w-4" /> Рутина
                                 <span className="bg-white/20 text-current text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                     {routinesCount}
                                 </span>
                             </TabsTrigger>
-                            <TabsTrigger value="habits" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-orange-500 data-[state=active]:text-white dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-orange-500/20">
+                            <TabsTrigger value="habits" className="gap-2 px-5 py-2.5 text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-primary/20">
                                 <Zap className="h-4 w-4" /> Звички
                                 <span className="bg-white/20 text-current text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                     {activeHabitsCount}

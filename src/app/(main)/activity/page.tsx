@@ -56,7 +56,7 @@ export default function ActivityPage() {
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
-                <div className="h-12 w-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm">
+                <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm">
                     <Activity className="h-6 w-6" />
                 </div>
                 <div>
@@ -85,9 +85,9 @@ export default function ActivityPage() {
                                 <div className="flex items-center gap-4">
                                     <div className={cn(
                                         "h-3 w-3 rounded-full border-2 ml-[22px]",
-                                        isToday ? "bg-indigo-500 border-indigo-100 ring-2 ring-indigo-50 dark:ring-indigo-900" : "bg-muted-foreground/30 border-card"
+                                        isToday ? "bg-primary border-primary/20 ring-2 ring-primary/10 dark:ring-primary/20" : "bg-muted-foreground/30 border-card"
                                     )} />
-                                    <h3 className={cn("text-sm font-bold uppercase tracking-wider", isToday ? "text-indigo-600 dark:text-indigo-400" : "text-muted-foreground")}>
+                                    <h3 className={cn("text-sm font-bold uppercase tracking-wider", isToday ? "text-primary" : "text-muted-foreground")}>
                                         {isToday ? 'Сьогодні' : dateLabel}
                                     </h3>
                                 </div>
@@ -97,8 +97,8 @@ export default function ActivityPage() {
                                         <div key={item.id} className="bg-card border border-border p-4 rounded-xl shadow-sm flex items-start gap-4 hover:shadow-md transition-all group">
                                             {/* Icon/Circle based on Type */}
                                             <div className={cn(
-                                                "h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 text-white shadow-sm",
-                                                item.areaColor || "bg-slate-400"
+                                                "h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 text-primary-foreground shadow-sm",
+                                                item.areaColor || "bg-muted-foreground"
                                             )}>
                                                 {item.type === 'goal' && <Target className="h-5 w-5" />}
                                                 {item.type === 'metric' && <Filter className="h-5 w-5" />}
@@ -108,7 +108,7 @@ export default function ActivityPage() {
 
                                             <div className="flex-1">
                                                 <div className="flex justify-between items-start">
-                                                    <h4 className="font-semibold text-foreground group-hover:text-indigo-600 transition-colors">
+                                                    <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                                                         {item.title}
                                                     </h4>
                                                     <span className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded-full">

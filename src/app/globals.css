@@ -56,61 +56,65 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%; /* #F8F9FB - Soft Grayish White */
-    --foreground: 152 69% 10%; /* Very dark green/black */
+    --background: 210 20% 98%;
+    /* #F8F9FB - Soft Grayish White */
+    --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 152 69% 10%;
+    --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 152 69% 10%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 152 69% 19%; /* #0F5132 - Deep Forest Green */
-    --primary-foreground: 0 0% 100%; /* White */
+    --primary: 24.6 95% 53.1%;
+    /* Orange */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 152 30% 90%; /* Light Green Tint */
-    --secondary-foreground: 152 69% 19%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 20% 90%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 152 40% 96%;
-    --accent-foreground: 152 69% 19%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 152 69% 19%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 24.6 95% 53.1%;
 
-    --radius: 1.5rem; /* 24px - Highly rounded */
+    --radius: 1.5rem;
+    /* 24px - Highly rounded */
 
     --sidebar: 0 0% 100%;
-    --sidebar-foreground: 215 16% 47%;
-    --sidebar-border: 214 32% 91%;
+    --sidebar-foreground: 215.4 16.3% 46.9%;
+    --sidebar-border: 214.3 31.8% 91.4%;
   }
 
   .dark {
-    --background: 152 50% 5%; /* Very dark green/black */
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
 
-    --card: 152 50% 8%;
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 152 50% 8%;
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 152 60% 45%; /* Brighter Green for Dark Mode */
-    --primary-foreground: 0 0% 100%;
+    --primary: 24.6 95% 53.1%;
+    /* Orange */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 152 30% 20%;
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 152 30% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 152 30% 20%;
+    --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -121,7 +125,6 @@
     --ring: 24.6 95% 53.1%;
 
     --sidebar: 222.2 84% 4.9%;
-    /* Match background usually, or slightly lighter */
     --sidebar-foreground: 210 40% 98%;
     --sidebar-border: 217.2 32.6% 17.5%;
   }
