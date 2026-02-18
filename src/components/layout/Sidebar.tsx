@@ -56,7 +56,7 @@ const navGroups: NavGroup[] = [
         title: 'AI Інструменти',
         items: [
             { name: 'Аналіз Дня', href: '#ai-daily-review', icon: Lightbulb, isAction: true, actionId: 'daily-review' },
-            { name: 'Розбиття Цілей', href: '#ai-goal-breakdown', icon: Target, isAction: true, actionId: 'goal-breakdown' },
+            { name: 'AI Стратегія', href: '#ai-goal-strategy', icon: Target, isAction: true, actionId: 'goal-breakdown' },
         ]
     },
     {
