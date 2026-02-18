@@ -53,7 +53,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         };
 
         dispatch({ type: 'UPDATE_PROJECT', payload: updatedProject });
-        toast.success("Project updated successfully");
+        toast.success("Проект успішно оновлено");
         onOpenChange(false);
     };
 
@@ -61,55 +61,55 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Edit Project</DialogTitle>
+                    <DialogTitle>Редагувати проект</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
-                        <label htmlFor="title" className="text-sm font-medium">Title</label>
+                        <label htmlFor="title" className="text-sm font-medium">Назва</label>
                         <Input
                             id="title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Project title"
+                            placeholder="Назва проекту"
                         />
                     </div>
 
                     <div className="grid gap-2">
-                        <label htmlFor="description" className="text-sm font-medium">Description</label>
+                        <label htmlFor="description" className="text-sm font-medium">Опис</label>
                         <Textarea
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Project description"
+                            placeholder="Опис проекту"
                             className="min-h-[100px]"
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                            <label htmlFor="status" className="text-sm font-medium">Status</label>
+                            <label htmlFor="status" className="text-sm font-medium">Статус</label>
                             <Select value={status} onValueChange={(v: any) => setStatus(v)}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Status" />
+                                    <SelectValue placeholder="Статус" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="planned">Planned</SelectItem>
-                                    <SelectItem value="completed">Completed</SelectItem>
-                                    <SelectItem value="paused">Paused</SelectItem>
-                                    <SelectItem value="deferred">Deferred</SelectItem>
+                                    <SelectItem value="active">Активний</SelectItem>
+                                    <SelectItem value="planned">Запланований</SelectItem>
+                                    <SelectItem value="completed">Завершений</SelectItem>
+                                    <SelectItem value="paused">На паузі</SelectItem>
+                                    <SelectItem value="deferred">Відкладений</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
                         <div className="grid gap-2">
-                            <label htmlFor="area" className="text-sm font-medium">Area</label>
+                            <label htmlFor="area" className="text-sm font-medium">Сфера</label>
                             <Select value={areaId} onValueChange={setAreaId}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select area" />
+                                    <SelectValue placeholder="Виберіть сферу" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="none">No Area</SelectItem>
+                                    <SelectItem value="none">Без сфери</SelectItem>
                                     {state.areas.map(area => (
                                         <SelectItem key={area.id} value={area.id}>
                                             {area.title}
@@ -122,7 +122,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
-                            <label htmlFor="startDate" className="text-sm font-medium">Start Date</label>
+                            <label htmlFor="startDate" className="text-sm font-medium">Дата початку</label>
                             <Input
                                 id="startDate"
                                 type="date"
@@ -132,7 +132,7 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                         </div>
 
                         <div className="grid gap-2">
-                            <label htmlFor="deadline" className="text-sm font-medium">Deadline</label>
+                            <label htmlFor="deadline" className="text-sm font-medium">Дедлайн</label>
                             <Input
                                 id="deadline"
                                 type="date"
@@ -143,8 +143,8 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-                    <Button onClick={handleSave}>Save Changes</Button>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Скасувати</Button>
+                    <Button onClick={handleSave}>Зберегти зміни</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

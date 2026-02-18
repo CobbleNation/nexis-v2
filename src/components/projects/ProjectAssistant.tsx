@@ -12,59 +12,7 @@ interface ProjectAssistantProps {
     areaName?: string;
 }
 
-// Mock AI Service until backend is ready
-const mockGenerateSuggestions = async (title: string, area: string): Promise<ProjectSuggestionResponse> => {
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
 
-    // Simple keyword matching for demo
-    const lowerTitle = title.toLowerCase();
-
-    if (lowerTitle.includes('fit') || lowerTitle.includes('gym') || lowerTitle.includes('health') || lowerTitle.includes('weight')) {
-        return {
-            suggestedMetrics: [
-                { name: 'Weight', unit: 'kg', rationale: 'Track physical progress' },
-                { name: 'Workout Frequency', unit: 'times/week', rationale: 'Consistency is key' },
-                { name: 'Body Fat', unit: '%', rationale: 'Body composition tracking' }
-            ],
-            suggestedTasks: [
-                { title: 'Buy gym membership', priority: 'high', rationale: 'Essential first step' },
-                { title: 'Create workout plan', priority: 'high', rationale: 'Plan your routine' },
-                { title: 'Buy protein powder', priority: 'medium', rationale: 'Nutrition support' },
-                { title: 'Schedule first session', priority: 'medium', rationale: 'Commit to starting' }
-            ]
-        };
-    }
-
-    if (lowerTitle.includes('code') || lowerTitle.includes('app') || lowerTitle.includes('dev') || lowerTitle.includes('web')) {
-        return {
-            suggestedMetrics: [
-                { name: 'Commits', unit: 'commits/day', rationale: 'Track coding activity' },
-                { name: 'Hours Coded', unit: 'hours', rationale: 'Track improved focus' },
-                { name: 'Bugs Fixed', unit: 'count', rationale: 'Quality control' }
-            ],
-            suggestedTasks: [
-                { title: 'Setup repository', priority: 'high', rationale: 'Initial setup' },
-                { title: 'Design database schema', priority: 'high', rationale: 'Core architecture' },
-                { title: 'Configure CI/CD', priority: 'medium', rationale: 'Automation' },
-                { title: 'Write MVP features', priority: 'medium', rationale: 'Core value' }
-            ]
-        };
-    }
-
-    // Default generic suggestions
-    return {
-        suggestedMetrics: [
-            { name: 'Consistency', unit: '%', rationale: 'Track how often you work on this' },
-            { name: 'Milestones Reached', unit: 'count', rationale: 'Track major progress steps' }
-        ],
-        suggestedTasks: [
-            { title: 'Define project scope', priority: 'high', rationale: 'Clarify goals' },
-            { title: 'Break down into milestones', priority: 'high', rationale: 'Make it manageable' },
-            { title: 'Research resources', priority: 'medium', rationale: 'Gather information' },
-            { title: 'First implementation step', priority: 'medium', rationale: 'Get started' }
-        ]
-    };
-};
 
 export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
     const { state, dispatch } = useData();
@@ -80,9 +28,28 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
         setIsLoading(true);
         setIsOpen(true);
         try {
-            const result = await mockGenerateSuggestions(project.title, areaName || 'General');
+            const response = await fetch('/api/ai/suggest-project', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: project.title,
+                    description: project.description,
+                    areaName: areaName
+                })
+            });
+
+            if (!response.ok) {
+                if (response.status === 403) {
+                    toast.error("Ця функція доступна тільки для Pro користувачів");
+                    return;
+                }
+                throw new Error('AI Request failed');
+            }
+
+            const result: ProjectSuggestionResponse = await response.json();
             setSuggestions(result);
         } catch (error) {
+            console.error(error);
             toast.error("Не вдалося отримати пропозиції від AI");
         } finally {
             setIsLoading(false);

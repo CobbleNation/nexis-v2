@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useData } from '@/lib/store';
 import {
     ChevronRight, ChevronLeft, Loader2,
-    Hash, Scale, ToggleLeft, List,
+    Hash, Scale, ToggleRight, List,
     TrendingUp, TrendingDown, Minus
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,7 +33,7 @@ interface MetricCreationWizardProps {
 const VALUE_TYPES = [
     { id: 'numeric', label: 'Numeric', icon: Hash, desc: 'Countable numbers' },
     { id: 'scale', label: 'Scale', icon: Scale, desc: 'Range (e.g., 1-10)' },
-    { id: 'boolean', label: 'Boolean', icon: ToggleLeft, desc: 'Yes / No' },
+    { id: 'boolean', label: 'Boolean', icon: ToggleRight, desc: 'Yes / No' },
     { id: 'enum', label: 'Status', icon: List, desc: 'Select from list' },
 ] as const;
 
@@ -175,7 +175,7 @@ export function MetricCreationWizard({ initialTitle, initialAreaId, initialUnit,
                                     <SelectTrigger className="h-11 bg-white dark:bg-secondary/20 shadow-sm dark:text-foreground border-slate-200 dark:border-border"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">📥 Вхідні (General)</SelectItem>
-                                        {state.areas.map(a => (
+                                        {(state.areas || []).map(a => (
                                             <SelectItem key={a.id} value={a.id}>
                                                 <div className="flex items-center gap-2">
                                                     <div className={cn("w-2 h-2 rounded-full", a.color)} /> {a.title}

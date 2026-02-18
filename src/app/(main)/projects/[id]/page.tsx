@@ -30,6 +30,7 @@ export default function ProjectPage() {
     const [newTaskTitle, setNewTaskTitle] = useState("");
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [importSearch, setImportSearch] = useState("");
+    const [metricSearch, setMetricSearch] = useState('');
     const [isMetricAddOpen, setIsMetricAddOpen] = useState(false);
 
     const project = state.projects.find(p => p.id === id);
@@ -137,6 +138,8 @@ export default function ProjectPage() {
 
     // Combined Progress
     let completionPercentage = 0;
+    const hasItems = totalTasks > 0 || totalGoals > 0;
+
     if (totalTasks > 0 && totalGoals > 0) {
         completionPercentage = Math.round((taskProgress + goalProgressAvg) / 2);
     } else if (totalTasks > 0) {
@@ -529,35 +532,87 @@ export default function ProjectPage() {
 
             {/* Add Metric Modal */}
             <Dialog open={isMetricAddOpen} onOpenChange={setIsMetricAddOpen}>
-                <DialogContent className="sm:max-w-[400px]">
-                    <DialogHeader>
+                <DialogContent className="sm:max-w-[500px] h-[600px] flex flex-col p-0 overflow-hidden bg-slate-50 dark:bg-background">
+                    <DialogHeader className="px-6 py-4 border-b border-slate-100 dark:border-border bg-white dark:bg-card shrink-0">
                         <DialogTitle>Додати метрику</DialogTitle>
+                        <div className="relative mt-2">
+                            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                            <Input
+                                value={metricSearch}
+                                onChange={(e) => setMetricSearch(e.target.value)}
+                                placeholder="Пошук метрик за назвою..."
+                                className="pl-9 bg-slate-50 dark:bg-secondary/20"
+                            />
+                        </div>
                     </DialogHeader>
-                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                        {state.metricDefinitions
-                            .filter(m => !(project.metricIds || []).includes(m.id))
-                            .filter(m => (project.areaId === 'general' || !project.areaId) ? true : m.areaId === project.areaId)
-                            .length === 0 && (
-                                <p className="text-center text-sm text-slate-500 py-4">Немає доступних метрик для цієї сфери.</p>
-                            )
-                        }
-                        {state.metricDefinitions
-                            .filter(m => !(project.metricIds || []).includes(m.id))
-                            .filter(m => (project.areaId === 'general' || !project.areaId) ? true : m.areaId === project.areaId)
-                            .map(m => (
-                                <button
-                                    key={m.id}
-                                    onClick={() => handleAddMetric(m.id)}
-                                    className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/30 transition-all text-left"
-                                >
-                                    <div className="flex flex-col">
-                                        <span className="font-medium text-sm text-foreground">{m.name}</span>
-                                        <span className="text-xs text-slate-400">{m.unit}</span>
+
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        {(() => {
+                            // Filter Metrics
+                            const availableMetrics = state.metricDefinitions.filter(m => {
+                                // Exclude already linked
+                                if ((project.metricIds || []).includes(m.id)) return false;
+
+                                // Search Filter
+                                const searchLower = metricSearch.toLowerCase();
+                                const matchesName = m.name.toLowerCase().includes(searchLower);
+                                const area = state.areas.find(a => a.id === m.areaId);
+                                const matchesArea = area?.title.toLowerCase().includes(searchLower);
+
+                                return matchesName || matchesArea;
+                            });
+
+                            if (availableMetrics.length === 0) {
+                                return (
+                                    <div className="text-center py-12 text-slate-400 text-sm">
+                                        Не знайдено доступних метрик.
                                     </div>
-                                    <Plus className="w-4 h-4 text-slate-400" />
-                                </button>
-                            ))
-                        }
+                                );
+                            }
+
+                            // Group by Area
+                            const metricsByArea: Record<string, typeof availableMetrics> = {};
+                            availableMetrics.forEach(m => {
+                                const areaId = m.areaId || 'unassigned';
+                                if (!metricsByArea[areaId]) metricsByArea[areaId] = [];
+                                metricsByArea[areaId].push(m);
+                            });
+
+                            return Object.entries(metricsByArea).map(([areaId, metrics]) => {
+                                const area = state.areas.find(a => a.id === areaId);
+                                return (
+                                    <div key={areaId} className="space-y-2">
+                                        <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 sticky top-0 bg-slate-50 dark:bg-background py-2 z-10 backdrop-blur-sm">
+                                            <span className={cn("w-2 h-2 rounded-full", area?.color || "bg-slate-300")} />
+                                            {area?.title || 'Загальні'}
+                                            <span className="text-[10px] bg-slate-200 dark:bg-secondary px-1.5 py-0.5 rounded-full ml-auto text-slate-500">
+                                                {metrics.length}
+                                            </span>
+                                        </h4>
+                                        <div className="space-y-2">
+                                            {metrics.map(m => (
+                                                <button
+                                                    key={m.id}
+                                                    onClick={() => handleAddMetric(m.id)}
+                                                    className="w-full text-left p-3 rounded-xl border border-slate-200 dark:border-border bg-white dark:bg-card hover:bg-slate-50 dark:hover:bg-secondary/20 transition-all flex items-center justify-between group shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-900"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={cn("p-2 rounded-lg bg-slate-50 dark:bg-secondary/40 text-slate-500 group-hover:text-blue-500 transition-colors")}>
+                                                            <Activity className="w-4 h-4" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-semibold text-sm text-slate-700 dark:text-foreground">{m.name}</div>
+                                                            {m.unit && <div className="text-[10px] font-bold uppercase text-slate-400">{m.unit}</div>}
+                                                        </div>
+                                                    </div>
+                                                    <Plus className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors" />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            });
+                        })()}
                     </div>
                 </DialogContent>
             </Dialog>

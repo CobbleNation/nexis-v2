@@ -293,6 +293,27 @@ export async function POST(req: Request) {
             if (typeof entryData.date === 'string') entryData.date = new Date(entryData.date);
 
             await db.insert(metricEntries).values({ ...entryData, userId });
+
+            // Update Linked Goals
+            const linkedGoals = await db.select().from(goals).where(and(eq(goals.userId, userId), eq(goals.targetMetricId, entryData.metricId)));
+
+            for (const goal of linkedGoals) {
+                const start = goal.metricStartValue || 0;
+                const target = goal.metricTargetValue || 100;
+                const current = entryData.value;
+
+                // Recalculate Progress
+                const total = Math.abs(target - start);
+                let progress = 0;
+                if (total > 0) {
+                    const diff = Math.abs(current - start);
+                    progress = Math.min(100, Math.max(0, Math.round((diff / total) * 100)));
+                }
+
+                await db.update(goals)
+                    .set({ metricCurrentValue: current, progress, updatedAt: new Date() })
+                    .where(eq(goals.id, goal.id));
+            }
         } else if (type === 'UPDATE_AREA') {
             const areaData = { ...data };
             if (typeof areaData.createdAt === 'string') areaData.createdAt = new Date(areaData.createdAt);
