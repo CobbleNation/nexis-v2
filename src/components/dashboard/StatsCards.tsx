@@ -46,21 +46,21 @@ function StatCard({ title, value, trend, trendValue, variant = 'default' }: Stat
                 </div>
             </div>
 
-            <div className="z-10">
-                <div className="text-4xl font-bold mb-2 tracking-tight">{value}</div>
+            <div className="z-10 mt-auto">
+                <div className="text-4xl font-bold tracking-tight mb-3">{value}</div>
                 {trendValue && (
                     <div className="flex items-center gap-2">
                         <div className={cn(
-                            "flex items-center text-xs px-2 py-1 rounded-full",
+                            "flex items-center text-[10px] uppercase font-bold px-2 py-0.5 rounded-md",
                             isPrimary
                                 ? "bg-white/20 text-white"
-                                : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
                         )}>
                             <ArrowUpRight className="w-3 h-3 mr-1" />
                             <span>{trendValue}</span>
                         </div>
-                        <span className={cn("text-xs opacity-70", isPrimary ? "text-white" : "text-muted-foreground")}>
-                            з минулого місяця
+                        <span className={cn("text-[10px] uppercase font-bold opacity-60", isPrimary ? "text-white" : "text-muted-foreground")}>
+                            Вплив
                         </span>
                     </div>
                 )}

@@ -13,7 +13,7 @@ interface DailyReviewResponse {
 
 import { useSubscription } from '@/hooks/useSubscription';
 
-export function DailyReviewDialog() {
+export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.ReactNode }) {
     const { isPro } = useSubscription() || { isPro: false };
     const { state } = useData();
     const [isOpen, setIsOpen] = useState(false);
@@ -67,13 +67,15 @@ export function DailyReviewDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button
-                    variant="outline"
-                    className="gap-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40"
-                >
-                    <Sparkles className="w-4 h-4" />
-                    AI Аналіз Дня
-                </Button>
+                {customTrigger ? customTrigger : (
+                    <Button
+                        variant="outline"
+                        className="gap-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40"
+                    >
+                        <Sparkles className="w-4 h-4" />
+                        AI Аналіз Дня
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="w-[95%] sm:max-w-md bg-white dark:bg-card border-none shadow-2xl overflow-hidden p-0 gap-0 max-h-[90vh] overflow-y-auto">
                 <div className="sr-only">

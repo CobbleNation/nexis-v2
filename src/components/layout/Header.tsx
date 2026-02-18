@@ -54,17 +54,17 @@ export function Header() {
                     <NotificationsPopover />
 
                     {/* Profile */}
-                    <Link href="/settings" className="flex items-center gap-3 pl-1 pr-3 py-1 rounded-full bg-transparent hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-all">
-                        <Avatar className="h-9 w-9 border border-border">
+                    <Link href="/settings" className="flex items-center gap-3 px-3 py-1.5 rounded-full border border-border/60 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
+                        <Avatar className="h-8 w-8 border-2 border-white dark:border-slate-700 shadow-sm">
                             <AvatarImage src={user?.avatar} />
-                            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs">
+                            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-[10px]">
                                 {user?.name?.substring(0, 2).toUpperCase() || 'TM'}
                             </AvatarFallback>
                         </Avatar>
-                        <div className="hidden md:block text-left">
+                        <div className="hidden md:block text-left pr-1">
                             <div className="flex flex-col">
-                                <span className="text-sm font-bold text-foreground leading-tight">{user?.name || 'User'}</span>
-                                <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                                <span className="text-sm font-bold text-foreground leading-none mb-0.5">{user?.name || 'User'}</span>
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                                     {user?.subscriptionTier === 'pro' ? 'Pro Plan' : 'Free Plan'}
                                 </span>
                             </div>

@@ -5,7 +5,6 @@ import { ProjectAnalytics } from './ProjectAnalytics';
 import { Reminders } from './Reminders';
 import { ProjectList } from './ProjectList';
 import { ProjectProgress } from './ProjectProgress';
-import { TimeTracker } from './TimeTracker';
 
 export function DashboardGrid() {
     return (
@@ -24,14 +23,11 @@ export function DashboardGrid() {
                 </div>
 
                 {/* Row 3 */}
-                <div className="md:col-span-4 lg:col-span-4 h-full">
+                <div className="md:col-span-6 lg:col-span-6 h-full">
                     <ProjectList />
                 </div>
-                <div className="md:col-span-4 lg:col-span-4 h-full">
+                <div className="md:col-span-6 lg:col-span-6 h-full">
                     <ProjectProgress />
-                </div>
-                <div className="md:col-span-4 lg:col-span-4 h-full">
-                    <TimeTracker />
                 </div>
             </div>
         </div>

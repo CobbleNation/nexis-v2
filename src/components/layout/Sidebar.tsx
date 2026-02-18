@@ -13,9 +13,11 @@ import {
     Settings,
     LogOut,
     Layers,
-    Activity,
+    Sparkles,
     Zap,
-    Plus
+    Plus,
+    ChevronDown,
+    Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
@@ -23,18 +25,73 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
+import { DailyReviewDialog } from '@/components/features/DailyReviewDialog';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 
-const navigation = [
-    { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
-    // Removed 'Щоденник' (Activity) as per request
-    { name: 'Дії', href: '/actions', icon: CheckSquare },
-    { name: 'Проєкти', href: '/projects', icon: Folder },
-    { name: 'Сфери', href: '/areas', icon: Layers },
-    { name: 'Цілі', href: '/goals', icon: Target },
-    { name: 'Аналітика', href: '/insights', icon: BarChart2 },
-    { name: 'Контент', href: '/content', icon: BookOpen },
-    { name: 'Розклад', href: '/timeline', icon: Calendar }, // Renamed from 'Часова шкала'
-    { name: 'Налаштування', href: '/settings', icon: Settings },
+// Navigation Groups
+interface NavItem {
+    name: string;
+    href: string;
+    icon: any;
+    isAction?: boolean;
+    actionId?: string;
+    subItems?: { name: string; href: string }[];
+}
+
+interface NavGroup {
+    title: string;
+    items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
+    {
+        title: 'Головна',
+        items: [
+            { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
+        ]
+    },
+    {
+        title: 'AI Інструменти',
+        items: [
+            { name: 'AI Коуч', href: '#ai-daily-review', icon: Brain, isAction: true, actionId: 'daily-review' },
+        ]
+    },
+    {
+        title: 'Управління',
+        items: [
+            { name: 'Проєкти', href: '/projects', icon: Folder },
+            { name: 'Сфери', href: '/areas', icon: Layers },
+            { name: 'Цілі', href: '/goals', icon: Target },
+        ]
+    },
+    {
+        title: 'Щоденно',
+        items: [
+            {
+                name: 'Дії',
+                href: '/actions',
+                icon: CheckSquare,
+                subItems: [
+                    { name: 'Задачі', href: '/actions?tab=tasks' },
+                    { name: 'Звички', href: '/actions?tab=habits' },
+                ]
+            },
+            { name: 'Розклад', href: '/timeline', icon: Calendar },
+        ]
+    },
+    {
+        title: 'Ресурси',
+        items: [
+            { name: 'Контент', href: '/content', icon: BookOpen },
+            { name: 'Аналітика', href: '/insights', icon: BarChart2 },
+        ]
+    },
+    {
+        title: 'Налаштування',
+        items: [
+            { name: 'Налаштування', href: '/settings', icon: Settings },
+        ]
+    }
 ];
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -50,78 +107,115 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const [showQuickAdd, setShowQuickAdd] = useState(false);
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden">
-            {/* Logo Section */}
-            <div className="p-8 pb-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                    <div className="w-5 h-5 bg-primary rounded-lg rotate-45 shadow-sm shadow-primary/20" />
+        <div className="flex flex-col h-full bg-white dark:bg-slate-900">
+            {/* Logo Section - Compact */}
+            <div className="p-6 pb-2 flex items-center gap-3 shrink-0">
+                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <div className="w-4 h-4 bg-primary rounded-sm rotate-45 shadow-sm shadow-primary/20" />
                 </div>
-                <span className="text-2xl font-bold tracking-tight text-foreground">Nexis</span>
+                <span className="text-xl font-bold tracking-tight text-foreground">Nexis</span>
             </div>
 
             {/* Global Create Button */}
-            <div className="px-6 mb-2">
+            <div className="px-4 py-4 shrink-0">
                 <Button
                     onClick={() => setShowQuickAdd(true)}
-                    className="w-full justify-start gap-3 bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25 rounded-2xl h-12 text-base font-bold"
+                    className="w-full justify-start gap-2 bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/20 rounded-xl h-10 text-sm font-semibold"
                 >
-                    <div className="bg-white/20 p-1 rounded-lg">
-                        <Plus className="w-5 h-5 text-white" />
-                    </div>
-                    Створити
+                    <Plus className="w-4 h-4" />
+                    <span className="truncate">Створити</span>
                 </Button>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-4 space-y-2 overflow-y-auto py-4 scrollbar-hide">
-                {navigation.map((item) => {
-                    const isActive = pathname.startsWith(item.href);
-                    const Icon = item.icon;
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={handleNavigation}
-                            className={cn(
-                                "flex items-center gap-4 px-5 py-3.5 text-sm font-medium rounded-2xl transition-all duration-300 relative group",
-                                isActive
-                                    ? "text-primary bg-primary/5 font-bold shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                            )}
-                        >
-                            {isActive && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
-                            )}
-                            {/* Removed fill-current to prevent icon filling */}
-                            <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "text-primary")} />
-                            {item.name}
-                        </Link>
-                    );
-                })}
+            <nav className="flex-1 px-3 space-y-6 overflow-y-auto py-2 scrollbar-hide">
+                {navGroups.map((group, groupIdx) => (
+                    <div key={groupIdx} className="space-y-1">
+                        {group.title && (
+                            <h4 className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 mb-2">
+                                {group.title}
+                            </h4>
+                        )}
+
+                        {group.items.map((item) => {
+                            // Special handling for Action items (like AI Modal)
+                            if (item.isAction && item.actionId === 'daily-review') {
+                                return (
+                                    <div key={item.name} className="px-1">
+                                        <DailyReviewDialog customTrigger={
+                                            <button
+                                                className={cn(
+                                                    "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10"
+                                                )}
+                                            >
+                                                <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                                                <span>{item.name}</span>
+                                            </button>
+                                        } />
+                                    </div>
+                                );
+                            }
+
+                            const isActive = pathname.startsWith(item.href);
+                            const Icon = item.icon;
+
+                            return (
+                                <div key={item.href} className="space-y-0.5">
+                                    <Link
+                                        href={item.href}
+                                        onClick={handleNavigation}
+                                        className={cn(
+                                            "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group relative",
+                                            isActive
+                                                ? "text-primary bg-primary/10 font-semibold"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                        )}
+                                    >
+                                        <Icon className={cn("w-4 h-4 transition-transform group-hover:scale-110", isActive && "text-primary")} />
+                                        <span className="flex-1">{item.name}</span>
+                                        {/* Optional: Add chevron if has subItems and we want collapsible (not requested yet, keeping simple) */}
+                                    </Link>
+
+                                    {/* Render Sub-items if active or parent match */}
+                                    {item.subItems && isActive && (
+                                        <div className="ml-9 space-y-0.5 border-l border-border/50 pl-2 mt-1">
+                                            {item.subItems.map(sub => (
+                                                <Link
+                                                    key={sub.href}
+                                                    href={sub.href}
+                                                    onClick={handleNavigation}
+                                                    className={cn(
+                                                        "block px-2 py-1.5 text-xs rounded-md transition-colors",
+                                                        pathname === sub.href // simplistic check, might need query param match
+                                                            ? "text-primary font-medium bg-primary/5"
+                                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                                                    )}
+                                                >
+                                                    {sub.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                ))}
             </nav>
 
             {/* Bottom Actions */}
-            <div className="p-4 space-y-4">
+            <div className="p-4 mt-auto border-t border-border/40 bg-slate-50/50 dark:bg-slate-900/50">
                 {/* Upgrade Card (Only for Free Plan) */}
                 {!isPro && (
-                    <div className="bg-gradient-to-br from-primary/10 to-orange-100 dark:to-orange-900/10 p-5 rounded-[1.5rem] relative overflow-hidden border border-primary/10">
-                        <div className="relative z-10">
-                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-3 shadow-sm">
-                                <Zap className="w-5 h-5 text-primary fill-current" />
-                            </div>
-                            <h4 className="font-bold text-foreground text-sm mb-1">Перейти на Pro</h4>
-                            <p className="text-xs text-muted-foreground mb-3 leading-relaxed">Отримайте доступ до всіх можливостей.</p>
-                            <Button asChild size="sm" className="w-full rounded-xl font-bold shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white border-none">
-                                <Link href="/pricing" onClick={handleNavigation}>Покращити план</Link>
-                            </Button>
-                        </div>
-                        {/* Abstract Background Decoration */}
-                        <div className="absolute -right-6 -top-6 w-24 h-24 bg-primary/20 rounded-full blur-2xl" />
-                        <div className="absolute -left-6 -bottom-6 w-20 h-20 bg-orange-300/20 rounded-full blur-xl" />
+                    <div className="mb-0">
+                        <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2 border-primary/20 text-primary hover:text-primary hover:bg-primary/5">
+                            <Link href="/pricing" onClick={handleNavigation}>
+                                <Zap className="w-4 h-4 fill-current" />
+                                <span className="text-xs font-bold">Upgrade to Pro</span>
+                            </Link>
+                        </Button>
                     </div>
                 )}
-
-                {/* User Profile moved to Header as per request */}
             </div>
 
             <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
@@ -131,8 +225,9 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar() {
     return (
-        <aside className="hidden md:flex fixed left-4 top-4 bottom-4 w-64 flex-col bg-transparent rounded-[2rem] shadow-xl border border-border/50 z-50 overflow-hidden">
+        <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col bg-background border-r border-border z-50">
             <SidebarContent />
         </aside>
     );
 }
+
