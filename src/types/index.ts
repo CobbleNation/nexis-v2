@@ -247,6 +247,8 @@ export interface Project {
     goalIds?: string[];
     status: 'active' | 'completed' | 'paused' | 'planned' | 'deferred';
     deadline?: string;
+    startDate?: string;
+    metricIds?: string[]; // IDs of metrics specifically linked to this project
     description?: string;
     createdAt?: string | Date;
     updatedAt?: string | Date;

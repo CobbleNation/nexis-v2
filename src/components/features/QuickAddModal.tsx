@@ -97,6 +97,7 @@ export function QuickAddModal({
     const [habitMinimum, setHabitMinimum] = React.useState('');
     const [habitTimeOfDay, setHabitTimeOfDay] = React.useState<'morning' | 'afternoon' | 'evening' | 'anytime'>('anytime');
     const [relatedMetricIds, setRelatedMetricIds] = React.useState<string[]>([]);
+    const [isProjectScheduled, setIsProjectScheduled] = React.useState(false);
 
     // Helpers
     const TIME_SLOTS = Array.from({ length: 15 }).map((_, i) => {
@@ -217,6 +218,7 @@ export function QuickAddModal({
             setHabitMinimum('');
             setHabitTimeOfDay('anytime');
             setRelatedMetricIds([]);
+            setIsProjectScheduled(false);
 
             // Handle Initial Data Pre-fill (From Voice Assistant etc.)
             if (initialData) {
@@ -475,9 +477,10 @@ export function QuickAddModal({
                         title,
                         description: description || undefined,
                         areaId: selectedArea,
-                        status: 'active',
+                        status: isProjectScheduled ? 'planned' : 'active',
                         goalIds: [],
-                        deadline: date ? new Date(date).toISOString() : undefined,
+                        startDate: isProjectScheduled ? date : undefined,
+                        deadline: !isProjectScheduled && date ? new Date(date).toISOString() : undefined,
                     };
                     dispatch({ type: 'ADD_PROJECT', payload: newProject });
                     toast.success("Проект створено");
@@ -999,8 +1002,39 @@ export function QuickAddModal({
                                 </div>
                             )}
 
-                            {/* Date (Hide for Habit AND Routine) */}
-                            {type !== 'habit' && type !== 'routine' && (
+                            {/* Project Scheduling */}
+                            {type === 'project' && (
+                                <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-border">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                            {isProjectScheduled ? 'Запланований старт' : 'Дедлайн'}
+                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-slate-400">
+                                                {isProjectScheduled ? 'Відкласти' : 'Активний'}
+                                            </span>
+                                            <Switch checked={isProjectScheduled} onCheckedChange={setIsProjectScheduled} className="scale-75 data-[state=checked]:bg-blue-500" />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5 animate-in slide-in-from-top-2">
+                                        <input
+                                            type="date"
+                                            value={date}
+                                            onChange={(e) => setDate(e.target.value)}
+                                            className="h-8 w-full px-2 bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-primary/50 shadow-sm rounded-md text-xs font-medium text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/10"
+                                        />
+                                        <p className="text-[10px] text-muted-foreground">
+                                            {isProjectScheduled
+                                                ? "Проект буде мати статус 'Planned' до цієї дати."
+                                                : "Дата завершення проекту (необов'язково)."}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Date (Hide for Habit, Routine AND Project) */}
+                            {type !== 'habit' && type !== 'routine' && type !== 'project' && (
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                                         {type === 'project' ? 'Дедлайн' : 'Дата'} {['task', 'event', 'content'].includes(type) && contentType !== 'library' && <span className="text-red-500">*</span>}

@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
+import { ProjectActionsMenu } from '@/components/projects/ProjectActionsMenu';
 
 function ProjectsContent() {
     const { state } = useData();
@@ -41,9 +42,9 @@ function ProjectsContent() {
                                 )}>
                                     {project.icon || <Folder className="w-6 h-6" />}
                                 </div>
-                                <button className="p-2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors">
-                                    <MoreHorizontal className="w-5 h-5" />
-                                </button>
+                                <div className="z-20">
+                                    <ProjectActionsMenu project={project} />
+                                </div>
                             </div>
 
                             {/* Content */}

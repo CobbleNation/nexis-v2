@@ -170,6 +170,26 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
     }, [deadline, goalType]);
 
+    // Sync metric values when targetMetricId changes
+    useEffect(() => {
+        if (!targetMetricId) return;
+
+        const metric = state.metricDefinitions.find(m => m.id === targetMetricId);
+        if (metric) {
+            if (metric.baseline !== undefined) setMetricStartValue(metric.baseline.toString());
+            if (metric.target !== undefined) setMetricTargetValue(metric.target.toString());
+            if (metric.direction) {
+                // Map to allowed values for goal direction if needed, or just use as is if types match
+                // Goal direction: 'increase' | 'decrease' | 'maintain'
+                // Metric direction: 'increase' | 'decrease' | 'neutral'
+                // We map 'neutral' to 'maintain' (or keep default if not compatible)
+                if (metric.direction === 'neutral') setMetricDirection('maintain');
+                else setMetricDirection(metric.direction);
+            }
+        }
+    }, [targetMetricId, state.metricDefinitions]);
+
+
 
     const handleAISuggestMetrics = async () => {
         if (!finalTitle) {

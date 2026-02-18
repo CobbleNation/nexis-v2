@@ -2,7 +2,7 @@
 
 import { useFilteredData, useData } from '@/lib/store';
 import { Progress } from '@/components/ui/progress';
-import { Target, CheckCircle2, Circle, Clock, ArrowRight, Folder, ChevronRight, Plus, Layers } from 'lucide-react';
+import { Target, CheckCircle2, Circle, Clock, ArrowRight, Folder, ChevronRight, Plus, Layers, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -159,11 +159,12 @@ const GoalsList = ({ goals, areas, openDetails, onCreate }: { goals: Goal[], are
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
                         className={cn(
-                            "rounded-[2rem] p-6 shadow-sm border flex flex-col justify-between min-h-[340px] cursor-pointer transition-all duration-300 group hover:shadow-xl hover:-translate-y-1 relative bg-white dark:bg-card",
+                            "rounded-[2rem] p-6 shadow-sm border flex flex-col justify-between min-h-[300px] cursor-pointer transition-all duration-300 group hover:shadow-md relative bg-white dark:bg-card",
+                            "hover:border-primary/20",
                             isSuccess ? "bg-emerald-50/20 border-emerald-100 dark:border-emerald-900/20" :
                                 isPartial ? "bg-amber-50/20 border-amber-100 dark:border-amber-900/20" :
                                     isAbandoned ? "bg-slate-50 border-slate-200 dark:bg-slate-900/20 dark:border-slate-800 opacity-80" :
-                                        "bg-white dark:bg-card border-border/50 dark:border-border"
+                                        "bg-white dark:bg-card border-slate-100 dark:border-border"
                         )}
                         onClick={() => openDetails(goal)}
                     >
@@ -174,49 +175,57 @@ const GoalsList = ({ goals, areas, openDetails, onCreate }: { goals: Goal[], are
                                     isSuccess ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
                                         isPartial ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" :
                                             isAbandoned ? "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400" :
-                                                "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                                                "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                                 )}>
                                     {area?.icon && <span>{area.icon}</span>}
                                     <span>{area?.name || 'General'}</span>
                                 </div>
                                 <div className={cn(
                                     "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                                    isSuccess ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30" : "bg-slate-100 text-slate-400 dark:bg-slate-800"
+                                    isSuccess ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30" : "bg-slate-50 text-slate-400 dark:bg-slate-800"
                                 )}>
                                     {isSuccess ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                            <h3 className="text-lg font-bold text-slate-800 dark:text-foreground mb-3 line-clamp-2 leading-tight">
                                 {goal.title}
                             </h3>
 
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
-                                <div className="flex items-center gap-1.5">
-                                    <Target className="w-4 h-4" />
-                                    <span>{goal.progress || 0}%</span>
-                                </div>
+                            <div className="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-muted-foreground mb-6">
+                                {goal.targetMetricId ? (
+                                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-secondary/50 px-2 py-1 rounded-md">
+                                        <TrendingUp className="w-3.5 h-3.5" />
+                                        <span>{goal.metricCurrentValue ?? 0} / {goal.metricTargetValue ?? 100}</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-secondary/50 px-2 py-1 rounded-md">
+                                        <Target className="w-3.5 h-3.5" />
+                                        <span>{goal.progress || 0}%</span>
+                                    </div>
+                                )}
+
                                 {goal.deadline && (
-                                    <div className="flex items-center gap-1.5">
-                                        <Clock className="w-4 h-4" />
+                                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-secondary/50 px-2 py-1 rounded-md">
+                                        <Clock className="w-3.5 h-3.5" />
                                         <span>{new Date(goal.deadline).toLocaleDateString('uk-UA')}</span>
                                     </div>
                                 )}
                             </div>
 
-                            <div className="w-full bg-secondary h-2 rounded-full overflow-hidden">
+                            <div className="w-full bg-slate-100 dark:bg-secondary h-1.5 rounded-full overflow-hidden">
                                 <div
                                     className={cn("h-full rounded-full transition-all duration-500",
-                                        isSuccess ? "bg-emerald-500" : "bg-primary"
+                                        isSuccess ? "bg-emerald-500" : "bg-blue-500"
                                     )}
                                     style={{ width: `${goal.progress || 0}%` }}
                                 />
                             </div>
                         </div>
 
-                        <div className="mt-6 pt-6 border-t border-border/50 flex items-center justify-between text-primary font-medium opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                            <span>Деталі</span>
-                            <ArrowRight className="w-4 h-4" />
+                        <div className="mt-6 pt-4 border-t border-slate-100 dark:border-border/50 flex items-center justify-between text-slate-400 dark:text-muted-foreground text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <span className="font-medium">Переглянути деталі</span>
+                            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
                         </div>
                     </motion.div>
                 );
