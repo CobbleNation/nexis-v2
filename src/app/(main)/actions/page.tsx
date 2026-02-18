@@ -54,16 +54,7 @@ function ActionsPageContent() {
                         </span>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Налаштування
-                    </Button>
-                    <Button onClick={() => { }} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/20">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Нова Дія
-                    </Button>
-                </div>
+
             </div>
 
             <Tabs value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col space-y-6">
