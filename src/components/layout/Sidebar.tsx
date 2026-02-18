@@ -121,11 +121,20 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                         // Robust active check using searchParams
                                         const [childPath, childQuery] = child.href.split('?');
                                         const childTab = childQuery ? new URLSearchParams(childQuery).get('tab') : null;
-                                        const currentTab = searchParams.get('tab');
+
+                                        const queryTab = searchParams.get('tab');
+
+                                        // Determine effective current tab (handling defaults)
+                                        let effectiveTab = queryTab;
+                                        if (!effectiveTab) {
+                                            if (pathname === '/actions') effectiveTab = 'tasks';
+                                            else if (pathname === '/goals') effectiveTab = 'goals';
+                                            else if (pathname === '/content') effectiveTab = 'notes';
+                                        }
 
                                         // If child has specific tab, check it. If not, just check pathname.
                                         const isChildActive = childTab
-                                            ? pathname === childPath && currentTab === childTab
+                                            ? pathname === childPath && effectiveTab === childTab
                                             : pathname === child.href;
 
                                         return (
