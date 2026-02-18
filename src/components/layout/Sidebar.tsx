@@ -23,14 +23,14 @@ import { Button } from '@/components/ui/button';
 
 const navigation = [
     { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
-    { name: 'Щоденник', href: '/activity', icon: Activity },
+    // Removed 'Щоденник' (Activity) as per request
     { name: 'Дії', href: '/actions', icon: CheckSquare },
     { name: 'Проєкти', href: '/projects', icon: Folder },
     { name: 'Сфери', href: '/areas', icon: Layers },
     { name: 'Цілі', href: '/goals', icon: Target },
     { name: 'Аналітика', href: '/insights', icon: BarChart2 },
     { name: 'Контент', href: '/content', icon: BookOpen },
-    { name: 'Часова шкала', href: '/timeline', icon: Calendar },
+    { name: 'Розклад', href: '/timeline', icon: Calendar }, // Renamed from 'Часова шкала'
     { name: 'Налаштування', href: '/settings', icon: Settings },
 ];
 
@@ -74,7 +74,8 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                             {isActive && (
                                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
                             )}
-                            <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "fill-current")} />
+                            {/* Removed fill-current to prevent icon filling */}
+                            <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "text-primary")} />
                             {item.name}
                         </Link>
                     );
@@ -102,22 +103,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     </div>
                 )}
 
-                {/* User Profile - Compact */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl border border-border/40 bg-gray-50/50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer group">
-                    <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
-                        <AvatarImage src={user?.avatar} />
-                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                            {user?.name?.substring(0, 2).toUpperCase() || 'ME'}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                        <div className="text-sm font-bold text-foreground truncate">{user?.name || 'User'}</div>
-                        <div className="text-[10px] text-muted-foreground truncate">{user?.email}</div>
-                    </div>
-                    <button onClick={() => logout()} className="p-2 text-muted-foreground hover:text-red-500 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/10">
-                        <LogOut className="w-4 h-4" />
-                    </button>
-                </div>
+                {/* User Profile moved to Header as per request */}
             </div>
         </div>
     );

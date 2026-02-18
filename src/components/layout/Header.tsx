@@ -2,10 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, Plus, CheckSquare, Folder, Target, BookOpen } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationsPopover } from '@/components/layout/NotificationsPopover';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from '@/lib/auth-context';
 import { useFilteredData, useData } from '@/lib/store';
 import { MobileContextControls } from '@/components/features/MobileContextControls';
@@ -48,6 +56,41 @@ export function Header() {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3">
+                    {/* Global Add Button */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button size="icon" className="rounded-full h-10 w-10 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shadow-primary/25">
+                                <Plus className="h-5 w-5" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 rounded-2xl p-2">
+                            <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                                <Link href="/actions?action=new" className="flex items-center gap-2">
+                                    <CheckSquare className="w-4 h-4 text-primary" />
+                                    <span>Завдання</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                                <Link href="/projects?action=new" className="flex items-center gap-2">
+                                    <Folder className="w-4 h-4 text-primary" />
+                                    <span>Проєкт</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                                <Link href="/goals?action=new" className="flex items-center gap-2">
+                                    <Target className="w-4 h-4 text-primary" />
+                                    <span>Ціль</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                                <Link href="/content?action=new" className="flex items-center gap-2">
+                                    <BookOpen className="w-4 h-4 text-primary" />
+                                    <span>Нотатка</span>
+                                </Link>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                     <NotificationsPopover />
 
                     {/* Profile */}
@@ -59,7 +102,13 @@ export function Header() {
                             </AvatarFallback>
                         </Avatar>
                         <div className="hidden md:block text-left pr-2">
-                            <div className="text-sm font-bold text-foreground">{user?.name || 'User'}</div>
+                            <div className="flex items-center gap-2">
+                                <div className="text-sm font-bold text-foreground leading-none">{user?.name || 'User'}</div>
+                                {/* Subscription Badge */}
+                                <Badge variant="secondary" className="h-5 px-1.5 text-[10px] font-bold tracking-wide uppercase bg-primary/10 text-primary hover:bg-primary/20 border-primary/20">
+                                    {user?.subscriptionTier === 'pro' ? 'PRO' : 'FREE'}
+                                </Badge>
+                            </div>
                         </div>
                     </Link>
                 </div>
