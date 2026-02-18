@@ -28,7 +28,7 @@ export function ProjectProgress() {
     }
 
     return (
-        <div className="bg-card text-card-foreground p-6 rounded-[2rem] shadow-sm border border-border h-full flex flex-col">
+        <div className="bg-white dark:bg-card text-card-foreground p-6 rounded-[2rem] shadow-sm border border-border/50 dark:border-border h-full flex flex-col">
             <h3 className="text-lg font-bold mb-4">Статус Проєктів</h3>
 
             <div className="relative flex-1 min-h-[180px]">

@@ -14,7 +14,7 @@ export function Reminders() {
         .sort((a: any, b: any) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())[0];
 
     return (
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-border flex flex-col justify-between h-full">
+        <div className="bg-white dark:bg-card p-6 rounded-[2rem] shadow-sm border border-border/50 dark:border-border flex flex-col justify-between h-full">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-bold text-foreground">Нагадування</h3>
                 <Calendar className="w-5 h-5 text-muted-foreground" />

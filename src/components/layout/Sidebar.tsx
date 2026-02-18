@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import {
     LayoutDashboard,
     CheckSquare,
@@ -50,6 +50,7 @@ interface NavGroup {
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const { user, logout } = useAuth();
     const { state } = useData(); // Added useData
     const isPro = user?.subscriptionTier === 'pro' || user?.role === 'admin';
@@ -93,7 +94,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 },
                 {
                     name: 'Цілі',
-                    href: '/goals',
+                    href: '/goals?tab=active',
                     icon: Target,
                     subItems: [
                         { name: 'Активні', href: '/goals?tab=active' },
@@ -189,7 +190,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                         )}
 
                         {group.items.map((item) => {
-                            // Special handling for Action items (like AI Modal)
+                            // Action items logic (Daily Review, AI Strategy) remains the same
                             if (item.isAction) {
                                 if (item.actionId === 'daily-review') {
                                     return (
@@ -236,8 +237,8 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                         className={cn(
                                             "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group relative",
                                             isActive
-                                                ? "text-primary bg-primary/10 font-semibold"
-                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                                ? "text-primary bg-primary/10 font-semibold shadow-sm"
+                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                                         )}
                                     >
                                         <Icon className={cn("w-4 h-4 transition-transform group-hover:scale-110", isActive && "text-primary")} />
@@ -246,9 +247,22 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
                                     {/* Render Sub-items if active or parent match */}
                                     {item.subItems && (isActive || pathname.startsWith(item.href)) && (
-                                        <div className="ml-9 space-y-0.5 border-l border-border/50 pl-2 mt-1">
+                                        <div className="ml-9 space-y-1 border-l border-border/50 pl-2 mt-1">
                                             {item.subItems.map((sub, idx) => {
-                                                const isSubActive = pathname === sub.href || (pathname === sub.href + '/');
+                                                // Enhanced Active Check for Tabs
+                                                let isSubActive = false;
+                                                if (sub.href.includes('?')) {
+                                                    // Check query param
+                                                    const [path, query] = sub.href.split('?');
+                                                    const params = new URLSearchParams(query);
+                                                    const tab = params.get('tab');
+                                                    const currentTab = searchParams.get('tab');
+                                                    isSubActive = pathname === path && currentTab === tab;
+                                                } else {
+                                                    // Standard path match
+                                                    isSubActive = pathname === sub.href || (pathname === sub.href + '/');
+                                                }
+
                                                 // @ts-ignore
                                                 const itemColor = sub.color;
 
@@ -258,17 +272,17 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                                         href={sub.href}
                                                         onClick={handleNavigation}
                                                         className={cn(
-                                                            "block px-2 py-1.5 text-xs rounded-md transition-colors flex items-center gap-2",
+                                                            "block px-3 py-2 text-xs rounded-md transition-all duration-200 flex items-center gap-2.5",
                                                             isSubActive
-                                                                ? "text-primary font-medium bg-primary/5"
-                                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                                                ? "text-foreground font-semibold bg-secondary/50 shadow-sm translate-x-1"
+                                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:translate-x-1"
                                                         )}
                                                     >
-                                                        {/* Start with small dot if color is present (Spheres) */}
+                                                        {/* Spheres: Always show the dot with the correct color class */}
                                                         {itemColor && (
                                                             <span className={cn(
-                                                                "w-1.5 h-1.5 rounded-full",
-                                                                isSubActive ? `bg-${itemColor.split('-')[1]}-500` : `bg-${itemColor.split('-')[1]}-300`
+                                                                "w-2 h-2 rounded-full ring-1 ring-inset ring-black/5",
+                                                                itemColor // Properly applying the bg-color class from store
                                                             )} />
                                                         )}
                                                         {sub.name}

@@ -23,7 +23,7 @@ function StatCard({ title, value, trend, trendValue, variant = 'default' }: Stat
                 "p-6 rounded-[2rem] flex flex-col justify-between h-[180px] relative overflow-hidden transition-all duration-300",
                 isPrimary
                     ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20"
-                    : "bg-white text-foreground shadow-sm hover:shadow-md border border-border"
+                    : "bg-white dark:bg-card text-foreground shadow-sm hover:shadow-md border border-border/50 dark:border-border"
             )}
         >
             {/* Background decoration for primary card */}
@@ -40,7 +40,7 @@ function StatCard({ title, value, trend, trendValue, variant = 'default' }: Stat
                 </span>
                 <div className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center",
-                    isPrimary ? "bg-white/20 text-white" : "bg-gray-100 text-foreground"
+                    isPrimary ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-secondary text-foreground"
                 )}>
                     <ArrowUpRight className="w-4 h-4" />
                 </div>

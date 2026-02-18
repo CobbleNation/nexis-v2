@@ -13,7 +13,7 @@ export function ProjectList() {
         .slice(0, 5);
 
     return (
-        <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-border h-full flex flex-col">
+        <div className="bg-white dark:bg-card p-6 rounded-[2rem] shadow-sm border border-border/50 dark:border-border h-full flex flex-col">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-foreground">Проєкти</h3>
                 <Link href="/projects" className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-border text-xs font-semibold hover:bg-muted transition-colors">
@@ -29,7 +29,7 @@ export function ProjectList() {
                 ) : (
                     projects.map((project: any, index: number) => (
                         <Link href={`/projects/${project.id}`} key={project.id || index}>
-                            <div className="flex items-center gap-4 group cursor-pointer hover:bg-muted/30 p-2 rounded-xl transition-colors">
+                            <div className="flex items-center gap-4 group cursor-pointer hover:bg-slate-50 dark:hover:bg-muted/10 p-2 rounded-xl transition-colors">
                                 <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-lg bg-primary/10 text-primary")}>
                                     {project.icon || <Folder className="w-5 h-5" />}
                                 </div>

@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
+import { QuickAddModal } from '@/components/features/QuickAddModal';
 
 function ProjectsContent() {
     const { state } = useData();
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const currentTab = searchParams.get('tab') || 'active';
@@ -88,7 +90,10 @@ function ProjectsContent() {
             })}
 
             {/* Add New Card (Only shown in Active tab usually, or always) */}
-            <button className="group h-full min-h-[250px] border-2 border-dashed border-border rounded-[2rem] flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300">
+            <button
+                onClick={() => setShowCreateModal(true)}
+                className="group h-full min-h-[250px] border-2 border-dashed border-border rounded-[2rem] flex flex-col items-center justify-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300"
+            >
                 <div className="w-16 h-16 rounded-full bg-muted group-hover:bg-primary/10 flex items-center justify-center transition-colors">
                     <Plus className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
                 </div>
@@ -169,6 +174,7 @@ function ProjectsContent() {
                     ) : <ProjectList items={deferredProjects} />}
                 </TabsContent>
             </Tabs>
+            <QuickAddModal open={showCreateModal} onOpenChange={setShowCreateModal} defaultTab="project" />
         </div>
     );
 }
