@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function ProjectsPage() {
+function ProjectsContent() {
     const { state } = useData();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -169,5 +170,13 @@ export default function ProjectsPage() {
                 </TabsContent>
             </Tabs>
         </div>
+    );
+}
+
+export default function ProjectsPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center text-muted-foreground">Завантаження проектів...</div>}>
+            <ProjectsContent />
+        </Suspense>
     );
 }
