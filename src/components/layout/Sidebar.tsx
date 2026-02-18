@@ -145,7 +145,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                                 className={cn(
                                                     "block px-3 py-1.5 rounded-md text-sm transition-all duration-200",
                                                     isChildActive
-                                                        ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 font-medium shadow-sm ring-1 ring-orange-200 dark:ring-orange-900/20"
+                                                        ? "text-orange-600 dark:text-orange-400 font-medium"
                                                         : "text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 hover:pl-4"
                                                 )}
                                             >
