@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useData } from '@/lib/store';
 import {
     ChevronRight, ChevronLeft, Loader2,
-    Hash, Scale, ToggleRight, List,
+    Hash, Scale, CheckSquare, List,
     TrendingUp, TrendingDown, Minus
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ interface MetricCreationWizardProps {
     initialUnit?: string;
     initialTarget?: number;
     initialDirection?: 'increase' | 'decrease' | 'neutral';
+    initialDescription?: string;
     onComplete: (metricId?: string) => void;
     onCancel: () => void;
 }
@@ -33,7 +34,7 @@ interface MetricCreationWizardProps {
 const VALUE_TYPES = [
     { id: 'numeric', label: 'Numeric', icon: Hash, desc: 'Countable numbers' },
     { id: 'scale', label: 'Scale', icon: Scale, desc: 'Range (e.g., 1-10)' },
-    { id: 'boolean', label: 'Boolean', icon: ToggleRight, desc: 'Yes / No' },
+    { id: 'boolean', label: 'Boolean', icon: CheckSquare, desc: 'Yes / No' },
     { id: 'enum', label: 'Status', icon: List, desc: 'Select from list' },
 ] as const;
 
@@ -70,7 +71,7 @@ const UNIT_GROUPS = [
 
 // --- COMPONENT ---
 
-export function MetricCreationWizard({ initialTitle, initialAreaId, initialUnit, initialTarget, initialDirection, onComplete, onCancel }: MetricCreationWizardProps) {
+export function MetricCreationWizard({ initialTitle, initialAreaId, initialUnit, initialTarget, initialDirection, initialDescription, onComplete, onCancel }: MetricCreationWizardProps) {
     const { state, dispatch } = useData();
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -88,7 +89,7 @@ export function MetricCreationWizard({ initialTitle, initialAreaId, initialUnit,
     // Details
     const [baseline, setBaseline] = useState<string>('');
     const [target, setTarget] = useState<string>(initialTarget?.toString() || '');
-    const [description, setDescription] = useState('');
+    const [description, setDescription] = useState(initialDescription || '');
 
     const handleNext = () => {
         if (step === 1) {

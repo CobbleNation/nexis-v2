@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { ProjectAssistant } from "@/components/projects/ProjectAssistant";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PieChart } from 'lucide-react';
 
 export default function ProjectPage() {
     const { id } = useParams();
@@ -329,32 +330,46 @@ export default function ProjectPage() {
                                 <Activity className="w-4 h-4" /> Аналітика
                             </h3>
 
-                            <div className="space-y-6">
-                                {/* Completion Circle */}
-                                <div className="flex items-center justify-between">
-                                    <div className="flex flex-col">
-                                        <span className="text-3xl font-bold text-slate-900 dark:text-foreground">{completionPercentage}%</span>
-                                        <span className="text-xs text-slate-500 font-medium">Виконано</span>
+                            {hasItems ? (
+                                <div className="space-y-6">
+                                    {/* Completion Circle */}
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <span className="text-3xl font-bold text-slate-900 dark:text-foreground">{completionPercentage}%</span>
+                                            <span className="text-xs text-slate-500 font-medium">Виконано</span>
+                                        </div>
+                                        <div className="relative w-16 h-16">
+                                            <svg className="w-full h-full transform -rotate-90">
+                                                <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="none" className="text-slate-100 dark:text-secondary" />
+                                                <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray={175.93} strokeDashoffset={175.93 - (175.93 * completionPercentage) / 100} className="text-blue-500 transition-all duration-1000 ease-out" />
+                                            </svg>
+                                        </div>
                                     </div>
-                                    <div className="relative w-16 h-16">
-                                        <svg className="w-full h-full transform -rotate-90">
-                                            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="none" className="text-slate-100 dark:text-secondary" />
-                                            <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="none" strokeDasharray={175.93} strokeDashoffset={175.93 - (175.93 * completionPercentage) / 100} className="text-blue-500 transition-all duration-1000 ease-out" />
-                                        </svg>
+
+                                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 dark:border-border/50">
+                                        <div className="bg-slate-50 dark:bg-secondary/20 p-3 rounded-xl">
+                                            <div className="text-2xl font-bold text-slate-700 dark:text-foreground">{completedTasks.length}</div>
+                                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Ready</div>
+                                        </div>
+                                        <div className="bg-slate-50 dark:bg-secondary/20 p-3 rounded-xl">
+                                            <div className="text-2xl font-bold text-slate-700 dark:text-foreground">{activeTasks.length}</div>
+                                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pending</div>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 dark:border-border/50">
-                                    <div className="bg-slate-50 dark:bg-secondary/20 p-3 rounded-xl">
-                                        <div className="text-2xl font-bold text-slate-700 dark:text-foreground">{completedTasks.length}</div>
-                                        <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Ready</div>
+                            ) : (
+                                <div className="py-6 flex flex-col items-center justify-center text-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-secondary flex items-center justify-center text-slate-400">
+                                        <Target className="w-5 h-5" />
                                     </div>
-                                    <div className="bg-slate-50 dark:bg-secondary/20 p-3 rounded-xl">
-                                        <div className="text-2xl font-bold text-slate-700 dark:text-foreground">{activeTasks.length}</div>
-                                        <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pending</div>
+                                    <div>
+                                        <p className="font-medium text-sm text-slate-700 dark:text-foreground">Немає даних</p>
+                                        <p className="text-xs text-slate-500 dark:text-muted-foreground mt-0.5">Додайте завдання або метрику</p>
                                     </div>
                                 </div>
+                            )}
 
+                            <div className="mt-4 pt-4 border-t border-slate-50 dark:border-border/50">
                                 {daysLeft !== null && (
                                     <div className={cn("p-3 rounded-xl flex items-center gap-3", isOverdue ? "bg-red-50 text-red-600" : "bg-blue-50 text-blue-600")}>
                                         <Clock className="w-5 h-5" />
