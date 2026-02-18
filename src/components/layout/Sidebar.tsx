@@ -62,9 +62,36 @@ const navGroups: NavGroup[] = [
     {
         title: 'Управління',
         items: [
-            { name: 'Проєкти', href: '/projects', icon: Folder },
-            { name: 'Сфери', href: '/areas', icon: Layers },
-            { name: 'Цілі', href: '/goals', icon: Target },
+            {
+                name: 'Сфери',
+                href: '/areas',
+                icon: Layers,
+                subItems: [
+                    { name: 'Всі Сфери', href: '/areas' }
+                ]
+            },
+            {
+                name: 'Цілі',
+                href: '/goals',
+                icon: Target,
+                subItems: [
+                    { name: 'Активні', href: '/goals?tab=active' },
+                    { name: 'Досягненні', href: '/goals?tab=achieved' },
+                    { name: 'Не повністю', href: '/goals?tab=partial' },
+                    { name: 'Зупинені', href: '/goals?tab=paused' },
+                ]
+            },
+            {
+                name: 'Проєкти',
+                href: '/projects',
+                icon: Folder,
+                subItems: [
+                    { name: 'Активні', href: '/projects?tab=active' },
+                    { name: 'Заплановані', href: '/projects?tab=planned' },
+                    { name: 'Виконанні', href: '/projects?tab=completed' },
+                    { name: 'Відкладені', href: '/projects?tab=deferred' },
+                ]
+            },
         ]
     },
     {
@@ -76,7 +103,9 @@ const navGroups: NavGroup[] = [
                 icon: CheckSquare,
                 subItems: [
                     { name: 'Задачі', href: '/actions?tab=tasks' },
+                    { name: 'Рутина', href: '/actions?tab=routine' },
                     { name: 'Звички', href: '/actions?tab=habits' },
+                    { name: 'Фокус', href: '/actions?tab=focus' },
                 ]
             },
             { name: 'Розклад', href: '/timeline', icon: Calendar },
@@ -85,7 +114,17 @@ const navGroups: NavGroup[] = [
     {
         title: 'Ресурси',
         items: [
-            { name: 'Контент', href: '/content', icon: BookOpen },
+            {
+                name: 'Контент',
+                href: '/content',
+                icon: BookOpen,
+                subItems: [
+                    { name: 'Нотатки', href: '/content?tab=notes' },
+                    { name: 'Журнал', href: '/content?tab=journal' },
+                    { name: 'Файли', href: '/content?tab=files' },
+                    { name: 'Бібліотека', href: '/content?tab=library' },
+                ]
+            },
             { name: 'Аналітика', href: '/insights', icon: BarChart2 },
         ]
     },

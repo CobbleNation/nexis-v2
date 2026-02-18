@@ -128,15 +128,6 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 mt-2">
-                                    {/* Locked Explanation Trigger - Moved below score */}
-                                    <button
-                                        onClick={handleInfluenceClick}
-                                        className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors text-[10px] font-medium text-zinc-500 dark:text-zinc-400"
-                                    >
-                                        {!isPro && <Lock className="w-3 h-3" />}
-                                        <Activity className="w-3 h-3" />
-                                        <span>Що вплинуло?</span>
-                                    </button>
                                     <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Рівень Фокусу</span>
                                 </div>
                             </div>
