@@ -245,7 +245,7 @@ export interface Project {
     title: string;
     areaId?: string;
     goalIds?: string[];
-    status: 'active' | 'completed' | 'paused';
+    status: 'active' | 'completed' | 'paused' | 'planned' | 'deferred';
     deadline?: string;
     description?: string;
     createdAt?: string | Date;

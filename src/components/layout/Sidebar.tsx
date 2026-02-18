@@ -83,7 +83,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     href: '/areas',
                     icon: Layers,
                     subItems: [
-                        { name: 'Всі Сфери', href: '/areas' },
+                        { name: 'Всі Сфери', href: '/areas', color: 'bg-slate-400' },
                         ...state.areas.map(area => ({
                             name: area.title,
                             href: `/areas/${area.id}`,
