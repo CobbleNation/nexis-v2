@@ -117,7 +117,15 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                             {showChildren && (
                                 <div className="mt-1 ml-9 space-y-1 border-l-2 border-slate-200 dark:border-slate-800 pl-2">
                                     {item.children!.map((child) => {
-                                        const isChildActive = pathname === child.href || (typeof window !== 'undefined' && window.location.href.includes(child.href.split('?')[1]));
+                                        // Robust active check using searchParams
+                                        const [childPath, childQuery] = child.href.split('?');
+                                        const childTab = childQuery ? new URLSearchParams(childQuery).get('tab') : null;
+                                        const currentTab = searchParams.get('tab');
+
+                                        // If child has specific tab, check it. If not, just check pathname.
+                                        const isChildActive = childTab
+                                            ? pathname === childPath && currentTab === childTab
+                                            : pathname === child.href;
 
                                         return (
                                             <Link
@@ -125,8 +133,10 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                                 href={child.href}
                                                 onClick={onNavigate}
                                                 className={cn(
-                                                    "block px-3 py-1.5 rounded-md text-sm transition-colors text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50",
-                                                    isChildActive && "text-orange-600 font-medium"
+                                                    "block px-3 py-1.5 rounded-md text-sm transition-all duration-200",
+                                                    isChildActive
+                                                        ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 font-medium shadow-sm ring-1 ring-orange-200 dark:ring-orange-900/20"
+                                                        : "text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 hover:pl-4"
                                                 )}
                                             >
                                                 {child.name}
