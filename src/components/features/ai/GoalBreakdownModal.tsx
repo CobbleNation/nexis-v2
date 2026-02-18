@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from '@/components/ui/badge';
+import { v4 as uuidv4 } from 'uuid';
+import { Action } from '@/types';
 
 interface GoalBreakdownModalProps {
     customTrigger?: React.ReactNode;
@@ -75,49 +77,95 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
         // Simulate AI thinking time
         setTimeout(() => {
             const progress = selectedGoal.progress;
-            // Simulated "recent activity" check
-            const hasActivity = linkedTasks.length > 0 || (Math.random() > 0.5);
+
+            // Context Check: Truly check for linked items
+            const hasLinkedTasks = linkedTasks.length > 0;
+            const hasMetric = selectedGoal.targetMetricId;
 
             let status: 'on_track' | 'needs_attention' | 'new' = 'new';
             let recommendation = '';
             let focusArea = '';
             let newTasks: string[] = [];
 
+            // Helper for Keyword Matching
+            const getSuggestions = (title: string, type: string) => {
+                const t = title.toLowerCase();
+                if (t.includes('ваг') || t.includes('схуд') || t.includes('тіл')) return ['Скласти план харчування', 'Записатися в зал / знайти тренера', 'Купити ваги для продуктів'];
+                if (t.includes('англій') || t.includes('мов')) return ['Знайти викладача / курси', 'Встановити Duolingo', 'Дивитися 1 відео в день англійською'];
+                if (t.includes('грош') || t.includes('фінанс') || t.includes('дохід')) return ['Проаналізувати витрати за місяць', 'Відкласти 10% від доходу', 'Знайти додаткове джерело доходу'];
+                if (t.includes('сайт') || t.includes('проєкт') || t.includes('код')) return ['Створити структуру проєкту', 'Вибрати технологічний стек', 'Зробити MVP'];
+                if (t.includes('чита') || t.includes('книг')) return ['Обрати першу книгу', 'Виділити 20 хв ввечері на читання', 'Купити електронну книгу'];
+
+                // Fallback based on type
+                if (type === 'strategic') return ['Визначити ключові метрики', 'Розбити на місячні етапи', 'Знайти ментора'];
+                return ['Визначити перший крок', 'Зробити чернетку', 'Знайти референси'];
+            };
+
             if (progress > 60) {
                 status = 'on_track';
                 recommendation = 'Чудова динаміка! Виконали більшу частину. Зараз важливо не втрачати темп. Рекомендую зосередитись на фіналізації та перевірці результатів.';
                 focusArea = 'Фіналізація та Якість';
                 newTasks = ['Перевірити відповідність результатів', 'Підготувати звіт', 'Запланувати ретроспективу'];
-            } else if ((progress < 20 && !hasActivity) || selectedGoal.status === 'paused') {
+            } else if ((progress < 20 && !hasLinkedTasks) || selectedGoal.status === 'paused') {
                 status = 'needs_attention';
-                recommendation = 'Ціль виглядає заблокованою або надто складною. Схоже, потрібна декомпозиція на менші кроки.';
+                recommendation = 'Ціль виглядає заблокованою. Немає активних задач або прогресу. Схоже, потрібна декомпозиція на менші кроки або конкретний план дій.';
                 focusArea = 'Декомпозиція та Спрощення';
-                newTasks = ['Розділити на 3 під-етапи', 'Виділити 15 хв на старт', 'Знайти блокери'];
+                newTasks = getSuggestions(selectedGoal.title, selectedGoal.type);
+            } else if (progress < 20 && hasLinkedTasks) {
+                status = 'on_track'; // Has tasks, just started
+                recommendation = 'Ви на початку шляху, але план дій вже є. Продовжуйте виконувати заплановані задачі.';
+                focusArea = 'Виконання та Дисципліна';
+                newTasks = ['Виконати найпріоритетнішу задачу', 'Переглянути дедлайни', 'Зробити чек-ін прогресу'];
             } else {
-                status = 'new';
-                recommendation = 'Бачу ціль, але мало активності. Давайте створимо початковий імпульс для старту.';
-                focusArea = 'Швидкий Старт';
-                newTasks = ['Визначити перший крок', 'Зробити чернетку', 'Знайти референси'];
+                // Mid progress
+                status = 'on_track';
+                recommendation = 'Прогрес є, рухаємось стабільно. Варто переглянути, чи можна оптимізувати процеси для пришвидшення.';
+                focusArea = 'Оптимізація';
+                newTasks = ['Проаналізувати, що забирає час', 'Делегувати рутину', 'Збільшити інтенсивність'];
             }
 
             setProposal({
                 status,
                 recommendation,
+                focusArea,
                 newTasks,
-                focusArea
+                suggestedMetric: (!hasMetric && selectedGoal.type === 'strategic') ? 'Додати метрику прогресу' : undefined
             });
             setStep('result');
-        }, 2500);
+        }, 1500);
     };
 
     const handleApply = async () => {
-        if (!proposal || !selectedGoalId) return;
+        if (!proposal || !selectedGoalId || !selectedGoal) return;
         setStep('creating');
 
         try {
             await new Promise(r => setTimeout(r, 1000));
-            // In real app, dispatch 'ADD_TASK' actions here
-            toast.success("Стратегію успішно застосовано!");
+            // Create actions for each suggested task
+            proposal.newTasks.forEach((taskTitle, index) => {
+                const newAction: Action = {
+                    id: uuidv4(),
+                    userId: 'user', // Default
+                    title: taskTitle,
+                    description: `Generated by AI Strategy for goal: ${selectedGoal.title}`,
+                    type: 'task',
+                    status: 'pending',
+                    completed: false,
+                    priority: 'medium',
+                    // Schedule for today/tomorrow
+                    date: new Date().toISOString().split('T')[0],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    // CRITICAL: Link to Goal and Area
+                    linkedGoalId: selectedGoalId,
+                    areaId: selectedGoal.areaId,
+                    duration: 15,
+                    isFocus: index === 0 // Make the first one a focus item
+                };
+                dispatch({ type: 'ADD_ACTION', payload: newAction });
+            });
+
+            toast.success(`Стратегію застосовано! Додано ${proposal.newTasks.length} нових дій.`);
             setIsOpen(false);
             setStep('select');
             setSelectedGoalId(null);

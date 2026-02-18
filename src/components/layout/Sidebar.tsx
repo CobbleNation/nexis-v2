@@ -22,9 +22,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
+import { useData } from '@/lib/store'; // Added import
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { DailyReviewDialog } from '@/components/features/DailyReviewDialog';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
@@ -37,7 +38,7 @@ interface NavItem {
     icon: any;
     isAction?: boolean;
     actionId?: string;
-    subItems?: { name: string; href: string }[];
+    subItems?: { name: string; href: string; color?: string }[];
 }
 
 interface NavGroup {
@@ -45,100 +46,12 @@ interface NavGroup {
     items: NavItem[];
 }
 
-const navGroups: NavGroup[] = [
-    {
-        title: 'Головна',
-        items: [
-            { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
-        ]
-    },
-    {
-        title: 'AI Інструменти',
-        items: [
-            { name: 'Аналіз Дня', href: '#ai-daily-review', icon: Lightbulb, isAction: true, actionId: 'daily-review' },
-            { name: 'AI Стратегія', href: '#ai-goal-strategy', icon: Target, isAction: true, actionId: 'goal-breakdown' },
-        ]
-    },
-    {
-        title: 'Управління',
-        items: [
-            {
-                name: 'Сфери',
-                href: '/areas',
-                icon: Layers,
-                subItems: [
-                    { name: 'Всі Сфери', href: '/areas' }
-                ]
-            },
-            {
-                name: 'Цілі',
-                href: '/goals',
-                icon: Target,
-                subItems: [
-                    { name: 'Активні', href: '/goals?tab=active' },
-                    { name: 'Досягненні', href: '/goals?tab=achieved' },
-                    { name: 'Не повністю', href: '/goals?tab=partial' },
-                    { name: 'Зупинені', href: '/goals?tab=paused' },
-                ]
-            },
-            {
-                name: 'Проєкти',
-                href: '/projects',
-                icon: Folder,
-                subItems: [
-                    { name: 'Активні', href: '/projects?tab=active' },
-                    { name: 'Заплановані', href: '/projects?tab=planned' },
-                    { name: 'Виконанні', href: '/projects?tab=completed' },
-                    { name: 'Відкладені', href: '/projects?tab=deferred' },
-                ]
-            },
-        ]
-    },
-    {
-        title: 'Щоденно',
-        items: [
-            {
-                name: 'Дії',
-                href: '/actions',
-                icon: CheckSquare,
-                subItems: [
-                    { name: 'Задачі', href: '/actions?tab=tasks' },
-                    { name: 'Рутина', href: '/actions?tab=routine' },
-                    { name: 'Звички', href: '/actions?tab=habits' },
-                    { name: 'Фокус', href: '/actions?tab=focus' },
-                ]
-            },
-            { name: 'Розклад', href: '/timeline', icon: Calendar },
-        ]
-    },
-    {
-        title: 'Ресурси',
-        items: [
-            {
-                name: 'Контент',
-                href: '/content',
-                icon: BookOpen,
-                subItems: [
-                    { name: 'Нотатки', href: '/content?tab=notes' },
-                    { name: 'Журнал', href: '/content?tab=journal' },
-                    { name: 'Файли', href: '/content?tab=files' },
-                    { name: 'Бібліотека', href: '/content?tab=library' },
-                ]
-            },
-            { name: 'Аналітика', href: '/insights', icon: BarChart2 },
-        ]
-    },
-    {
-        title: 'Налаштування',
-        items: [
-            { name: 'Налаштування', href: '/settings', icon: Settings },
-        ]
-    }
-];
+
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
     const { user, logout } = useAuth();
+    const { state } = useData(); // Added useData
     const isPro = user?.subscriptionTier === 'pro' || user?.role === 'admin';
 
     // Helper to close sheet on mobile
@@ -147,6 +60,102 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     };
 
     const [showQuickAdd, setShowQuickAdd] = useState(false);
+
+    const navGroups: NavGroup[] = useMemo(() => [
+        {
+            title: 'Головна',
+            items: [
+                { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
+            ]
+        },
+        {
+            title: 'AI Інструменти',
+            items: [
+                { name: 'Аналіз Дня', href: '#ai-daily-review', icon: Lightbulb, isAction: true, actionId: 'daily-review' },
+                { name: 'AI Стратегія', href: '#ai-goal-strategy', icon: Target, isAction: true, actionId: 'goal-breakdown' },
+            ]
+        },
+        {
+            title: 'Управління',
+            items: [
+                {
+                    name: 'Сфери',
+                    href: '/areas',
+                    icon: Layers,
+                    subItems: [
+                        { name: 'Всі Сфери', href: '/areas' },
+                        ...state.areas.map(area => ({
+                            name: area.title,
+                            href: `/areas/${area.id}`,
+                            color: area.color
+                        }))
+                    ]
+                },
+                {
+                    name: 'Цілі',
+                    href: '/goals',
+                    icon: Target,
+                    subItems: [
+                        { name: 'Активні', href: '/goals?tab=active' },
+                        { name: 'Досягненні', href: '/goals?tab=achieved' },
+                        { name: 'Не повністю', href: '/goals?tab=partial' },
+                        { name: 'Зупинені', href: '/goals?tab=paused' },
+                    ]
+                },
+                {
+                    name: 'Проєкти',
+                    href: '/projects',
+                    icon: Folder,
+                    subItems: [
+                        { name: 'Активні', href: '/projects?tab=active' },
+                        { name: 'Заплановані', href: '/projects?tab=planned' },
+                        { name: 'Виконанні', href: '/projects?tab=completed' },
+                        { name: 'Відкладені', href: '/projects?tab=deferred' },
+                    ]
+                },
+            ]
+        },
+        {
+            title: 'Щоденно',
+            items: [
+                {
+                    name: 'Дії',
+                    href: '/actions',
+                    icon: CheckSquare,
+                    subItems: [
+                        { name: 'Задачі', href: '/actions?tab=tasks' },
+                        { name: 'Рутина', href: '/actions?tab=routine' },
+                        { name: 'Звички', href: '/actions?tab=habits' },
+                        { name: 'Фокус', href: '/actions?tab=focus' },
+                    ]
+                },
+                { name: 'Розклад', href: '/timeline', icon: Calendar },
+            ]
+        },
+        {
+            title: 'Ресурси',
+            items: [
+                {
+                    name: 'Контент',
+                    href: '/content',
+                    icon: BookOpen,
+                    subItems: [
+                        { name: 'Нотатки', href: '/content?tab=notes' },
+                        { name: 'Журнал', href: '/content?tab=journal' },
+                        { name: 'Файли', href: '/content?tab=files' },
+                        { name: 'Бібліотека', href: '/content?tab=library' },
+                    ]
+                },
+                { name: 'Аналітика', href: '/insights', icon: BarChart2 },
+            ]
+        },
+        {
+            title: 'Налаштування',
+            items: [
+                { name: 'Налаштування', href: '/settings', icon: Settings },
+            ]
+        }
+    ], [state.areas]);
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-slate-900">
@@ -233,27 +242,39 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                     >
                                         <Icon className={cn("w-4 h-4 transition-transform group-hover:scale-110", isActive && "text-primary")} />
                                         <span className="flex-1">{item.name}</span>
-                                        {/* Optional: Add chevron if has subItems and we want collapsible (not requested yet, keeping simple) */}
                                     </Link>
 
                                     {/* Render Sub-items if active or parent match */}
-                                    {item.subItems && isActive && (
+                                    {item.subItems && (isActive || pathname.startsWith(item.href)) && (
                                         <div className="ml-9 space-y-0.5 border-l border-border/50 pl-2 mt-1">
-                                            {item.subItems.map(sub => (
-                                                <Link
-                                                    key={sub.href}
-                                                    href={sub.href}
-                                                    onClick={handleNavigation}
-                                                    className={cn(
-                                                        "block px-2 py-1.5 text-xs rounded-md transition-colors",
-                                                        pathname === sub.href // simplistic check, might need query param match
-                                                            ? "text-primary font-medium bg-primary/5"
-                                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                                                    )}
-                                                >
-                                                    {sub.name}
-                                                </Link>
-                                            ))}
+                                            {item.subItems.map((sub, idx) => {
+                                                const isSubActive = pathname === sub.href || (pathname === sub.href + '/');
+                                                // @ts-ignore
+                                                const itemColor = sub.color;
+
+                                                return (
+                                                    <Link
+                                                        key={idx}
+                                                        href={sub.href}
+                                                        onClick={handleNavigation}
+                                                        className={cn(
+                                                            "block px-2 py-1.5 text-xs rounded-md transition-colors flex items-center gap-2",
+                                                            isSubActive
+                                                                ? "text-primary font-medium bg-primary/5"
+                                                                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                                                        )}
+                                                    >
+                                                        {/* Start with small dot if color is present (Spheres) */}
+                                                        {itemColor && (
+                                                            <span className={cn(
+                                                                "w-1.5 h-1.5 rounded-full",
+                                                                isSubActive ? `bg-${itemColor.split('-')[1]}-500` : `bg-${itemColor.split('-')[1]}-300`
+                                                            )} />
+                                                        )}
+                                                        {sub.name}
+                                                    </Link>
+                                                )
+                                            })}
                                         </div>
                                     )}
                                 </div>
