@@ -74,6 +74,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const { user, logout } = useAuth();
 
     return (
