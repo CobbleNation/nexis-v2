@@ -365,6 +365,16 @@ export function QuickAddModal({
         return errors;
     };
 
+    // Metric Selection for Projects
+    const [selectedMetricIds, setSelectedMetricIds] = React.useState<string[]>([]);
+
+    // Reset metrics when type changes or opens
+    React.useEffect(() => {
+        if (open) {
+            setSelectedMetricIds([]);
+        }
+    }, [open, type]);
+
     const handleSubmit = async () => {
         // Run Validation
         const missingFields = validateForm();
@@ -481,6 +491,7 @@ export function QuickAddModal({
                         goalIds: [],
                         startDate: isProjectScheduled ? date : undefined,
                         deadline: !isProjectScheduled && date ? new Date(date).toISOString() : undefined,
+                        metricIds: selectedMetricIds,
                     };
                     dispatch({ type: 'ADD_PROJECT', payload: newProject });
                     toast.success("Проект створено");
@@ -902,16 +913,70 @@ export function QuickAddModal({
                                         </div>
                                     </div>
                                 ) : (
-                                    <Textarea
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        placeholder={
-                                            type === 'routine' ? "Опис рутини..." :
-                                                type === 'project' ? "Короткий опис проекту..." :
-                                                    "Додаткові деталі..."
-                                        }
-                                        className="min-h-[100px] flex-1 resize-none border-none focus-visible:ring-0 p-0 text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30 text-sm shadow-none bg-transparent"
-                                    />
+                                    <div className="flex flex-col h-full gap-4">
+                                        <Textarea
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            placeholder={
+                                                type === 'routine' ? "Опис рутини..." :
+                                                    type === 'project' ? "Короткий опис проекту..." :
+                                                        "Додаткові деталі..."
+                                            }
+                                            className="min-h-[100px] flex-1 resize-none border-none focus-visible:ring-0 p-0 text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30 text-sm shadow-none bg-transparent"
+                                        />
+
+                                        {/* Project Metrics Selection */}
+                                        {type === 'project' && (
+                                            <div className="space-y-2 pt-4 border-t border-slate-100 dark:border-border">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Метрики проекту</label>
+                                                    <Select onValueChange={(v) => {
+                                                        if (!selectedMetricIds.includes(v)) {
+                                                            setSelectedMetricIds([...selectedMetricIds, v]);
+                                                        }
+                                                    }}>
+                                                        <SelectTrigger className="h-6 w-auto text-[10px] border-none shadow-none p-0 text-blue-500 hover:text-blue-600">
+                                                            <span>+ Додати метрику</span>
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {state.metricDefinitions
+                                                                .filter(m => (areaId === 'all' || !areaId) ? true : m.areaId === areaId)
+                                                                .map(m => (
+                                                                    <SelectItem key={m.id} value={m.id} disabled={selectedMetricIds.includes(m.id)}>
+                                                                        {m.name}
+                                                                    </SelectItem>
+                                                                ))
+                                                            }
+                                                            {state.metricDefinitions.length === 0 && (
+                                                                <div className="p-2 text-xs text-muted-foreground text-center">Немає метрик</div>
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {selectedMetricIds.map(mid => {
+                                                        const m = state.metricDefinitions.find(d => d.id === mid);
+                                                        if (!m) return null;
+                                                        return (
+                                                            <div key={mid} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 text-xs border border-indigo-100 dark:border-indigo-500/20">
+                                                                <BarChart3 className="w-3 h-3" />
+                                                                <span>{m.name}</span>
+                                                                <button
+                                                                    onClick={() => setSelectedMetricIds(prev => prev.filter(id => id !== mid))}
+                                                                    className="ml-1 hover:text-red-500"
+                                                                >
+                                                                    <Trash2 className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    {selectedMetricIds.length === 0 && (
+                                                        <span className="text-xs text-slate-400 italic">Немає обраних метрик</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 )}
 
                                 {/* Subtasks (Inline) */}

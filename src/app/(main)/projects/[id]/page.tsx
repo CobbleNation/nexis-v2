@@ -10,7 +10,8 @@ import {
     PauseCircle,
     Layers,
     ArrowDownToLine,
-    Search
+    Search,
+    Trash2
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ import { ActionCard } from "@/components/actions/ActionCard";
 import { useState } from "react";
 import { Action } from "@/types";
 import { toast } from "sonner";
+import { ProjectAssistant } from "@/components/projects/ProjectAssistant";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -28,6 +30,7 @@ export default function ProjectPage() {
     const [newTaskTitle, setNewTaskTitle] = useState("");
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [importSearch, setImportSearch] = useState("");
+    const [isMetricAddOpen, setIsMetricAddOpen] = useState(false);
 
     const project = state.projects.find(p => p.id === id);
 
@@ -106,9 +109,41 @@ export default function ProjectPage() {
         toast.success(newStatus === 'completed' ? "Проект завершено!" : "Проект відновлено!");
     };
 
+    const handleAddMetric = (metricId: string) => {
+        const currentMetrics = project.metricIds || [];
+        if (!currentMetrics.includes(metricId)) {
+            const updated = { ...project, metricIds: [...currentMetrics, metricId] };
+            dispatch({ type: 'UPDATE_PROJECT', payload: updated });
+            toast.success("Метрику додано до проекту");
+        }
+        setIsMetricAddOpen(false);
+    };
+
+    const handleRemoveMetric = (metricId: string) => {
+        const currentMetrics = project.metricIds || [];
+        const updated = { ...project, metricIds: currentMetrics.filter(id => id !== metricId) };
+        dispatch({ type: 'UPDATE_PROJECT', payload: updated });
+        toast.success("Метрику видалено з проекту");
+    };
+
     // Analytics Calculations
     const totalTasks = projectTasks.length;
-    const completionPercentage = totalTasks > 0 ? Math.round((completedTasks.length / totalTasks) * 100) : 0;
+    const taskProgress = totalTasks > 0 ? (completedTasks.length / totalTasks) * 100 : 0;
+
+    // Goal Progress
+    const totalGoals = linkedGoals.length;
+    const goalProgressSum = linkedGoals.reduce((sum, g) => sum + (g.progress || 0), 0);
+    const goalProgressAvg = totalGoals > 0 ? goalProgressSum / totalGoals : 0;
+
+    // Combined Progress
+    let completionPercentage = 0;
+    if (totalTasks > 0 && totalGoals > 0) {
+        completionPercentage = Math.round((taskProgress + goalProgressAvg) / 2);
+    } else if (totalTasks > 0) {
+        completionPercentage = Math.round(taskProgress);
+    } else if (totalGoals > 0) {
+        completionPercentage = Math.round(goalProgressAvg);
+    }
 
     const daysLeft = project.deadline ? Math.ceil((new Date(project.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : null;
     const isOverdue = daysLeft !== null && daysLeft < 0;
@@ -207,6 +242,9 @@ export default function ProjectPage() {
                                 <p className="text-slate-700 dark:text-foreground leading-relaxed whitespace-pre-wrap text-base">{project.description}</p>
                             </div>
                         )}
+
+                        {/* AI Assistant */}
+                        <ProjectAssistant project={project} areaName={area?.title} />
 
                         {/* Tasks Section */}
                         <div className="bg-white dark:bg-card rounded-3xl border border-slate-100 dark:border-border shadow-sm overflow-hidden flex flex-col min-h-[500px]">
@@ -353,24 +391,42 @@ export default function ProjectPage() {
 
                         {/* Metrics (Enhancement) */}
                         <div className="bg-white dark:bg-card rounded-2xl p-6 border border-slate-100 dark:border-border shadow-sm">
-                            <h3 className="text-xs font-bold text-slate-400 dark:text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <Activity className="w-4 h-4" /> Метрики
-                            </h3>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xs font-bold text-slate-400 dark:text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                    <Activity className="w-4 h-4" /> Метрики
+                                </h3>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-slate-400 hover:text-blue-500" onClick={() => setIsMetricAddOpen(true)}>
+                                    <Plus className="w-4 h-4" />
+                                </Button>
+                            </div>
+
                             {linkedMetrics.length > 0 ? (
                                 <div className="space-y-3">
                                     {linkedMetrics.map(metric => (
-                                        <div key={metric.id} className="p-3 bg-slate-50 dark:bg-secondary/20 rounded-xl border border-slate-100 dark:border-border">
-                                            <div className="flex items-center justify-between">
+                                        <div key={metric.id} className="group p-3 bg-slate-50 dark:bg-secondary/20 rounded-xl border border-slate-100 dark:border-border flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
                                                 <span className="text-sm font-medium text-slate-700 dark:text-foreground">{metric.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
                                                 <span className="text-xs text-slate-500 bg-white dark:bg-card px-2 py-0.5 rounded-md border border-slate-100 dark:border-border shadow-sm">{metric.unit}</span>
+                                                <button
+                                                    onClick={() => handleRemoveMetric(metric.id)}
+                                                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-red-500 transition-all"
+                                                >
+                                                    <Trash2 className="w-3 h-3" />
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-6 text-slate-400 text-sm">
+                                <div className="text-center py-6 text-slate-400 text-sm border-2 border-dashed border-slate-100 dark:border-border rounded-xl">
                                     Немає пов'язаних метрик.
-                                    {/* Link to connect metric could go here */}
+                                    <br />
+                                    <Button variant="link" size="sm" onClick={() => setIsMetricAddOpen(true)} className="text-blue-500 mt-1 h-auto p-0">
+                                        Додати метрику
+                                    </Button>
                                 </div>
                             )}
                         </div>
@@ -381,52 +437,127 @@ export default function ProjectPage() {
 
             {/* Import Modal */}
             <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[600px] max-h-[85vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle>Імпортувати завдання</DialogTitle>
                     </DialogHeader>
-                    {/* ... Existing Import Logic ... */}
-                    <div className="space-y-4">
-                        <div className="relative">
+
+                    <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+                        <div className="relative shrink-0">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                             <Input
                                 value={importSearch}
                                 onChange={(e) => setImportSearch(e.target.value)}
-                                placeholder="Пошук завдань..."
-                                className="pl-9 bg-slate-50"
+                                placeholder="Пошук завдань за назвою або сферою..."
+                                className="pl-9 bg-slate-50 dark:bg-secondary/20"
                             />
                         </div>
-                        <div className="space-y-2 h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                            {state.actions
-                                .filter(a =>
-                                    a.type === 'task' &&
-                                    !a.completed &&
-                                    !a.projectId &&
-                                    a.title.toLowerCase().includes(importSearch.toLowerCase())
-                                )
-                                .map(task => (
-                                    <div key={task.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/50 transition-colors group">
-                                        <div className="flex items-center gap-3 overflow-hidden">
-                                            <div className={cn("w-2 h-2 rounded-full shrink-0", state.areas.find(a => a.id === task.areaId)?.color || "bg-slate-300 dark:bg-slate-700")} />
-                                            <span className="truncate font-medium text-sm text-slate-700 dark:text-foreground">{task.title}</span>
+
+                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-6">
+                            {(() => {
+                                const filteredTasks = state.actions.filter(a => {
+                                    if (a.type !== 'task' || a.completed || a.projectId) return false;
+
+                                    const searchLower = importSearch.toLowerCase();
+                                    const matchesTitle = a.title.toLowerCase().includes(searchLower);
+                                    const area = state.areas.find(ar => ar.id === a.areaId);
+                                    const matchesArea = area?.title.toLowerCase().includes(searchLower);
+
+                                    return matchesTitle || matchesArea;
+                                });
+
+                                if (filteredTasks.length === 0) {
+                                    return (
+                                        <div className="text-center py-12 text-slate-400 text-sm">
+                                            Не знайдено доступних завдань для імпорту.
                                         </div>
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => handleImportTask(task)}
-                                            className="opacity-0 group-hover:opacity-100 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                        >
-                                            <Plus className="h-4 w-4 mr-1" /> Додати
-                                        </Button>
-                                    </div>
-                                ))
-                            }
-                            {state.actions.filter(a => a.type === 'task' && !a.completed && !a.projectId).length === 0 && (
-                                <div className="text-center py-8 text-slate-400 text-sm">
-                                    Немає доступних завдань для імпорту.
-                                </div>
-                            )}
+                                    );
+                                }
+
+                                // Group by Area
+                                const tasksByArea: Record<string, typeof filteredTasks> = {};
+                                filteredTasks.forEach(task => {
+                                    const areaId = task.areaId || 'unassigned';
+                                    if (!tasksByArea[areaId]) tasksByArea[areaId] = [];
+                                    tasksByArea[areaId].push(task);
+                                });
+
+                                return Object.entries(tasksByArea).map(([areaId, tasks]) => {
+                                    const area = state.areas.find(a => a.id === areaId);
+                                    return (
+                                        <div key={areaId} className="space-y-2">
+                                            <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2 sticky top-0 bg-white dark:bg-background py-2 z-10">
+                                                <span className={cn("w-2 h-2 rounded-full", area?.color || "bg-slate-300")} />
+                                                {area?.title || 'Без сфери'}
+                                                <span className="text-[10px] bg-slate-100 dark:bg-secondary px-1.5 py-0.5 rounded-full ml-auto text-slate-400">
+                                                    {tasks.length}
+                                                </span>
+                                            </h4>
+
+                                            <div className="space-y-2">
+                                                {tasks.map(task => (
+                                                    <div key={task.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/30 transition-all group">
+                                                        <div className="flex items-center gap-3 overflow-hidden">
+                                                            <div className={cn("w-1 h-8 rounded-full shrink-0", area?.color || "bg-slate-300")} />
+                                                            <div className="flex flex-col overflow-hidden">
+                                                                <span className="truncate font-medium text-sm text-slate-700 dark:text-foreground">{task.title}</span>
+                                                                {task.description && (
+                                                                    <span className="truncate text-xs text-slate-400">{task.description}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            onClick={() => handleImportTask(task)}
+                                                            className="opacity-0 group-hover:opacity-100 text-primary hover:text-primary hover:bg-primary/5 transition-opacity"
+                                                        >
+                                                            <Plus className="h-4 w-4 mr-1" /> Додати
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                });
+                            })()}
                         </div>
+                    </div>
+                </DialogContent>
+
+            </Dialog>
+
+            {/* Add Metric Modal */}
+            <Dialog open={isMetricAddOpen} onOpenChange={setIsMetricAddOpen}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>Додати метрику</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                        {state.metricDefinitions
+                            .filter(m => !(project.metricIds || []).includes(m.id))
+                            .filter(m => (project.areaId === 'general' || !project.areaId) ? true : m.areaId === project.areaId)
+                            .length === 0 && (
+                                <p className="text-center text-sm text-slate-500 py-4">Немає доступних метрик для цієї сфери.</p>
+                            )
+                        }
+                        {state.metricDefinitions
+                            .filter(m => !(project.metricIds || []).includes(m.id))
+                            .filter(m => (project.areaId === 'general' || !project.areaId) ? true : m.areaId === project.areaId)
+                            .map(m => (
+                                <button
+                                    key={m.id}
+                                    onClick={() => handleAddMetric(m.id)}
+                                    className="w-full flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/30 transition-all text-left"
+                                >
+                                    <div className="flex flex-col">
+                                        <span className="font-medium text-sm text-foreground">{m.name}</span>
+                                        <span className="text-xs text-slate-400">{m.unit}</span>
+                                    </div>
+                                    <Plus className="w-4 h-4 text-slate-400" />
+                                </button>
+                            ))
+                        }
                     </div>
                 </DialogContent>
             </Dialog>

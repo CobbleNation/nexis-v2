@@ -98,3 +98,17 @@ export interface DayExplanationResponse {
     insight: string;
     theme: string;
 }
+
+export interface ProjectSuggestionResponse {
+    suggestedMetrics: {
+        name: string;
+        unit: string;
+        rationale: string;
+    }[];
+    suggestedTasks: {
+        title: string;
+        description?: string;
+        priority: 'low' | 'medium' | 'high';
+        rationale: string;
+    }[];
+}

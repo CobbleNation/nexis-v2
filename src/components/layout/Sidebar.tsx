@@ -226,7 +226,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                 }
                             }
 
-                            const isActive = pathname.startsWith(item.href);
+                            const isActive = pathname.startsWith(item.href.split('?')[0]);
                             const Icon = item.icon;
 
                             return (

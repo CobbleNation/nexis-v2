@@ -22,22 +22,25 @@ export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
     const { dispatch } = useData();
     const [showEdit, setShowEdit] = useState(false);
 
-    const handleDelete = () => {
-        if (window.confirm(`Are you sure you want to delete "${project.title}"? This action cannot be undone.`)) {
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (window.confirm(`Ви впевнені, що хочете видалити проект "${project.title}"? Цю дію неможливо скасувати.`)) {
             dispatch({ type: 'DELETE_PROJECT', payload: { id: project.id } });
-            toast.success("Project deleted");
+            toast.success("Проект видалено");
         }
     };
 
-    const handlePostpone = () => {
+    const handlePostpone = (e: React.MouseEvent) => {
+        e.stopPropagation();
         dispatch({
             type: 'UPDATE_PROJECT',
             payload: { ...project, status: 'deferred', updatedAt: new Date().toISOString() }
         });
-        toast.success("Project postponed");
+        toast.success("Проект відкладено");
     };
 
-    const handleToggleStatus = () => {
+    const handleToggleStatus = (e: React.MouseEvent) => {
+        e.stopPropagation();
         let newStatus: Project['status'] = project.status === 'completed' ? 'active' : 'completed';
 
         // If it was planned, start it
@@ -54,45 +57,58 @@ export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
             type: 'UPDATE_PROJECT',
             payload: { ...project, status: newStatus, updatedAt: new Date().toISOString() }
         });
-        toast.success(`Project marked as ${newStatus}`);
+
+        const statusText = newStatus === 'active' ? 'активний' : 'завершений';
+        toast.success(`Проект позначено як ${statusText}`);
+    };
+
+    const handleEditClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowEdit(true);
     };
 
     return (
         <>
             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-muted">
                         <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => setShowEdit(true)}>
-                        <Edit className="w-4 h-4 mr-2" /> Edit Project
+                    <DropdownMenuLabel>Дії</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={handleEditClick}>
+                        <Edit className="w-4 h-4 mr-2" /> Редагувати
                     </DropdownMenuItem>
 
                     {project.status !== 'completed' && (
                         <DropdownMenuItem onClick={handleToggleStatus}>
-                            <CheckCircle className="w-4 h-4 mr-2 text-green-500" /> Complete
+                            <CheckCircle className="w-4 h-4 mr-2 text-green-500" /> Завершити
                         </DropdownMenuItem>
                     )}
 
                     {project.status === 'completed' && (
                         <DropdownMenuItem onClick={handleToggleStatus}>
-                            <PlayCircle className="w-4 h-4 mr-2 text-blue-500" /> Reactivate
+                            <PlayCircle className="w-4 h-4 mr-2 text-blue-500" /> Активувати
+                        </DropdownMenuItem>
+                    )}
+
+                    {project.status === 'deferred' && (
+                        <DropdownMenuItem onClick={handleToggleStatus}>
+                            <PlayCircle className="w-4 h-4 mr-2 text-blue-500" /> Повернути в роботу
                         </DropdownMenuItem>
                     )}
 
                     {project.status !== 'deferred' && project.status !== 'completed' && (
                         <DropdownMenuItem onClick={handlePostpone}>
-                            <Clock className="w-4 h-4 mr-2 text-amber-500" /> Postpone
+                            <Clock className="w-4 h-4 mr-2 text-amber-500" /> Відкласти
                         </DropdownMenuItem>
                     )}
 
                     <DropdownMenuSeparator />
 
                     <DropdownMenuItem onClick={handleDelete} className="text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20">
-                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        <Trash2 className="w-4 h-4 mr-2" /> Видалити
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -105,3 +121,4 @@ export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
         </>
     );
 }
+
