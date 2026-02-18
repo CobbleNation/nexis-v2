@@ -24,12 +24,13 @@ export function ProjectProgress() {
                             endAngle={0}
                             innerRadius={60}
                             outerRadius={90}
+                            cornerRadius={6}
                             paddingAngle={2}
                             dataKey="value"
                             stroke="none"
                         >
                             {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} cornerRadius={6} />
+                                <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                         </Pie>
                     </PieChart>

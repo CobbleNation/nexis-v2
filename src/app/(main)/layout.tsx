@@ -16,7 +16,7 @@ export default function MainLayout({
             <React.Suspense fallback={null}>
                 <MobileNav />
             </React.Suspense>
-            <div className="flex-1 flex flex-col md:ml-64 transition-all duration-300 overflow-x-hidden">
+            <div className="flex-1 flex flex-col md:ml-72 transition-all duration-300 overflow-x-hidden">
                 <Header />
                 <main className="flex-1 p-3 md:p-6 pb-24 md:pb-6 relative min-h-[calc(100dvh-4rem)] md:h-[calc(100vh-4rem)] md:overflow-y-auto scroll-smooth">
                     {children}

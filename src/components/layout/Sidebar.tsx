@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import {
     LayoutDashboard,
     History,
@@ -11,32 +11,21 @@ import {
     Library,
     Lightbulb,
     Settings,
-    Plus,
-    LogOut
+    LogOut,
+    Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { SidebarUpsell } from '@/components/layout/SidebarUpsell';
 
-import { LucideIcon } from 'lucide-react';
-
-interface NavItem {
-    name: string;
-    href: string;
-    icon: LucideIcon;
-    children?: { name: string; href: string }[];
-}
-
-const NAV_ITEMS: NavItem[] = [
-    { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
-    { name: 'Розклад', href: '/timeline', icon: History },
-    { name: 'Сфери', href: '/areas', icon: Activity },
+const NAV_ITEMS = [
     {
-        name: 'Завдання',
+        name: 'Dashboard',
+        href: '/overview',
+        icon: LayoutDashboard,
+        exact: true
+    },
+    {
+        name: 'Tasks',
         href: '/actions',
         icon: CheckSquare,
         children: [
@@ -48,17 +37,27 @@ const NAV_ITEMS: NavItem[] = [
         ]
     },
     {
-        name: 'Цілі та Проекти',
+        name: 'Calendar',
+        href: '/timeline',
+        icon: History
+    },
+    {
+        name: 'Analytics',
+        href: '/insights',
+        icon: Activity
+    },
+    {
+        name: 'Goals',
         href: '/goals',
         icon: Target,
         children: [
-            { name: 'Активні Цілі', href: '/goals?tab=goals' },
+            { name: 'Активні', href: '/goals?tab=active' },
             { name: 'Проекти', href: '/goals?tab=projects' },
             { name: 'Історія', href: '/goals?tab=history' },
         ]
     },
     {
-        name: 'Контент',
+        name: 'Content',
         href: '/content',
         icon: Library,
         children: [
@@ -68,129 +67,175 @@ const NAV_ITEMS: NavItem[] = [
             { name: 'Бібліотека', href: '/content?tab=library' },
         ]
     },
-    { name: 'Аналітика', href: '/insights', icon: Lightbulb },
-    { name: 'Налаштування', href: '/settings', icon: Settings },
+    {
+        name: 'Team',
+        href: '/team',
+        icon: Lightbulb
+    }
 ];
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const { user, logout } = useAuth();
+    const router = useRouter();
+
 
     return (
-        <div id="sidebar-container" className="flex flex-col h-full bg-sidebar text-sidebar-foreground">
-            {/* Logo Area - Floating & Clean */}
-            <div className="h-24 flex items-center px-6 mb-2 shrink-0">
-                <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                        <Activity className="h-6 w-6 text-white" />
-                    </div>
-                    <span className="text-xl font-bold tracking-tight text-foreground/90">Zynorvia</span>
+        <div className="flex flex-col h-full py-6 px-4">
+            {/* Logo area */}
+            <div className="flex items-center gap-3 px-2 mb-10">
+                <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+                    <div className="absolute inset-0 rounded-full border-2 border-white/20"></div>
+                    <Target className="w-6 h-6" />
+                </div>
+                <div>
+                    <h1 className="text-xl font-bold tracking-tight text-foreground">Donezo</h1>
                 </div>
             </div>
 
-            {/* Navigation - Spaced & Pill-shaped */}
-            <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-2 scrollbar-thin scrollbar-thumb-sidebar-border">
-                <div className="text-[10px] font-bold text-muted-foreground/40 mb-3 px-4 uppercase tracking-widest">Головне Меню</div>
-                {NAV_ITEMS.map((item) => {
-                    const isActive = pathname.startsWith(item.href);
-                    const navId = `sidebar-nav-${item.href.replace('/', '')}`;
-                    const hasChildren = item.children && item.children.length > 0;
-                    const showChildren = isActive && hasChildren;
+            {/* Navigation */}
+            <div className="flex-1 space-y-8 overflow-y-auto no-scrollbar">
+                <div>
+                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 px-2">Menu</div>
+                    <nav className="space-y-1.5">
+                        {NAV_ITEMS.slice(0, 5).map((item) => (
+                            <NavItem key={item.href} item={item} pathname={pathname} searchParams={searchParams} onNavigate={onNavigate} />
+                        ))}
+                    </nav>
+                </div>
 
-                    return (
-                        <div key={item.href} className="flex flex-col mb-1">
-                            <Link
-                                href={item.href}
-                                onClick={onNavigate}
-                                id={navId}
-                                className={cn(
-                                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                                    isActive
-                                        ? "bg-sidebar-accent shadow-sm text-orange-600 ring-1 ring-sidebar-border"
-                                        : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
-                                )}
-                            >
-                                <item.icon className={cn("h-5 w-5 transition-colors", isActive ? "text-orange-600" : "text-muted-foreground/70 group-hover:text-orange-500")} />
-                                {item.name}
-                            </Link>
-
-                            {showChildren && (
-                                <div className="mt-1 ml-9 space-y-1 border-l-2 border-slate-200 dark:border-slate-800 pl-2">
-                                    {item.children!.map((child) => {
-                                        // Robust active check using searchParams
-                                        const [childPath, childQuery] = child.href.split('?');
-                                        const childTab = childQuery ? new URLSearchParams(childQuery).get('tab') : null;
-
-                                        const queryTab = searchParams.get('tab');
-
-                                        // Determine effective current tab (handling defaults)
-                                        let effectiveTab = queryTab;
-                                        if (!effectiveTab) {
-                                            if (pathname === '/actions') effectiveTab = 'tasks';
-                                            else if (pathname === '/goals') effectiveTab = 'goals';
-                                            else if (pathname === '/content') effectiveTab = 'notes';
-                                        }
-
-                                        // If child has specific tab, check it. If not, just check pathname.
-                                        const isChildActive = childTab
-                                            ? pathname === childPath && effectiveTab === childTab
-                                            : pathname === child.href;
-
-                                        return (
-                                            <Link
-                                                key={child.href}
-                                                href={child.href}
-                                                onClick={onNavigate}
-                                                className={cn(
-                                                    "block px-3 py-1.5 rounded-md text-sm transition-all duration-200",
-                                                    isChildActive
-                                                        ? "text-orange-600 dark:text-orange-400 font-medium"
-                                                        : "text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800 hover:pl-4"
-                                                )}
-                                            >
-                                                {child.name}
-                                            </Link>
-                                        );
-                                    })}
-                                </div>
+                <div>
+                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 px-2">General</div>
+                    <nav className="space-y-1.5">
+                        <Link
+                            href="/settings"
+                            onClick={onNavigate}
+                            className={cn(
+                                "flex items-center gap-3 px-4 py-3 rounded-full text-base font-medium transition-all duration-200",
+                                pathname.startsWith('/settings')
+                                    ? "text-foreground bg-white shadow-sm ring-1 ring-border"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-white/50"
                             )}
-                        </div>
-                    );
-                })}
-            </nav>
-
-            <SidebarUpsell />
-
-            {/* User Profile - Clean & Separated */}
-            {user && (
-                <div className="p-4 mt-auto border-t border-sidebar-border shrink-0">
-                    <div className="flex items-center justify-between gap-2 px-2 py-2">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                            <Avatar className="h-9 w-9 rounded-full border border-sidebar-border shadow-sm shrink-0">
-                                <AvatarImage src={user.avatar} className="object-cover" />
-                                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs font-bold">
-                                    {user.name?.substring(0, 2).toUpperCase() || 'Я'}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 overflow-hidden">
-                                <p className="text-sm font-bold text-foreground truncate min-w-[3ch]">{user.name}</p>
-                                <p className="text-[10px] text-muted-foreground truncate font-medium uppercase tracking-wide">
-                                    {user.subscriptionTier === 'pro' ? 'Pro Plan' : 'Free Plan'}
-                                </p>
-                            </div>
-                        </div>
-
+                        >
+                            <Settings className="h-5 w-5" />
+                            Settings
+                        </Link>
+                        <NavItem
+                            item={{ name: 'Help', href: '/help', icon: Lightbulb }}
+                            pathname={pathname}
+                            searchParams={searchParams}
+                            onNavigate={onNavigate}
+                        />
                         <button
                             onClick={async () => {
-                                await logout();
+                                // Logout logic
                             }}
-                            className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                            title="Вийти"
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-full text-base font-medium text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
                         >
-                            <LogOut className="h-4 w-4" />
+                            <LogOut className="h-5 w-5" />
+                            Logout
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            {/* Download App Card */}
+            <div className="mt-6">
+                <div className="relative overflow-hidden rounded-3xl bg-black p-6 text-center">
+                    {/* Abstract background shapes */}
+                    <div className="absolute top-0 left-0 w-full h-full opacity-30">
+                        <div className="absolute -top-10 -left-10 w-32 h-32 bg-primary blur-3xl rounded-full"></div>
+                        <div className="absolute top-10 right-0 w-24 h-24 bg-blue-500 blur-3xl rounded-full"></div>
+                    </div>
+
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center mb-3">
+                            <Download className="w-5 h-5 text-white" />
+                        </div>
+                        <h4 className="text-white font-bold mb-1">Download our<br />Mobile App</h4>
+                        <p className="text-white/60 text-xs mb-4">Get easy in another way</p>
+                        <button className="w-full py-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-full transition-colors">
+                            Download
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function NavItem({ item, pathname, searchParams, onNavigate }: { item: any, pathname: string, searchParams: any, onNavigate?: () => void }) {
+    const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+    const showChildren = isActive && item.children;
+
+    // Calculate child active state
+    const effectiveActive = isActive; // Simplified for now, can be enhanced
+
+    return (
+        <div className="space-y-1">
+            <Link
+                href={item.href}
+                onClick={onNavigate}
+                className={cn(
+                    "relative flex items-center gap-3 px-4 py-3 rounded-full text-base font-medium transition-all duration-200 group",
+                    isActive
+                        ? "text-primary bg-white shadow-sm ring-1 ring-border" // Active: White bg, Green text, border
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/50"
+                )}
+            >
+                {/* Active Indicator Line (Left) */}
+                {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1 bg-primary rounded-r-full" />
+                )}
+
+                <item.icon className={cn(
+                    "h-5 w-5 transition-colors",
+                    isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                )} />
+                {item.name}
+
+                {isActive && item.name === 'Tasks' && (
+                    <span className="ml-auto bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-lg">12+</span>
+                )}
+            </Link>
+
+            {/* Sub-items */}
+            {showChildren && (
+                <div className="ml-5 pl-4 border-l-2 border-border space-y-1 mt-1">
+                    {item.children.map((child: any) => {
+                        const [childPath, childQuery] = child.href.split('?');
+                        const childTab = childQuery ? new URLSearchParams(childQuery).get('tab') : null;
+                        const queryTab = searchParams.get('tab');
+
+                        // Determine default tab if query param is missing
+                        let currentEffectiveTab = queryTab;
+                        if (!currentEffectiveTab && isActive) {
+                            if (pathname === '/actions') currentEffectiveTab = 'inbox'; // Default for actions
+                            else if (pathname === '/goals') currentEffectiveTab = 'active';
+                            else if (pathname === '/content') currentEffectiveTab = 'notes';
+                        }
+
+
+                        const isChildActive = childTab
+                            ? pathname === childPath && currentEffectiveTab === childTab
+                            : pathname === child.href;
+
+                        return (
+                            <Link
+                                key={child.href}
+                                href={child.href}
+                                onClick={onNavigate}
+                                className={cn(
+                                    "block px-3 py-2 text-sm rounded-lg transition-colors",
+                                    isChildActive
+                                        ? "text-primary font-bold"
+                                        : "text-muted-foreground hover:text-foreground"
+                                )}
+                            >
+                                {child.name}
+                            </Link>
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -199,8 +244,11 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function Sidebar() {
     return (
-        <aside className="hidden md:flex fixed left-0 top-0 h-screen w-64 bg-sidebar border-r border-sidebar-border flex-col z-50">
-            <SidebarContent />
+        <aside className="hidden md:flex flex-col w-72 fixed inset-y-0 z-50 bg-transparent pointer-events-none">
+            {/* The visible sidebar box, floating with margin */}
+            <div className="flex-1 m-4 mr-0 bg-sidebar rounded-[2rem] border border-sidebar-border shadow-sm pointer-events-auto overflow-hidden">
+                <SidebarContent />
+            </div>
         </aside>
     );
 }
