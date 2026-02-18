@@ -14,12 +14,15 @@ import {
     LogOut,
     Layers,
     Activity,
-    Zap
+    Zap,
+    Plus
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { QuickAddModal } from '@/components/features/QuickAddModal';
 
 const navigation = [
     { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
@@ -44,6 +47,8 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         if (onNavigate) onNavigate();
     };
 
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+
     return (
         <div className="flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden">
             {/* Logo Section */}
@@ -52,6 +57,19 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     <div className="w-5 h-5 bg-primary rounded-lg rotate-45 shadow-sm shadow-primary/20" />
                 </div>
                 <span className="text-2xl font-bold tracking-tight text-foreground">Nexis</span>
+            </div>
+
+            {/* Global Create Button */}
+            <div className="px-6 mb-2">
+                <Button
+                    onClick={() => setShowQuickAdd(true)}
+                    className="w-full justify-start gap-3 bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/25 rounded-2xl h-12 text-base font-bold"
+                >
+                    <div className="bg-white/20 p-1 rounded-lg">
+                        <Plus className="w-5 h-5 text-white" />
+                    </div>
+                    Створити
+                </Button>
             </div>
 
             {/* Navigation */}
@@ -105,6 +123,8 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
                 {/* User Profile moved to Header as per request */}
             </div>
+
+            <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
         </div>
     );
 }
