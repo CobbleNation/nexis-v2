@@ -2,7 +2,7 @@
 
 import { useData } from '@/lib/store';
 import { Action } from '@/types';
-import { Check, Calendar, Activity, Zap, MoreHorizontal, Clock, ArrowUpRight, Folder, Search, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Check, Calendar, Activity, Zap, MoreHorizontal, Clock, ArrowUpRight, Folder, Search, Plus, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -64,6 +64,15 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
     const totalSubtasks = task.subtasks?.length || 0;
     const progress = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
 
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const isOverdue = !task.completed && task.status !== 'canceled' && task.status !== 'deferred' && !!task.date && task.date < todayStr;
+
+    const handleDelete = () => {
+        dispatch({ type: 'DELETE_ACTION', payload: { id: task.id } });
+        toast.info("Завдання видалено");
+    };
+
     return (
         <motion.div
             layout
@@ -72,7 +81,9 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
             exit={{ opacity: 0, scale: 0.95 }}
             className={cn(
                 "group flex flex-col p-4 bg-white dark:bg-card border rounded-2xl transition-all shadow-sm",
-                task.completed ? "border-slate-100 dark:border-border bg-slate-50/50 dark:bg-secondary/20" : "border-slate-200 dark:border-border hover:border-orange-200 dark:hover:border-primary/50 hover:shadow-md"
+                task.completed ? "border-slate-100 dark:border-border bg-slate-50/50 dark:bg-secondary/20" :
+                    isOverdue ? "border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-950/10 hover:border-red-300 dark:hover:border-red-800" :
+                        "border-slate-200 dark:border-border hover:border-orange-200 dark:hover:border-primary/50 hover:shadow-md"
             )}
         >
             <div className="flex items-start gap-4">
@@ -146,6 +157,12 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
                                         {completedSubtasks}/{totalSubtasks}
                                     </div>
                                 )}
+
+                                {isOverdue && (
+                                    <div className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded-md border border-red-100 dark:bg-red-900/20 dark:border-red-800/50">
+                                        Прострочено
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -194,6 +211,18 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+
+                        {/* Overdue Quick Actions */}
+                        {isOverdue && (
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                                <button title="Відновити (Перепланувати)" onClick={(e) => { e.stopPropagation(); setIsEditOpen(true); }} className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-md transition-colors">
+                                    <RotateCcw className="w-4 h-4" />
+                                </button>
+                                <button title="Видалити" onClick={(e) => { e.stopPropagation(); handleDelete(); }} className="p-1.5 text-red-600 hover:bg-red-100 rounded-md transition-colors">
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Edit/Delete Dialog */}

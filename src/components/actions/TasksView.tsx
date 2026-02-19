@@ -6,12 +6,26 @@ import { Calendar, Activity } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { ActionCard } from './ActionCard';
+import { TaskFilters } from './TaskFilters';
+import { useState } from 'react';
+import { format } from 'date-fns';
 
 export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active' | 'completed' | 'deferred' | 'incomplete' }) {
     const { state, dispatch } = useData();
     // Use local date for "Today" comparison to match input[type="date"] values
     const today = new Date();
     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+    const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+    const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+
+    const hasActiveFilters = selectedAreas.length > 0 || selectedProjects.length > 0 || selectedDates.length > 0;
+    const clearFilters = () => {
+        setSelectedAreas([]);
+        setSelectedProjects([]);
+        setSelectedDates([]);
+    };
 
     // --- Filter Logic ---
     let filteredTasks: Action[] = [];
@@ -32,11 +46,13 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
             // "Active": "Planned tasks"
             // Includes: Future, Specific Date, Area-bound (if we treat areas as planned?)
             // Excludes: Deferred, Completed, Canceled, AND Inbox (no date/no area)
+            // Nexis: Overdue tasks should move to Incomplete, not stay in Active!
             filteredTasks = allActions.filter(a =>
                 !a.completed &&
                 a.status !== 'canceled' &&
                 a.status !== 'deferred' &&
-                (!!a.date || !!a.areaId) // Must be planned (date or area) to be Active, else it's Inbox
+                (!!a.date || !!a.areaId) &&
+                !(a.date && a.date < todayStr)
             );
             break;
         case 'completed':
@@ -57,6 +73,18 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                 a.date && a.date < todayStr
             );
             break;
+    }
+
+    // Apply Advanced Filters
+    if (selectedAreas.length > 0) {
+        filteredTasks = filteredTasks.filter(a => a.areaId && selectedAreas.includes(a.areaId));
+    }
+    if (selectedProjects.length > 0) {
+        filteredTasks = filteredTasks.filter(a => a.projectId && selectedProjects.includes(a.projectId));
+    }
+    if (selectedDates.length > 0) {
+        const selectedDateStrs = selectedDates.map(d => format(d, 'yyyy-MM-dd'));
+        filteredTasks = filteredTasks.filter(a => a.date && selectedDateStrs.includes(a.date));
     }
 
     // Sort by priority/date
@@ -168,6 +196,17 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                         {filter === 'incomplete' && "Пропущені дедлайни. Час надолужити!"}
                     </p>
                 </div>
+
+                <TaskFilters
+                    selectedAreas={selectedAreas}
+                    setSelectedAreas={setSelectedAreas}
+                    selectedProjects={selectedProjects}
+                    setSelectedProjects={setSelectedProjects}
+                    selectedDates={selectedDates}
+                    setSelectedDates={setSelectedDates}
+                    hasActiveFilters={hasActiveFilters}
+                    clearFilters={clearFilters}
+                />
             </div>
 
             <div className="space-y-8">

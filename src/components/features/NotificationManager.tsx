@@ -109,29 +109,33 @@ export function NotificationManager() {
             });
 
 
-            // 3. Deadlines (Due Today / Tomorrow)
+            // 3. Deadlines (Due Today / Tomorrow / Overdue)
             actions.forEach(task => {
-                if (task.dueDate && !task.completed) {
-                    const dueDate = new Date(task.dueDate);
+                if ((task.dueDate || task.date) && !task.completed && task.status !== 'canceled' && task.status !== 'deferred') {
+                    const dateToCheck = task.dueDate ? new Date(task.dueDate) : new Date(task.date!);
                     const today = new Date(now);
                     today.setHours(0, 0, 0, 0);
-                    const dueDay = new Date(dueDate);
+                    const dueDay = new Date(dateToCheck);
                     dueDay.setHours(0, 0, 0, 0);
 
                     const diffTime = dueDay.getTime() - today.getTime();
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                     if (diffDays <= 1) {
-                        const key = `${task.id}-deadline-${diffDays}`;
-                        const storageKey = `notified-deadline-${task.id}-${today.toDateString()}`;
+                        // Past, Today or Tomorrow.
+                        // For past, only notify once per past day maybe? Or just a general "Overdue" if not notified.
+                        const key = diffDays < 0 ? `${task.id}-overdue` : `${task.id}-deadline-${diffDays}`;
+                        const storageKey = `notified-deadline-${key}`;
 
                         if (!processedDeadlines.current.has(key) && !localStorage.getItem(storageKey)) {
                             let title = '';
-                            let type: 'warning' | 'error' = 'warning';
+                            let type: 'warning' | 'error' | 'info' = 'warning';
+                            let message = `Завдання "${task.title}" потребує уваги.`;
 
                             if (diffDays < 0) {
-                                title = 'Прострочено';
+                                title = '🚨 Час виконання стік';
                                 type = 'error';
+                                message = `Стікає час виконання завдання "${task.title}". Не переймайтесь, Ви можете відновити його та запланувати на інший час в розділі "Не завершені".`;
                             } else if (diffDays === 0) {
                                 title = 'Дедлайн сьогодні';
                             } else {
@@ -140,7 +144,7 @@ export function NotificationManager() {
 
                             sendNotification({
                                 title,
-                                message: `Завдання "${task.title}" потребує уваги.`,
+                                message,
                                 type,
                                 link: '/actions'
                             });
@@ -151,6 +155,33 @@ export function NotificationManager() {
                     }
                 }
             });
+
+            // 3.5. Inbox Reminders (Unscheduled)
+            const unscheduledTasksCount = actions.filter(a => a.type === 'task' && !a.date && !a.areaId && !a.completed && a.status !== 'canceled').length;
+            if (unscheduledTasksCount > 0) {
+                const INBOX_THROTTLE_MS = 5 * 60 * 60 * 1000; // 5 hours
+                const lastNotifiedStr = localStorage.getItem('last-inbox-notification-time');
+                let shouldNotify = false;
+
+                if (!lastNotifiedStr) {
+                    shouldNotify = true;
+                } else {
+                    const lastNotified = parseInt(lastNotifiedStr, 10);
+                    if (nowTime - lastNotified > INBOX_THROTTLE_MS) {
+                        shouldNotify = true;
+                    }
+                }
+
+                if (shouldNotify) {
+                    sendNotification({
+                        title: '📥 Нерозібрані думки',
+                        message: `У Вас є ${unscheduledTasksCount} незапланованих думок/завдань у Вхідних. Розплануйте дії, щоб очистити фокус.`,
+                        type: 'info',
+                        link: '/actions?tab=inbox'
+                    });
+                    localStorage.setItem('last-inbox-notification-time', nowTime.toString());
+                }
+            }
 
             // 4. Sphere Degradation (Area Status Check)
             areas.forEach(area => {
