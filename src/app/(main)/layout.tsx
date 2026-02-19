@@ -25,7 +25,7 @@ export default function MainLayout({
     if (isLoading) {
         return (
             <div className="flex min-h-screen bg-background items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
             </div>
         );
     }

@@ -41,8 +41,8 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
 
 export async function clearAuthCookies() {
     const cookieStore = await cookies();
-    cookieStore.delete('access_token');
-    cookieStore.delete('refresh_token');
+    cookieStore.delete({ name: 'access_token', path: '/' });
+    cookieStore.delete({ name: 'refresh_token', path: '/' });
 }
 
 export async function getSession() {
