@@ -99,6 +99,16 @@ export function QuickAddModal({
     const [relatedMetricIds, setRelatedMetricIds] = React.useState<string[]>([]);
     const [isProjectScheduled, setIsProjectScheduled] = React.useState(false);
 
+    // Metric Selection for Projects (Moved from bottom to fix Error #300)
+    const [selectedMetricIds, setSelectedMetricIds] = React.useState<string[]>([]);
+
+    // Reset metrics when type changes or opens
+    React.useEffect(() => {
+        if (open) {
+            setSelectedMetricIds([]);
+        }
+    }, [open, type]);
+
     // Helpers
     const TIME_SLOTS = Array.from({ length: 15 }).map((_, i) => {
         const hour = 8 + i;
@@ -365,15 +375,7 @@ export function QuickAddModal({
         return errors;
     };
 
-    // Metric Selection for Projects
-    const [selectedMetricIds, setSelectedMetricIds] = React.useState<string[]>([]);
 
-    // Reset metrics when type changes or opens
-    React.useEffect(() => {
-        if (open) {
-            setSelectedMetricIds([]);
-        }
-    }, [open, type]);
 
     const handleSubmit = async () => {
         // Run Validation

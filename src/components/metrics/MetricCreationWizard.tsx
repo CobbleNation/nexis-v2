@@ -175,7 +175,7 @@ export function MetricCreationWizard({ initialTitle, initialAreaId, initialUnit,
                                 <Select value={areaId} onValueChange={setAreaId}>
                                     <SelectTrigger className="h-11 bg-white dark:bg-secondary/20 shadow-sm dark:text-foreground border-slate-200 dark:border-border"><SelectValue placeholder="Оберіть..." /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">📥 Вхідні (General)</SelectItem>
+                                        <SelectItem value="all">📥 Вхідні</SelectItem>
                                         {(state.areas || []).map(a => (
                                             <SelectItem key={a.id} value={a.id}>
                                                 <div className="flex items-center gap-2">
