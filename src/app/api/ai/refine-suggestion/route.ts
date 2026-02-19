@@ -1,5 +1,5 @@
 
-import { PROJECT_SUGGESTION_SYSTEM_PROMPT } from '@/lib/ai/prompts';
+import { REFINE_SUGGESTION_SYSTEM_PROMPT } from '@/lib/ai/prompts';
 import { ProjectSuggestionResponse } from '@/lib/ai/types';
 import OpenAI from 'openai';
 import { verifyJWT } from '@/lib/auth-utils';
@@ -15,7 +15,7 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { title, description, areaName } = body;
+        const { suggestion, instruction, type, projectContext } = body;
 
         // 1. Auth & Pro Check
         const cookieStore = await cookies();
@@ -29,29 +29,27 @@ export async function POST(req: Request) {
         const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
 
         if (!user || (user.subscriptionTier !== 'pro' && user.role !== 'admin')) {
-            // For now, let's allow basic suggestions even for free users or handle it on frontend
-            // Or return 403. Let's return 403 conform to other AI routes.
             return new Response(JSON.stringify({ error: 'Pro subscription required' }), { status: 403 });
         }
 
-        if (!title) {
-            return new Response('Project title is required', { status: 400 });
+        if (!suggestion || !instruction) {
+            return new Response('Suggestion and instruction are required', { status: 400 });
         }
 
         const userPrompt = `
-Project Title: ${title}
-Description: ${description || 'N/A'}
-Area: ${areaName || 'General'}
+Original Suggestion: ${JSON.stringify(suggestion)}
+Type: ${type}
+User Instruction: ${instruction}
+Project Context: ${JSON.stringify(projectContext || {})}
 
-Suggest relevant metrics and tasks for this project.
-IMPORTANT: All text must be in Ukrainian.
-For metrics, use ONLY Ukrainian units (e.g., "год", "хв", "стор", "км", "кг", "шт", "грн"). Do NOT use English units like "h", "min", "pages", "uah".
+Refine the suggestion based on the user instruction. Ensure the result is in Ukrainian.
+If it's a metric, ensure units are in Ukrainian (e.g., 'год', 'грн').
 `;
 
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
-                { role: "system", content: PROJECT_SUGGESTION_SYSTEM_PROMPT },
+                { role: "system", content: REFINE_SUGGESTION_SYSTEM_PROMPT || "You are a helpful AI assistant. Refine the JSON object based on the user's instruction. Return ONLY the valid JSON of the updated object." },
                 { role: "user", content: userPrompt }
             ],
             response_format: { type: "json_object" },
@@ -64,12 +62,12 @@ For metrics, use ONLY Ukrainian units (e.g., "год", "хв", "стор", "км
             throw new Error('No content received from OpenAI');
         }
 
-        const result: ProjectSuggestionResponse = JSON.parse(content);
+        const result = JSON.parse(content);
 
         return Response.json(result);
 
     } catch (error: any) {
-        console.error('AI Project API Error:', error);
+        console.error('AI Refine API Error:', error);
         return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
