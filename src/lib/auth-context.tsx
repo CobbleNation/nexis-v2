@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data.user.onboardingCompleted = false;
         }
         setUser(data.user);
-        router.push('/overview');
+        window.location.href = '/overview'; // Hard navigation to clear potential ghostly cache states
     }
 
     async function register(formData: any) {
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data.user.onboardingCompleted = false;
         }
         setUser(data.user);
-        router.push('/overview');
+        window.location.href = '/overview'; // Hard navigation to bypass cache ghosting
     }
 
     async function logout() {
@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('onboarding_step');
         localStorage.removeItem('onboarding_active');
         setUser(null);
-        router.push('/login');
+        window.location.href = '/login'; // Force a hard navigation to wipe React Router state & Cache
     }
 
     async function updateProfile(data: Partial<User>) {
