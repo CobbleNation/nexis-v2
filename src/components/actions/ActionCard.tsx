@@ -88,15 +88,18 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
         >
             <div className="flex items-start gap-4">
                 <button
-                    onClick={onComplete}
+                    onClick={isOverdue ? undefined : onComplete}
+                    disabled={isOverdue}
                     className={cn(
                         "h-6 w-6 rounded-lg border-2 transition-all flex items-center justify-center shrink-0 mt-0.5",
                         task.completed
                             ? "bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-200/50"
-                            : "border-slate-300 dark:border-slate-600 hover:border-orange-400 dark:hover:border-primary hover:bg-orange-50 dark:hover:bg-primary/10 text-orange-600 dark:text-primary"
+                            : isOverdue
+                                ? "border-red-200 bg-red-50/50 text-red-300 cursor-not-allowed"
+                                : "border-slate-300 dark:border-slate-600 hover:border-orange-400 dark:hover:border-primary hover:bg-orange-50 dark:hover:bg-primary/10 text-orange-600 dark:text-primary"
                     )}
                 >
-                    {task.completed && <Check className="w-4 h-4" />}
+                    {task.completed ? <Check className="w-4 h-4" /> : isOverdue ? <Clock className="w-3 h-3" /> : null}
                 </button>
 
                 <div className="flex-1 min-w-0 space-y-2">
