@@ -7,7 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { ActionCard } from './ActionCard';
 
-export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active' | 'completed' | 'deferred' }) {
+export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active' | 'completed' | 'deferred' | 'incomplete' }) {
     const { state, dispatch } = useData();
     // Use local date for "Today" comparison to match input[type="date"] values
     const today = new Date();
@@ -29,13 +29,14 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
             );
             break;
         case 'active':
-            // "Active": "All things I plan to do"
-            // Includes: Future, No Date, Active Routines
-            // Excludes: Deferred, Completed, Canceled
+            // "Active": "Planned tasks"
+            // Includes: Future, Specific Date, Area-bound (if we treat areas as planned?)
+            // Excludes: Deferred, Completed, Canceled, AND Inbox (no date/no area)
             filteredTasks = allActions.filter(a =>
                 !a.completed &&
                 a.status !== 'canceled' &&
-                a.status !== 'deferred'
+                a.status !== 'deferred' &&
+                (!!a.date || !!a.areaId) // Must be planned (date or area) to be Active, else it's Inbox
             );
             break;
         case 'completed':
@@ -46,6 +47,16 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
             // "Deferred": Consciously postponed
             filteredTasks = allActions.filter(a => a.status === 'deferred');
             break;
+        case 'incomplete':
+            // "Incomplete" / "Missed": Overdue tasks
+            // Logic: Not completed, Not canceled, Date < Today
+            filteredTasks = allActions.filter(a =>
+                !a.completed &&
+                a.status !== 'canceled' &&
+                a.status !== 'deferred' &&
+                a.date && a.date < todayStr
+            );
+            break;
     }
 
     // Sort by priority/date
@@ -53,13 +64,19 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
         // High priority first
         if (a.priority === 'high' && b.priority !== 'high') return -1;
         if (a.priority !== 'high' && b.priority === 'high') return 1;
-        // Then by date
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    });
 
-    if (filter === 'completed') {
-        filteredTasks.reverse();
-    }
+        // Date sorting depends on view
+        const dateA = a.date ? new Date(a.date).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+        const dateB = b.date ? new Date(b.date).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+
+        if (filter === 'completed' || filter === 'incomplete') {
+            // History/Missed: Newest first (descending)
+            return dateB - dateA;
+        } else {
+            // Planned: Soonest first (ascending)
+            return dateA - dateB;
+        }
+    });
 
     const completeTask = (task: Action) => {
         dispatch({ type: 'TOGGLE_ACTION', payload: { id: task.id } });
@@ -71,6 +88,70 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
         });
     };
 
+    // --- Grouping Logic ---
+    const groupedTasks: Record<string, Action[]> = {};
+
+    filteredTasks.forEach(task => {
+        let groupKey = 'No Date';
+        if (task.date) {
+            const date = new Date(task.date);
+            // Format: "Wednesday, 19 February"
+            groupKey = date.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
+            // Capitalize first letter
+            groupKey = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+
+            // Add relative labels
+            if (task.date === todayStr) groupKey = `Сьогодні, ${groupKey}`;
+            else {
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+                if (task.date === yesterdayStr) groupKey = `Вчора, ${groupKey}`;
+                if (task.date === tomorrowStr) groupKey = `Завтра, ${groupKey}`;
+            }
+        } else {
+            groupKey = "Без дати";
+        }
+
+        if (!groupedTasks[groupKey]) groupedTasks[groupKey] = [];
+        groupedTasks[groupKey].push(task);
+    });
+
+    // We need to maintain the sort order of groups based on the tasks inside them
+    // Since tasks are already sorted, we can iterate through filteredTasks to pick extraction order
+    const groupOrder: string[] = [];
+    filteredTasks.forEach(task => {
+        let groupKey = 'No Date';
+        if (task.date) {
+            const date = new Date(task.date);
+            groupKey = date.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
+            groupKey = groupKey.charAt(0).toUpperCase() + groupKey.slice(1);
+            if (task.date === todayStr) groupKey = `Сьогодні, ${groupKey}`;
+            else {
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+                if (task.date === yesterdayStr) groupKey = `Вчора, ${groupKey}`;
+                if (task.date === tomorrowStr) groupKey = `Завтра, ${groupKey}`;
+            }
+        } else {
+            groupKey = "Без дати";
+        }
+
+        if (!groupOrder.includes(groupKey)) {
+            groupOrder.push(groupKey);
+        }
+    });
+
     return (
         <div className="space-y-6 w-full h-full p-4 md:p-8">
             <div className="py-4 space-y-4">
@@ -81,14 +162,15 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                     </h2>
                     <p className="text-muted-foreground text-sm">
                         {filter === 'current' && "Поточний фокус та завдання на сьогодні."}
-                        {filter === 'active' && "Всі активні завдання в роботі."}
+                        {filter === 'active' && "Всі заплановані завдання."}
                         {filter === 'deferred' && "Свідомо відкладені завдання."}
                         {filter === 'completed' && "Історія успіху."}
+                        {filter === 'incomplete' && "Пропущені дедлайни. Час надолужити!"}
                     </p>
                 </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-8">
                 {filteredTasks.length === 0 && (
                     <div className="p-12 text-center text-muted-foreground bg-white dark:bg-card/50 rounded-3xl border border-dashed border-slate-200 dark:border-border">
                         <p>
@@ -96,13 +178,21 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                             {filter === 'active' && "Всі завдання виконані."}
                             {filter === 'deferred' && "Немає відкладених завдань."}
                             {filter === 'completed' && "Історія порожня."}
+                            {filter === 'incomplete' && "Чудово! Жодних прострочених завдань."}
                         </p>
                     </div>
                 )}
 
                 <AnimatePresence mode="popLayout">
-                    {filteredTasks.map(task => (
-                        <ActionCard key={task.id} task={task} onComplete={() => completeTask(task)} areas={state.areas} />
+                    {groupOrder.map(group => (
+                        <div key={group} className="space-y-3">
+                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+                                {group}
+                            </h3>
+                            {groupedTasks[group].map(task => (
+                                <ActionCard key={task.id} task={task} onComplete={() => completeTask(task)} areas={state.areas} />
+                            ))}
+                        </div>
                     ))}
                 </AnimatePresence>
             </div>

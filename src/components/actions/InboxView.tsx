@@ -29,6 +29,29 @@ export function InboxView() {
         a.status !== 'canceled'
     );
 
+    // Grouping
+    const groupedInbox: Record<string, Action[]> = {};
+    // Sort Newest First (standard for Inbox)
+    inboxItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    inboxItems.forEach(item => {
+        const date = new Date(item.createdAt);
+        const today = new Date();
+        const todayStr = today.toDateString();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+
+        let dateLabel = date.toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' });
+        dateLabel = dateLabel.charAt(0).toUpperCase() + dateLabel.slice(1);
+
+        if (date.toDateString() === todayStr) dateLabel = `Сьогодні, ${dateLabel}`;
+        else if (date.toDateString() === yesterdayStr) dateLabel = `Вчора, ${dateLabel}`;
+
+        if (!groupedInbox[dateLabel]) groupedInbox[dateLabel] = [];
+        groupedInbox[dateLabel].push(item);
+    });
+
     const { canCreateTask } = useSubscription();
     const [showUpgrade, setShowUpgrade] = useState(false);
 
@@ -96,39 +119,46 @@ export function InboxView() {
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto space-y-2 p-1">
+            <div className="flex-1 overflow-y-auto space-y-6 p-1">
                 <AnimatePresence mode="popLayout">
-                    {inboxItems.length > 0 ? inboxItems.map(item => (
-                        <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-card p-4 rounded-xl border border-slate-100 dark:border-border shadow-sm flex items-center justify-between group hover:border-slate-200 dark:hover:border-primary/50 transition-all cursor-pointer"
-                            onClick={() => { setEditTarget(item.id); setIsEditOpen(true); }}
-                        >
-                            <span className="font-medium text-slate-700 dark:text-foreground">{item.title}</span>
+                    {Object.keys(groupedInbox).length > 0 ? Object.keys(groupedInbox).map(group => (
+                        <div key={group} className="space-y-2">
+                            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider pl-1">
+                                {group}
+                            </h3>
+                            {groupedInbox[group].map(item => (
+                                <motion.div
+                                    key={item.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="bg-white dark:bg-card p-4 rounded-xl border border-slate-100 dark:border-border shadow-sm flex items-center justify-between group hover:border-slate-200 dark:hover:border-primary/50 transition-all cursor-pointer"
+                                    onClick={() => { setEditTarget(item.id); setIsEditOpen(true); }}
+                                >
+                                    <span className="font-medium text-slate-700 dark:text-foreground">{item.title}</span>
 
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-slate-400 dark:text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
-                                    onClick={(e) => { e.stopPropagation(); processItem(item.id, 'delete'); }}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                                {/* Schedule Button - Opens Dialog to set Date/Area */}
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 text-xs text-orange-600 dark:text-primary bg-orange-50 dark:bg-primary/20 hover:bg-orange-100 dark:hover:bg-primary/30 font-medium"
-                                    onClick={(e) => { e.stopPropagation(); setEditTarget(item.id); setIsEditOpen(true); }}
-                                >
-                                    <Calendar className="w-3 h-3 mr-1" /> Запланувати
-                                </Button>
-                            </div>
-                        </motion.div>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-slate-400 dark:text-muted-foreground hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                            onClick={(e) => { e.stopPropagation(); processItem(item.id, 'delete'); }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                        {/* Schedule Button - Opens Dialog to set Date/Area */}
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 text-xs text-orange-600 dark:text-primary bg-orange-50 dark:bg-primary/20 hover:bg-orange-100 dark:hover:bg-primary/30 font-medium"
+                                            onClick={(e) => { e.stopPropagation(); setEditTarget(item.id); setIsEditOpen(true); }}
+                                        >
+                                            <Calendar className="w-3 h-3 mr-1" /> Запланувати
+                                        </Button>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     )) : (
                         <motion.div
                             initial={{ opacity: 0 }}

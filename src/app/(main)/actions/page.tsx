@@ -24,7 +24,7 @@ function ActionsPageContent() {
         params.set('tab', val);
         router.push(`/actions?${params.toString()}`);
     };
-    const [taskFilter, setTaskFilter] = useState<'current' | 'active' | 'completed' | 'deferred'>('current');
+    const [taskFilter, setTaskFilter] = useState<'current' | 'active' | 'completed' | 'deferred' | 'incomplete'>('current');
 
     // Counters
     const inboxCount = state.actions.filter(a => a.type === 'task' && !a.completed && !a.date).length;
@@ -102,6 +102,7 @@ function ActionsPageContent() {
                                 { id: 'active', label: 'Активні' },
                                 { id: 'completed', label: 'Виконані' },
                                 { id: 'deferred', label: 'Відкладені' },
+                                { id: 'incomplete', label: 'Не завершені' },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
