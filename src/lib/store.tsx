@@ -105,104 +105,24 @@ function calculateGoalProgress(current: number, start: number, target: number): 
 
 // --- Initial State ---
 // --- Initial State ---
-const SEED_AREA_HEALTH = 'area-health';
-const SEED_AREA_WORK = 'area-work';
-const SEED_AREA_RELATIONSHIPS = 'area-relationships';
+
 
 const INITIAL_STATE: AppState = {
-    user: { name: 'User', avatar: '/avatar.png' },
-    areas: [
-        { id: SEED_AREA_HEALTH, title: 'Здоровʼя', color: 'bg-emerald-500', description: 'Energy & Body', iconName: 'Activity', status: 'stable' },
-        { id: SEED_AREA_WORK, title: 'Карʼєра', color: 'bg-blue-500', description: 'Work & Business', iconName: 'Briefcase', status: 'stable' },
-        { id: SEED_AREA_RELATIONSHIPS, title: 'Відносини', color: 'bg-rose-500', description: 'Family & Friends', iconName: 'Heart', status: 'stable' }
-    ],
-    goals: [
-        {
-            id: 'seed-goal-1',
-            title: 'Пробігти 5км',
-            areaId: SEED_AREA_HEALTH,
-            status: 'active',
-            progress: 35,
-            deadline: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(),
-            type: 'tactical'
-        }
-    ],
+    user: { name: '', avatar: '' }, // Empty user
+    areas: [],
+    goals: [],
     projects: [],
-    actions: [
-        {
-            id: 'seed-task-1',
-            userId: 'current',
-            title: 'Ранкова зарядка',
-            areaId: SEED_AREA_HEALTH,
-            date: new Date().toISOString().split('T')[0],
-            completed: false,
-            duration: 15,
-            type: 'task',
-            status: 'pending',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        {
-            id: 'seed-task-2',
-            userId: 'current',
-            title: 'Перевірити пошту',
-            areaId: SEED_AREA_WORK,
-            date: new Date().toISOString().split('T')[0],
-            completed: false,
-            duration: 30,
-            type: 'task',
-            status: 'pending',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        },
-        {
-            id: 'seed-task-3',
-            userId: 'current',
-            title: 'Зателефонувати мамі',
-            areaId: SEED_AREA_RELATIONSHIPS,
-            date: new Date().toISOString().split('T')[0],
-            completed: false,
-            duration: 15,
-            type: 'task',
-            status: 'pending',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        }
-    ],
+    actions: [],
     routines: [],
     events: [],
-    habits: [
-        {
-            id: 'seed-habit-1',
-            userId: 'current',
-            title: 'Пити воду',
-            areaId: SEED_AREA_HEALTH,
-            type: 'binary',
-            frequency: 'daily',
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            streak: 3
-        }
-    ],
+    habits: [],
     habitLogs: [],
     focuses: [],
     checkIns: [],
     insights: [],
     periods: [],
     experiments: [],
-    notes: [
-        {
-            id: 'seed-note-1',
-            userId: 'current',
-            title: 'Ласкаво просимо в Nexis',
-            content: 'Це ваша база знань. Тут можна зберігати ідеї та нотатки.',
-            relatedAreaIds: [SEED_AREA_WORK],
-            date: new Date().toISOString().split('T')[0],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            tags: ['welcome']
-        }
-    ],
+    notes: [],
     journal: [],
     files: [],
     library: [],
