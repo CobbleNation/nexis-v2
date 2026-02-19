@@ -35,7 +35,7 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax', // Strict can cause issues with redirect from external sites, Lax is good balance
         maxAge: 7 * 24 * 60 * 60, // 7 days
-        path: '/api/auth', // Scoped only to auth endpoints
+        path: '/', // Allow middleware to see it for auto-refresh on protected routes
     });
 }
 

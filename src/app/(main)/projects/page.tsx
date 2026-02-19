@@ -61,19 +61,37 @@ function ProjectsContent() {
                                     {tasksCount} tasks
                                 </div>
 
-                                {/* Progress Bar */}
-                                <div className="space-y-1.5 mb-4">
-                                    <div className="flex justify-between text-xs font-medium">
-                                        <span className="text-muted-foreground">Прогрес</span>
-                                        <span className="text-primary">{(project.progress || 0)}%</span>
-                                    </div>
-                                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full bg-primary rounded-full transition-all duration-500"
-                                            style={{ width: `${project.progress || 0}%` }}
-                                        />
-                                    </div>
-                                </div>
+                                {/* Progress Section or Empty State */}
+                                {(() => {
+                                    const totalTasks = state.actions.filter(a => a.projectId === project.id).length;
+                                    const totalMetrics = (project.metricIds || []).length;
+                                    const hasItems = totalTasks > 0 || totalMetrics > 0;
+
+                                    if (!hasItems) {
+                                        return (
+                                            <div className="mb-4 py-2 px-3 bg-slate-100 dark:bg-secondary/30 rounded-lg border border-dashed border-slate-300 dark:border-border text-center">
+                                                <p className="text-xs text-muted-foreground font-medium">
+                                                    Порожньо. Додайте задачі або метрики.
+                                                </p>
+                                            </div>
+                                        );
+                                    }
+
+                                    return (
+                                        <div className="space-y-1.5 mb-4">
+                                            <div className="flex justify-between text-xs font-medium">
+                                                <span className="text-muted-foreground">Прогрес</span>
+                                                <span className="text-primary">{(project.progress || 0)}%</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-primary rounded-full transition-all duration-500"
+                                                    style={{ width: `${project.progress || 0}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
                             </div>
 
                             {/* Footer */}
@@ -110,9 +128,7 @@ function ProjectsContent() {
                     <h2 className="text-3xl font-bold text-foreground tracking-tight">Проєкти</h2>
                     <p className="text-muted-foreground mt-1">Керуйте всіма вашими проєктами в одному місці.</p>
                 </div>
-                <Button className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-6 shadow-lg shadow-primary/20">
-                    <Plus className="w-4 h-4 mr-2" /> Новий Проєкт
-                </Button>
+
             </div>
 
             <Tabs value={currentTab} onValueChange={(val) => router.push(`/projects?tab=${val}`)} className="space-y-6">
