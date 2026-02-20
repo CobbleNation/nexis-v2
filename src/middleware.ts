@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { verifyJWT } from './lib/jwt-utils';
 
-const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/api/auth/login', '/api/auth/register', '/api/debug/fix-areas', '/pricing', '/privacy', '/terms', '/api/billing/webhook'];
+const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/api/auth/login', '/api/auth/register', '/api/auth/logout', '/api/debug/fix-areas', '/pricing', '/privacy', '/terms', '/api/billing/webhook'];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
