@@ -33,8 +33,8 @@ export async function middleware(request: NextRequest) {
                 if (accessToken || refreshToken) {
                     const response = NextResponse.next();
                     const isProduction = process.env.NODE_ENV === 'production';
-                    response.cookies.set({ name: 'access_token', value: '', maxAge: 0, path: '/', secure: isProduction, sameSite: 'lax' });
-                    response.cookies.set({ name: 'refresh_token', value: '', maxAge: 0, path: '/', secure: isProduction, sameSite: 'lax' });
+                    response.cookies.set({ name: 'access_token', value: '', maxAge: 0, expires: new Date(0), path: '/', secure: isProduction, sameSite: 'lax', httpOnly: true });
+                    response.cookies.set({ name: 'refresh_token', value: '', maxAge: 0, expires: new Date(0), path: '/', secure: isProduction, sameSite: 'lax', httpOnly: true });
                     return response;
                 }
             }
@@ -82,18 +82,22 @@ export async function middleware(request: NextRequest) {
             name: 'access_token',
             value: '',
             maxAge: 0,
+            expires: new Date(0),
             path: '/',
             secure: isProduction,
             sameSite: 'lax',
+            httpOnly: true,
         });
 
         response.cookies.set({
             name: 'refresh_token',
             value: '',
             maxAge: 0,
+            expires: new Date(0),
             path: '/',
             secure: isProduction,
             sameSite: 'lax',
+            httpOnly: true,
         });
 
         return response;

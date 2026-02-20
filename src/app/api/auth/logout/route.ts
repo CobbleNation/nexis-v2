@@ -11,18 +11,22 @@ export async function POST() {
         name: 'access_token',
         value: '',
         maxAge: 0,
+        expires: new Date(0),
         path: '/',
         secure: isProduction,
         sameSite: 'lax',
+        httpOnly: true,
     });
 
     response.cookies.set({
         name: 'refresh_token',
         value: '',
         maxAge: 0,
+        expires: new Date(0),
         path: '/',
         secure: isProduction,
         sameSite: 'lax',
+        httpOnly: true,
     });
 
     return response;
