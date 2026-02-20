@@ -9,13 +9,34 @@ export async function middleware(request: NextRequest) {
 
     // 1. Allow public paths
     if (pathname === '/' || PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
-        // If user is already logged in and tries to visit login/register, verify token first
-        const token = request.cookies.get('access_token')?.value;
-        if (token && (pathname === '/login' || pathname === '/register')) {
-            // VERIFY token before redirecting. Simply checking existence causes loops if token is invalid/expired.
-            const payload = await verifyJWT(token);
-            if (payload) {
+        // For Auth entry pages, we want to actively redirect authenticated users to /overview,
+        // and aggressively clear ANY lingering broken cookies for unauthenticated users 
+        // to prevent ghost session resurrections.
+        if (pathname === '/login' || pathname === '/register') {
+            const accessToken = request.cookies.get('access_token')?.value;
+            const refreshToken = request.cookies.get('refresh_token')?.value;
+
+            let isAuthorized = false;
+
+            if (accessToken) {
+                if (await verifyJWT(accessToken)) isAuthorized = true;
+            }
+            if (!isAuthorized && refreshToken) {
+                if (await verifyJWT(refreshToken)) isAuthorized = true;
+            }
+
+            if (isAuthorized) {
                 return NextResponse.redirect(new URL('/overview', request.url));
+            } else {
+                // If they are not authorized, but HAVE cookies lying around, NUKE them.
+                // This self-heals any broken state where a browser failed to delete a token on logout.
+                if (accessToken || refreshToken) {
+                    const response = NextResponse.next();
+                    const isProduction = process.env.NODE_ENV === 'production';
+                    response.cookies.set({ name: 'access_token', value: '', maxAge: 0, path: '/', secure: isProduction, sameSite: 'lax' });
+                    response.cookies.set({ name: 'refresh_token', value: '', maxAge: 0, path: '/', secure: isProduction, sameSite: 'lax' });
+                    return response;
+                }
             }
         }
         return NextResponse.next();

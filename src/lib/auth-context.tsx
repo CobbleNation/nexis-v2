@@ -124,12 +124,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function logout() {
-        await fetch('/api/auth/logout', { method: 'POST' });
-        localStorage.removeItem('nexis-data'); // Clear local data on logout for safety
+        // Clear local data immediately for UI responsiveness
+        localStorage.removeItem('nexis-data');
         localStorage.removeItem('onboarding_step');
         localStorage.removeItem('onboarding_active');
         setUser(null);
-        window.location.href = '/login'; // Force a hard navigation to wipe React Router state & Cache
+
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch (e) {
+            console.error('Logout request failed', e);
+        }
+
+        // Wait a tiny bit (150ms) before hard navigation to ensure the browser 
+        // processes the HttpOnly Set-Cookie deletion headers. Fast navigations 
+        // can occasionally tear down the network socket before headers are flushed.
+        setTimeout(() => {
+            window.location.href = '/login';
+        }, 150);
     }
 
     async function updateProfile(data: Partial<User>) {
