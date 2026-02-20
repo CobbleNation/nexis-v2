@@ -17,69 +17,59 @@ export async function middleware(request: NextRequest) {
             if (payload) {
                 return NextResponse.redirect(new URL('/overview', request.url));
             }
-            // If token is invalid, let them stay on /login (and theoretically we could clear cookie here, but next() is enough)
         }
         return NextResponse.next();
     }
 
-    // 2. Protect /app routes (or any route not public)
-    // Assuming everything not public is protected given the structure
-    // But specifically we want to protect /overview, /timeline, /actions, /goals, /content, /settings
-    // And /api routes except auth
-
-    // Check for Access Token
+    // 2. Protect routes
     const accessToken = request.cookies.get('access_token')?.value;
     const refreshToken = request.cookies.get('refresh_token')?.value;
 
-    // NOTE: In a real "memory-only" access token architecture, middleware might not see it if it's in headers.
-    // But we implemented it as HttpOnly cookie in `auth-utils.ts` for this reason - Middleware support.
+    let isAuthorized = false;
+    let payload: any = null;
 
-    if (!accessToken) {
-        // If we have a refresh token, let the client handle the refresh
-        if (refreshToken) {
-            return NextResponse.next();
+    if (accessToken) {
+        payload = await verifyJWT(accessToken);
+        if (payload) {
+            isAuthorized = true;
         }
-
-        // If it's an API call, return 401
-        if (pathname.startsWith('/api/')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-        // Otherwise redirect to login
-        const loginUrl = new URL('/login', request.url);
-        loginUrl.searchParams.set('returnUrl', pathname);
-        return NextResponse.redirect(loginUrl);
     }
 
-    // Verify token and check role for Admin routes
-    // console.log('[Middleware] Verifying token for:', pathname);
-    const payload = await verifyJWT(accessToken);
-    // console.log('[Middleware] Token verified, payload:', payload ? 'valid' : 'invalid');
-
-    if (!payload) {
-        // If access token is invalid but we have a refresh token, let the client handle it
-        if (refreshToken) {
-            return NextResponse.next();
+    // If access token is invalid/missing, check if refresh token is VALID
+    if (!isAuthorized && refreshToken) {
+        const refreshPayload = await verifyJWT(refreshToken);
+        if (refreshPayload) {
+            // Valid refresh token, allow request through. 
+            // The client or layout will trigger a call to /api/auth/refresh to get a new access token.
+            isAuthorized = true;
+            // Note: Since we don't have the access token's payload, we might need to be careful with role checks here.
+            // But generally, the refresh flow handles this.
+            // If admin route, we might need to wait for the refresh call on the client, or decode the refresh token to check roles if available (we only store userId currently).
         }
+    }
 
-        // Invalid Token
-        if (pathname.startsWith('/api/')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-        const loginUrl = new URL('/login', request.url);
-        loginUrl.searchParams.set('returnUrl', pathname);
-        return NextResponse.redirect(loginUrl);
+    if (!isAuthorized) {
+        // Unauthorized
+        const response = pathname.startsWith('/api/')
+            ? NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            : NextResponse.redirect(new URL(`/login?returnUrl=${encodeURIComponent(pathname)}`, request.url));
+
+        // Clear invalid cookies to completely remove the ghost session
+        response.cookies.delete('access_token');
+        response.cookies.delete('refresh_token');
+        return response;
     }
 
     // Admin Guard
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
-        const role = payload.role as string | undefined;
+        // If they only had a refresh token, we don't know their role immediately from jwt verify without hitting db.
+        // It's safer to redirect them to /overview and let them refresh their token on the client, or we could fetch the user here.
+        // But since payload is only set if accessToken is valid:
+        const role = payload?.role as string | undefined;
         if (role !== 'admin') {
-            // If it's an API call, return 403
             if (pathname.startsWith('/api/')) {
                 return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
             }
-            // Otherwise redirect to dashboard with error or 404/403 page
-            // For now, redirect to overview
             return NextResponse.redirect(new URL('/overview', request.url));
         }
     }
