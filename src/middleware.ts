@@ -55,8 +55,26 @@ export async function middleware(request: NextRequest) {
             : NextResponse.redirect(new URL(`/login?returnUrl=${encodeURIComponent(pathname)}`, request.url));
 
         // Clear invalid cookies to completely remove the ghost session
-        response.cookies.delete('access_token');
-        response.cookies.delete('refresh_token');
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        response.cookies.set({
+            name: 'access_token',
+            value: '',
+            maxAge: 0,
+            path: '/',
+            secure: isProduction,
+            sameSite: 'lax',
+        });
+
+        response.cookies.set({
+            name: 'refresh_token',
+            value: '',
+            maxAge: 0,
+            path: '/',
+            secure: isProduction,
+            sameSite: 'lax',
+        });
+
         return response;
     }
 

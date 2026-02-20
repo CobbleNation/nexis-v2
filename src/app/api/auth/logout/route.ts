@@ -1,7 +1,29 @@
 import { NextResponse } from 'next/server';
-import { clearAuthCookies } from '@/lib/auth-utils';
 
 export async function POST() {
-    await clearAuthCookies();
-    return NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true });
+
+    // Using NextResponse directly to ensure headers aren't merged incorrectly
+    // by next/headers in Vercel production.
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    response.cookies.set({
+        name: 'access_token',
+        value: '',
+        maxAge: 0,
+        path: '/',
+        secure: isProduction,
+        sameSite: 'lax',
+    });
+
+    response.cookies.set({
+        name: 'refresh_token',
+        value: '',
+        maxAge: 0,
+        path: '/',
+        secure: isProduction,
+        sameSite: 'lax',
+    });
+
+    return response;
 }
