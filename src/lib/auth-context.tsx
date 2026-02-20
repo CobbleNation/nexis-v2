@@ -130,18 +130,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('onboarding_active');
         setUser(null);
 
-        try {
-            await fetch('/api/auth/logout', { method: 'POST' });
-        } catch (e) {
-            console.error('Logout request failed', e);
-        }
-
-        // Wait a tiny bit (150ms) before hard navigation to ensure the browser 
-        // processes the HttpOnly Set-Cookie deletion headers. Fast navigations 
-        // can occasionally tear down the network socket before headers are flushed.
-        setTimeout(() => {
-            window.location.href = '/login';
-        }, 150);
+        // Standard top-level navigation to the logout endpoint.
+        // This completely eliminates fetch/Set-Cookie race conditions
+        // by relying on standard HTTP 307 redirect cookie mechanics.
+        window.location.href = '/api/auth/logout';
     }
 
     async function updateProfile(data: Partial<User>) {
