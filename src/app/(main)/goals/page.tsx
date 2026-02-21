@@ -177,7 +177,7 @@ const GoalsList = ({ goals, areas, openDetails, onCreate }: { goals: Goal[], are
                                             isAbandoned ? "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-400" :
                                                 "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
                                 )}>
-                                    {area?.color && <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: area.color.startsWith('#') || area.color.startsWith('rgb') ? area.color : undefined }} />}
+                                    {area && <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", !area.color?.startsWith('#') && !area.color?.startsWith('rgb') && area.color)} style={(area.color?.startsWith('#') || area.color?.startsWith('rgb')) ? { backgroundColor: area.color } : undefined} />}
                                     <span>{area?.title || 'Загальне'}</span>
                                 </div>
                                 <div className={cn(
