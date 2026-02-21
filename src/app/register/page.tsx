@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Activity, Loader2 } from 'lucide-react';
@@ -13,7 +14,33 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { register } = useAuth();
+    const { register, user, isLoading } = useAuth();
+    const router = useRouter();
+
+    // If user is already authenticated, redirect to app
+    useEffect(() => {
+        if (!isLoading && user) {
+            router.replace('/overview');
+        }
+    }, [isLoading, user, router]);
+
+    // Show loading while checking auth state
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] dark:bg-slate-950">
+                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            </div>
+        );
+    }
+
+    // If user is already logged in, show brief state before redirect
+    if (user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] dark:bg-slate-950">
+                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            </div>
+        );
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

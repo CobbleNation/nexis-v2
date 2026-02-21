@@ -9,28 +9,21 @@ export async function middleware(request: NextRequest) {
 
     // 1. Allow public paths
     if (pathname === '/' || PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
-        // For Auth entry pages, we want to actively redirect authenticated users to /overview,
-        // and aggressively clear ANY lingering broken cookies for unauthenticated users 
-        // to prevent ghost session resurrections.
+        // For Auth entry pages, aggressively clear ANY invalid/expired cookies
+        // to prevent ghost session states. Do NOT redirect authenticated users —
+        // let the page component handle that via client-side useAuth() check.
         if (pathname === '/login' || pathname === '/register') {
             const accessToken = request.cookies.get('access_token')?.value;
             const refreshToken = request.cookies.get('refresh_token')?.value;
 
-            let isAuthorized = false;
+            if (accessToken || refreshToken) {
+                // Verify if tokens are actually valid
+                let hasValidToken = false;
+                if (accessToken && await verifyJWT(accessToken)) hasValidToken = true;
+                if (!hasValidToken && refreshToken && await verifyJWT(refreshToken)) hasValidToken = true;
 
-            if (accessToken) {
-                if (await verifyJWT(accessToken)) isAuthorized = true;
-            }
-            if (!isAuthorized && refreshToken) {
-                if (await verifyJWT(refreshToken)) isAuthorized = true;
-            }
-
-            if (isAuthorized) {
-                return NextResponse.redirect(new URL('/overview', request.url));
-            } else {
-                // If they are not authorized, but HAVE cookies lying around, NUKE them.
-                // This self-heals any broken state where a browser failed to delete a token on logout.
-                if (accessToken || refreshToken) {
+                // If tokens exist but are ALL invalid → nuke them to self-heal ghost sessions
+                if (!hasValidToken) {
                     const response = NextResponse.next();
                     const isProduction = process.env.NODE_ENV === 'production';
                     response.cookies.set({ name: 'access_token', value: '', maxAge: 0, expires: new Date(0), path: '/', secure: isProduction, sameSite: 'lax', httpOnly: true });
