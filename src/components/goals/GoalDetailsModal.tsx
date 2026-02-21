@@ -368,7 +368,7 @@ export function GoalDetailsModal({ goal, open, onOpenChange }: GoalDetailsModalP
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        className="h-7 text-xs gap-1.5 border-dashed border-slate-300 dark:border-border text-slate-500 hover:text-indigo-600 hover:border-indigo-200"
+                                        className="h-7 text-xs gap-1.5 border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 hover:text-amber-800 dark:hover:text-amber-300"
                                         disabled={isGeneratingBreakdown}
                                         onClick={() => {
                                             if (!HAS_AI_GOAL_BREAKDOWN) {
@@ -382,8 +382,8 @@ export function GoalDetailsModal({ goal, open, onOpenChange }: GoalDetailsModalP
                                             }
                                         }}
                                     >
-                                        {isGeneratingBreakdown ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-amber-500" />}
-                                        {isGeneratingBreakdown ? "Думаю..." : "AI План (Pro)"}
+                                        {isGeneratingBreakdown ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                                        {isGeneratingBreakdown ? "Думаю..." : "AI План"}
                                     </Button>
                                     <Button
                                         variant="ghost"
