@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
         // Create Tokens
         const accessToken = await createAccessToken({ userId: newUser.id });
-        const refreshToken = await createRefreshToken({ userId: newUser.id });
+        const refreshToken = await createRefreshToken({ userId: newUser.id, role: newUser.role });
 
         // TODO: Store Refresh Token Hash in DB (sessions) - Skipping for brevity in MVP but highly recommended
 

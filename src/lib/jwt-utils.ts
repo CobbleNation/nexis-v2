@@ -16,7 +16,7 @@ export async function createAccessToken(payload: { userId: string; role?: string
         .sign(JWT_SECRET);
 }
 
-export async function createRefreshToken(payload: { userId: string }) {
+export async function createRefreshToken(payload: { userId: string; role?: string }) {
     // We sign it but mostly rely on the random hash in DB for revocation
     return new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })

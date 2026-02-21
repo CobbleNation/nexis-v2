@@ -63,9 +63,7 @@ export async function middleware(request: NextRequest) {
             // Valid refresh token, allow request through. 
             // The client or layout will trigger a call to /api/auth/refresh to get a new access token.
             isAuthorized = true;
-            // Note: Since we don't have the access token's payload, we might need to be careful with role checks here.
-            // But generally, the refresh flow handles this.
-            // If admin route, we might need to wait for the refresh call on the client, or decode the refresh token to check roles if available (we only store userId currently).
+            payload = refreshPayload; // Use refresh token payload for role checking
         }
     }
 

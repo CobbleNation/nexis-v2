@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
         // Create Tokens
         const accessToken = await createAccessToken({ userId: user.id, role: user.role });
-        const refreshToken = await createRefreshToken({ userId: user.id });
+        const refreshToken = await createRefreshToken({ userId: user.id, role: user.role });
 
         await setAuthCookies(accessToken, refreshToken);
 
