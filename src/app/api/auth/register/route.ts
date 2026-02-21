@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
-import { hashPassword, createAccessToken, createRefreshToken, setAuthCookies } from '@/lib/auth-utils';
+import { hashPassword, createAccessToken, createRefreshToken, setAuthCookies, createSession } from '@/lib/auth-utils';
 import { trackEvent } from '@/lib/analytics-server';
 import { seedLifeAreas } from '@/lib/seed-areas';
 import { z } from 'zod';
@@ -38,7 +38,8 @@ export async function POST(req: Request) {
         const accessToken = await createAccessToken({ userId: newUser.id });
         const refreshToken = await createRefreshToken({ userId: newUser.id, role: newUser.role });
 
-        // TODO: Store Refresh Token Hash in DB (sessions) - Skipping for brevity in MVP but highly recommended
+        // Store session in DB and set cookies
+        await createSession(newUser.id, refreshToken);
 
         // Seed Default Life Areas
         await seedLifeAreas(newUser.id);

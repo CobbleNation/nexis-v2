@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { verifyJWT, createAccessToken, createRefreshToken, setAuthCookies } from '@/lib/auth-utils';
+import { verifyJWT, createAccessToken, createRefreshToken, setAuthCookies, validateSession, revokeSession, createSession, clearAuthCookies } from '@/lib/auth-utils';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -21,20 +21,34 @@ export async function POST() {
         return NextResponse.json({ error: 'No refresh token' }, { status: 401, headers: noCacheHeaders });
     }
 
+    // 1. Verify JWT signature
     const payload = await verifyJWT(refreshToken);
     if (!payload || !payload.userId) {
+        await clearAuthCookies();
         return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401, headers: noCacheHeaders });
     }
 
-    // Look up user from DB to get the CURRENT role (handles role changes)
+    // 2. Validate session exists in DB (prevents ghost sessions)
+    const session = await validateSession(refreshToken);
+    if (!session) {
+        // Token has valid JWT but no DB session — it was revoked (user logged out)
+        await clearAuthCookies();
+        return NextResponse.json({ error: 'Session revoked' }, { status: 401, headers: noCacheHeaders });
+    }
+
+    // 3. Look up user from DB to get the CURRENT role
     const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
     if (!user) {
+        await clearAuthCookies();
         return NextResponse.json({ error: 'User not found' }, { status: 401, headers: noCacheHeaders });
     }
 
+    // 4. Rotate tokens: revoke old session, create new one
     const newAccessToken = await createAccessToken({ userId: user.id, role: user.role });
     const newRefreshToken = await createRefreshToken({ userId: user.id, role: user.role });
 
+    await revokeSession(refreshToken);
+    await createSession(user.id, newRefreshToken);
     await setAuthCookies(newAccessToken, newRefreshToken);
 
     return NextResponse.json({ success: true }, { headers: noCacheHeaders });

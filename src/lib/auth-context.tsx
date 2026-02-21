@@ -43,6 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (params.get('logged_out') === '1') {
             // Force-clear any remaining cookies via POST
             fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
+            // Clear all auth-related localStorage
+            localStorage.removeItem('nexis-data');
+            localStorage.removeItem('onboarding_step');
+            localStorage.removeItem('onboarding_active');
             setUser(null);
             setIsLoading(false);
             // Clean URL
@@ -69,7 +73,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Access token expired/invalid — try refresh
             const refreshRes = await fetch('/api/auth/refresh', { method: 'POST', cache: 'no-store' });
             if (!refreshRes.ok) {
+                // Both tokens failed — no valid session exists.
+                // Hard redirect to login to prevent any authenticated UI flash.
                 setUser(null);
+                setIsLoading(false);
+
+                // Only redirect if we're on a protected route (not already on login/register/public)
+                const path = window.location.pathname;
+                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms'];
+                if (!publicPaths.includes(path)) {
+                    window.location.href = '/login';
+                }
                 return;
             }
 
@@ -83,6 +97,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setUser(data.user);
             } else {
                 setUser(null);
+                const path = window.location.pathname;
+                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms'];
+                if (!publicPaths.includes(path)) {
+                    window.location.href = '/login';
+                }
             }
         } catch {
             setUser(null);

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
-import { verifyPassword, createAccessToken, createRefreshToken, setAuthCookies } from '@/lib/auth-utils';
+import { verifyPassword, createAccessToken, createRefreshToken, setAuthCookies, createSession } from '@/lib/auth-utils';
 import { trackEvent } from '@/lib/analytics-server';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
@@ -19,7 +19,6 @@ export async function POST(req: Request) {
         // Find User
         const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
         if (!user) {
-            // Timing attack mitigation technically needed here but MVP
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
@@ -33,6 +32,8 @@ export async function POST(req: Request) {
         const accessToken = await createAccessToken({ userId: user.id, role: user.role });
         const refreshToken = await createRefreshToken({ userId: user.id, role: user.role });
 
+        // Store session in DB and set cookies
+        await createSession(user.id, refreshToken);
         await setAuthCookies(accessToken, refreshToken);
 
         // Track Login
