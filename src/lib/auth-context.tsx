@@ -35,8 +35,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    // Check session on mount
+    // Check session on mount — but skip if we just logged out
     useEffect(() => {
+        // If URL has ?logged_out=1, the user just explicitly logged out.
+        // Skip session recovery entirely and force-clear any remaining cookies.
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('logged_out') === '1') {
+            // Double-clear cookies via POST endpoint as safety net
+            fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
+            setUser(null);
+            setIsLoading(false);
+
+            // Clean URL without reloading
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, '', cleanUrl);
+            return;
+        }
+
         checkSession();
     }, []);
 
