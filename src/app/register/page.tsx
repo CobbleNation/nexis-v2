@@ -24,24 +24,6 @@ export default function RegisterPage() {
         }
     }, [isLoading, user, router]);
 
-    // Show loading while checking auth state
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] dark:bg-slate-950">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-            </div>
-        );
-    }
-
-    // If user is already logged in, show brief state before redirect
-    if (user) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] dark:bg-slate-950">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-            </div>
-        );
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -62,6 +44,15 @@ export default function RegisterPage() {
             setIsSubmitting(false);
         }
     };
+
+    // Show loading spinner while checking auth state
+    if (isLoading || user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] dark:bg-slate-950">
+                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] dark:bg-slate-950 px-4">

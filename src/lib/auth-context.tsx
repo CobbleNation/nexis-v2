@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 interface User {
     id: string;
@@ -35,20 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    // Check session on mount — but skip if we just logged out
+    // Check session on mount
     useEffect(() => {
         // If URL has ?logged_out=1, the user just explicitly logged out.
-        // Skip session recovery entirely and force-clear any remaining cookies.
+        // Skip session recovery and force null.
         const params = new URLSearchParams(window.location.search);
         if (params.get('logged_out') === '1') {
-            // Double-clear cookies via POST endpoint as safety net
+            // Force-clear any remaining cookies via POST
             fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
             setUser(null);
             setIsLoading(false);
-
-            // Clean URL without reloading
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState({}, '', cleanUrl);
+            // Clean URL
+            window.history.replaceState({}, '', window.location.pathname);
             return;
         }
 
@@ -57,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function checkSession() {
         try {
+            // Try to get user with current access token
             const res = await fetch('/api/auth/me');
             if (res.ok) {
                 const data = await res.json();
@@ -64,26 +63,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     data.user.onboardingCompleted = false;
                 }
                 setUser(data.user);
-            } else {
-                // Try refresh
-                const refreshRes = await fetch('/api/auth/refresh', { method: 'POST' });
-                if (refreshRes.ok) {
-                    // Retry me
-                    const retryRes = await fetch('/api/auth/me');
-                    if (retryRes.ok) {
-                        const data = await retryRes.json();
-                        if (data.user && typeof data.user.onboardingCompleted === 'undefined') {
-                            data.user.onboardingCompleted = false;
-                        }
-                        setUser(data.user);
-                    } else {
-                        setUser(null);
-                    }
-                } else {
-                    setUser(null);
-                }
+                return;
             }
-        } catch (err) {
+
+            // Access token expired/invalid — try refresh
+            const refreshRes = await fetch('/api/auth/refresh', { method: 'POST' });
+            if (!refreshRes.ok) {
+                setUser(null);
+                return;
+            }
+
+            // Refresh succeeded — retry /me with new access token
+            const retryRes = await fetch('/api/auth/me');
+            if (retryRes.ok) {
+                const data = await retryRes.json();
+                if (data.user && typeof data.user.onboardingCompleted === 'undefined') {
+                    data.user.onboardingCompleted = false;
+                }
+                setUser(data.user);
+            } else {
+                setUser(null);
+            }
+        } catch {
             setUser(null);
         } finally {
             setIsLoading(false);
@@ -91,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function login(credentials: any) {
-        // Clear potential stale onboarding state
+        // Clear potential stale state
         localStorage.removeItem('onboarding_step');
         localStorage.removeItem('onboarding_active');
 
@@ -111,11 +112,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data.user.onboardingCompleted = false;
         }
         setUser(data.user);
-        window.location.href = '/overview'; // Hard navigation to clear potential ghostly cache states
+        // Hard navigation to ensure clean state
+        window.location.href = '/overview';
     }
 
     async function register(formData: any) {
-        // Clear potential stale onboarding state
         localStorage.removeItem('onboarding_step');
         localStorage.removeItem('onboarding_active');
 
@@ -135,28 +136,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             data.user.onboardingCompleted = false;
         }
         setUser(data.user);
-        window.location.href = '/overview'; // Hard navigation to bypass cache ghosting
+        window.location.href = '/overview';
     }
 
     async function logout() {
-        // Clear local data immediately for UI responsiveness
+        // 1. Clear local state immediately
         localStorage.removeItem('nexis-data');
         localStorage.removeItem('onboarding_step');
         localStorage.removeItem('onboarding_active');
         setUser(null);
 
-        // Standard top-level navigation to the logout endpoint.
-        // This completely eliminates fetch/Set-Cookie race conditions
-        // by relying on standard HTTP 307 redirect cookie mechanics.
-        window.location.href = '/api/auth/logout';
+        // 2. Clear cookies via POST (server-side, awaited)
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+        } catch {
+            // Ignore — we'll still navigate away
+        }
+
+        // 3. Hard navigate to login page with flag
+        // The flag ensures AuthProvider won't try to restore session on the login page
+        window.location.href = '/login?logged_out=1';
     }
 
     async function updateProfile(data: Partial<User>) {
         if (!user) return;
 
-        // Optimistic update
         const updatedUser = { ...user, ...data };
-        // Name Logic: If first/last provided, reconstruct full name
         if (data.firstName || data.lastName) {
             updatedUser.name = `${data.firstName || user.firstName || ''} ${data.lastName || user.lastName || ''}`.trim();
         }
@@ -170,7 +175,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
         } catch (e) {
             console.error("Failed to sync profile update", e);
-            // Revert if critical, but for local-first mock it's fine
         }
     }
 
