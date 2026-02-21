@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, TrendingUp, Calendar, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '@/lib/store';
@@ -17,20 +17,19 @@ import { ItemEditDialog } from '@/components/shared/ItemEditDialog';
 import { TimelineLockState } from '@/components/timeline/TimelineLockState';
 import { useSubscription } from '@/hooks/useSubscription';
 import { LIMITS, SUBSCRIPTION_PLAN } from '@/lib/limits';
+import { toast } from 'sonner';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
 
 export default function TimelinePage() {
-    const { state } = useData();
+    const { state, dispatch } = useData();
     const { isPro, tier } = useSubscription();
-    // Use global state.period instead of URL params for Topbar sync
-    // BUT user requested in-page switcher, so we prioritize local state initialized from global
     const [viewModeLocal, setViewModeLocal] = useState<ViewMode>((state.period as ViewMode) || 'day');
     const currentViewMode = viewModeLocal;
 
     const [currentDate, setCurrentDate] = useState(new Date());
 
-    // Navigation Logic
+    // Navigation
     const navigate = (direction: 'prev' | 'next') => {
         if (currentViewMode === 'day') setCurrentDate(d => direction === 'next' ? addDays(d, 1) : subDays(d, 1));
         if (currentViewMode === 'week') setCurrentDate(d => direction === 'next' ? addWeeks(d, 1) : subWeeks(d, 1));
@@ -40,7 +39,7 @@ export default function TimelinePage() {
 
     const goToToday = () => setCurrentDate(new Date());
 
-    // Data Aggregation
+    // Data
     const scheduleItems = useMemo(() => {
         return getScheduleItems({ ...state, metrics: state.metricDefinitions }, new Date(currentDate.getFullYear() - 1, 0, 1), new Date(currentDate.getFullYear() + 2, 0, 1), currentViewMode);
     }, [state, currentDate, currentViewMode]);
@@ -53,24 +52,52 @@ export default function TimelinePage() {
         if (currentViewMode === 'year') return format(currentDate, 'yyyy');
     };
 
+    // Edit Dialog
     const [editTarget, setEditTarget] = useState<{ id: string; type: any } | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-    const handleEditItem = (id: string, type: string) => {
-        // Parse ID if it has prefixes like 'task-'
-        // Actually, schedule-utils IDs are 'task-123'. We need to strip prefix based on type or ScheduleItem logic.
-        // ScheduleItem has `entityId` and `type`. Views pass `item.entityId` and `item.type`.
-        // Let's assume onToggleItem (renamed/repurposed) receives explicit data or we fix the View signature.
+    // --- Callbacks ---
+    const handleEditItem = useCallback((id: string, type: string) => {
         setEditTarget({ id, type });
         setIsEditDialogOpen(true);
-    };
+    }, []);
+
+    const handleCompleteItem = useCallback((id: string, type: string) => {
+        if (type === 'task') {
+            const action = state.actions.find(a => a.id === id);
+            if (action) {
+                dispatch({
+                    type: 'UPDATE_ACTION',
+                    payload: { ...action, completed: true, status: 'completed' as const }
+                });
+                toast.success('Завдання виконано ✅');
+            }
+        }
+    }, [state.actions, dispatch]);
+
+    const handleDeleteItem = useCallback((id: string, type: string) => {
+        if (type === 'task') dispatch({ type: 'DELETE_ACTION', payload: { id } });
+        else if (type === 'event') dispatch({ type: 'DELETE_EVENT', payload: { id } });
+        else if (type === 'routine') dispatch({ type: 'DELETE_ROUTINE', payload: { id } });
+        toast.success('Видалено');
+    }, [dispatch]);
+
+    const handleDayClick = useCallback((day: Date) => {
+        setCurrentDate(day);
+        setViewModeLocal('day');
+    }, []);
+
+    const handleLegacyToggle = useCallback((id: string) => {
+        const item = scheduleItems.find(i => i.entityId === id);
+        if (item) handleEditItem(id, item.type);
+    }, [scheduleItems, handleEditItem]);
 
     return (
-        <div id="schedule-container" className="space-y-6 animate-in fade-in duration-500 h-[calc(100vh-theme(spacing.8))] flex flex-col">
-            <div id="schedule-top-bar" className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+        <div id="schedule-container" className="space-y-4 animate-in fade-in duration-500 h-[calc(100vh-theme(spacing.8))] flex flex-col">
+            <div id="schedule-top-bar" className="flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">Розклад</h2>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                         {currentViewMode === 'day' && 'План на день'}
                         {currentViewMode === 'week' && 'Навантаження тижня'}
                         {currentViewMode === 'month' && 'Масштаб місяця'}
@@ -127,21 +154,32 @@ export default function TimelinePage() {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.2 }}
-                        className="h-full overflow-y-auto pr-2 pb-2"
+                        className="h-full"
                     >
-                        {currentViewMode === 'day' && <DayView date={currentDate} items={scheduleItems} onToggleItem={(id) => {
-                            const item = scheduleItems.find(i => i.entityId === id);
-                            if (item) handleEditItem(id, item.type);
-                        }} />}
+                        {currentViewMode === 'day' && (
+                            <DayView
+                                date={currentDate}
+                                items={scheduleItems}
+                                onToggleItem={handleLegacyToggle}
+                                onEditItem={handleEditItem}
+                                onCompleteItem={handleCompleteItem}
+                                onDeleteItem={handleDeleteItem}
+                            />
+                        )}
 
                         {currentViewMode === 'week' && (
                             tier === SUBSCRIPTION_PLAN.FREE && !LIMITS[SUBSCRIPTION_PLAN.FREE].HAS_WEEKLY_VIEW ? (
                                 <TimelineLockState view="week" />
                             ) : (
-                                <WeekView date={currentDate} items={scheduleItems} onToggleItem={(id) => {
-                                    const item = scheduleItems.find(i => i.entityId === id);
-                                    if (item) handleEditItem(id, item.type);
-                                }} />
+                                <WeekView
+                                    date={currentDate}
+                                    items={scheduleItems}
+                                    onToggleItem={handleLegacyToggle}
+                                    onEditItem={handleEditItem}
+                                    onCompleteItem={handleCompleteItem}
+                                    onDeleteItem={handleDeleteItem}
+                                    onDayClick={handleDayClick}
+                                />
                             )
                         )}
 
@@ -149,10 +187,7 @@ export default function TimelinePage() {
                             tier === SUBSCRIPTION_PLAN.FREE && !LIMITS[SUBSCRIPTION_PLAN.FREE].HAS_MONTHLY_VIEW ? (
                                 <TimelineLockState view="month" />
                             ) : (
-                                <MonthView date={currentDate} items={scheduleItems} onToggleItem={(id) => {
-                                    const item = scheduleItems.find(i => i.entityId === id);
-                                    if (item) handleEditItem(id, item.type);
-                                }} />
+                                <MonthView date={currentDate} items={scheduleItems} onToggleItem={handleLegacyToggle} />
                             )
                         )}
 
