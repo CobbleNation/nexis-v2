@@ -1,9 +1,8 @@
 'use client';
 
 import { useData } from '@/lib/store';
-import { Check, Folder, Calendar as CalendarIcon, ChevronDown, ChevronRight, X, SlidersHorizontal, Circle } from 'lucide-react';
+import { Check, Folder, ChevronDown, ChevronRight, X, SlidersHorizontal, CheckCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { useState } from 'react';
@@ -13,8 +12,10 @@ interface TaskFiltersProps {
     setSelectedAreas: (areas: string[]) => void;
     selectedProjects: string[];
     setSelectedProjects: (projects: string[]) => void;
-    selectedDates: Date[];
-    setSelectedDates: (dates: Date[]) => void;
+    dateFrom: Date | null;
+    setDateFrom: (date: Date | null) => void;
+    dateTo: Date | null;
+    setDateTo: (date: Date | null) => void;
     hasActiveFilters: boolean;
     clearFilters: () => void;
 }
@@ -24,8 +25,10 @@ export function TaskFilters({
     setSelectedAreas,
     selectedProjects,
     setSelectedProjects,
-    selectedDates,
-    setSelectedDates,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
     hasActiveFilters,
     clearFilters
 }: TaskFiltersProps) {
@@ -44,7 +47,27 @@ export function TaskFilters({
         else setSelectedProjects([...selectedProjects, id]);
     };
 
-    const activeCount = selectedAreas.length + selectedProjects.length + selectedDates.length;
+    const selectAllAreas = () => {
+        const allIds = state.areas.map(a => a.id);
+        if (selectedAreas.length === allIds.length) {
+            setSelectedAreas([]);
+        } else {
+            setSelectedAreas(allIds);
+        }
+    };
+
+    const activeProjects = state.projects.filter(p => p.status !== 'completed');
+    const selectAllProjects = () => {
+        const allIds = activeProjects.map(p => p.id);
+        if (selectedProjects.length === allIds.length) {
+            setSelectedProjects([]);
+        } else {
+            setSelectedProjects(allIds);
+        }
+    };
+
+    const hasDateFilter = dateFrom !== null || dateTo !== null;
+    const activeCount = selectedAreas.length + selectedProjects.length + (hasDateFilter ? 1 : 0);
 
     return (
         <div className="w-full h-full flex flex-col bg-white dark:bg-card/50 rounded-2xl border border-slate-200/80 dark:border-border overflow-hidden">
@@ -95,6 +118,23 @@ export function TaskFilters({
                     </button>
                     {areasOpen && (
                         <div className="px-2 pb-2 space-y-0.5">
+                            {/* Select All */}
+                            {state.areas.length > 0 && (
+                                <button
+                                    onClick={selectAllAreas}
+                                    className={cn(
+                                        "w-full flex items-center justify-between px-3 py-1.5 text-xs rounded-lg transition-all mb-1",
+                                        selectedAreas.length === state.areas.length
+                                            ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                                            : "text-slate-400 dark:text-muted-foreground hover:bg-slate-50 dark:hover:bg-secondary/30 hover:text-slate-600 dark:hover:text-slate-300"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <CheckCheck className="w-3.5 h-3.5" />
+                                        <span>{selectedAreas.length === state.areas.length ? 'Зняти всі' : 'Обрати всі'}</span>
+                                    </div>
+                                </button>
+                            )}
                             {state.areas.map(area => (
                                 <button
                                     key={area.id}
@@ -148,7 +188,24 @@ export function TaskFilters({
                     </button>
                     {projectsOpen && (
                         <div className="px-2 pb-2 space-y-0.5">
-                            {state.projects.filter(p => p.status !== 'completed').map(project => (
+                            {/* Select All */}
+                            {activeProjects.length > 0 && (
+                                <button
+                                    onClick={selectAllProjects}
+                                    className={cn(
+                                        "w-full flex items-center justify-between px-3 py-1.5 text-xs rounded-lg transition-all mb-1",
+                                        selectedProjects.length === activeProjects.length
+                                            ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                                            : "text-slate-400 dark:text-muted-foreground hover:bg-slate-50 dark:hover:bg-secondary/30 hover:text-slate-600 dark:hover:text-slate-300"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <CheckCheck className="w-3.5 h-3.5" />
+                                        <span>{selectedProjects.length === activeProjects.length ? 'Зняти всі' : 'Обрати всі'}</span>
+                                    </div>
+                                </button>
+                            )}
+                            {activeProjects.map(project => (
                                 <button
                                     key={project.id}
                                     onClick={() => toggleProject(project.id)}
@@ -168,7 +225,7 @@ export function TaskFilters({
                                     )}
                                 </button>
                             ))}
-                            {state.projects.filter(p => p.status !== 'completed').length === 0 && (
+                            {activeProjects.length === 0 && (
                                 <p className="text-xs text-muted-foreground px-3 py-2">Немає активних проектів</p>
                             )}
                         </div>
@@ -190,41 +247,58 @@ export function TaskFilters({
                                 Дати
                             </span>
                         </div>
-                        {selectedDates.length > 0 && (
+                        {hasDateFilter && (
                             <span className="text-[10px] font-medium bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full">
-                                {selectedDates.length}
+                                ✓
                             </span>
                         )}
                     </button>
                     {datesOpen && (
-                        <div className="px-2 pb-3">
-                            <Calendar
-                                mode="multiple"
-                                selected={selectedDates}
-                                onSelect={(dates) => setSelectedDates(dates as Date[])}
-                                locale={uk}
-                                className="rounded-xl border border-slate-100 dark:border-border bg-white dark:bg-secondary/20"
-                            />
-                            {selectedDates.length > 0 && (
-                                <div className="mt-2 flex flex-wrap gap-1.5 px-1">
-                                    {selectedDates.map(d => (
-                                        <span
-                                            key={d.toISOString()}
-                                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-medium"
-                                        >
-                                            {format(d, 'dd.MM', { locale: uk })}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const dateStr = format(d, 'yyyy-MM-dd');
-                                                    setSelectedDates(selectedDates.filter(sd => format(sd, 'yyyy-MM-dd') !== dateStr));
-                                                }}
-                                                className="hover:text-red-500 transition-colors"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </span>
-                                    ))}
+                        <div className="px-3 pb-3 space-y-3">
+                            {/* Date From */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-medium text-slate-500 dark:text-muted-foreground pl-0.5">
+                                    З
+                                </label>
+                                <input
+                                    type="date"
+                                    value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
+                                    onChange={(e) => setDateFrom(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
+                                />
+                            </div>
+
+                            {/* Date To */}
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-medium text-slate-500 dark:text-muted-foreground pl-0.5">
+                                    По
+                                </label>
+                                <input
+                                    type="date"
+                                    value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
+                                    onChange={(e) => setDateTo(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
+                                    min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
+                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
+                                />
+                            </div>
+
+                            {/* Summary + Clear */}
+                            {hasDateFilter && (
+                                <div className="flex items-center justify-between pt-1">
+                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                                        {dateFrom && dateTo
+                                            ? `${format(dateFrom, 'dd.MM.yy', { locale: uk })} — ${format(dateTo, 'dd.MM.yy', { locale: uk })}`
+                                            : dateFrom
+                                                ? `З ${format(dateFrom, 'dd.MM.yy', { locale: uk })}`
+                                                : `По ${format(dateTo!, 'dd.MM.yy', { locale: uk })}`
+                                        }
+                                    </span>
+                                    <button
+                                        onClick={() => { setDateFrom(null); setDateTo(null); }}
+                                        className="text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
                             )}
                         </div>

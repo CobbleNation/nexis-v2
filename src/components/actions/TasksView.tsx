@@ -19,13 +19,15 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
 
     const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
     const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
-    const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+    const [dateFrom, setDateFrom] = useState<Date | null>(null);
+    const [dateTo, setDateTo] = useState<Date | null>(null);
 
-    const hasActiveFilters = selectedAreas.length > 0 || selectedProjects.length > 0 || selectedDates.length > 0;
+    const hasActiveFilters = selectedAreas.length > 0 || selectedProjects.length > 0 || dateFrom !== null || dateTo !== null;
     const clearFilters = () => {
         setSelectedAreas([]);
         setSelectedProjects([]);
-        setSelectedDates([]);
+        setDateFrom(null);
+        setDateTo(null);
     };
 
     // --- Filter Logic ---
@@ -83,9 +85,15 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
     if (selectedProjects.length > 0) {
         filteredTasks = filteredTasks.filter(a => a.projectId && selectedProjects.includes(a.projectId));
     }
-    if (selectedDates.length > 0) {
-        const selectedDateStrs = selectedDates.map(d => format(d, 'yyyy-MM-dd'));
-        filteredTasks = filteredTasks.filter(a => a.date && selectedDateStrs.includes(a.date));
+    if (dateFrom || dateTo) {
+        const fromStr = dateFrom ? format(dateFrom, 'yyyy-MM-dd') : null;
+        const toStr = dateTo ? format(dateTo, 'yyyy-MM-dd') : null;
+        filteredTasks = filteredTasks.filter(a => {
+            if (!a.date) return false;
+            if (fromStr && a.date < fromStr) return false;
+            if (toStr && a.date > toStr) return false;
+            return true;
+        });
     }
 
     // Sort by priority/date
@@ -205,7 +213,7 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                         <span className="hidden sm:inline">Фільтри</span>
                         {hasActiveFilters && (
                             <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                {selectedAreas.length + selectedProjects.length + selectedDates.length}
+                                {selectedAreas.length + selectedProjects.length + (dateFrom || dateTo ? 1 : 0)}
                             </span>
                         )}
                     </button>
@@ -229,8 +237,10 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                             setSelectedAreas={setSelectedAreas}
                             selectedProjects={selectedProjects}
                             setSelectedProjects={setSelectedProjects}
-                            selectedDates={selectedDates}
-                            setSelectedDates={setSelectedDates}
+                            dateFrom={dateFrom}
+                            setDateFrom={setDateFrom}
+                            dateTo={dateTo}
+                            setDateTo={setDateTo}
                             hasActiveFilters={hasActiveFilters}
                             clearFilters={clearFilters}
                         />
@@ -274,8 +284,10 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                         setSelectedAreas={setSelectedAreas}
                         selectedProjects={selectedProjects}
                         setSelectedProjects={setSelectedProjects}
-                        selectedDates={selectedDates}
-                        setSelectedDates={setSelectedDates}
+                        dateFrom={dateFrom}
+                        setDateFrom={setDateFrom}
+                        dateTo={dateTo}
+                        setDateTo={setDateTo}
                         hasActiveFilters={hasActiveFilters}
                         clearFilters={clearFilters}
                     />
