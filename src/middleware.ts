@@ -65,9 +65,8 @@ export async function middleware(request: NextRequest) {
         );
 
         // Clear any invalid cookies
-        const isProduction = process.env.NODE_ENV === 'production';
-        response.cookies.set({ name: 'access_token', value: '', maxAge: 0, expires: new Date(0), path: '/', secure: isProduction, sameSite: 'lax', httpOnly: true });
-        response.cookies.set({ name: 'refresh_token', value: '', maxAge: 0, expires: new Date(0), path: '/', secure: isProduction, sameSite: 'lax', httpOnly: true });
+        response.cookies.delete('access_token');
+        response.cookies.delete('refresh_token');
 
         return response;
     }

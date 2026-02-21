@@ -1,65 +1,20 @@
 import { NextResponse } from 'next/server';
+import { clearAuthCookies } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
 
+const noCacheHeaders = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+};
+
 export async function GET(request: Request) {
-    const response = NextResponse.redirect(new URL('/login?logged_out=1', request.url));
-
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    response.cookies.set({
-        name: 'access_token',
-        value: '',
-        maxAge: 0,
-        expires: new Date(0),
-        path: '/',
-        secure: isProduction,
-        sameSite: 'lax',
-        httpOnly: true,
-    });
-
-    response.cookies.set({
-        name: 'refresh_token',
-        value: '',
-        maxAge: 0,
-        expires: new Date(0),
-        path: '/',
-        secure: isProduction,
-        sameSite: 'lax',
-        httpOnly: true,
-    });
-
-    return response;
+    await clearAuthCookies();
+    return NextResponse.redirect(new URL('/login?logged_out=1', request.url), { headers: noCacheHeaders });
 }
 
 export async function POST() {
-    const response = NextResponse.json({ success: true });
-
-    // Using NextResponse directly to ensure headers aren't merged incorrectly
-    // by next/headers in Vercel production.
-    const isProduction = process.env.NODE_ENV === 'production';
-
-    response.cookies.set({
-        name: 'access_token',
-        value: '',
-        maxAge: 0,
-        expires: new Date(0),
-        path: '/',
-        secure: isProduction,
-        sameSite: 'lax',
-        httpOnly: true,
-    });
-
-    response.cookies.set({
-        name: 'refresh_token',
-        value: '',
-        maxAge: 0,
-        expires: new Date(0),
-        path: '/',
-        secure: isProduction,
-        sameSite: 'lax',
-        httpOnly: true,
-    });
-
-    return response;
+    await clearAuthCookies();
+    return NextResponse.json({ success: true }, { headers: noCacheHeaders });
 }

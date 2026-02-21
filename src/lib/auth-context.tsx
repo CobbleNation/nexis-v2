@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function checkSession() {
         try {
             // Try to get user with current access token
-            const res = await fetch('/api/auth/me');
+            const res = await fetch('/api/auth/me', { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
                 if (data.user && typeof data.user.onboardingCompleted === 'undefined') {
@@ -67,14 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             // Access token expired/invalid — try refresh
-            const refreshRes = await fetch('/api/auth/refresh', { method: 'POST' });
+            const refreshRes = await fetch('/api/auth/refresh', { method: 'POST', cache: 'no-store' });
             if (!refreshRes.ok) {
                 setUser(null);
                 return;
             }
 
             // Refresh succeeded — retry /me with new access token
-            const retryRes = await fetch('/api/auth/me');
+            const retryRes = await fetch('/api/auth/me', { cache: 'no-store' });
             if (retryRes.ok) {
                 const data = await retryRes.json();
                 if (data.user && typeof data.user.onboardingCompleted === 'undefined') {

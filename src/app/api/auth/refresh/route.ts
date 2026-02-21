@@ -7,23 +7,29 @@ import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
 
+const noCacheHeaders = {
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+};
+
 export async function POST() {
     const cookieStore = await cookies();
     const refreshToken = cookieStore.get('refresh_token')?.value;
 
     if (!refreshToken) {
-        return NextResponse.json({ error: 'No refresh token' }, { status: 401 });
+        return NextResponse.json({ error: 'No refresh token' }, { status: 401, headers: noCacheHeaders });
     }
 
     const payload = await verifyJWT(refreshToken);
     if (!payload || !payload.userId) {
-        return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401 });
+        return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401, headers: noCacheHeaders });
     }
 
     // Look up user from DB to get the CURRENT role (handles role changes)
     const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
     if (!user) {
-        return NextResponse.json({ error: 'User not found' }, { status: 401 });
+        return NextResponse.json({ error: 'User not found' }, { status: 401, headers: noCacheHeaders });
     }
 
     const newAccessToken = await createAccessToken({ userId: user.id, role: user.role });
@@ -31,5 +37,5 @@ export async function POST() {
 
     await setAuthCookies(newAccessToken, newRefreshToken);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, { headers: noCacheHeaders });
 }
