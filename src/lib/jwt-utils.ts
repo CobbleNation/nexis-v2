@@ -1,13 +1,12 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-// In production on Vercel, append the deployment commit SHA to the secret.
-// This ensures that EVERY new deployment invalidates all existing sessions,
-// because the signing key changes and old tokens can no longer be verified.
-const baseSecret = process.env.JWT_SECRET || 'dependency-injection-is-cool-but-hard-coded-secrets-are-bad';
-const deploymentSalt = process.env.VERCEL_GIT_COMMIT_SHA || '';
-const JWT_SECRET = new TextEncoder().encode(baseSecret + deploymentSalt);
+// Stable secret — sessions persist across deployments.
+// To force-logout all users, rotate the JWT_SECRET env var.
+const JWT_SECRET = new TextEncoder().encode(
+    process.env.JWT_SECRET || 'dependency-injection-is-cool-but-hard-coded-secrets-are-bad'
+);
 const ACCESS_TOKEN_EXPIRY = '15m'; // 15 minutes
-const REFRESH_TOKEN_EXPIRY = '7d'; // 7 days
+const REFRESH_TOKEN_EXPIRY = '30d'; // 30 days
 
 export async function createAccessToken(payload: { userId: string; role?: string }) {
     return new SignJWT(payload)

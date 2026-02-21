@@ -23,12 +23,12 @@ export function LandingHeader() {
 
                 <div className="flex items-center gap-4">
                     <ThemeToggle />
-                    <Link href="/overview">
+                    <Link href="/login">
                         <Button variant="ghost" className="hidden sm:flex text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
                             Увійти
                         </Button>
                     </Link>
-                    <Link href="/overview">
+                    <Link href="/register">
                         <Button className="rounded-full px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold shadow-lg shadow-slate-900/20 transition-all hover:scale-105 active:scale-95">
                             Спробувати безкоштовно
                         </Button>
