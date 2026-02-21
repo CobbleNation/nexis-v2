@@ -72,7 +72,7 @@ export function TaskFilters({
     return (
         <div className="w-full h-full flex flex-col bg-white dark:bg-card/50 rounded-2xl border border-slate-200/80 dark:border-border overflow-hidden">
             {/* Header */}
-            <div className="px-4 py-3 border-b border-slate-100 dark:border-border flex items-center justify-between shrink-0">
+            <div className="px-4 py-2 border-b border-slate-100 dark:border-border flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                     <SlidersHorizontal className="w-4 h-4 text-slate-500 dark:text-muted-foreground" />
                     <span className="text-sm font-semibold text-slate-700 dark:text-foreground">Фільтри</span>
@@ -99,7 +99,7 @@ export function TaskFilters({
                 <div className="border-b border-slate-100 dark:border-border">
                     <button
                         onClick={() => setAreasOpen(!areasOpen)}
-                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-secondary/30 transition-colors"
+                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-50 dark:hover:bg-secondary/30 transition-colors"
                     >
                         <div className="flex items-center gap-2">
                             {areasOpen
@@ -117,7 +117,7 @@ export function TaskFilters({
                         )}
                     </button>
                     {areasOpen && (
-                        <div className="px-2 pb-2 space-y-0.5">
+                        <div className="px-2 pb-1.5 space-y-0">
                             {/* Select All */}
                             {state.areas.length > 0 && (
                                 <button
@@ -140,7 +140,7 @@ export function TaskFilters({
                                     key={area.id}
                                     onClick={() => toggleArea(area.id)}
                                     className={cn(
-                                        "w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all",
+                                        "w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-all",
                                         selectedAreas.includes(area.id)
                                             ? "bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400"
                                             : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-secondary/30"
@@ -169,7 +169,7 @@ export function TaskFilters({
                 <div className="border-b border-slate-100 dark:border-border">
                     <button
                         onClick={() => setProjectsOpen(!projectsOpen)}
-                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-secondary/30 transition-colors"
+                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-50 dark:hover:bg-secondary/30 transition-colors"
                     >
                         <div className="flex items-center gap-2">
                             {projectsOpen
@@ -187,7 +187,7 @@ export function TaskFilters({
                         )}
                     </button>
                     {projectsOpen && (
-                        <div className="px-2 pb-2 space-y-0.5">
+                        <div className="px-2 pb-1.5 space-y-0">
                             {/* Select All */}
                             {activeProjects.length > 0 && (
                                 <button
@@ -210,7 +210,7 @@ export function TaskFilters({
                                     key={project.id}
                                     onClick={() => toggleProject(project.id)}
                                     className={cn(
-                                        "w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-all",
+                                        "w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-all",
                                         selectedProjects.includes(project.id)
                                             ? "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400"
                                             : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-secondary/30"
@@ -236,7 +236,7 @@ export function TaskFilters({
                 <div>
                     <button
                         onClick={() => setDatesOpen(!datesOpen)}
-                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-secondary/30 transition-colors"
+                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-50 dark:hover:bg-secondary/30 transition-colors"
                     >
                         <div className="flex items-center gap-2">
                             {datesOpen

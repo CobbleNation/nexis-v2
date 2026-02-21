@@ -231,7 +231,7 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
             <div className="flex-1 flex min-h-0 gap-4 px-4 md:px-8 pb-4">
                 {/* Filter Sidebar */}
                 {showFilters && (
-                    <div className="hidden md:block w-[260px] shrink-0 sticky top-0 self-start max-h-[calc(100vh-14rem)] overflow-hidden">
+                    <div className="hidden md:block w-[260px] shrink-0 sticky top-0 self-start max-h-[calc(100vh-12rem)] overflow-y-auto custom-scrollbar">
                         <TaskFilters
                             selectedAreas={selectedAreas}
                             setSelectedAreas={setSelectedAreas}
