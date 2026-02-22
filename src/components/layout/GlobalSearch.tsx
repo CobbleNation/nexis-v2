@@ -137,7 +137,7 @@ export function GlobalSearch() {
                         }}
                         onFocus={() => setIsOpen(true)}
                         placeholder="Пошук (Цілі, Нотатки, Завдання)..."
-                        className="h-12 border-none bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 text-base"
+                        className="h-12 border-none bg-transparent shadow-none rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 text-base"
                     />
 
                     {/* Quick Category Toggle (Visible when open or if category selected) */}

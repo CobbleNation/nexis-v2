@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationsPopover } from '@/components/layout/NotificationsPopover';
 import { useAuth } from '@/lib/auth-context';
 import { useFilteredData, useData } from '@/lib/store';
-import { MobileContextControls } from '@/components/features/MobileContextControls';
+
 import { ContextState } from '@/components/overview/ContextState';
 import { calculateFocusLevel } from '@/lib/metrics';
 import { useMemo } from 'react';
@@ -66,18 +66,13 @@ export function Header() {
             {/* Sub-header for Context Controls (Area & Time) - ONLY on Overview */}
             {pathname === '/overview' && (
                 <div className="px-6 md:px-8 pb-4">
-                    <div className="flex items-center justify-between">
-                        <ContextState
-                            score={contextScore}
-                            metrics={metrics}
-                            period={period}
-                            areaName={activeArea?.title}
-                            activeColor={activeColor}
-                        />
-                        <div className="md:hidden">
-                            <MobileContextControls />
-                        </div>
-                    </div>
+                    <ContextState
+                        score={contextScore}
+                        metrics={metrics}
+                        period={period}
+                        areaName={activeArea?.title}
+                        activeColor={activeColor}
+                    />
                 </div>
             )}
         </div>

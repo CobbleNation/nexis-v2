@@ -99,36 +99,36 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
     const breakdown = metrics ? metrics.breakdown : { focus: 0, goals: 0, spheres: 0, time: 0 };
 
     return (
-        <div className="flex items-center justify-between w-full mt-6">
+        <div className="flex items-center justify-between w-full mt-2 md:mt-6">
             <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-1 md:mb-2">
                     <span className={cn("w-2 h-2 rounded-full animate-pulse", activeColor || "bg-slate-400")} />
-                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">
+                    <span className="text-[11px] md:text-sm font-semibold text-muted-foreground uppercase tracking-widest">
                         {translatedPeriod} · {areaName || "Система"}
                     </span>
                 </div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
                     {areaName ? `Фокус: ${areaName}` : "Огляд Системи"}
                 </h1>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
                 <TooltipProvider delayDuration={0} skipDelayDuration={500}>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div className="flex flex-col items-end cursor-help group relative" id="focus-level-card">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2" id="onboarding-context-score">
-                                        <span className={cn("text-5xl font-extrabold tabular-nums transition-colors duration-300", getScoreColor(score))}>
+                                <div className="flex items-center gap-2 md:gap-3">
+                                    <div className="flex items-center gap-1.5 md:gap-2" id="onboarding-context-score">
+                                        <span className={cn("text-3xl md:text-5xl font-extrabold tabular-nums transition-colors duration-300", getScoreColor(score))}>
                                             {score}
                                         </span>
-                                        <div className="h-10 w-10 rounded-full bg-slate-50 dark:bg-card border border-slate-100 dark:border-border flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors shadow-sm">
-                                            <Activity className="h-5 w-5" />
+                                        <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-slate-50 dark:bg-card border border-slate-100 dark:border-border flex items-center justify-center text-muted-foreground group-hover:text-foreground transition-colors shadow-sm">
+                                            <Activity className="h-4 w-4 md:h-5 md:w-5" />
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Рівень Фокусу</span>
+                                <div className="flex items-center gap-2 mt-1 md:mt-2">
+                                    <span className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-wider">Рівень Фокусу</span>
                                 </div>
                             </div>
                         </TooltipTrigger>
