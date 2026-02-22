@@ -62,7 +62,7 @@ export default function UsersPage() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h1 className="text-3xl font-bold">User Management</h1>
+                <h1 className="text-2xl md:text-3xl font-bold">User Management</h1>
                 <div className="flex items-center gap-4">
                     <input
                         type="text"
@@ -82,7 +82,7 @@ export default function UsersPage() {
                     <CardTitle>All Users</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border border-slate-800">
+                    <div className="rounded-md border border-slate-800 overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-slate-800 hover:bg-slate-800/50">

@@ -99,27 +99,27 @@ function ContentPageContent() {
 
             <Tabs value={currentTab} onValueChange={handleTabChange} className="flex-1 flex flex-col space-y-6">
                 <div className="flex justify-between items-center bg-white/50 dark:bg-card/50 p-2 rounded-2xl border border-slate-100 dark:border-border backdrop-blur-sm">
-                    <TabsList id="content-tabs" className="bg-transparent p-0 gap-2">
-                        <TabsTrigger value="notes" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground">
-                            <FileText className="h-4 w-4" /> Нотатки
+                    <TabsList id="content-tabs" className="bg-transparent p-0 gap-1 md:gap-2 overflow-x-auto no-scrollbar flex-nowrap">
+                        <TabsTrigger value="notes" className="shrink-0 gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-3 md:px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground whitespace-nowrap">
+                            <FileText className="h-4 w-4" /> <span className="hidden sm:inline">Нотатки</span>
                             <span className="bg-slate-100 dark:bg-primary-foreground/20 text-slate-600 dark:text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                 {state.notes.length}
                             </span>
                         </TabsTrigger>
-                        <TabsTrigger value="journal" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground">
-                            <BookOpen className="h-4 w-4" /> Журнал
+                        <TabsTrigger value="journal" className="shrink-0 gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-3 md:px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground whitespace-nowrap">
+                            <BookOpen className="h-4 w-4" /> <span className="hidden sm:inline">Журнал</span>
                             <span className="bg-slate-100 dark:bg-primary-foreground/20 text-slate-600 dark:text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                 {state.journal.length}
                             </span>
                         </TabsTrigger>
-                        <TabsTrigger value="files" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground">
-                            <Folder className="h-4 w-4" /> Файли
+                        <TabsTrigger value="files" className="shrink-0 gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-3 md:px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground whitespace-nowrap">
+                            <Folder className="h-4 w-4" /> <span className="hidden sm:inline">Файли</span>
                             <span className="bg-slate-100 dark:bg-primary-foreground/20 text-slate-600 dark:text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                 {state.files.length}
                             </span>
                         </TabsTrigger>
-                        <TabsTrigger value="library" className="gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground">
-                            <HardDrive className="h-4 w-4" /> Бібліотека
+                        <TabsTrigger value="library" className="shrink-0 gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-primary dark:data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm rounded-xl px-3 md:px-4 py-2 transition-all text-slate-600 dark:text-muted-foreground whitespace-nowrap">
+                            <HardDrive className="h-4 w-4" /> <span className="hidden sm:inline">Бібліотека</span>
                             <span className="bg-slate-100 dark:bg-primary-foreground/20 text-slate-600 dark:text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
                                 {state.library.length}
                             </span>

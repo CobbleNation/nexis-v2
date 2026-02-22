@@ -95,7 +95,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Core Metrics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <Card className="border-none shadow-sm bg-card">
                     <CardContent className="p-5 flex items-center gap-4">
                         <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"><Activity className="w-5 h-5" /></div>

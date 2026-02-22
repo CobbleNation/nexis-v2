@@ -119,23 +119,23 @@ export default function SettingsPage() {
             <Tabs defaultValue="profile" className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-6">
                     <aside className="w-full md:w-64 shrink-0">
-                        <TabsList className="flex flex-col h-auto bg-transparent space-y-2 p-0 justify-start w-full">
-                            <TabsTrigger value="profile" className="w-full justify-start px-4 py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted">
-                                <User className="mr-3 h-4 w-4" /> Профіль
+                        <TabsList className="flex md:flex-col h-auto bg-transparent md:space-y-2 p-0 md:justify-start w-full overflow-x-auto no-scrollbar gap-1 md:gap-0">
+                            <TabsTrigger value="profile" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted text-sm">
+                                <User className="mr-2 md:mr-3 h-4 w-4" /> Профіль
                             </TabsTrigger>
-                            <TabsTrigger value="appearance" className="w-full justify-start px-4 py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted">
-                                <Palette className="mr-3 h-4 w-4" /> Вигляд
+                            <TabsTrigger value="appearance" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted text-sm">
+                                <Palette className="mr-2 md:mr-3 h-4 w-4" /> Вигляд
                             </TabsTrigger>
-                            <TabsTrigger value="notifications" className="w-full justify-start px-4 py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted">
-                                <Bell className="mr-3 h-4 w-4" /> Сповіщення
+                            <TabsTrigger value="notifications" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted text-sm whitespace-nowrap">
+                                <Bell className="mr-2 md:mr-3 h-4 w-4" /> Сповіщення
                             </TabsTrigger>
-                            <TabsTrigger value="subscription" className="w-full justify-start px-4 py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted">
-                                <CreditCard className="mr-3 h-4 w-4" /> Підписка
+                            <TabsTrigger value="subscription" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted text-sm whitespace-nowrap">
+                                <CreditCard className="mr-2 md:mr-3 h-4 w-4" /> Підписка
                             </TabsTrigger>
-                            <TabsTrigger value="data" className="w-full justify-start px-4 py-3 data-[state=active]:bg-rose-50 dark:data-[state=active]:bg-rose-950/20 data-[state=active]:text-rose-700 dark:data-[state=active]:text-rose-400 !shadow-none rounded-xl font-bold transition-all text-destructive/70 hover:text-destructive hover:bg-rose-50/50">
-                                <Trash2 className="mr-3 h-4 w-4" /> Дані та Акаунт
+                            <TabsTrigger value="data" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-rose-50 dark:data-[state=active]:bg-rose-950/20 data-[state=active]:text-rose-700 dark:data-[state=active]:text-rose-400 !shadow-none rounded-xl font-bold transition-all text-destructive/70 hover:text-destructive hover:bg-rose-50/50 text-sm whitespace-nowrap">
+                                <Trash2 className="mr-2 md:mr-3 h-4 w-4" /> Дані
                             </TabsTrigger>
-                            <div className="pt-4 mt-4 border-t border-border w-full">
+                            <div className="hidden md:block pt-4 mt-4 border-t border-border w-full">
                                 <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={() => logout()}>
                                     <LogOut className="mr-3 h-4 w-4" /> Вийти
                                 </Button>
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                                 <CardContent className="space-y-6">
                                     <div className="space-y-4">
                                         <Label>Тема інтерфейсу</Label>
-                                        <div className="grid grid-cols-3 gap-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                                             <button
                                                 onClick={() => setTheme('light')}
                                                 className={cn(
