@@ -127,7 +127,7 @@ export function NotificationsPopover() {
 
             {/* Mobile: Fullscreen overlay */}
             {isOpen && (
-                <div className="md:hidden fixed inset-0 z-[100] bg-background flex flex-col animate-in fade-in duration-150">
+                <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col animate-in fade-in duration-150">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                         <div className="flex items-center gap-2">
