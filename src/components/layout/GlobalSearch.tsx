@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Search, X, CheckSquare, Target, Folder, FileText, LayoutGrid, ArrowRight, Clock, Hash, ArrowLeft } from 'lucide-react';
 import { useData } from "@/lib/store";
@@ -123,125 +124,127 @@ export function GlobalSearch() {
     if (isOpen) {
         return (
             <>
-                {/* Mobile: fullscreen overlay */}
-                <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col animate-in fade-in duration-150">
-                    {/* Mobile search header */}
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
-                        <button onClick={handleClose} className="p-1.5 -ml-1 rounded-full text-muted-foreground hover:text-foreground transition-colors">
-                            <ArrowLeft className="h-5 w-5" />
-                        </button>
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                ref={inputRef}
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                autoFocus
-                                placeholder="Пошук..."
-                                className="h-10 pl-9 border-none bg-muted/50 shadow-none rounded-xl focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 text-base"
-                            />
-                        </div>
-                        {query && (
-                            <button onClick={() => setQuery('')} className="p-1.5 rounded-full text-muted-foreground hover:text-foreground transition-colors">
-                                <X className="h-4 w-4" />
+                {/* Mobile: fullscreen overlay via portal */}
+                {typeof document !== 'undefined' && createPortal(
+                    <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col animate-in fade-in duration-150">
+                        {/* Mobile search header */}
+                        <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
+                            <button onClick={handleClose} className="p-1.5 -ml-1 rounded-full text-muted-foreground hover:text-foreground transition-colors">
+                                <ArrowLeft className="h-5 w-5" />
                             </button>
-                        )}
-                    </div>
-
-                    {/* Categories */}
-                    <div className="flex items-center gap-1 px-4 py-2 border-b border-border/40 overflow-x-auto no-scrollbar">
-                        {categories.map((cat) => {
-                            const Icon = cat.icon;
-                            const isActive = category === cat.id;
-                            return (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setCategory(cat.id)}
-                                    className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap",
-                                        isActive
-                                            ? "bg-primary/10 text-primary"
-                                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                                    )}
-                                >
-                                    <Icon className="h-3.5 w-3.5" />
-                                    {cat.label}
+                            <div className="flex-1 relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    ref={inputRef}
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    autoFocus
+                                    placeholder="Пошук..."
+                                    className="h-10 pl-9 border-none bg-muted/50 shadow-none rounded-xl focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 text-base"
+                                />
+                            </div>
+                            {query && (
+                                <button onClick={() => setQuery('')} className="p-1.5 rounded-full text-muted-foreground hover:text-foreground transition-colors">
+                                    <X className="h-4 w-4" />
                                 </button>
-                            );
-                        })}
-                    </div>
-
-                    {/* Results - fill remaining space */}
-                    <div className="flex-1 overflow-y-auto">
-                        <div className="p-3 space-y-1">
-                            {results.length === 0 ? (
-                                <div className="py-20 text-center text-muted-foreground">
-                                    {query ? (
-                                        <>
-                                            <p className="font-medium text-foreground">Нічого не знайдено</p>
-                                            <p className="text-sm mt-1">Спробуйте змінити запит або категорію</p>
-                                        </>
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 opacity-60">
-                                            <Search className="h-8 w-8" />
-                                            <p className="text-sm">Введіть запит для пошуку...</p>
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                results.map((result, idx) => (
-                                    <div
-                                        key={`${result.type}-${result.data.id}-${idx}`}
-                                        onClick={() => handleSelect(result)}
-                                        className="flex items-center gap-3 p-3 rounded-xl active:bg-muted/50 cursor-pointer transition-colors"
-                                    >
-                                        <div className={cn(
-                                            "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 border border-border/50 shadow-sm",
-                                            result.type === 'task' && "bg-blue-500/10 text-blue-500",
-                                            result.type === 'goal' && "bg-purple-500/10 text-purple-500",
-                                            result.type === 'project' && "bg-orange-500/10 text-orange-500",
-                                            result.type === 'note' && "bg-emerald-500/10 text-emerald-500",
-                                            result.type === 'area' && "bg-slate-500/10 text-slate-500",
-                                        )}>
-                                            {result.type === 'task' && <CheckSquare className="h-5 w-5" />}
-                                            {result.type === 'goal' && <Target className="h-5 w-5" />}
-                                            {result.type === 'project' && <Folder className="h-5 w-5" />}
-                                            {result.type === 'note' && <FileText className="h-5 w-5" />}
-                                            {result.type === 'area' && <Hash className="h-5 w-5" />}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <span className="font-medium text-foreground truncate block">{result.data.title}</span>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                                <Badge variant="outline" className="h-4 px-1 rounded-[4px] text-[9px] uppercase tracking-wider font-semibold border-border/40 bg-background/50">
-                                                    {result.type === 'task' ? 'Завдання' :
-                                                        result.type === 'goal' ? 'Ціль' :
-                                                            result.type === 'project' ? 'Проект' :
-                                                                result.type === 'note' ? 'Нотатка' : 'Сфера'}
-                                                </Badge>
-                                                {result.data.date && (
-                                                    <span className="flex items-center gap-1">
-                                                        <Clock className="h-3 w-3" />
-                                                        {new Date(result.data.date).toLocaleDateString()}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
-                                    </div>
-                                ))
                             )}
                         </div>
-                    </div>
 
-                    {/* Footer */}
-                    {results.length > 0 && (
-                        <div className="bg-muted/30 p-2 text-center border-t border-border/50">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">
-                                {results.length} результатів
-                            </span>
+                        {/* Categories */}
+                        <div className="flex items-center gap-1 px-4 py-2 border-b border-border/40 overflow-x-auto no-scrollbar">
+                            {categories.map((cat) => {
+                                const Icon = cat.icon;
+                                const isActive = category === cat.id;
+                                return (
+                                    <button
+                                        key={cat.id}
+                                        onClick={() => setCategory(cat.id)}
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap",
+                                            isActive
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        )}
+                                    >
+                                        <Icon className="h-3.5 w-3.5" />
+                                        {cat.label}
+                                    </button>
+                                );
+                            })}
                         </div>
-                    )}
-                </div>
+
+                        {/* Results - fill remaining space */}
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="p-3 space-y-1">
+                                {results.length === 0 ? (
+                                    <div className="py-20 text-center text-muted-foreground">
+                                        {query ? (
+                                            <>
+                                                <p className="font-medium text-foreground">Нічого не знайдено</p>
+                                                <p className="text-sm mt-1">Спробуйте змінити запит або категорію</p>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 opacity-60">
+                                                <Search className="h-8 w-8" />
+                                                <p className="text-sm">Введіть запит для пошуку...</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    results.map((result, idx) => (
+                                        <div
+                                            key={`${result.type}-${result.data.id}-${idx}`}
+                                            onClick={() => handleSelect(result)}
+                                            className="flex items-center gap-3 p-3 rounded-xl active:bg-muted/50 cursor-pointer transition-colors"
+                                        >
+                                            <div className={cn(
+                                                "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 border border-border/50 shadow-sm",
+                                                result.type === 'task' && "bg-blue-500/10 text-blue-500",
+                                                result.type === 'goal' && "bg-purple-500/10 text-purple-500",
+                                                result.type === 'project' && "bg-orange-500/10 text-orange-500",
+                                                result.type === 'note' && "bg-emerald-500/10 text-emerald-500",
+                                                result.type === 'area' && "bg-slate-500/10 text-slate-500",
+                                            )}>
+                                                {result.type === 'task' && <CheckSquare className="h-5 w-5" />}
+                                                {result.type === 'goal' && <Target className="h-5 w-5" />}
+                                                {result.type === 'project' && <Folder className="h-5 w-5" />}
+                                                {result.type === 'note' && <FileText className="h-5 w-5" />}
+                                                {result.type === 'area' && <Hash className="h-5 w-5" />}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <span className="font-medium text-foreground truncate block">{result.data.title}</span>
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                                    <Badge variant="outline" className="h-4 px-1 rounded-[4px] text-[9px] uppercase tracking-wider font-semibold border-border/40 bg-background/50">
+                                                        {result.type === 'task' ? 'Завдання' :
+                                                            result.type === 'goal' ? 'Ціль' :
+                                                                result.type === 'project' ? 'Проект' :
+                                                                    result.type === 'note' ? 'Нотатка' : 'Сфера'}
+                                                    </Badge>
+                                                    {result.data.date && (
+                                                        <span className="flex items-center gap-1">
+                                                            <Clock className="h-3 w-3" />
+                                                            {new Date(result.data.date).toLocaleDateString()}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <ArrowRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        {results.length > 0 && (
+                            <div className="bg-muted/30 p-2 text-center border-t border-border/50">
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">
+                                    {results.length} результатів
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                    , document.body)}
 
                 {/* Desktop: keep the original inline search */}
                 <div ref={containerRef} className="relative flex-1 max-w-2xl mx-2 md:mx-12 hidden md:block">

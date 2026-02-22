@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import {
     Popover,
@@ -126,7 +127,7 @@ export function NotificationsPopover() {
             </Button>
 
             {/* Mobile: Fullscreen overlay */}
-            {isOpen && (
+            {isOpen && typeof document !== 'undefined' && createPortal(
                 <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col animate-in fade-in duration-150">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
@@ -161,7 +162,7 @@ export function NotificationsPopover() {
                         {notificationsList}
                     </div>
                 </div>
-            )}
+                , document.body)}
 
             {/* Desktop: Popover */}
             <Popover open={isOpen} onOpenChange={setIsOpen}>
