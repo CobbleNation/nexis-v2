@@ -44,10 +44,10 @@ export function Header() {
                     <NotificationsPopover />
 
                     {/* Profile */}
-                    <Link href="/settings" className="flex items-center gap-3 px-3 py-1.5 rounded-full border border-border/60 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm">
-                        <Avatar className="h-8 w-8 border-2 border-white dark:border-slate-700 shadow-sm">
+                    <Link href="/settings" className="flex items-center gap-3 md:px-3 md:py-1.5 rounded-full md:border md:border-border/60 md:bg-white/50 md:dark:bg-slate-800/50 md:hover:bg-white md:dark:hover:bg-slate-800 transition-all md:shadow-sm">
+                        <Avatar className="h-9 w-9 md:h-8 md:w-8 border-2 border-primary/30 shadow-md ring-2 ring-primary/10 md:ring-0 md:border-white md:dark:border-slate-700">
                             <AvatarImage src={user?.avatar} />
-                            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-[10px]">
+                            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs md:text-[10px]">
                                 {user?.name?.substring(0, 2).toUpperCase() || 'TM'}
                             </AvatarFallback>
                         </Avatar>
