@@ -22,14 +22,11 @@ export function NotificationsPopover() {
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
-    // Lock body scroll on mobile when open
+    // Lock body scroll on mobile when open (iOS Safari compatible)
     React.useEffect(() => {
         if (isOpen) {
-            const isMobile = window.innerWidth < 768;
-            if (isMobile) {
-                document.body.style.overflow = 'hidden';
-                return () => { document.body.style.overflow = ''; };
-            }
+            document.body.style.overflow = 'hidden';
+            return () => { document.body.style.overflow = ''; };
         }
     }, [isOpen]);
 
@@ -128,7 +125,7 @@ export function NotificationsPopover() {
 
             {/* Mobile: Fullscreen overlay */}
             {isOpen && typeof document !== 'undefined' && createPortal(
-                <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col animate-in fade-in duration-150">
+                <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150">
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                         <div className="flex items-center gap-2">
@@ -158,7 +155,7 @@ export function NotificationsPopover() {
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
                         {notificationsList}
                     </div>
                 </div>

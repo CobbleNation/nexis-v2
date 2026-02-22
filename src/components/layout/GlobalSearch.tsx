@@ -21,7 +21,7 @@ export function GlobalSearch() {
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Lock body scroll when search is open
+    // Lock body scroll when search is open (iOS Safari compatible)
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -123,7 +123,7 @@ export function GlobalSearch() {
             <>
                 {/* Mobile: fullscreen overlay via portal */}
                 {typeof document !== 'undefined' && createPortal(
-                    <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col overflow-hidden animate-in fade-in duration-150">
+                    <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150">
                         {/* Mobile search header */}
                         <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
                             <button onClick={handleClose} className="p-1.5 -ml-1 rounded-full text-muted-foreground hover:text-foreground transition-colors">
@@ -148,7 +148,7 @@ export function GlobalSearch() {
                         </div>
 
                         {/* Categories */}
-                        <div className="flex items-center gap-1 px-4 py-2 border-b border-border/40 overflow-x-auto no-scrollbar">
+                        <div className="flex items-center gap-1 px-4 py-2 border-b border-border/40 overflow-x-auto no-scrollbar overscroll-contain touch-pan-x">
                             {categories.map((cat) => {
                                 const Icon = cat.icon;
                                 const isActive = category === cat.id;
@@ -171,7 +171,7 @@ export function GlobalSearch() {
                         </div>
 
                         {/* Results - fill remaining space */}
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
                             <div className="p-3 space-y-1">
                                 {results.length === 0 ? (
                                     <div className="py-20 text-center text-muted-foreground">
