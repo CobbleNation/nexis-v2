@@ -21,14 +21,11 @@ export function GlobalSearch() {
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // Lock body scroll on mobile when search is open
+    // Lock body scroll when search is open
     useEffect(() => {
         if (isOpen) {
-            const isMobile = window.innerWidth < 768;
-            if (isMobile) {
-                document.body.style.overflow = 'hidden';
-                return () => { document.body.style.overflow = ''; };
-            }
+            document.body.style.overflow = 'hidden';
+            return () => { document.body.style.overflow = ''; };
         }
     }, [isOpen]);
 
@@ -126,7 +123,7 @@ export function GlobalSearch() {
             <>
                 {/* Mobile: fullscreen overlay via portal */}
                 {typeof document !== 'undefined' && createPortal(
-                    <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col animate-in fade-in duration-150">
+                    <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col overflow-hidden animate-in fade-in duration-150">
                         {/* Mobile search header */}
                         <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
                             <button onClick={handleClose} className="p-1.5 -ml-1 rounded-full text-muted-foreground hover:text-foreground transition-colors">
