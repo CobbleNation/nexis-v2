@@ -769,7 +769,6 @@ export function QuickAddModal({
                                     </div>
                                     <Input
                                         id={type === 'content' ? 'note-title-input' : 'onboarding-task-title'}
-                                        autoFocus
                                         value={title}
                                         onChange={(e) => {
                                             setTitle(e.target.value);

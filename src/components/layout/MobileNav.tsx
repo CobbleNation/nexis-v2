@@ -7,10 +7,12 @@ import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SidebarContent } from '@/components/layout/Sidebar';
 import { useState } from 'react';
+import { QuickAddModal } from '@/components/features/QuickAddModal';
 
 export function MobileNav() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
 
     const MOBILE_ITEMS = [
         { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
@@ -48,7 +50,7 @@ export function MobileNav() {
             </Link>
 
             <button
-                onClick={() => window.dispatchEvent(new CustomEvent('zynorvia:open-quick-add'))}
+                onClick={() => setShowQuickAdd(true)}
                 className="flex flex-col items-center justify-center -mt-6 p-1 relative z-10"
             >
                 <div className="h-14 w-14 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-full shadow-lg shadow-orange-500/30 flex items-center justify-center text-white active:scale-95 transition-transform">
@@ -83,6 +85,8 @@ export function MobileNav() {
                     <SidebarContent onNavigate={() => setOpen(false)} />
                 </SheetContent>
             </Sheet>
+
+            <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
         </div>
     );
 }
