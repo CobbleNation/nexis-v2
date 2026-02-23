@@ -23,9 +23,31 @@ export function GlobalSearch() {
 
     // Lock body scroll on mobile when open (iOS Safari compatible)
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && window.innerWidth < 768) { // Only apply to mobile
+            const originalStyle = window.getComputedStyle(document.body).overflow;
+            const originalPosition = window.getComputedStyle(document.body).position;
+            const originalWidth = window.getComputedStyle(document.body).width;
+            const scrollY = window.scrollY;
+
+            // Apply strict locking for iOS Safari
             document.body.style.overflow = 'hidden';
-            return () => { document.body.style.overflow = ''; };
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+
+            // Also lock HTML on iOS to prevent bounce
+            document.documentElement.style.overflow = 'hidden';
+
+            return () => {
+                document.body.style.overflow = originalStyle;
+                document.body.style.position = originalPosition;
+                document.body.style.top = '';
+                document.body.style.width = originalWidth;
+
+                document.documentElement.style.overflow = '';
+
+                window.scrollTo(0, scrollY);
+            };
         }
     }, [isOpen]);
 
@@ -123,9 +145,9 @@ export function GlobalSearch() {
             <>
                 {/* Mobile: fullscreen overlay using createPortal to match NotificationsPopover scroll lock */}
                 {typeof document !== 'undefined' && createPortal(
-                    <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150 outline-none">
-                        {/* Mobile search header */}
-                        <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
+                    <div className="md:hidden fixed inset-0 z-[9999] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150 outline-none select-none">
+                        {/* Mobile search header - touch-none to prevent bounce when interacting with input area */}
+                        <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 shrink-0 touch-none">
                             <button onClick={handleClose} className="p-1.5 -ml-1 rounded-full text-muted-foreground hover:text-foreground transition-colors">
                                 <ArrowLeft className="h-5 w-5" />
                             </button>
@@ -148,7 +170,7 @@ export function GlobalSearch() {
                         </div>
 
                         {/* Categories */}
-                        <div className="flex items-center gap-1 px-4 py-2 border-b border-border/40 overflow-x-auto no-scrollbar overscroll-contain touch-pan-x">
+                        <div className="flex items-center gap-1 px-4 py-2 border-b border-border/40 overflow-x-auto no-scrollbar overscroll-x-contain touch-pan-x shrink-0">
                             {categories.map((cat) => {
                                 const Icon = cat.icon;
                                 const isActive = category === cat.id;
@@ -171,7 +193,7 @@ export function GlobalSearch() {
                         </div>
 
                         {/* Results - fill remaining space */}
-                        <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
+                        <div className="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y">
                             <div className="p-3 space-y-1">
                                 {results.length === 0 ? (
                                     <div className="py-20 text-center text-muted-foreground">
