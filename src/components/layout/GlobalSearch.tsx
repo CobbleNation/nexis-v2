@@ -192,9 +192,9 @@ export function GlobalSearch() {
                             })}
                         </div>
 
-                        {/* Results - fill remaining space */}
-                        <div className="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y">
-                            <div className="p-3 space-y-1">
+                        {/* Results - fill remaining space but only scroll if necessary */}
+                        <div className="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y min-h-0">
+                            <div className="p-3 space-y-1 h-fit">
                                 {results.length === 0 ? (
                                     <div className="py-20 text-center text-muted-foreground">
                                         {query ? (
@@ -254,9 +254,9 @@ export function GlobalSearch() {
                             </div>
                         </div>
 
-                        {/* Footer */}
+                        {/* Footer - stick to bottom only if needed */}
                         {results.length > 0 && (
-                            <div className="bg-muted/30 p-2 text-center border-t border-border/50">
+                            <div className="bg-muted/30 p-2 text-center border-t border-border/50 shrink-0">
                                 <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-widest">
                                     {results.length} результатів
                                 </span>
