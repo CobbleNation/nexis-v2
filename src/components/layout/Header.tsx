@@ -9,6 +9,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationsPopover } from '@/components/layout/NotificationsPopover';
 import { useAuth } from '@/lib/auth-context';
 import { useFilteredData, useData } from '@/lib/store';
+import { QuickAddModal } from '@/components/features/QuickAddModal';
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 
 import { ContextState } from '@/components/overview/ContextState';
 import { calculateFocusLevel } from '@/lib/metrics';
@@ -17,6 +20,7 @@ import { useMemo } from 'react';
 import { GlobalSearch } from '@/components/layout/GlobalSearch';
 
 export function Header() {
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
     const pathname = usePathname();
     const { user } = useAuth();
     const { state } = useData();
@@ -39,7 +43,16 @@ export function Header() {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3">
-                    {/* Add Button Removed (Moved to Sidebar) */}
+                    {/* Mobile Quick Add Button */}
+                    <div className="md:hidden">
+                        <Button
+                            size="icon"
+                            className="h-10 w-10 rounded-full shadow-sm bg-primary text-primary-foreground hover:bg-primary/90"
+                            onClick={() => setShowQuickAdd(true)}
+                        >
+                            <Plus className="h-5 w-5" />
+                        </Button>
+                    </div>
 
                     <NotificationsPopover />
 
@@ -75,6 +88,8 @@ export function Header() {
                     />
                 </div>
             )}
+
+            <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
         </div>
     );
 }

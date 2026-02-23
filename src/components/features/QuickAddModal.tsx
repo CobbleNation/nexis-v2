@@ -1,7 +1,7 @@
 import { useOnboarding } from "@/components/onboarding/OnboardingProvider";
 import * as React from "react"
 import { useState } from "react"
-import { CheckSquare, Calendar, FileText, Target, Hash, BarChart3, Repeat, Clock, Plus, Trash2, AlertCircle, List, Folder, BookOpen, HardDrive, Paperclip, Link as LinkIcon, Video, Layout, Zap } from "lucide-react"
+import { CheckSquare, Calendar, FileText, Target, Hash, BarChart3, Repeat, Clock, Plus, Trash2, AlertCircle, List, Folder, BookOpen, HardDrive, Paperclip, Link as LinkIcon, Video, Layout, Zap, X } from "lucide-react"
 import {
     Dialog,
     DialogContent,
@@ -700,8 +700,16 @@ export function QuickAddModal({
     return (
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="w-[95%] sm:max-w-2xl h-[90vh] sm:h-[600px] p-0 gap-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-card rounded-xl sm:rounded-xl ring-1 ring-slate-900/5 dark:ring-border/20 transition-all duration-200 flex flex-col">
+                <DialogContent className="fixed left-[50%] top-[50%] z-[9999] translate-x-[-50%] translate-y-[-50%] w-[95%] sm:max-w-2xl max-h-[90dvh] sm:h-[600px] p-0 gap-0 overflow-hidden border-none shadow-2xl bg-white dark:bg-card rounded-xl sm:rounded-xl ring-1 ring-slate-900/5 dark:ring-border/20 transition-all duration-200 flex flex-col">
                     <DialogTitle className="sr-only">Quick Add Menu</DialogTitle>
+
+                    {/* Explicit Close Button for Mobile */}
+                    <button
+                        onClick={() => onOpenChange(false)}
+                        className="absolute right-2 top-2 z-50 rounded-full p-2 bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 transition-colors sm:hidden"
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
 
                     {/* Header (Entity Selector) */}
                     <div className="bg-slate-50/80 dark:bg-card/50 border-b border-slate-100 dark:border-border p-2 flex overflow-x-auto gap-1 shrink-0 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
@@ -749,10 +757,10 @@ export function QuickAddModal({
                     )}
 
                     {/* Main Content Area - Grid Layout */}
-                    <div className="flex-1 overflow-y-auto sm:overflow-hidden flex flex-col sm:grid sm:grid-cols-[1fr_240px] divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-border bg-white dark:bg-card text-foreground">
+                    <div className="flex-1 overflow-y-auto sm:overflow-hidden flex flex-col sm:grid sm:grid-cols-[1fr_240px] divide-y sm:divide-y-0 sm:divide-x divide-slate-100 dark:divide-border bg-white dark:bg-card text-foreground overscroll-contain touch-pan-y">
 
                         {/* Left Column: Core Content */}
-                        <div className="flex flex-col h-auto sm:h-full sm:overflow-y-auto p-5">
+                        <div className="flex flex-col h-auto sm:h-full sm:overflow-y-auto p-4 sm:p-5 relative pb-20 sm:pb-5">
                             {/* Title Input - Hide for Journal? No, keep it consistent or use it as summary */}
                             {!(type === 'content' && contentType === 'journal') && (
                                 <div className="flex items-start gap-3 mb-4">
@@ -786,7 +794,7 @@ export function QuickAddModal({
 
 
                             {/* Dynamic Middle Section */}
-                            <div className="space-y-4 flex-1">
+                            <div className="space-y-4 flex-1 pb-4">
                                 {type === 'metric' ? (
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1">
