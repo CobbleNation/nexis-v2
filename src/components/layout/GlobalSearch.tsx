@@ -21,7 +21,13 @@ export function GlobalSearch() {
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // No manual body scroll lock needed, Radix Dialog handles it natively
+    // Lock body scroll on mobile when open (iOS Safari compatible)
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            return () => { document.body.style.overflow = ''; };
+        }
+    }, [isOpen]);
 
     // Close on click outside (desktop only)
     useEffect(() => {
@@ -120,7 +126,7 @@ export function GlobalSearch() {
                     <DialogPrimitive.Root open={isOpen} onOpenChange={setIsOpen}>
                         <DialogPrimitive.Portal>
                             <DialogPrimitive.Content
-                                className="fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden animate-in fade-in duration-150 outline-none"
+                                className="fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150 outline-none"
                             >
                                 <DialogPrimitive.Title className="sr-only">Пошук</DialogPrimitive.Title>
                                 {/* Mobile search header */}
