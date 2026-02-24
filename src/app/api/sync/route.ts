@@ -298,8 +298,8 @@ export async function POST(req: Request) {
             const linkedGoals = await db.select().from(goals).where(and(eq(goals.userId, userId), eq(goals.targetMetricId, entryData.metricId)));
 
             for (const goal of linkedGoals) {
-                const start = goal.metricStartValue ?? 0;
-                const target = goal.metricTargetValue ?? 100;
+                const start = goal.metricStartValue || 0;
+                const target = goal.metricTargetValue || 100;
                 const current = entryData.value;
 
                 // Recalculate Progress

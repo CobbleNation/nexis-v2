@@ -179,8 +179,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
             const validGoals = (action.payload.goals || []).map(goal => {
                 if (goal.targetMetricId && metricMap.has(goal.targetMetricId)) {
                     const current = metricMap.get(goal.targetMetricId)!;
-                    const start = goal.metricStartValue ?? 0;
-                    const target = goal.metricTargetValue ?? 100;
+                    const start = goal.metricStartValue || 0;
+                    const target = goal.metricTargetValue || 100;
 
                     let progress = goal.progress || 0;
                     const total = Math.abs(target - start);
@@ -345,8 +345,8 @@ function appReducer(state: AppState, action: AppAction): AppState {
             // 1. Update Goals tracking this metric
             const updatedGoals = state.goals.map(goal => {
                 if (goal.targetMetricId === newEntry.metricId) {
-                    const start = goal.metricStartValue ?? 0;
-                    const target = goal.metricTargetValue ?? 100;
+                    const start = goal.metricStartValue || 0;
+                    const target = goal.metricTargetValue || 100;
                     const current = newEntry.value;
 
                     // Recalculate Progress
