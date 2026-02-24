@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { GoalDetailsModal } from '@/components/goals/GoalDetailsModal';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { Goal } from '@/types';
 import { useState } from 'react';
@@ -28,15 +27,10 @@ function GoalsContent() {
     const partialGoals = filteredGoals.filter(g => g.status === 'not_achieved');
     const stoppedGoals = filteredGoals.filter(g => g.status === 'paused' || g.status === 'abandoned');
 
-    const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
-
-
     const openDetails = (goal: Goal) => {
-        setSelectedGoal(goal);
-        setIsDetailsOpen(true);
+        router.push(`/goals/${goal.id}`);
     };
 
     return (
@@ -128,12 +122,6 @@ function GoalsContent() {
 
 
             </Tabs>
-
-            <GoalDetailsModal
-                goal={selectedGoal}
-                open={isDetailsOpen}
-                onOpenChange={setIsDetailsOpen}
-            />
 
             <QuickAddModal
                 open={showCreateModal}

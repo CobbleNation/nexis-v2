@@ -145,7 +145,7 @@ const INITIAL_STATE: AppState = {
 // --- Reducer ---
 function appReducer(state: AppState, action: AppAction): AppState {
     switch (action.type) {
-        case 'INIT_DATA':
+        case 'INIT_DATA': {
             // Data sanitization: Ensure valid dates for Journal
             const sanitizedJournal = action.payload.journal?.map((j: any) => ({
                 ...j,
@@ -154,12 +154,22 @@ function appReducer(state: AppState, action: AppAction): AppState {
                     : (typeof j.date === 'string' ? j.date.split('T')[0] : j.date)
             })) || [];
 
+            // Notifications retention (30 days)
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            const validNotifications = action.payload.notifications?.filter(n => {
+                const date = new Date(n.date);
+                return date >= thirtyDaysAgo;
+            }) || [];
+
             return {
                 ...state,
                 ...action.payload,
                 journal: sanitizedJournal,
+                notifications: validNotifications,
                 isLoading: false
             };
+        }
         case 'ADD_ACTION':
             return { ...state, actions: [action.payload, ...state.actions] };
         case 'UPDATE_ACTION':
@@ -352,7 +362,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
             }
             return { ...state, notifications: state.notifications.map(n => action.payload.ids.includes(n.id) ? { ...n, read: true } : n) };
         case 'CLEAR_NOTIFICATIONS':
-            return { ...state, notifications: [] };
+            return state; // No longer user-clearable, cleared 30 days automatically
         case 'UPDATE_SETTINGS':
             return {
                 ...state,

@@ -28,24 +28,25 @@ import {
 import { Goal, Action } from "@/types";
 import { calculateGoalProgress, ComputedGoalStatus } from "@/lib/goal-utils";
 
+import Link from 'next/link';
+
 interface GoalCardProps {
     goal: Goal;
     linkedActions?: Action[];
     onEdit?: (goal: Goal) => void;
     onDelete?: (goalId: string) => void;
+    href?: string;
 }
 
-export function GoalCard({ goal, linkedActions = [], onEdit, onDelete }: GoalCardProps) {
+export function GoalCard({ goal, linkedActions = [], onEdit, onDelete, href }: GoalCardProps) {
     // Calculate honest progress
-    // Note: We use the cached metricCurrentValue from the goal object itself
-    // In a real app, this might come from a separate store or query if real-time is needed
     const statusData: ComputedGoalStatus = React.useMemo(() => {
         return calculateGoalProgress(goal, goal.metricCurrentValue, linkedActions);
     }, [goal, linkedActions]);
 
     const { type } = goal;
 
-    return (
+    const cardContent = (
         <Card className={cn(
             "group relative transition-all duration-200 hover:shadow-md border-border/50",
             type === 'vision' ? "bg-gradient-to-br from-primary/5 to-transparent border-primary/20" : "bg-card"
@@ -149,6 +150,12 @@ export function GoalCard({ goal, linkedActions = [], onEdit, onDelete }: GoalCar
             </CardContent>
         </Card>
     );
+
+    if (href) {
+        return <Link href={href} className="block">{cardContent}</Link>;
+    }
+
+    return <Link href={`/goals/${goal.id}`} className="block">{cardContent}</Link>;
 }
 
 // --- Sub-components ---

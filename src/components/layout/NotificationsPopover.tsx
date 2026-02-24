@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -8,12 +8,13 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { Bell, Check, Trash2, X, Info, CheckCircle, AlertTriangle, AlertOctagon, ArrowLeft } from 'lucide-react';
+import { Bell, Check, X, Info, CheckCircle, AlertTriangle, AlertOctagon, ArrowLeft } from 'lucide-react';
 import { useData } from "@/lib/store";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, isToday, isYesterday, format } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { Notification } from '@/types';
 
 export function NotificationsPopover() {
     const { state, dispatch } = useData();
@@ -34,10 +35,6 @@ export function NotificationsPopover() {
         dispatch({ type: 'MARK_NOTIFICATIONS_READ', payload: { ids: [] } });
     };
 
-    const handleClearAll = () => {
-        dispatch({ type: 'CLEAR_NOTIFICATIONS', payload: undefined });
-    };
-
     const handleMarkRead = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         dispatch({ type: 'MARK_NOTIFICATIONS_READ', payload: { ids: [id] } });
@@ -52,6 +49,34 @@ export function NotificationsPopover() {
         }
     };
 
+    // Group notifications by date
+    const groupedNotifications = useMemo(() => {
+        const groups: { [key: string]: Notification[] } = {};
+
+        // Sort notifications from newest to oldest first
+        const sorted = [...notifications].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        sorted.forEach(notification => {
+            const date = new Date(notification.date);
+            let groupLabel = '';
+
+            if (isToday(date)) {
+                groupLabel = `Сьогодні, ${format(date, 'd MMMM', { locale: uk })}`;
+            } else if (isYesterday(date)) {
+                groupLabel = `Вчора, ${format(date, 'd MMMM', { locale: uk })}`;
+            } else {
+                groupLabel = format(date, 'd MMMM yyyy', { locale: uk });
+            }
+
+            if (!groups[groupLabel]) {
+                groups[groupLabel] = [];
+            }
+            groups[groupLabel].push(notification);
+        });
+
+        return groups;
+    }, [notifications]);
+
     const notificationsList = (
         <>
             {notifications.length === 0 ? (
@@ -64,43 +89,54 @@ export function NotificationsPopover() {
                 </div>
             ) : (
                 <div className="flex flex-col">
-                    {notifications.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((notification) => (
-                        <div
-                            key={notification.id}
-                            className={cn(
-                                "flex gap-3 p-4 border-b border-border/40 hover:bg-muted/30 transition-colors relative group",
-                                !notification.read && "bg-primary/5 hover:bg-primary/10"
-                            )}
-                        >
-                            <div className={cn("mt-1 p-1.5 rounded-full bg-background border shadow-sm h-fit",
-                                !notification.read && "border-primary/20"
-                            )}>
-                                {getIcon(notification.type)}
+                    {Object.entries(groupedNotifications).map(([groupLabel, groupNotifs]) => (
+                        <div key={groupLabel} className="mb-2">
+                            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur py-2 px-4 border-y border-border/50 first:border-t-0 shadow-sm">
+                                <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                                    {groupLabel}
+                                </h5>
                             </div>
-                            <div className="flex-1 space-y-1">
-                                <div className="flex justify-between items-start gap-2">
-                                    <p className={cn("text-sm font-medium leading-none", !notification.read && "text-primary dark:text-orange-400")}>
-                                        {notification.title}
-                                    </p>
-                                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                        {formatDistanceToNow(new Date(notification.date), { addSuffix: true, locale: uk })}
-                                    </span>
-                                </div>
-                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                    {notification.message}
-                                </p>
+                            <div className="flex flex-col">
+                                {groupNotifs.map((notification) => (
+                                    <div
+                                        key={notification.id}
+                                        className={cn(
+                                            "flex gap-3 p-4 border-b border-border/40 hover:bg-muted/30 transition-colors relative group",
+                                            !notification.read && "bg-primary/5 hover:bg-primary/10"
+                                        )}
+                                    >
+                                        <div className={cn("mt-1 p-1.5 rounded-full bg-background border shadow-sm h-fit shrink-0",
+                                            !notification.read && "border-primary/20"
+                                        )}>
+                                            {getIcon(notification.type)}
+                                        </div>
+                                        <div className="flex-1 space-y-1 min-w-0">
+                                            <div className="flex justify-between items-start gap-2">
+                                                <p className={cn("text-sm font-medium leading-none truncate", !notification.read && "text-primary dark:text-orange-400")}>
+                                                    {notification.title}
+                                                </p>
+                                                <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
+                                                    {format(new Date(notification.date), 'HH:mm')}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground leading-relaxed break-words">
+                                                {notification.message}
+                                            </p>
+                                        </div>
+                                        {!notification.read && (
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6 absolute top-1/2 -translate-y-1/2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={(e) => handleMarkRead(notification.id, e)}
+                                            >
+                                                <span className="h-2 w-2 rounded-full bg-primary" />
+                                                <span className="sr-only">Mark as read</span>
+                                            </Button>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
-                            {!notification.read && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-6 w-6 absolute top-1/2 -translate-y-1/2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(e) => handleMarkRead(notification.id, e)}
-                                >
-                                    <span className="h-2 w-2 rounded-full bg-primary" />
-                                    <span className="sr-only">Mark as read</span>
-                                </Button>
-                            )}
                         </div>
                     ))}
                 </div>
@@ -127,9 +163,9 @@ export function NotificationsPopover() {
             {isOpen && typeof document !== 'undefined' && createPortal(
                 <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 shrink-0">
                         <div className="flex items-center gap-2">
-                            <button onClick={() => setIsOpen(false)} className="p-1.5 -ml-1 rounded-full text-muted-foreground hover:text-foreground transition-colors">
+                            <button onClick={() => setIsOpen(false)} className="p-1.5 -ml-1 rounded-full text-muted-foreground hover:text-foreground transition-colors shrink-0">
                                 <ArrowLeft className="h-5 w-5" />
                             </button>
                             <h4 className="font-semibold text-base">Сповіщення</h4>
@@ -146,16 +182,11 @@ export function NotificationsPopover() {
                                     Все
                                 </Button>
                             )}
-                            {notifications.length > 0 && (
-                                <Button variant="ghost" size="icon" onClick={handleClearAll} className="h-8 w-8 text-muted-foreground hover:text-rose-500">
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                            )}
                         </div>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y">
+                    <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y relative">
                         {notificationsList}
                     </div>
                 </div>
@@ -167,19 +198,14 @@ export function NotificationsPopover() {
                     {/* Hidden trigger for desktop popover positioning */}
                     <span className="hidden md:inline-block absolute" />
                 </PopoverTrigger>
-                <PopoverContent className="hidden md:block w-[380px] p-0 mr-4 rounded-2xl shadow-xl border-border/50 bg-background/95 backdrop-blur-xl" align="end">
-                    <div className="flex items-center justify-between p-4 border-b border-border/50">
+                <PopoverContent className="hidden md:block w-[380px] p-0 mr-4 rounded-2xl shadow-xl border-border/50 bg-background/95 backdrop-blur-xl shrink-0" align="end">
+                    <div className="flex items-center justify-between p-4 border-b border-border/50 shrink-0">
                         <h4 className="font-semibold text-sm">Сповіщення</h4>
                         <div className="flex gap-1">
                             {unreadCount > 0 && (
                                 <Button variant="ghost" size="xs" onClick={handleMarkAllRead} className="h-7 text-xs text-muted-foreground hover:text-primary">
                                     <Check className="h-3 w-3 mr-1" />
                                     Відмітити все
-                                </Button>
-                            )}
-                            {notifications.length > 0 && (
-                                <Button variant="ghost" size="icon" onClick={handleClearAll} className="h-7 w-7 text-muted-foreground hover:text-rose-500">
-                                    <Trash2 className="h-3.5 w-3.5" />
                                 </Button>
                             )}
                         </div>
