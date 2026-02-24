@@ -40,6 +40,8 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
 
             if (item) {
                 setFormData({ ...item });
+            } else {
+                setFormData({});
             }
         }
     }, [open, itemId, type, state]);

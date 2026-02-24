@@ -22,7 +22,7 @@ interface DayViewProps {
     onTimeSelect?: (date: Date, time: string) => void;
 }
 
-const START_HOUR = 6;
+const START_HOUR = 0;
 const END_HOUR = 23;
 const TOTAL_HOURS = END_HOUR - START_HOUR;
 const HOUR_HEIGHT = 64; // px per hour — fixed for scrolling

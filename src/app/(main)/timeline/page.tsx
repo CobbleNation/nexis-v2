@@ -64,9 +64,14 @@ export default function TimelinePage() {
 
     // --- Callbacks ---
     const handleEditItem = useCallback((id: string, type: string) => {
-        setEditTarget({ id, type });
+        let actualType = type;
+        if (type === 'deadline') {
+            const isGoal = state.goals.some(g => g.id === id);
+            actualType = isGoal ? 'goal' : 'project';
+        }
+        setEditTarget({ id, type: actualType as any });
         setIsEditDialogOpen(true);
-    }, []);
+    }, [state.goals]);
 
     const handleCompleteItem = useCallback((id: string, type: string) => {
         if (type === 'task') {
