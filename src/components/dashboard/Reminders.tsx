@@ -103,7 +103,7 @@ export function Reminders() {
                             placeholder="Обр. час"
                             value={time}
                             onChange={(e) => setTime(e.target.value)}
-                            className="w-[100px] px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 transition-all"
+                            className="w-[115px] shrink-0 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 transition-all"
                         />
                     </div>
                     <button
