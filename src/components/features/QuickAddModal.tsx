@@ -903,7 +903,7 @@ export function QuickAddModal({
                                                 value={description}
                                                 onChange={(e) => setDescription(e.target.value)}
                                                 placeholder="Що сьогодні зрозуміли?..."
-                                                className="min-h-[200px] flex-1 resize-none border-none focus-visible:ring-0 p-0 text-base shadow-none bg-transparent text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30"
+                                                className="min-h-[200px] flex-1 resize-none border-none focus-visible:ring-0 p-0 rounded-none text-base shadow-none bg-transparent text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30"
                                             />
                                         );
                                     })()
@@ -931,7 +931,7 @@ export function QuickAddModal({
                                                     type === 'project' ? "Короткий опис проекту..." :
                                                         "Додаткові деталі..."
                                             }
-                                            className="min-h-[100px] flex-1 resize-none border-none focus-visible:ring-0 p-0 text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30 text-sm shadow-none bg-transparent"
+                                            className="min-h-[100px] flex-1 resize-none border-none focus-visible:ring-0 p-0 rounded-none text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30 text-sm shadow-none bg-transparent"
                                         />
 
                                         {/* Project Metrics Selection */}

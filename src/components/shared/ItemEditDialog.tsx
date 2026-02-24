@@ -168,7 +168,7 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
                                     setFormData({ ...formData, [key]: e.target.value });
                                 }}
                                 placeholder="Додайте деталі..."
-                                className="min-h-[100px] flex-1 resize-none border-none focus-visible:ring-0 p-0 text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30 text-sm shadow-none bg-transparent"
+                                className="min-h-[100px] flex-1 resize-none border-none focus-visible:ring-0 p-0 rounded-none text-slate-600 dark:text-foreground placeholder:text-slate-300 dark:placeholder:text-muted-foreground/30 text-sm shadow-none bg-transparent"
                             />
                         )}
                     </div>
