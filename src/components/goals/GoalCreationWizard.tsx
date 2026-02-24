@@ -518,7 +518,19 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
                 {step === 3 && (
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 max-w-2xl mx-auto py-4">
-                        {goalType === 'strategic' ? (
+                        {goalType === 'vision' ? (
+                            <div className="text-center py-16 space-y-6 bg-white dark:bg-card rounded-3xl border border-dashed border-slate-200 dark:border-border">
+                                <div className="h-16 w-16 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                                    <Target className="w-8 h-8" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-bold text-slate-900 dark:text-foreground">Метрика не застосовується</h3>
+                                    <p className="text-slate-500 dark:text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
+                                        Для довгострокових (Vision) цілей вимірювання не є критичним на цьому етапі.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
                             <div className="space-y-6">
                                 <div className="text-center space-y-2">
                                     <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 mb-1">
@@ -692,19 +704,6 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                 </div>
 
                             </div>
-                        ) : (
-                            <div className="text-center py-16 space-y-6 bg-white dark:bg-card rounded-3xl border border-dashed border-slate-200 dark:border-border">
-                                <div className="h-16 w-16 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                                    <Target className="w-8 h-8" />
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-slate-900 dark:text-foreground">Метрика не обов'язкова</h3>
-                                    <p className="text-slate-500 dark:text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
-                                        Для {goalType === 'vision' ? 'довгострокових (Vision)' : 'тактичних'} цілей вимірювання не є критичним на цьому етапі.
-                                        <br />Ви можете додати її пізніше в налаштуваннях.
-                                    </p>
-                                </div>
-                            </div>
                         )}
                     </div>
                 )}
@@ -733,7 +732,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                             </div>
                         )}
 
-                        {goalType === 'strategic' && (metricStartValue !== undefined || metricTargetValue !== undefined) && (
+                        {goalType !== 'vision' && targetMetricId && (
                             <div className="bg-white dark:bg-card p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-border space-y-4">
                                 <Label className="text-sm font-semibold">Налаштування Старту та Фінішу</Label>
                                 <div className="grid grid-cols-2 gap-4">
