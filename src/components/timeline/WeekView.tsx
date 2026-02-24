@@ -22,6 +22,7 @@ interface WeekViewProps {
     onCompleteItem?: (id: string, type: string) => void;
     onDeleteItem?: (id: string, type: string) => void;
     onDayClick?: (date: Date) => void;
+    onTimeSelect?: (date: Date, time: string) => void;
 }
 
 const START_HOUR = 6;
@@ -29,7 +30,7 @@ const END_HOUR = 23;
 const TOTAL_HOURS = END_HOUR - START_HOUR;
 const HOUR_HEIGHT = 56; // slightly smaller for week view
 
-export function WeekView({ date, items, onToggleItem, onEditItem, onCompleteItem, onDeleteItem, onDayClick }: WeekViewProps) {
+export function WeekView({ date, items, onToggleItem, onEditItem, onCompleteItem, onDeleteItem, onDayClick, onTimeSelect }: WeekViewProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const start = startOfWeek(date, { weekStartsOn: 1 });
     const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
@@ -156,90 +157,105 @@ export function WeekView({ date, items, onToggleItem, onEditItem, onCompleteItem
                         {days.map((day) => {
                             const dayItems = items.filter(item => item.time && isSameDay(new Date(item.date), day));
 
-                            return (
-                                <div key={day.toISOString()} className="flex-1 border-r border-slate-100 dark:border-border/50 last:border-r-0 relative">
-                                    {dayItems.map(item => {
-                                        const [h, m] = item.time!.split(':').map(Number);
-                                        if (h < START_HOUR || h > END_HOUR) return null;
+                            // Calculate Grid Positions (Overlaps)
+                            const renderItems = (() => {
+                                const itemsWithPos = dayItems.map(item => {
+                                    const [h, m] = item.time!.split(':').map(Number);
+                                    if (h < START_HOUR || h > END_HOUR) return null;
+                                    const topPx = ((h - START_HOUR) * 60 + m) / 60 * HOUR_HEIGHT;
+                                    const heightPx = Math.max(((item.duration || 60) / 60) * HOUR_HEIGHT, 24);
+                                    return { item, top: topPx, height: heightPx, colIndex: 0 };
+                                }).filter(Boolean) as { item: ScheduleItem; top: number; height: number; colIndex: number }[];
 
-                                        const topPx = ((h - START_HOUR) * 60 + m) / 60 * HOUR_HEIGHT;
-                                        const heightPx = Math.max(((item.duration || 60) / 60) * HOUR_HEIGHT, 24);
-                                        const styles = getItemStyles(item);
+                                itemsWithPos.sort((a, b) => a.top - b.top || b.height - a.height);
+
+                                // Column Assignment
+                                const columns: typeof itemsWithPos[] = [];
+                                itemsWithPos.forEach(entry => {
+                                    let placed = false;
+                                    for (let i = 0; i < columns.length; i++) {
+                                        const col = columns[i];
+                                        const overlap = col.some(e => Math.max(entry.top, e.top) < Math.min(entry.top + entry.height, e.top + e.height));
+                                        if (!overlap) {
+                                            col.push(entry);
+                                            entry.colIndex = i;
+                                            placed = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!placed) {
+                                        columns.push([entry]);
+                                        entry.colIndex = columns.length - 1;
+                                    }
+                                });
+
+                                return { itemsWithPos, totalCols: Math.max(columns.length, 1) };
+                            })();
+
+                            return (
+                                <div key={day.toISOString()} className="flex-1 min-w-[120px] md:min-w-0 border-r border-slate-100 dark:border-border/50 last:border-r-0 relative">
+                                    {/* Clickable Grid Area */}
+                                    <div
+                                        className="absolute inset-0 cursor-crosshair z-0"
+                                        onClick={(e) => {
+                                            if (!onTimeSelect) return;
+                                            const offsetY = e.nativeEvent.offsetY;
+                                            const totalMinutes = (offsetY / HOUR_HEIGHT) * 60;
+                                            const hours = Math.floor(totalMinutes / 60) + START_HOUR;
+                                            const minutes = Math.floor((totalMinutes % 60) / 30) * 30; // Round to nearest 30 mins
+                                            if (hours >= START_HOUR && hours <= END_HOUR) {
+                                                const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                                                onTimeSelect(day, timeStr);
+                                            }
+                                        }}
+                                    />
+
+                                    {renderItems.itemsWithPos.map(entry => {
+                                        const widthPercent = 100 / renderItems.totalCols;
+                                        const leftPercent = widthPercent * entry.colIndex;
+                                        const styles = getItemStyles(entry.item);
 
                                         return (
-                                            <Popover key={item.id}>
+                                            <Popover key={entry.item.id}>
                                                 <PopoverTrigger asChild>
                                                     <motion.div
                                                         initial={{ opacity: 0, scale: 0.9 }}
                                                         animate={{ opacity: 1, scale: 1 }}
                                                         className={cn(
-                                                            "absolute left-0.5 right-0.5 rounded-md border overflow-hidden hover:z-20 hover:shadow-lg transition-all cursor-pointer flex",
+                                                            "absolute rounded-md border flex overflow-hidden hover:z-20 hover:shadow-lg transition-all cursor-pointer group",
                                                             styles.bg, styles.border
                                                         )}
-                                                        style={{ top: topPx, height: Math.max(heightPx - 2, 22) }}
+                                                        style={{
+                                                            top: entry.top,
+                                                            height: Math.max(entry.height - 2, 22),
+                                                            left: `${leftPercent}%`,
+                                                            width: `calc(${widthPercent}% - 4px)`
+                                                        }}
                                                     >
                                                         <div className={cn("w-0.5 shrink-0", styles.accent)} />
                                                         <div className={cn("flex flex-col justify-center px-1.5 py-0.5 flex-1 min-w-0", styles.text)}>
-                                                            <div className="font-bold truncate leading-tight text-[10px]">{item.title}</div>
-                                                            {heightPx > 30 && (
-                                                                <div className="opacity-70 truncate text-[9px] font-medium">{item.time}</div>
+                                                            <div className="flex items-center gap-1 leading-tight">
+                                                                {entry.item.isFocus && <Star className="w-2.5 h-2.5 text-amber-500 shrink-0 fill-amber-500" />}
+                                                                <span className="font-bold truncate text-[10px]">{entry.item.title}</span>
+                                                                {entry.item.status === 'completed' && <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 shrink-0" />}
+                                                            </div>
+                                                            {entry.height > 30 && (
+                                                                <div className="opacity-70 truncate text-[9px] font-medium flex items-center gap-1 mt-0.5">
+                                                                    <Clock className="w-2 h-2" />
+                                                                    {entry.item.time}
+                                                                </div>
                                                             )}
                                                         </div>
                                                     </motion.div>
                                                 </PopoverTrigger>
-                                                <PopoverContent className="w-72 p-0 overflow-hidden border-slate-200 dark:border-border shadow-xl rounded-xl" align="start" side="bottom">
-                                                    {/* Header */}
-                                                    <div className={cn("p-3 border-b relative", styles.bg, styles.border)}>
-                                                        <div className={cn("flex items-start gap-2", styles.text)}>
-                                                            <div className={cn("w-1 min-h-[28px] rounded-full shrink-0 self-stretch", styles.accent)} />
-                                                            <div className="flex-1 min-w-0">
-                                                                <h4 className="font-bold text-sm leading-tight">{item.title}</h4>
-                                                                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                                                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-white/30 dark:bg-black/20">
-                                                                        {getTypeLabel(item.type)}
-                                                                    </span>
-                                                                    {item.time && (
-                                                                        <span className="text-[11px] font-medium flex items-center gap-1 opacity-80">
-                                                                            <Clock className="w-3 h-3" />
-                                                                            {item.time}{item.duration ? ` · ${item.duration}хв` : ''}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {/* Details */}
-                                                    <div className="p-3 bg-white dark:bg-card">
-                                                        {item.details ? (
-                                                            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap line-clamp-3">{item.details}</p>
-                                                        ) : (
-                                                            <p className="text-sm text-muted-foreground/60 italic">Без деталей</p>
-                                                        )}
-                                                    </div>
-                                                    {/* Actions */}
-                                                    {(onCompleteItem || onEditItem || onDeleteItem) && (
-                                                        <div className="border-t border-slate-100 dark:border-border p-2 flex gap-1.5 bg-slate-50/50 dark:bg-card/50">
-                                                            {onCompleteItem && item.type === 'task' && item.status !== 'completed' && (
-                                                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 flex-1 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                                                                    onClick={() => onCompleteItem(item.entityId, item.type)}>
-                                                                    <CheckCircle2 className="w-3.5 h-3.5" /> Виконано
-                                                                </Button>
-                                                            )}
-                                                            {onEditItem && (
-                                                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 flex-1 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30"
-                                                                    onClick={() => onEditItem(item.entityId, item.type)}>
-                                                                    <Edit className="w-3.5 h-3.5" /> Редагувати
-                                                                </Button>
-                                                            )}
-                                                            {onDeleteItem && (
-                                                                <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 text-rose-500 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
-                                                                    onClick={() => onDeleteItem(item.entityId, item.type)}>
-                                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                                </Button>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </PopoverContent>
+                                                <ItemPopover
+                                                    item={entry.item}
+                                                    styles={styles}
+                                                    getTypeLabel={getTypeLabel}
+                                                    onEdit={onEditItem}
+                                                    onComplete={onCompleteItem}
+                                                    onDelete={onDeleteItem}
+                                                />
                                             </Popover>
                                         );
                                     })}
@@ -250,5 +266,71 @@ export function WeekView({ date, items, onToggleItem, onEditItem, onCompleteItem
                 </div>
             </div>
         </div>
+    );
+}
+
+// --- Shared Popover Component ---
+function ItemPopover({ item, styles, getTypeLabel, onEdit, onComplete, onDelete }: {
+    item: ScheduleItem;
+    styles: { bg: string; border: string; text: string; accent: string };
+    getTypeLabel: (type: string) => string;
+    onEdit?: (id: string, type: string) => void;
+    onComplete?: (id: string, type: string) => void;
+    onDelete?: (id: string, type: string) => void;
+}) {
+    return (
+        <PopoverContent className="w-72 p-0 overflow-hidden border-slate-200 dark:border-border shadow-xl rounded-xl" align="start" side="bottom">
+            {/* Header */}
+            <div className={cn("p-3 border-b relative", styles.bg, styles.border)}>
+                <div className={cn("flex items-start gap-2", styles.text)}>
+                    <div className={cn("w-1 min-h-[28px] rounded-full shrink-0 self-stretch", styles.accent)} />
+                    <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-sm leading-tight">{item.title}</h4>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-white/30 dark:bg-black/20">
+                                {getTypeLabel(item.type)}
+                            </span>
+                            {item.time && (
+                                <span className="text-[11px] font-medium flex items-center gap-1 opacity-80">
+                                    <Clock className="w-3 h-3" />
+                                    {item.time}{item.duration ? ` · ${item.duration}хв` : ''}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* Details */}
+            <div className="p-3 bg-white dark:bg-card">
+                {item.details ? (
+                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap line-clamp-3">{item.details}</p>
+                ) : (
+                    <p className="text-sm text-muted-foreground/60 italic">Без деталей</p>
+                )}
+            </div>
+            {/* Actions */}
+            {(onComplete || onEdit || onDelete) && (
+                <div className="border-t border-slate-100 dark:border-border p-2 flex gap-1.5 bg-slate-50/50 dark:bg-card/50">
+                    {onComplete && item.type === 'task' && item.status !== 'completed' && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 flex-1 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                            onClick={() => onComplete(item.entityId, item.type)}>
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Виконано
+                        </Button>
+                    )}
+                    {onEdit && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 flex-1 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30"
+                            onClick={() => onEdit(item.entityId, item.type)}>
+                            <Edit className="w-3.5 h-3.5" /> Редагувати
+                        </Button>
+                    )}
+                    {onDelete && (
+                        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 text-rose-500 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
+                            onClick={() => onDelete(item.entityId, item.type)}>
+                            <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                    )}
+                </div>
+            )}
+        </PopoverContent>
     );
 }

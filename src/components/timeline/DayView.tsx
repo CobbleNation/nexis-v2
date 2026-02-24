@@ -19,6 +19,7 @@ interface DayViewProps {
     onEditItem?: (id: string, type: string) => void;
     onCompleteItem?: (id: string, type: string) => void;
     onDeleteItem?: (id: string, type: string) => void;
+    onTimeSelect?: (date: Date, time: string) => void;
 }
 
 const START_HOUR = 6;
@@ -26,7 +27,7 @@ const END_HOUR = 23;
 const TOTAL_HOURS = END_HOUR - START_HOUR;
 const HOUR_HEIGHT = 64; // px per hour — fixed for scrolling
 
-export function DayView({ date, items, onToggleItem, onEditItem, onCompleteItem, onDeleteItem }: DayViewProps) {
+export function DayView({ date, items, onToggleItem, onEditItem, onCompleteItem, onDeleteItem, onTimeSelect }: DayViewProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // All-day items & Routines
@@ -232,6 +233,22 @@ export function DayView({ date, items, onToggleItem, onEditItem, onCompleteItem,
 
                     {/* Schedule Items */}
                     <div className="absolute top-0 left-14 right-2 bottom-0">
+                        {/* Clickable Grid Area */}
+                        <div
+                            className="absolute inset-0 cursor-crosshair z-0"
+                            onClick={(e) => {
+                                if (!onTimeSelect) return;
+                                const offsetY = e.nativeEvent.offsetY;
+                                const totalMinutes = (offsetY / HOUR_HEIGHT) * 60;
+                                const hours = Math.floor(totalMinutes / 60) + START_HOUR;
+                                const minutes = Math.floor((totalMinutes % 60) / 30) * 30; // Round to nearest 30 mins
+                                if (hours >= START_HOUR && hours <= END_HOUR) {
+                                    const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                                    onTimeSelect(date, timeStr);
+                                }
+                            }}
+                        />
+
                         {renderItems.itemsWithPos.map(entry => {
                             const widthPercent = 100 / renderItems.totalCols;
                             const leftPercent = widthPercent * entry.colIndex;
@@ -252,7 +269,7 @@ export function DayView({ date, items, onToggleItem, onEditItem, onCompleteItem,
                                                 top: entry.top,
                                                 height: Math.max(entry.height - 2, 28),
                                                 left: `${leftPercent}%`,
-                                                width: `${widthPercent - 1}%`,
+                                                width: `calc(${widthPercent}% - 4px)`
                                             }}
                                         >
                                             {/* Left accent bar */}

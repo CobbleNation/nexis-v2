@@ -18,6 +18,8 @@ import { TimelineLockState } from '@/components/timeline/TimelineLockState';
 import { useSubscription } from '@/hooks/useSubscription';
 import { LIMITS, SUBSCRIPTION_PLAN } from '@/lib/limits';
 import { toast } from 'sonner';
+// ... other imports
+import { QuickAddModal } from '@/components/features/QuickAddModal';
 
 type ViewMode = 'day' | 'week' | 'month' | 'year';
 
@@ -56,6 +58,10 @@ export default function TimelinePage() {
     const [editTarget, setEditTarget] = useState<{ id: string; type: any } | null>(null);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+    // Quick Add
+    const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+    const [quickAddData, setQuickAddData] = useState<{ date: string, time: string } | undefined>();
+
     // --- Callbacks ---
     const handleEditItem = useCallback((id: string, type: string) => {
         setEditTarget({ id, type });
@@ -91,6 +97,12 @@ export default function TimelinePage() {
         const item = scheduleItems.find(i => i.entityId === id);
         if (item) handleEditItem(id, item.type);
     }, [scheduleItems, handleEditItem]);
+
+    const handleTimeSelect = useCallback((date: Date, time: string) => {
+        const dateStr = format(date, 'yyyy-MM-dd');
+        setQuickAddData({ date: dateStr, time });
+        setIsQuickAddOpen(true);
+    }, []);
 
     return (
         <div id="schedule-container" className="space-y-4 animate-in fade-in duration-500 h-[calc(100vh-theme(spacing.8))] flex flex-col">
@@ -164,6 +176,7 @@ export default function TimelinePage() {
                                 onEditItem={handleEditItem}
                                 onCompleteItem={handleCompleteItem}
                                 onDeleteItem={handleDeleteItem}
+                                onTimeSelect={handleTimeSelect}
                             />
                         )}
 
@@ -179,6 +192,7 @@ export default function TimelinePage() {
                                     onCompleteItem={handleCompleteItem}
                                     onDeleteItem={handleDeleteItem}
                                     onDayClick={handleDayClick}
+                                    onTimeSelect={handleTimeSelect}
                                 />
                             )
                         )}
@@ -201,6 +215,12 @@ export default function TimelinePage() {
                 onOpenChange={setIsEditDialogOpen}
                 itemId={editTarget?.id || null}
                 type={editTarget?.type || null}
+            />
+
+            <QuickAddModal
+                open={isQuickAddOpen}
+                onOpenChange={setIsQuickAddOpen}
+                initialData={quickAddData}
             />
         </div>
     );
