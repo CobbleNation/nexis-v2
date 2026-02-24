@@ -162,11 +162,48 @@ function appReducer(state: AppState, action: AppAction): AppState {
                 return date >= thirtyDaysAgo;
             }) || [];
 
+            // 1. Calculate the latest metric values on load
+            const metricMap = new Map<string, number>();
+
+            // Sort entries so we process older ones first, leaving the latest in the map
+            // or just find the latest for each metric.
+            const sortedEntries = [...(action.payload.metricEntries || [])].sort(
+                (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+            );
+
+            sortedEntries.forEach(entry => {
+                metricMap.set(entry.metricId, entry.value);
+            });
+
+            // 2. Sync Goals with Latest Metrics
+            const validGoals = (action.payload.goals || []).map(goal => {
+                if (goal.targetMetricId && metricMap.has(goal.targetMetricId)) {
+                    const current = metricMap.get(goal.targetMetricId)!;
+                    const start = goal.metricStartValue || 0;
+                    const target = goal.metricTargetValue || 100;
+
+                    let progress = goal.progress || 0;
+                    const total = Math.abs(target - start);
+                    if (total > 0 && goal.status !== 'completed') {
+                        const diff = Math.abs(current - start);
+                        progress = Math.min(100, Math.max(0, Math.round((diff / total) * 100)));
+                    }
+
+                    return {
+                        ...goal,
+                        metricCurrentValue: current,
+                        progress: goal.status === 'completed' ? 100 : progress
+                    };
+                }
+                return goal;
+            });
+
             return {
                 ...state,
                 ...action.payload,
                 journal: sanitizedJournal,
                 notifications: validNotifications,
+                goals: validGoals,
                 isLoading: false
             };
         }
