@@ -5,19 +5,46 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { format, eachMonthOfInterval, startOfYear, endOfYear, isSameMonth } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
+import { ItemPopover } from './ItemPopover';
 
 interface YearViewProps {
     date: Date;
     items: ScheduleItem[];
+    onEditItem?: (id: string, type: string) => void;
+    onCompleteItem?: (id: string, type: string) => void;
+    onDeleteItem?: (id: string, type: string) => void;
 }
 
-export function YearView({ date, items }: YearViewProps) {
+export function YearView({ date, items, onEditItem, onCompleteItem, onDeleteItem }: YearViewProps) {
     const start = startOfYear(date);
     const end = endOfYear(date);
     const months = eachMonthOfInterval({ start, end });
 
     // Filter for "Big" things only (Deadlines, Events)
     const strategicItems = items.filter(i => i.type === 'deadline' || i.type === 'event' || i.type === 'task');
+
+    const getItemStyles = (item: ScheduleItem) => {
+        if (item.status === 'completed') {
+            return { bg: 'bg-slate-100 dark:bg-slate-800/50', border: 'border-slate-200 dark:border-slate-700', text: 'text-muted-foreground line-through', accent: 'bg-slate-300 dark:bg-slate-600' };
+        }
+        switch (item.type) {
+            case 'task': return { bg: 'bg-blue-50 dark:bg-blue-950/40', border: 'border-blue-200/80 dark:border-blue-800/60', text: 'text-blue-900 dark:text-blue-100', accent: 'bg-blue-500' };
+            case 'routine': return { bg: 'bg-purple-50 dark:bg-purple-950/40', border: 'border-purple-200/80 dark:border-purple-800/60', text: 'text-purple-900 dark:text-purple-100', accent: 'bg-purple-500' };
+            case 'event': return { bg: 'bg-orange-50 dark:bg-orange-950/40', border: 'border-orange-200/80 dark:border-orange-800/60', text: 'text-orange-900 dark:text-orange-100', accent: 'bg-orange-500' };
+            default: return { bg: 'bg-rose-50 dark:bg-rose-950/40', border: 'border-rose-200/80 dark:border-rose-800/60', text: 'text-rose-900 dark:text-rose-100', accent: 'bg-rose-500' };
+        }
+    };
+
+    const getTypeLabel = (type: string) => {
+        switch (type) {
+            case 'task': return 'Завдання';
+            case 'routine': return 'Рутина';
+            case 'event': return 'Подія';
+            case 'deadline': return 'Дедлайн';
+            default: return type;
+        }
+    };
 
     return (
         <div className="flex flex-col h-full bg-white dark:bg-card rounded-xl border border-slate-200 dark:border-border p-4 shadow-sm overflow-hidden">
@@ -43,18 +70,31 @@ export function YearView({ date, items }: YearViewProps) {
                             {/* Mini Timeline visualization */}
                             <div className="flex-1 flex flex-col gap-1.5 overflow-hidden">
                                 {monthItems.slice(0, 6).map(item => {
+                                    const styles = getItemStyles(item);
                                     let color = "bg-blue-500"; // Tasks
                                     if (item.type === 'deadline') color = "bg-rose-500";
                                     if (item.type === 'event') color = "bg-orange-500";
                                     if (item.type === 'routine') color = "bg-purple-500";
 
                                     return (
-                                        <div key={item.id} className="flex items-center gap-2 group/item">
-                                            <div className={cn("h-2 w-2 rounded-full shrink-0 shadow-sm", color)} />
-                                            <span className="text-[10px] truncate text-slate-600 dark:text-slate-400 group-hover/item:text-foreground transition-colors">
-                                                {item.title}
-                                            </span>
-                                        </div>
+                                        <Popover key={item.id}>
+                                            <PopoverTrigger asChild>
+                                                <div className="flex items-center gap-2 group/item cursor-pointer">
+                                                    <div className={cn("h-2 w-2 rounded-full shrink-0 shadow-sm", color)} />
+                                                    <span className="text-[10px] truncate text-slate-600 dark:text-slate-400 group-hover/item:text-foreground transition-colors hover:underline">
+                                                        {item.title}
+                                                    </span>
+                                                </div>
+                                            </PopoverTrigger>
+                                            <ItemPopover
+                                                item={item}
+                                                styles={styles}
+                                                getTypeLabel={getTypeLabel}
+                                                onEdit={onEditItem}
+                                                onComplete={onCompleteItem}
+                                                onDelete={onDeleteItem}
+                                            />
+                                        </Popover>
                                     )
                                 })}
                                 {monthItems.length > 6 && (

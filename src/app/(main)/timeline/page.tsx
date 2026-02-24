@@ -201,11 +201,26 @@ export default function TimelinePage() {
                             tier === SUBSCRIPTION_PLAN.FREE && !LIMITS[SUBSCRIPTION_PLAN.FREE].HAS_MONTHLY_VIEW ? (
                                 <TimelineLockState view="month" />
                             ) : (
-                                <MonthView date={currentDate} items={scheduleItems} onToggleItem={handleLegacyToggle} />
+                                <MonthView
+                                    date={currentDate}
+                                    items={scheduleItems}
+                                    onToggleItem={handleLegacyToggle}
+                                    onEditItem={handleEditItem}
+                                    onCompleteItem={handleCompleteItem}
+                                    onDeleteItem={handleDeleteItem}
+                                />
                             )
                         )}
 
-                        {currentViewMode === 'year' && <YearView date={currentDate} items={scheduleItems} />}
+                        {currentViewMode === 'year' && (
+                            <YearView
+                                date={currentDate}
+                                items={scheduleItems}
+                                onEditItem={handleEditItem}
+                                onCompleteItem={handleCompleteItem}
+                                onDeleteItem={handleDeleteItem}
+                            />
+                        )}
                     </motion.div>
                 </AnimatePresence>
             </div>

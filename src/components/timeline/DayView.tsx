@@ -7,10 +7,10 @@ import { useMemo, useState, useEffect, useRef } from 'react';
 import { CheckCircle2, Clock, Edit, Trash2, Circle, MapPin, Star } from 'lucide-react';
 import {
     Popover,
-    PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from '@/components/ui/button';
+import { ItemPopover } from './ItemPopover';
 
 interface DayViewProps {
     date: Date;
@@ -257,14 +257,8 @@ export function DayView({ date, items, onToggleItem, onEditItem, onCompleteItem,
                             return (
                                 <Popover key={entry.item.id}>
                                     <PopoverTrigger asChild>
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.96 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            layout
-                                            className={cn(
-                                                "absolute rounded-lg border flex overflow-hidden cursor-pointer hover:z-50 transition-all hover:shadow-lg group",
-                                                styles.bg, styles.border
-                                            )}
+                                        <div
+                                            className="absolute text-left outline-none cursor-pointer hover:z-50"
                                             style={{
                                                 top: entry.top,
                                                 height: Math.max(entry.height - 2, 28),
@@ -272,28 +266,38 @@ export function DayView({ date, items, onToggleItem, onEditItem, onCompleteItem,
                                                 width: `calc(${widthPercent}% - 4px)`
                                             }}
                                         >
-                                            {/* Left accent bar */}
-                                            <div className={cn("w-1 shrink-0 rounded-l-lg", styles.accent)} />
+                                            <motion.div
+                                                initial={{ opacity: 0, scale: 0.96 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                layout
+                                                className={cn(
+                                                    "w-full h-full rounded-lg border flex overflow-hidden transition-all hover:shadow-lg group",
+                                                    styles.bg, styles.border
+                                                )}
+                                            >
+                                                {/* Left accent bar */}
+                                                <div className={cn("w-1 shrink-0 rounded-l-lg", styles.accent)} />
 
-                                            <div className={cn("flex flex-col min-w-0 justify-center px-2 py-1 flex-1", styles.text)}>
-                                                <div className="flex items-center gap-1.5 leading-tight">
-                                                    {entry.item.isFocus && <Star className="w-3 h-3 text-amber-500 shrink-0 fill-amber-500" />}
-                                                    <span className="text-[11px] font-bold truncate">{entry.item.title}</span>
-                                                    {entry.item.status === 'completed' && <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />}
-                                                </div>
-
-                                                {entry.height > 36 && (
-                                                    <div className="text-[10px] opacity-70 mt-0.5 font-medium truncate flex items-center gap-1">
-                                                        <Clock className="w-2.5 h-2.5" />
-                                                        {entry.item.time} · {entry.item.duration}хв
+                                                <div className={cn("flex flex-col min-w-0 justify-center px-2 py-1 flex-1", styles.text)}>
+                                                    <div className="flex items-center gap-1.5 leading-tight">
+                                                        {entry.item.isFocus && <Star className="w-3 h-3 text-amber-500 shrink-0 fill-amber-500" />}
+                                                        <span className="text-[11px] font-bold truncate">{entry.item.title}</span>
+                                                        {entry.item.status === 'completed' && <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />}
                                                     </div>
-                                                )}
 
-                                                {entry.height > 56 && entry.item.details && (
-                                                    <div className="text-[10px] opacity-60 mt-0.5 line-clamp-1">{entry.item.details}</div>
-                                                )}
-                                            </div>
-                                        </motion.div>
+                                                    {entry.height > 36 && (
+                                                        <div className="text-[10px] opacity-70 mt-0.5 font-medium truncate flex items-center gap-1">
+                                                            <Clock className="w-2.5 h-2.5" />
+                                                            {entry.item.time} · {entry.item.duration}хв
+                                                        </div>
+                                                    )}
+
+                                                    {entry.height > 56 && entry.item.details && (
+                                                        <div className="text-[10px] opacity-60 mt-0.5 line-clamp-1">{entry.item.details}</div>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        </div>
                                     </PopoverTrigger>
                                     <ItemPopover item={entry.item} styles={styles} getTypeLabel={getTypeLabel} onEdit={onEditItem} onComplete={onCompleteItem} onDelete={onDeleteItem} />
                                 </Popover>
@@ -303,87 +307,5 @@ export function DayView({ date, items, onToggleItem, onEditItem, onCompleteItem,
                 </div>
             </div>
         </div>
-    );
-}
-
-// --- Shared Popover Component ---
-function ItemPopover({ item, styles, getTypeLabel, onEdit, onComplete, onDelete }: {
-    item: ScheduleItem;
-    styles: { bg: string; border: string; text: string; accent: string };
-    getTypeLabel: (type: string) => string;
-    onEdit?: (id: string, type: string) => void;
-    onComplete?: (id: string, type: string) => void;
-    onDelete?: (id: string, type: string) => void;
-}) {
-    return (
-        <PopoverContent className="w-72 p-0 overflow-hidden border-slate-200 dark:border-border shadow-xl rounded-xl" align="start" side="right">
-            {/* Header */}
-            <div className={cn("p-3 border-b relative overflow-hidden", styles.bg, styles.border)}>
-                <div className={cn("flex items-start gap-2", styles.text)}>
-                    <div className={cn("w-1 h-full min-h-[28px] rounded-full shrink-0 self-stretch", styles.accent)} />
-                    <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-sm leading-tight">{item.title}</h4>
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-white/30 dark:bg-black/20">
-                                {getTypeLabel(item.type)}
-                            </span>
-                            {item.time && (
-                                <span className="text-[11px] font-medium flex items-center gap-1 opacity-80">
-                                    <Clock className="w-3 h-3" />
-                                    {item.time}{item.duration ? ` · ${item.duration}хв` : ''}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Details */}
-            <div className="p-3 bg-white dark:bg-card">
-                {item.details ? (
-                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap line-clamp-4">{item.details}</p>
-                ) : (
-                    <p className="text-sm text-muted-foreground/60 italic">Без деталей</p>
-                )}
-            </div>
-
-            {/* Action Buttons */}
-            {(onComplete || onEdit || onDelete) && (
-                <div className="border-t border-slate-100 dark:border-border p-2 flex gap-1.5 bg-slate-50/50 dark:bg-card/50">
-                    {onComplete && item.type === 'task' && item.status !== 'completed' && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs gap-1.5 flex-1 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                            onClick={() => onComplete(item.entityId, item.type)}
-                        >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            Виконано
-                        </Button>
-                    )}
-                    {onEdit && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs gap-1.5 flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/30"
-                            onClick={() => onEdit(item.entityId, item.type)}
-                        >
-                            <Edit className="w-3.5 h-3.5" />
-                            Редагувати
-                        </Button>
-                    )}
-                    {onDelete && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 text-xs gap-1.5 text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/30"
-                            onClick={() => onDelete(item.entityId, item.type)}
-                        >
-                            <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                    )}
-                </div>
-            )}
-        </PopoverContent>
     );
 }

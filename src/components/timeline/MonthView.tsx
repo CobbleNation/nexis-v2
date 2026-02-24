@@ -5,14 +5,19 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay } from 'date-fns';
 import { uk } from 'date-fns/locale';
+import { Popover, PopoverTrigger } from '@/components/ui/popover';
+import { ItemPopover } from './ItemPopover';
 
 interface MonthViewProps {
     date: Date;
     items: ScheduleItem[];
     onToggleItem: (id: string) => void;
+    onEditItem?: (id: string, type: string) => void;
+    onCompleteItem?: (id: string, type: string) => void;
+    onDeleteItem?: (id: string, type: string) => void;
 }
 
-export function MonthView({ date, items }: MonthViewProps) {
+export function MonthView({ date, items, onToggleItem, onEditItem, onCompleteItem, onDeleteItem }: MonthViewProps) {
     const start = startOfMonth(date);
     const end = endOfMonth(date);
     const days = eachDayOfInterval({ start, end });
@@ -23,6 +28,28 @@ export function MonthView({ date, items }: MonthViewProps) {
 
     const getItemsForDay = (day: Date) => {
         return items.filter(item => isSameDay(new Date(item.date), day));
+    };
+
+    const getItemStyles = (item: ScheduleItem) => {
+        if (item.status === 'completed') {
+            return { bg: 'bg-slate-100 dark:bg-slate-800/50', border: 'border-slate-200 dark:border-slate-700', text: 'text-muted-foreground line-through', accent: 'bg-slate-300 dark:bg-slate-600' };
+        }
+        switch (item.type) {
+            case 'task': return { bg: 'bg-blue-50 dark:bg-blue-950/40', border: 'border-blue-200/80 dark:border-blue-800/60', text: 'text-blue-900 dark:text-blue-100', accent: 'bg-blue-500' };
+            case 'routine': return { bg: 'bg-purple-50 dark:bg-purple-950/40', border: 'border-purple-200/80 dark:border-purple-800/60', text: 'text-purple-900 dark:text-purple-100', accent: 'bg-purple-500' };
+            case 'event': return { bg: 'bg-orange-50 dark:bg-orange-950/40', border: 'border-orange-200/80 dark:border-orange-800/60', text: 'text-orange-900 dark:text-orange-100', accent: 'bg-orange-500' };
+            default: return { bg: 'bg-rose-50 dark:bg-rose-950/40', border: 'border-rose-200/80 dark:border-rose-800/60', text: 'text-rose-900 dark:text-rose-100', accent: 'bg-rose-500' };
+        }
+    };
+
+    const getTypeLabel = (type: string) => {
+        switch (type) {
+            case 'task': return 'Завдання';
+            case 'routine': return 'Рутина';
+            case 'event': return 'Подія';
+            case 'deadline': return 'Дедлайн';
+            default: return type;
+        }
     };
 
     return (
@@ -73,19 +100,28 @@ export function MonthView({ date, items }: MonthViewProps) {
                             {/* Blocks */}
                             <div className="flex flex-col gap-1 overflow-hidden">
                                 {allDisplay.slice(0, 4).map(item => {
-                                    let style = "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200 border-blue-200 dark:border-blue-800";
-                                    if (item.type === 'deadline') style = "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200 border-rose-200 dark:border-rose-800";
-                                    if (item.type === 'event') style = "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200 border-orange-200 dark:border-orange-800";
-                                    if (item.type === 'routine') style = "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-200 border-purple-200 dark:border-purple-800";
+                                    const styles = getItemStyles(item);
 
                                     return (
-                                        <div key={item.id} className={cn(
-                                            "text-[9px] truncate px-1.5 py-0.5 rounded-full border shadow-sm font-medium leading-none flex items-center gap-1",
-                                            style
-                                        )}>
-                                            <div className={cn("w-1 h-1 rounded-full bg-current opacity-50")} />
-                                            <span className="truncate">{item.title}</span>
-                                        </div>
+                                        <Popover key={item.id}>
+                                            <PopoverTrigger asChild>
+                                                <div className={cn(
+                                                    "text-[9px] truncate px-1.5 py-0.5 rounded-sm border shadow-sm font-medium leading-none flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity",
+                                                    styles.bg, styles.border, styles.text
+                                                )}>
+                                                    <div className={cn("w-1 h-1 rounded-full shrink-0", styles.accent)} />
+                                                    <span className="truncate">{item.title}</span>
+                                                </div>
+                                            </PopoverTrigger>
+                                            <ItemPopover
+                                                item={item}
+                                                styles={styles}
+                                                getTypeLabel={getTypeLabel}
+                                                onEdit={onEditItem}
+                                                onComplete={onCompleteItem}
+                                                onDelete={onDeleteItem}
+                                            />
+                                        </Popover>
                                     )
                                 })}
                                 {(allDisplay.length > 4) && (
