@@ -60,7 +60,7 @@ export function MobileNav() {
             </button>
 
             <Link
-                href="/goals"
+                href="/goals?tab=active"
                 className={cn(
                     "flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 active:scale-95 w-16",
                     pathname.startsWith('/goals') ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"
