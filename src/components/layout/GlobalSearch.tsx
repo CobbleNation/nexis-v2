@@ -395,8 +395,9 @@ export function GlobalSearch() {
 
     // --- Default: search bar (closed state) ---
     return (
-        <div ref={containerRef} className="relative flex-1 max-w-2xl mx-2 md:mx-12">
-            <div className="relative group transition-all duration-300 z-10">
+        <div ref={containerRef} className="relative flex-1 max-w-2xl mx-2 md:mx-12 flex justify-end md:block">
+            {/* Desktop Search */}
+            <div className="hidden md:block relative group transition-all duration-300 z-10 w-full">
                 {/* Glow Effect */}
                 <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
 
@@ -430,6 +431,15 @@ export function GlobalSearch() {
                     )}
                 </div>
             </div>
+
+            {/* Mobile Search Icon */}
+            <button
+                className="md:hidden flex items-center justify-center p-2 rounded-full text-foreground/80 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                onClick={() => setIsOpen(true)}
+                aria-label="Відкрити пошук"
+            >
+                <Search className="h-6 w-6" />
+            </button>
         </div>
     );
 }

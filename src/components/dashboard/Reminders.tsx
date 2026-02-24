@@ -88,16 +88,22 @@ export function Reminders() {
                     />
                     <div className="flex gap-2">
                         <input
-                            type="date"
+                            type={date ? "date" : "text"}
+                            onFocus={(e) => e.target.type = "date"}
+                            onBlur={(e) => { if (!e.target.value) e.target.type = "text" }}
+                            placeholder="Оберіть дату"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 transition-all"
+                            className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 transition-all"
                         />
                         <input
-                            type="time"
+                            type={time ? "time" : "text"}
+                            onFocus={(e) => e.target.type = "time"}
+                            onBlur={(e) => { if (!e.target.value) e.target.type = "text" }}
+                            placeholder="Обр. час"
                             value={time}
                             onChange={(e) => setTime(e.target.value)}
-                            className="w-[100px] px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 transition-all"
+                            className="w-[100px] px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 transition-all"
                         />
                     </div>
                     <button
