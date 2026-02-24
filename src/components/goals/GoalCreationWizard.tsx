@@ -170,24 +170,6 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
     }, [deadline, goalType]);
 
-    // Sync metric values when targetMetricId changes
-    useEffect(() => {
-        if (!targetMetricId) return;
-
-        const metric = state.metricDefinitions.find(m => m.id === targetMetricId);
-        if (metric) {
-            if (metric.baseline !== undefined) setMetricStartValue(metric.baseline.toString());
-            if (metric.target !== undefined) setMetricTargetValue(metric.target.toString());
-            if (metric.direction) {
-                // Map to allowed values for goal direction if needed, or just use as is if types match
-                // Goal direction: 'increase' | 'decrease' | 'maintain'
-                // Metric direction: 'increase' | 'decrease' | 'neutral'
-                // We map 'neutral' to 'maintain' (or keep default if not compatible)
-                if (metric.direction === 'neutral') setMetricDirection('maintain');
-                else setMetricDirection(metric.direction);
-            }
-        }
-    }, [targetMetricId, state.metricDefinitions]);
 
 
 
@@ -607,10 +589,20 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                         setTargetMetricId(val);
                                         // Auto-fetch current value
                                         if (val) {
+                                            const metric = state.metricDefinitions.find(m => m.id === val);
+                                            if (metric) {
+                                                if (metric.baseline !== undefined) setMetricStartValue(metric.baseline.toString());
+                                                if (metric.target !== undefined) setMetricTargetValue(metric.target.toString());
+                                                if (metric.direction) {
+                                                    if (metric.direction === 'neutral') setMetricDirection('maintain');
+                                                    else setMetricDirection(metric.direction);
+                                                }
+                                            }
+
                                             const entries = state.metricEntries.filter(e => e.metricId === val);
                                             // Sort by date desc
                                             entries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-                                            const currentVal = entries.length > 0 ? entries[0].value : 0;
+                                            const currentVal = entries.length > 0 ? entries[0].value : (metric?.baseline ?? 0);
                                             setMetricStartValue(currentVal.toString());
                                         }
                                         checkAndAdvance('create-goal-metric-select');
