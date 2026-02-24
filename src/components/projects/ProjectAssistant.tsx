@@ -186,21 +186,21 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
 
     if (!isOpen) {
         return (
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-900/50 shadow-sm flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-white dark:bg-card flex items-center justify-center shadow-sm text-indigo-500">
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-2xl p-4 sm:p-6 border border-indigo-100 dark:border-indigo-900/50 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                    <div className="w-10 h-10 shrink-0 rounded-full bg-white dark:bg-card flex items-center justify-center shadow-sm text-indigo-500">
                         <Sparkles className="w-5 h-5" />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-slate-800 dark:text-foreground">AI Асистент Проекту</h3>
-                        <p className="text-sm text-slate-500 dark:text-muted-foreground">Отримайте пропозиції задач та метрик для вашого проекту</p>
+                        <p className="text-sm text-slate-500 dark:text-muted-foreground break-words sm:break-normal">Отримайте пропозиції задач та метрик для вашого проекту</p>
                     </div>
                 </div>
                 {suggestions ? (
                     <Button
                         variant="outline"
                         onClick={() => setIsOpen(true)}
-                        className="border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400"
+                        className="w-full sm:w-auto border-indigo-200 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-400"
                     >
                         Показати пропозиції
                     </Button>
@@ -208,7 +208,7 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
                     <Button
                         onClick={handleGenerate}
                         disabled={isLoading}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20"
+                        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20"
                     >
                         {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
                         Аналізувати

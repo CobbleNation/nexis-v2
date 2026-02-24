@@ -165,17 +165,19 @@ export default function ProjectPage() {
                         До списку проектів
                     </button>
 
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-2">
-                            <h1 className="text-3xl font-bold text-slate-900 dark:text-foreground tracking-tight flex items-center gap-3">
-                                <Folder className="w-8 h-8 text-blue-500 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/20" />
-                                {project.title}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="space-y-2 w-full min-w-0">
+                            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-foreground tracking-tight flex items-start sm:items-center gap-3">
+                                <div className="shrink-0 mt-1 sm:mt-0">
+                                    <Folder className="w-7 h-7 sm:w-8 sm:h-8 text-blue-500 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/20" />
+                                </div>
+                                <span className="break-words min-w-0">{project.title}</span>
                             </h1>
-                            <div className="flex items-center gap-3 text-sm">
+                            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
                                 {area && (
                                     <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-secondary text-slate-600 dark:text-muted-foreground font-medium border border-slate-200 dark:border-border">
-                                        <div className={cn("w-2 h-2 rounded-full", area.color)} />
-                                        {area.title}
+                                        <div className={cn("w-2 h-2 shrink-0 rounded-full", area.color)} />
+                                        <span className="truncate max-w-[120px] sm:max-w-none">{area.title}</span>
                                     </span>
                                 )}
                                 <span className={cn(
@@ -207,12 +209,12 @@ export default function ProjectPage() {
                                 )}
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0">
                             <Button
                                 onClick={handleToggleProjectStatus}
                                 variant={project.status === 'completed' ? "outline" : "default"}
                                 className={cn(
-                                    "shrink-0 rounded-full px-6 font-medium shadow-lg hover:shadow-xl transition-all",
+                                    "w-full sm:w-auto shrink-0 rounded-full px-6 font-medium shadow-lg hover:shadow-xl transition-all",
                                     project.status === 'active' && "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20 dark:shadow-none"
                                 )}
                             >

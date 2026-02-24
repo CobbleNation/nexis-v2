@@ -4,6 +4,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useData } from '@/lib/store';
+import Link from 'next/link';
 
 interface StatCardProps {
     title: string;
@@ -11,9 +12,10 @@ interface StatCardProps {
     trend?: 'up' | 'down' | 'neutral';
     trendValue?: string;
     variant?: 'primary' | 'default';
+    href?: string;
 }
 
-function StatCard({ title, value, trend, trendValue, variant = 'default' }: StatCardProps) {
+function StatCard({ title, value, trend, trendValue, variant = 'default', href }: StatCardProps) {
     const isPrimary = variant === 'primary';
 
     return (
@@ -38,12 +40,21 @@ function StatCard({ title, value, trend, trendValue, variant = 'default' }: Stat
                 <span className={cn("text-sm font-medium", isPrimary ? "text-white/80" : "text-muted-foreground")}>
                     {title}
                 </span>
-                <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center",
-                    isPrimary ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-secondary text-foreground"
-                )}>
-                    <ArrowUpRight className="w-4 h-4" />
-                </div>
+                {href ? (
+                    <Link href={href} className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity",
+                        isPrimary ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-secondary text-foreground"
+                    )}>
+                        <ArrowUpRight className="w-4 h-4" />
+                    </Link>
+                ) : (
+                    <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center",
+                        isPrimary ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-secondary text-foreground"
+                    )}>
+                        <ArrowUpRight className="w-4 h-4" />
+                    </div>
+                )}
             </div>
 
             <div className="z-10 mt-auto">
@@ -86,24 +97,28 @@ export function StatsCards() {
                 trend="up"
                 trendValue="+2"
                 variant="primary"
+                href="/projects"
             />
             <StatCard
                 title="Завершені"
                 value={completedProjects}
                 trend="up"
                 trendValue="+5"
+                href="/projects?tab=completed"
             />
             <StatCard
                 title="Активні"
                 value={activeProjects}
                 trend="up"
                 trendValue="+3"
+                href="/projects?tab=active"
             />
             <StatCard
                 title="В очікуванні"
                 value={pendingProjects}
                 trend="neutral"
                 trendValue="1 новий"
+                href="/projects?tab=planned"
             />
         </div>
     );

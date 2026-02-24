@@ -105,23 +105,25 @@ export default function AreaDetailPage() {
             </div>
 
             <Tabs defaultValue="overview" className="space-y-8">
-                <TabsList id="area-navigation-tabs" className="bg-transparent border-b border-border/60 rounded-none h-auto p-0 w-full justify-start space-x-6">
-                    <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
-                        <Activity className="h-4 w-4" /> Огляд
-                    </TabsTrigger>
-                    <TabsTrigger value="goals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
-                        <Target className="h-4 w-4" /> Цілі <span className="ml-1 text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-600">{areaGoals.length}</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="actions" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
-                        <CheckSquare className="h-4 w-4" /> Дії
-                    </TabsTrigger>
-                    <TabsTrigger value="metrics" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
-                        <BarChart3 className="h-4 w-4" /> Метрики
-                    </TabsTrigger>
-                    <TabsTrigger value="notes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
-                        <FileText className="h-4 w-4" /> Нотатки
-                    </TabsTrigger>
-                </TabsList>
+                <div className="overflow-x-auto no-scrollbar w-[calc(100%+1.5rem)] -mx-4 px-4 sm:w-full sm:mx-0 sm:px-0 border-b border-border/60">
+                    <TabsList id="area-navigation-tabs" className="bg-transparent rounded-none h-auto p-0 justify-start space-x-6 w-max border-none pr-8 sm:pr-0">
+                        <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
+                            <Activity className="h-4 w-4" /> Огляд
+                        </TabsTrigger>
+                        <TabsTrigger value="goals" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
+                            <Target className="h-4 w-4" /> Цілі <span className="ml-1 text-xs bg-slate-100 px-2 py-0.5 rounded-full text-slate-600">{areaGoals.length}</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="actions" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
+                            <CheckSquare className="h-4 w-4" /> Дії
+                        </TabsTrigger>
+                        <TabsTrigger value="metrics" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
+                            <BarChart3 className="h-4 w-4" /> Метрики
+                        </TabsTrigger>
+                        <TabsTrigger value="notes" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-primary border-b-2 border-transparent rounded-none px-0 py-3 gap-2 text-muted-foreground data-[state=active]:text-foreground transition-all">
+                            <FileText className="h-4 w-4" /> Нотатки
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
                 <TabsContent value="overview" className="space-y-8">
                     {/* ... OVERVIEW CONTENT ... (Updating Goals Widget in Overview too?) */}

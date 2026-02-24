@@ -289,7 +289,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     )}
 
                     {step === 'result' && proposal && selectedGoal && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-[500px]">
+                        <div className="flex flex-col md:grid md:grid-cols-2 gap-6 h-auto max-h-[65vh] md:max-h-none md:h-[500px] overflow-y-auto md:overflow-y-visible pr-2 md:pr-0">
                             {/* Left Column: Context */}
                             <div className="space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border overflow-y-auto">
                                 <div>
@@ -371,7 +371,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
 
                                 {/* Status Card */}
                                 <div className={cn(
-                                    "p-5 rounded-2xl border flex items-start gap-4 shadow-sm",
+                                    "p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm",
                                     proposal.status === 'on_track' ? "bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800" :
                                         proposal.status === 'needs_attention' ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800" :
                                             "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800"

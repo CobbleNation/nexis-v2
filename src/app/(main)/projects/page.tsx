@@ -132,32 +132,34 @@ function ProjectsContent() {
             </div>
 
             <Tabs value={currentTab} onValueChange={(val) => router.push(`/projects?tab=${val}`)} className="space-y-6">
-                <TabsList className="bg-transparent p-0 gap-6 overflow-x-auto scrollbar-hide w-full justify-start">
-                    <TabsTrigger value="active" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
-                        Активні
-                        <span className="bg-secondary text-secondary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                            {activeProjects.length}
-                        </span>
-                    </TabsTrigger>
-                    <TabsTrigger value="planned" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
-                        Заплановані
-                        <span className="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                            {plannedProjects.length}
-                        </span>
-                    </TabsTrigger>
-                    <TabsTrigger value="completed" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
-                        Виконані
-                        <span className="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                            {completedProjects.length}
-                        </span>
-                    </TabsTrigger>
-                    <TabsTrigger value="deferred" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
-                        Відкладені
-                        <span className="bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                            {deferredProjects.length}
-                        </span>
-                    </TabsTrigger>
-                </TabsList>
+                <div className="overflow-x-auto no-scrollbar w-[calc(100%+1.5rem)] -mx-4 px-4 sm:w-full sm:mx-0 sm:px-0">
+                    <TabsList className="bg-transparent p-0 gap-6 w-max justify-start pr-8 sm:pr-0">
+                        <TabsTrigger value="active" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
+                            Активні
+                            <span className="bg-secondary text-secondary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                                {activeProjects.length}
+                            </span>
+                        </TabsTrigger>
+                        <TabsTrigger value="planned" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
+                            Заплановані
+                            <span className="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                                {plannedProjects.length}
+                            </span>
+                        </TabsTrigger>
+                        <TabsTrigger value="completed" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
+                            Виконані
+                            <span className="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                                {completedProjects.length}
+                            </span>
+                        </TabsTrigger>
+                        <TabsTrigger value="deferred" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
+                            Відкладені
+                            <span className="bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+                                {deferredProjects.length}
+                            </span>
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
 
                 <TabsContent value="active" className="animate-in fade-in slide-in-from-left-4 duration-300">
                     {activeProjects.length === 0 ? (
