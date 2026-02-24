@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { Goal } from '@/types';
 import { useState } from 'react';
+import { formatGoalMetricDisplay } from '@/lib/goal-utils';
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
@@ -186,7 +187,7 @@ const GoalsList = ({ goals, areas, openDetails, onCreate }: { goals: Goal[], are
                                 {goal.targetMetricId ? (
                                     <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-secondary/50 px-2 py-1 rounded-md">
                                         <TrendingUp className="w-3.5 h-3.5" />
-                                        <span>{goal.metricCurrentValue ?? 0} / {goal.metricTargetValue ?? 100}</span>
+                                        <span>{formatGoalMetricDisplay(goal).current} / {formatGoalMetricDisplay(goal).target}</span>
                                     </div>
                                 ) : (
                                     <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-secondary/50 px-2 py-1 rounded-md">

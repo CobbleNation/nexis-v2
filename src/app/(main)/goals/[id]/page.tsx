@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Goal, LifeArea, MetricDefinition, Action } from '@/types';
+import { formatGoalMetricDisplay } from '@/lib/goal-utils';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { Target, Calendar, CheckCircle2, AlertTriangle, Trash2, Edit, X, Trophy, TrendingUp, TrendingDown, Minus, PlayCircle, PauseCircle, ChevronRight, ExternalLink, Loader2, ArrowLeft, Plus, Circle, ListChecks, Sparkles } from 'lucide-react';
@@ -208,7 +209,7 @@ export default function GoalDetailsPage() {
                 id: uuidv4(),
                 userId: 'user',
                 title: `Рефлексія: ${activeGoal.title}`,
-                content: `### Рефлексія по цілі: \n\n**Результат**:  ${activeGoal.metricCurrentValue || 0}/${activeGoal.metricTargetValue} ${metric?.unit})\n**Рейтинг**: \n\n`,
+                content: `### Рефлексія по цілі: \n\n**Результат**:  ${formatGoalMetricDisplay(activeGoal).current}/${formatGoalMetricDisplay(activeGoal).target} ${metric?.unit})\n**Рейтинг**: \n\n`,
                 relatedAreaIds: [activeGoal.areaId],
                 date: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
@@ -459,8 +460,8 @@ export default function GoalDetailsPage() {
                                 <div>
                                     <div className="text-sm font-medium text-slate-500 dark:text-muted-foreground mb-1">{metric.name}</div>
                                     <div className="text-3xl font-bold text-slate-900 dark:text-foreground flex items-baseline gap-1.5">
-                                        {activeGoal.metricCurrentValue || 0}
-                                        <span className="text-sm text-slate-400 dark:text-muted-foreground font-normal">/ {activeGoal.metricTargetValue} {metric.unit}</span>
+                                        {formatGoalMetricDisplay(activeGoal).current}
+                                        <span className="text-sm text-slate-400 dark:text-muted-foreground font-normal">/ {formatGoalMetricDisplay(activeGoal).target} {metric.unit}</span>
                                     </div>
                                 </div>
                             </div>

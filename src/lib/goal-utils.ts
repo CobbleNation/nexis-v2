@@ -8,6 +8,32 @@ export interface ComputedGoalStatus {
     isMetricBased: boolean;
 }
 
+export function formatGoalMetricDisplay(goal: Goal, currentMetricValue?: number): { current: number, target: number } {
+    if (goal.metricStartValue === undefined || goal.metricTargetValue === undefined) {
+        return { current: currentMetricValue ?? goal.metricCurrentValue ?? 0, target: goal.metricTargetValue ?? 100 };
+    }
+
+    const start = goal.metricStartValue;
+    const target = goal.metricTargetValue;
+    const current = currentMetricValue ?? goal.metricCurrentValue ?? start;
+
+    if (start > target) {
+        // Decrease goal (e.g. debt from 290k to 0)
+        // Show progress made vs total required, e.g. paid 10k out of 290k
+        return {
+            current: Math.max(0, start - current),
+            target: start - target
+        };
+    } else {
+        // Increase goal (e.g. weight from 60 to 80)
+        // Usually showing absolute is fine, or delta if preferred. Standard is absolute.
+        return {
+            current,
+            target
+        };
+    }
+}
+
 /**
  * Calculates the 'Truthful' progress of a goal.
  * Rule: Only Strategic goals have numeric progress based on Metrics.
