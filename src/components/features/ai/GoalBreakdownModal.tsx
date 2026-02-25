@@ -177,6 +177,148 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
         }
     };
 
+    const contextContent = selectedGoal ? (
+        <>
+            <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Контекст Цілі</h4>
+                <h2 className="text-2xl font-bold leading-tight">{selectedGoal.title}</h2>
+                <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="outline" className={cn("bg-white dark:bg-slate-800", getAreaInfo(selectedGoal.areaId).color, "bg-opacity-10 text-foreground border-none")}>
+                        {getAreaInfo(selectedGoal.areaId).title}
+                    </Badge>
+                    <Badge variant="secondary">{selectedGoal.type}</Badge>
+                </div>
+            </div>
+
+            <div className="space-y-4">
+                <div className="p-4 bg-white dark:bg-card rounded-xl border shadow-sm space-y-3">
+                    <div className="flex items-center justify-between text-sm font-medium">
+                        <span className="flex items-center gap-2">
+                            <Target className="w-4 h-4 text-violet-500" />
+                            Основна Метрика
+                        </span>
+                    </div>
+                    {targetMetric ? (
+                        <div className="space-y-1">
+                            <div className="text-2xl font-bold tabular-nums">
+                                {selectedGoal.metricCurrentValue || selectedGoal.metricStartValue || 0}
+                                <span className="text-sm font-normal text-muted-foreground ml-1">
+                                    / {selectedGoal.metricTargetValue} {targetMetric.unit}
+                                </span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div className="h-full bg-violet-500" style={{ width: `${selectedGoal.progress}%` }} />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="text-sm text-muted-foreground italic">Метрика не прив'язана</div>
+                    )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 bg-white dark:bg-card rounded-xl border shadow-sm">
+                        <span className="text-xs text-muted-foreground uppercase font-bold">Задачі</span>
+                        <div className="flex items-baseline gap-1 mt-1">
+                            <span className="text-2xl font-bold">{linkedTasks.length}</span>
+                            <span className="text-xs text-muted-foreground">активних</span>
+                        </div>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-card rounded-xl border shadow-sm">
+                        <span className="text-xs text-muted-foreground uppercase font-bold">Проєкти</span>
+                        <div className="flex items-baseline gap-1 mt-1">
+                            <span className="text-2xl font-bold">{linkedProjects.length}</span>
+                            <span className="text-xs text-muted-foreground">пов'язаних</span>
+                        </div>
+                    </div>
+                </div>
+
+                {linkedTasks.length > 0 && (
+                    <div className="pt-2">
+                        <h5 className="text-xs font-semibold mb-2 text-muted-foreground">Активні Задачі:</h5>
+                        <div className="space-y-2">
+                            {linkedTasks.slice(0, 3).map(task => (
+                                <div key={task.id} className="flex items-center gap-2 text-sm p-2 bg-white dark:bg-card rounded-lg border  border-l-4 border-l-violet-500">
+                                    <span className="truncate">{task.title}</span>
+                                </div>
+                            ))}
+                            {linkedTasks.length > 3 && (
+                                <div className="text-xs text-center text-muted-foreground">
+                                    + ще {linkedTasks.length - 3} задач
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </>
+    ) : null;
+
+    const strategyContent = proposal ? (
+        <>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Рекомендація AI</h4>
+
+            {/* Status Card */}
+            <div className={cn(
+                "p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm",
+                proposal.status === 'on_track' ? "bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800" :
+                    proposal.status === 'needs_attention' ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800" :
+                        "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800"
+            )}>
+                <div className={cn(
+                    "p-2.5 rounded-xl shrink-0 shadow-sm",
+                    proposal.status === 'on_track' ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" :
+                        proposal.status === 'needs_attention' ? "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300" :
+                            "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                )}>
+                    {proposal.status === 'on_track' ? <TrendingUp className="w-6 h-6" /> :
+                        proposal.status === 'needs_attention' ? <AlertCircle className="w-6 h-6" /> :
+                            <Sparkles className="w-6 h-6" />}
+                </div>
+                <div>
+                    <h4 className="font-bold text-base mb-1">
+                        {proposal.status === 'on_track' ? 'Впевнений Прогрес' :
+                            proposal.status === 'needs_attention' ? 'Потрібно Втручання' :
+                                'Старт Стратегії'}
+                    </h4>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{proposal.recommendation}</p>
+                </div>
+            </div>
+
+            {/* Smart Actions */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-violet-500" />
+                    <h4 className="font-semibold text-sm">Наступні Кроки</h4>
+                    <Badge variant="outline" className="ml-auto text-xs font-normal">
+                        {proposal.focusArea}
+                    </Badge>
+                </div>
+
+                <div className="grid gap-3">
+                    {proposal.newTasks.map((task, idx) => (
+                        <div key={idx} className="group flex items-center gap-3 p-3.5 bg-white dark:bg-card border hover:border-violet-300 dark:hover:border-violet-700 rounded-xl transition-all shadow-sm">
+                            <div className="w-5 h-5 rounded-md border-2 border-slate-300 dark:border-slate-700 group-hover:border-violet-500 flex items-center justify-center">
+                                <div className="w-2.5 h-2.5 bg-violet-500 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                            <span className="text-sm font-medium">{task}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Missing Tools Suggestions */}
+            {!targetMetric && (
+                <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900 text-sm flex gap-3 items-start">
+                    <Activity className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
+                    <div className="text-orange-900 dark:text-orange-200">
+                        <span className="font-semibold block mb-0.5">Додайте Метрику</span>
+                        Цю ціль важко виміряти. Рекомендую додати числову метрику для відстеження прогресу.
+                    </div>
+                </div>
+            )}
+        </>
+    ) : null;
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
@@ -289,156 +431,45 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     )}
 
                     {step === 'result' && proposal && selectedGoal && (
-                        <div className="flex flex-col md:grid md:grid-cols-2 gap-6 h-auto max-h-[65vh] md:max-h-none md:h-[500px] overflow-y-auto md:overflow-y-visible pr-2 md:pr-0">
-                            {/* Left Column: Context */}
-                            <div className="space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border overflow-y-auto">
-                                <div>
-                                    <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">Контекст Цілі</h4>
-                                    <h2 className="text-2xl font-bold leading-tight">{selectedGoal.title}</h2>
-                                    <div className="flex items-center gap-2 mt-2">
-                                        <Badge variant="outline" className={cn("bg-white dark:bg-slate-800", getAreaInfo(selectedGoal.areaId).color, "bg-opacity-10 text-foreground border-none")}>
-                                            {getAreaInfo(selectedGoal.areaId).title}
-                                        </Badge>
-                                        <Badge variant="secondary">{selectedGoal.type}</Badge>
-                                    </div>
+                        <>
+                            {/* Desktop Layout */}
+                            <div className="hidden md:grid md:grid-cols-2 gap-6 h-[500px] pr-2 md:pr-0">
+                                <div className="space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border overflow-y-auto">
+                                    {contextContent}
                                 </div>
-
-                                <div className="space-y-4">
-                                    <div className="p-4 bg-white dark:bg-card rounded-xl border shadow-sm space-y-3">
-                                        <div className="flex items-center justify-between text-sm font-medium">
-                                            <span className="flex items-center gap-2">
-                                                <Target className="w-4 h-4 text-violet-500" />
-                                                Основна Метрика
-                                            </span>
-                                        </div>
-                                        {targetMetric ? (
-                                            <div className="space-y-1">
-                                                <div className="text-2xl font-bold tabular-nums">
-                                                    {selectedGoal.metricCurrentValue || selectedGoal.metricStartValue || 0}
-                                                    <span className="text-sm font-normal text-muted-foreground ml-1">
-                                                        / {selectedGoal.metricTargetValue} {targetMetric.unit}
-                                                    </span>
-                                                </div>
-                                                <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-violet-500" style={{ width: `${selectedGoal.progress}%` }} />
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="text-sm text-muted-foreground italic">Метрика не прив'язана</div>
-                                        )}
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="p-3 bg-white dark:bg-card rounded-xl border shadow-sm">
-                                            <span className="text-xs text-muted-foreground uppercase font-bold">Задачі</span>
-                                            <div className="flex items-baseline gap-1 mt-1">
-                                                <span className="text-2xl font-bold">{linkedTasks.length}</span>
-                                                <span className="text-xs text-muted-foreground">активних</span>
-                                            </div>
-                                        </div>
-                                        <div className="p-3 bg-white dark:bg-card rounded-xl border shadow-sm">
-                                            <span className="text-xs text-muted-foreground uppercase font-bold">Проєкти</span>
-                                            <div className="flex items-baseline gap-1 mt-1">
-                                                <span className="text-2xl font-bold">{linkedProjects.length}</span>
-                                                <span className="text-xs text-muted-foreground">пов'язаних</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {linkedTasks.length > 0 && (
-                                        <div className="pt-2">
-                                            <h5 className="text-xs font-semibold mb-2 text-muted-foreground">Активні Задачі:</h5>
-                                            <div className="space-y-2">
-                                                {linkedTasks.slice(0, 3).map(task => (
-                                                    <div key={task.id} className="flex items-center gap-2 text-sm p-2 bg-white dark:bg-card rounded-lg border  border-l-4 border-l-violet-500">
-                                                        <span className="truncate">{task.title}</span>
-                                                    </div>
-                                                ))}
-                                                {linkedTasks.length > 3 && (
-                                                    <div className="text-xs text-center text-muted-foreground">
-                                                        + ще {linkedTasks.length - 3} задач
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
+                                <div className="space-y-6 overflow-y-auto pr-2 pb-6">
+                                    {strategyContent}
                                 </div>
                             </div>
 
-                            {/* Right Column: Strategy */}
-                            <div className="space-y-6 overflow-y-auto pr-2">
-                                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Рекомендація AI</h4>
-
-                                {/* Status Card */}
-                                <div className={cn(
-                                    "p-5 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm",
-                                    proposal.status === 'on_track' ? "bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-800" :
-                                        proposal.status === 'needs_attention' ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800" :
-                                            "bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800"
-                                )}>
-                                    <div className={cn(
-                                        "p-2.5 rounded-xl shrink-0 shadow-sm",
-                                        proposal.status === 'on_track' ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300" :
-                                            proposal.status === 'needs_attention' ? "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300" :
-                                                "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                                    )}>
-                                        {proposal.status === 'on_track' ? <TrendingUp className="w-6 h-6" /> :
-                                            proposal.status === 'needs_attention' ? <AlertCircle className="w-6 h-6" /> :
-                                                <Sparkles className="w-6 h-6" />}
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-base mb-1">
-                                            {proposal.status === 'on_track' ? 'Впевнений Прогрес' :
-                                                proposal.status === 'needs_attention' ? 'Потрібно Втручання' :
-                                                    'Старт Стратегії'}
-                                        </h4>
-                                        <p className="text-sm leading-relaxed text-muted-foreground">{proposal.recommendation}</p>
-                                    </div>
-                                </div>
-
-                                {/* Smart Actions */}
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <Target className="w-4 h-4 text-violet-500" />
-                                        <h4 className="font-semibold text-sm">Наступні Кроки</h4>
-                                        <Badge variant="outline" className="ml-auto text-xs font-normal">
-                                            {proposal.focusArea}
-                                        </Badge>
-                                    </div>
-
-                                    <div className="grid gap-3">
-                                        {proposal.newTasks.map((task, idx) => (
-                                            <div key={idx} className="group flex items-center gap-3 p-3.5 bg-white dark:bg-card border hover:border-violet-300 dark:hover:border-violet-700 rounded-xl transition-all shadow-sm">
-                                                <div className="w-5 h-5 rounded-md border-2 border-slate-300 dark:border-slate-700 group-hover:border-violet-500 flex items-center justify-center">
-                                                    <div className="w-2.5 h-2.5 bg-violet-500 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                </div>
-                                                <span className="text-sm font-medium">{task}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Missing Tools Suggestions */}
-                                {!targetMetric && (
-                                    <div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900 text-sm flex gap-3 items-start">
-                                        <Activity className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
-                                        <div className="text-orange-900 dark:text-orange-200">
-                                            <span className="font-semibold block mb-0.5">Додайте Метрику</span>
-                                            Цю ціль важко виміряти. Рекомендую додати числову метрику для відстеження прогресу.
-                                        </div>
-                                    </div>
-                                )}
+                            {/* Mobile Layout */}
+                            <div className="md:hidden">
+                                <Tabs defaultValue="strategy" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                                        <TabsTrigger value="strategy">Стратегія</TabsTrigger>
+                                        <TabsTrigger value="context">Контекст</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="strategy" className="mt-0 space-y-6 overflow-y-auto max-h-[60vh] pb-6 pr-1">
+                                        {strategyContent}
+                                    </TabsContent>
+                                    <TabsContent value="context" className="mt-0 space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border overflow-y-auto max-h-[60vh]">
+                                        {contextContent}
+                                    </TabsContent>
+                                </Tabs>
                             </div>
-                        </div>
+                        </>
                     )}
                 </div>
 
                 <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
                     {step === 'select' && (
-                        <Button onClick={generateStrategy} disabled={!selectedGoalId} size="lg" className="w-full sm:w-auto bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/20">
-                            <Sparkles className="w-4 h-4 mr-2" />
-                            Отримати Стретегію
-                        </Button>
+                        <div className="flex flex-col-reverse sm:flex-row w-full justify-end gap-2">
+                            <Button variant="ghost" onClick={() => setIsOpen(false)} className="w-full sm:w-auto mt-2 sm:mt-0">Скасувати</Button>
+                            <Button onClick={generateStrategy} disabled={!selectedGoalId} size="lg" className="w-full sm:w-auto bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/20">
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Отримати Стратегію
+                            </Button>
+                        </div>
                     )}
                     {step === 'result' && (
                         <>
