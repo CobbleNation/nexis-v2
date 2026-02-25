@@ -329,11 +329,13 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className={cn(
-                "bg-white dark:bg-card transition-all duration-300",
-                step === 'result' ? "sm:max-w-[800px]" : "sm:max-w-[600px]"
-            )}>
-                <DialogHeader>
+            <DialogContent
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                className={cn(
+                    "bg-white dark:bg-card transition-all duration-300 flex flex-col gap-0 p-0 overflow-hidden max-h-[90dvh]",
+                    step === 'result' ? "sm:max-w-[800px]" : "sm:max-w-[600px]"
+                )}>
+                <DialogHeader className="p-6 pb-4 flex-shrink-0 border-b relative z-10 bg-white dark:bg-card rounded-t-xl">
                     <DialogTitle className="flex items-center gap-2 text-xl">
                         <BrainCircuit className="w-6 h-6 text-violet-500" />
                         AI Стратегія V2
@@ -345,7 +347,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="py-4">
+                <div className="flex-1 overflow-y-auto p-6 relative">
                     {step === 'select' && (
                         <div className="space-y-4">
                             <div className="relative">
@@ -358,7 +360,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                                 />
                             </div>
 
-                            <ScrollArea className="h-[400px] pr-4">
+                            <div className="pr-4 pb-4">
                                 <div className="space-y-8">
                                     {Object.entries(goalsByArea).map(([areaId, goals]) => {
                                         const areaInfo = getAreaInfo(areaId);
@@ -409,7 +411,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                                         </div>
                                     )}
                                 </div>
-                            </ScrollArea>
+                            </div>
                         </div>
                     )}
 
@@ -433,26 +435,26 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     {step === 'result' && proposal && selectedGoal && (
                         <>
                             {/* Desktop Layout */}
-                            <div className="hidden md:grid md:grid-cols-2 gap-6 h-[500px] pr-2 md:pr-0">
-                                <div className="space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border overflow-y-auto">
+                            <div className="hidden md:grid md:grid-cols-2 gap-6 h-auto min-h-[400px] pr-2 md:pr-0 relative">
+                                <div className="space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border">
                                     {contextContent}
                                 </div>
-                                <div className="space-y-6 overflow-y-auto pr-2 pb-6">
+                                <div className="space-y-6 pr-2 pb-6">
                                     {strategyContent}
                                 </div>
                             </div>
 
                             {/* Mobile Layout */}
-                            <div className="md:hidden">
+                            <div className="md:hidden pb-4">
                                 <Tabs defaultValue="strategy" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                                    <TabsList className="grid w-full grid-cols-2 mb-4 relative z-10 bg-white dark:bg-card sticky top-0 py-2">
                                         <TabsTrigger value="strategy">Стратегія</TabsTrigger>
                                         <TabsTrigger value="context">Контекст</TabsTrigger>
                                     </TabsList>
-                                    <TabsContent value="strategy" className="mt-0 space-y-6 overflow-y-auto max-h-[60vh] pb-6 pr-1">
+                                    <TabsContent value="strategy" className="mt-0 space-y-6 pb-2 pr-1">
                                         {strategyContent}
                                     </TabsContent>
-                                    <TabsContent value="context" className="mt-0 space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border overflow-y-auto max-h-[60vh]">
+                                    <TabsContent value="context" className="mt-0 space-y-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 p-6 border border-slate-100 dark:border-border">
                                         {contextContent}
                                     </TabsContent>
                                 </Tabs>
@@ -461,7 +463,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     )}
                 </div>
 
-                <DialogFooter className="gap-2 sm:gap-0 border-t pt-4">
+                <DialogFooter className="gap-2 sm:gap-0 p-6 flex-shrink-0 border-t bg-slate-50 dark:bg-slate-900/50 rounded-b-xl relative z-10 mt-auto">
                     {step === 'select' && (
                         <div className="flex flex-col-reverse sm:flex-row w-full justify-end gap-2">
                             <Button variant="ghost" onClick={() => setIsOpen(false)} className="w-full sm:w-auto mt-2 sm:mt-0">Скасувати</Button>
