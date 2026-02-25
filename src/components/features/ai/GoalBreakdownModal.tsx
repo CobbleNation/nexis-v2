@@ -352,10 +352,10 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="py-4">
+                <div className="py-4 flex-1 min-h-0 flex flex-col">
                     {step === 'select' && (
-                        <div className="space-y-4">
-                            <div className="relative">
+                        <div className="space-y-4 flex flex-col min-h-0 flex-1">
+                            <div className="relative shrink-0">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <Input
                                     placeholder="Пошук цілі..."
@@ -365,7 +365,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                                 />
                             </div>
 
-                            <ScrollArea className="h-[60vh] sm:h-[400px] pr-4">
+                            <ScrollArea className="flex-1 min-h-0 h-[50vh] sm:h-[400px] pr-4">
                                 <div className="space-y-8">
                                     {Object.entries(goalsByArea).map(([areaId, goals]) => {
                                         const areaInfo = getAreaInfo(areaId);
