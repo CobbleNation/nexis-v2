@@ -524,9 +524,9 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
                                 {/* Main Metric Selector */}
                                 <div className="space-y-4 bg-white dark:bg-card p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-border">
-                                    <div className="flex items-center justify-between">
-                                        <Label className="text-sm font-semibold">Головна Метрика</Label>
-                                        <div className="flex gap-2">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                        <Label className="text-sm font-semibold shrink-0">Головна Метрика</Label>
+                                        <div className="flex flex-wrap items-center gap-2">
                                             <Button
                                                 variant="ghost"
                                                 size="sm"

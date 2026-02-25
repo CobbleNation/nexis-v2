@@ -343,7 +343,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-xl">
                         <BrainCircuit className="w-6 h-6 text-violet-500" />
-                        AI Стратегія V2
+                        AI Стратегія
                     </DialogTitle>
                     <DialogDescription>
                         {step === 'select' ? "Оберіть ціль для глибокого аналізу та побудови стратегії." :

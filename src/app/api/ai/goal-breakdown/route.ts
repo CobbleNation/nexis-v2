@@ -15,7 +15,7 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { goalTitle, goalDescription, area } = body;
+        const { goalTitle, goalDescription, area, requestedCount } = body;
 
         // 1. Auth & Pro Check
         const cookieStore = await cookies();
@@ -37,12 +37,17 @@ export async function POST(req: Request) {
             return new Response('Goal title is required', { status: 400 });
         }
 
+        const countInstruction = requestedCount
+            ? `IMPORTANT: You MUST generate EXACTLY ${requestedCount} sub-tasks. No more, no less.`
+            : '';
+
         const userPrompt = `
 Goal Title: ${goalTitle}
 Description: ${goalDescription || 'No description provided'}
 Area: ${area || 'General'}
 
 Break this goal down into actionable sub-tasks following the system instructions.
+${countInstruction}
 `;
 
         const completion = await openai.chat.completions.create({

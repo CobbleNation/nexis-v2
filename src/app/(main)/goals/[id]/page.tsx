@@ -17,6 +17,7 @@ import { GoalCreationWizard } from '@/components/goals/GoalCreationWizard';
 import { MetricUpdateDialog } from '@/components/features/MetricUpdateDialog';
 import { v4 as uuidv4 } from 'uuid';
 import { GoalReflectionDialog } from '@/components/goals/GoalReflectionDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Input } from '@/components/ui/input';
 import { GoalBreakdownResponse } from '@/lib/ai/types';
@@ -41,6 +42,8 @@ export default function GoalDetailsPage() {
     const [isAddingSubgoal, setIsAddingSubgoal] = useState(false);
     const [newSubgoalTitle, setNewSubgoalTitle] = useState('');
     const [isGeneratingBreakdown, setIsGeneratingBreakdown] = useState(false);
+    const [previewTasks, setPreviewTasks] = useState<{ id: string; title: string; hint: string }[]>([]);
+    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
     // Use live data from store
     const activeGoal = state.goals.find(g => g.id === goalId);
@@ -98,6 +101,14 @@ export default function GoalDetailsPage() {
         : false;
 
     const handleAIBreakdown = async () => {
+        const activeStepsCount = activeGoal.subGoals?.filter(sg => !sg.completed).length || 0;
+        const requestedCount = Math.max(0, 7 - activeStepsCount);
+
+        if (requestedCount <= 0) {
+            toast.info("Максимальна кількість активних кроків (7). Виконайте або видаліть існуючі, щоб згенерувати нові.");
+            return;
+        }
+
         setIsGeneratingBreakdown(true);
         try {
             const response = await fetch('/api/ai/goal-breakdown', {
@@ -106,7 +117,8 @@ export default function GoalDetailsPage() {
                 body: JSON.stringify({
                     goalTitle: activeGoal.title,
                     goalDescription: activeGoal.description,
-                    area: area?.title
+                    area: area?.title,
+                    requestedCount
                 })
             });
 
@@ -115,48 +127,13 @@ export default function GoalDetailsPage() {
             const data: GoalBreakdownResponse = await response.json();
 
             if (data.subTasks && data.subTasks.length > 0) {
-                // 1. Create Subgoals for the Goal (Checklist)
-                const newSubgoals = data.subTasks.map((task: { title: any; }) => ({
+                const newPreviewTasks = data.subTasks.slice(0, requestedCount).map((task: { title: string }) => ({
                     id: uuidv4(),
                     title: task.title,
-                    completed: false
+                    hint: ''
                 }));
-
-                const updatedSubgoals = [...(activeGoal.subGoals || []), ...newSubgoals];
-
-                // 2. Create Actual Tasks (Actions) for the Calendar/Todo List
-                const todayStr = new Date().toISOString().split('T')[0];
-                const nowIso = new Date().toISOString();
-
-                data.subTasks.forEach((task: { title: string }, index: number) => {
-                    const newActionId = uuidv4();
-                    const newAction: Action = {
-                        id: newActionId,
-                        userId: 'user',
-                        title: task.title,
-                        description: `Auto-generated step for goal: ${activeGoal.title}`,
-                        type: 'task',
-                        status: 'pending',
-                        completed: false,
-                        priority: 'medium',
-                        date: todayStr,
-                        createdAt: nowIso,
-                        updatedAt: nowIso,
-                        areaId: activeGoal.areaId,
-                        linkedGoalId: activeGoal.id,
-                        duration: 15,
-                        isFocus: index < 3
-                    };
-
-                    dispatch({ type: 'ADD_ACTION', payload: newAction });
-                });
-
-                dispatch({
-                    type: 'UPDATE_GOAL',
-                    payload: { ...activeGoal, subGoals: updatedSubgoals }
-                });
-
-                toast.success(`Згенеровано ${newSubgoals.length} кроків та створено завдання!`);
+                setPreviewTasks(newPreviewTasks);
+                setIsPreviewOpen(true);
             } else {
                 toast.info("AI не знайшов варіантів для цієї цілі.");
             }
@@ -167,6 +144,64 @@ export default function GoalDetailsPage() {
         } finally {
             setIsGeneratingBreakdown(false);
         }
+    };
+
+    const removePreviewTask = (id: string) => {
+        setPreviewTasks(prev => prev.filter(t => t.id !== id));
+    };
+
+    const updatePreviewTaskHint = (id: string, hint: string) => {
+        setPreviewTasks(prev => prev.map(t => t.id === id ? { ...t, hint } : t));
+    };
+
+    const confirmPreviewTasks = () => {
+        if (previewTasks.length === 0) {
+            setIsPreviewOpen(false);
+            return;
+        }
+
+        const newSubgoals = previewTasks.map(task => ({
+            id: uuidv4(),
+            title: task.title,
+            completed: false
+        }));
+
+        const updatedSubgoals = [...(activeGoal.subGoals || []), ...newSubgoals];
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const nowIso = new Date().toISOString();
+
+        previewTasks.forEach((task, index) => {
+            const newActionId = uuidv4();
+            const newAction: Action = {
+                id: newActionId,
+                userId: 'user',
+                title: task.title,
+                description: task.hint ? `Коментар: ${task.hint}\n\nЗгенеровано AI для цілі: ${activeGoal.title}` : `Згенеровано AI для цілі: ${activeGoal.title}`,
+                type: 'task',
+                status: 'pending',
+                completed: false,
+                priority: 'medium',
+                date: todayStr,
+                createdAt: nowIso,
+                updatedAt: nowIso,
+                areaId: activeGoal.areaId,
+                linkedGoalId: activeGoal.id,
+                duration: 15,
+                isFocus: index < 3
+            };
+
+            dispatch({ type: 'ADD_ACTION', payload: newAction });
+        });
+
+        dispatch({
+            type: 'UPDATE_GOAL',
+            payload: { ...activeGoal, subGoals: updatedSubgoals }
+        });
+
+        toast.success(`Збережено ${previewTasks.length} кроків!`);
+        setIsPreviewOpen(false);
+        setPreviewTasks([]);
     };
 
     const addSubgoal = () => {
@@ -580,6 +615,55 @@ export default function GoalDetailsPage() {
                     )}
                 </div>
             </div>
+
+            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+                <DialogContent className="max-w-2xl bg-white dark:bg-card">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-violet-500" />
+                            Затвердження AI Плану
+                        </DialogTitle>
+                        <DialogDescription>
+                            Перегляньте запропоновані кроки, видаліть зайві або додайте свої коментарі до кожного.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="py-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                        {previewTasks.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground">Немає кроків для відображення.</div>
+                        ) : (
+                            previewTasks.map((task) => (
+                                <div key={task.id} className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-900/50 space-y-3 group transition-colors hover:border-violet-200 dark:hover:border-violet-800">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="font-semibold text-sm mt-0.5 leading-tight">{task.title}</div>
+                                        <button
+                                            onClick={() => removePreviewTask(task.id)}
+                                            className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-all shrink-0 md:opacity-0 group-hover:opacity-100"
+                                            title="Видалити"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <Input
+                                        placeholder="Додати коментар чи деталь (опціонально)..."
+                                        value={task.hint}
+                                        onChange={(e) => updatePreviewTaskHint(task.id, e.target.value)}
+                                        className="h-9 text-sm bg-white dark:bg-card border-slate-200 dark:border-slate-800"
+                                    />
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <DialogFooter className="gap-2 sm:gap-0 mt-2">
+                        <Button variant="ghost" onClick={() => setIsPreviewOpen(false)}>Скасувати</Button>
+                        <Button onClick={confirmPreviewTasks} disabled={previewTasks.length === 0} className="bg-violet-600 hover:bg-violet-700 text-white">
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            Зберегти Кроки
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <GoalReflectionDialog
                 goal={activeGoal}

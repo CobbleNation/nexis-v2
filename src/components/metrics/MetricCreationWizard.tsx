@@ -231,6 +231,35 @@ export function MetricCreationWizard({ initialTitle, initialAreaId, initialUnit,
                             </div>
                         </div>
 
+                        {/* Direction */}
+                        <div className="space-y-3">
+                            <Label className="text-base block">Напрямок Зміни</Label>
+                            <p className="text-xs text-muted-foreground -mt-2 mb-2">Що вважається "успіхом"?</p>
+                            <div className="grid grid-cols-3 gap-3">
+                                <button
+                                    onClick={() => setDirection('increase')}
+                                    className={cn("p-3 rounded-lg border-2 flex flex-col items-center gap-2 transition-all", direction === 'increase' ? "border-green-500 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400" : "border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/20 dark:text-muted-foreground")}
+                                >
+                                    <TrendingUp className="w-5 h-5" />
+                                    <span className="text-xs font-bold">Більше = Краще</span>
+                                </button>
+                                <button
+                                    onClick={() => setDirection('decrease')}
+                                    className={cn("p-3 rounded-lg border-2 flex flex-col items-center gap-2 transition-all", direction === 'decrease' ? "border-red-500 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400" : "border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/20 dark:text-muted-foreground")}
+                                >
+                                    <TrendingDown className="w-5 h-5" />
+                                    <span className="text-xs font-bold">Менше = Краще</span>
+                                </button>
+                                <button
+                                    onClick={() => setDirection('neutral')}
+                                    className={cn("p-3 rounded-lg border-2 flex flex-col items-center gap-2 transition-all", direction === 'neutral' ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400" : "border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/20 dark:text-muted-foreground")}
+                                >
+                                    <Minus className="w-5 h-5" />
+                                    <span className="text-xs font-bold">Нейтрально</span>
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Unit Selector (Hidden for Boolean/Enum) */}
                         {(valueType === 'numeric' || valueType === 'scale') && (
                             <div className="space-y-3">
@@ -269,35 +298,6 @@ export function MetricCreationWizard({ initialTitle, initialAreaId, initialUnit,
                                 </div>
                             </div>
                         )}
-
-                        {/* Direction */}
-                        <div className="space-y-3">
-                            <Label className="text-base block">Напрямок Зміни</Label>
-                            <p className="text-xs text-muted-foreground -mt-2 mb-2">Що вважається "успіхом"?</p>
-                            <div className="grid grid-cols-3 gap-3">
-                                <button
-                                    onClick={() => setDirection('increase')}
-                                    className={cn("p-3 rounded-lg border-2 flex flex-col items-center gap-2 transition-all", direction === 'increase' ? "border-green-500 bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400" : "border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/20 dark:text-muted-foreground")}
-                                >
-                                    <TrendingUp className="w-5 h-5" />
-                                    <span className="text-xs font-bold">Більше = Краще</span>
-                                </button>
-                                <button
-                                    onClick={() => setDirection('decrease')}
-                                    className={cn("p-3 rounded-lg border-2 flex flex-col items-center gap-2 transition-all", direction === 'decrease' ? "border-red-500 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400" : "border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/20 dark:text-muted-foreground")}
-                                >
-                                    <TrendingDown className="w-5 h-5" />
-                                    <span className="text-xs font-bold">Менше = Краще</span>
-                                </button>
-                                <button
-                                    onClick={() => setDirection('neutral')}
-                                    className={cn("p-3 rounded-lg border-2 flex flex-col items-center gap-2 transition-all", direction === 'neutral' ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400" : "border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-secondary/20 dark:text-muted-foreground")}
-                                >
-                                    <Minus className="w-5 h-5" />
-                                    <span className="text-xs font-bold">Нейтрально</span>
-                                </button>
-                            </div>
-                        </div>
 
                     </div>
                 )}
