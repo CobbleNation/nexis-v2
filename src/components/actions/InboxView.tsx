@@ -132,12 +132,12 @@ export function InboxView() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
-                                    className="bg-white dark:bg-card p-4 rounded-xl border border-slate-100 dark:border-border shadow-sm flex items-center justify-between group hover:border-slate-200 dark:hover:border-primary/50 transition-all cursor-pointer"
+                                    className="bg-white dark:bg-card p-4 rounded-xl border border-slate-100 dark:border-border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 group hover:border-slate-200 dark:hover:border-primary/50 transition-all cursor-pointer"
                                     onClick={() => { setEditTarget(item.id); setIsEditOpen(true); }}
                                 >
-                                    <span className="font-medium text-slate-700 dark:text-foreground">{item.title}</span>
+                                    <span className="font-medium text-slate-700 dark:text-foreground break-words leading-relaxed">{item.title}</span>
 
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0 self-end sm:self-auto">
                                         <Button
                                             variant="ghost"
                                             size="icon"
@@ -153,7 +153,7 @@ export function InboxView() {
                                             className="h-8 text-xs text-orange-600 dark:text-primary bg-orange-50 dark:bg-primary/20 hover:bg-orange-100 dark:hover:bg-primary/30 font-medium"
                                             onClick={(e) => { e.stopPropagation(); setEditTarget(item.id); setIsEditOpen(true); }}
                                         >
-                                            <Calendar className="w-3 h-3 mr-1" /> Запланувати
+                                            <Calendar className="w-3.5 h-3.5 mr-1" /> Запланувати
                                         </Button>
                                     </div>
                                 </motion.div>
