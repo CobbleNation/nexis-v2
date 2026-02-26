@@ -16,6 +16,7 @@ import { Progress } from '@/components/ui/progress';
 import { GoalCreationWizard } from '@/components/goals/GoalCreationWizard';
 import { MetricUpdateDialog } from '@/components/features/MetricUpdateDialog';
 import { v4 as uuidv4 } from 'uuid';
+import TextareaAutosize from 'react-textarea-autosize';
 import { GoalReflectionDialog } from '@/components/goals/GoalReflectionDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useSubscription } from '@/hooks/useSubscription';
@@ -156,8 +157,8 @@ export default function GoalDetailsPage() {
         setPreviewTasks(prev => prev.filter(t => t.id !== id));
     };
 
-    const updatePreviewTaskHint = (id: string, hint: string) => {
-        setPreviewTasks(prev => prev.map(t => t.id === id ? { ...t, hint } : t));
+    const updatePreviewTaskTitle = (id: string, title: string) => {
+        setPreviewTasks(prev => prev.map(t => t.id === id ? { ...t, title } : t));
     };
 
     const confirmPreviewTasks = () => {
@@ -490,16 +491,17 @@ export default function GoalDetailsPage() {
                                         </div>
                                         <div className="divide-y divide-violet-100 dark:divide-violet-900/30">
                                             {previewTasks.map((task) => (
-                                                <div key={task.id} className="p-3.5 flex items-center gap-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-colors group">
-                                                    <Sparkles className="w-5 h-5 text-violet-400 shrink-0" />
-                                                    <Input
+                                                <div key={task.id} className="p-3.5 flex items-start gap-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-colors group">
+                                                    <Sparkles className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
+                                                    <TextareaAutosize
                                                         value={task.title}
-                                                        onChange={(e) => updatePreviewTaskHint(task.id, e.target.value)}
-                                                        className="text-sm flex-1 bg-transparent border-none h-auto p-0 focus-visible:ring-0 shadow-none font-medium text-slate-700 dark:text-slate-200"
+                                                        onChange={(e) => updatePreviewTaskTitle(task.id, e.target.value)}
+                                                        className="text-sm flex-1 bg-transparent border-none h-auto p-0 focus-visible:ring-0 shadow-none font-medium text-slate-700 dark:text-slate-200 resize-none outline-none leading-relaxed min-h-0"
+                                                        minRows={1}
                                                     />
                                                     <button
                                                         onClick={() => removePreviewTask(task.id)}
-                                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 mt-0.5"
                                                     >
                                                         <X className="w-4 h-4" />
                                                     </button>
