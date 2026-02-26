@@ -43,6 +43,8 @@ export default function GoalDetailsPage() {
     const [newSubgoalTitle, setNewSubgoalTitle] = useState('');
     const [isGeneratingBreakdown, setIsGeneratingBreakdown] = useState(false);
     const [previewTasks, setPreviewTasks] = useState<{ id: string; title: string; hint: string }[]>([]);
+    const [regenerationFeedback, setRegenerationFeedback] = useState('');
+    const [subgoalToComplete, setSubgoalToComplete] = useState<string | null>(null);
     // Use live data from store
     const activeGoal = state.goals.find(g => g.id === goalId);
 
@@ -108,9 +110,9 @@ export default function GoalDetailsPage() {
         }
 
         let feedback = undefined;
-        if (isRegeneration && previewTasks.length > 0) {
-            const comments = previewTasks.map(t => `- ${t.title}${t.hint ? ` (Коментар/Побажання: ${t.hint})` : ''}`).join('\n');
-            feedback = `Ось поточні запропоновані кроки та мої коментарі до них:\n${comments}\nБудь ласка, перегенеруй список кроків враховуючи ці побажання. Ти можеш замінити деякі кроки, змінити їх, або додати нові, щоб краще відповідати моїм коментарям.`;
+        if (isRegeneration && previewTasks.length > 0 && regenerationFeedback.trim()) {
+            const currentTitles = previewTasks.map(t => `- ${t.title}`).join('\n');
+            feedback = `Ось поточні запропоновані кроки:\n${currentTitles}\nМої зауваження до них:\n${regenerationFeedback}\nБудь ласка, перегенеруй список кроків враховуючи ці побажання.`;
         }
 
         setIsGeneratingBreakdown(true);
@@ -220,14 +222,44 @@ export default function GoalDetailsPage() {
         toast.success("Крок додано");
     };
 
-    const toggleSubgoal = (id: string) => {
-        const updatedSubgoals = (activeGoal.subGoals || []).map(sg =>
-            sg.id === id ? { ...sg, completed: !sg.completed } : sg
+    const confirmSubgoalCompletion = () => {
+        if (!subgoalToComplete) return;
+        const sg = activeGoal.subGoals?.find(s => s.id === subgoalToComplete);
+        if (!sg) return;
+
+        // Find associated action and complete it
+        const action = state.actions.find(a => a.linkedGoalId === activeGoal.id && a.title === sg.title && !a.completed);
+
+        if (action) {
+            dispatch({ type: 'UPDATE_ACTION', payload: { ...action, completed: true, status: 'completed', updatedAt: new Date().toISOString() } });
+        }
+
+        const updatedSubgoals = (activeGoal.subGoals || []).map(s =>
+            s.id === sg.id ? { ...s, completed: true } : s
         );
         dispatch({
             type: 'UPDATE_GOAL',
             payload: { ...activeGoal, subGoals: updatedSubgoals }
         });
+
+        setSubgoalToComplete(null);
+        toast.success("Крок виконано!");
+    };
+
+    const toggleSubgoal = (id: string, currentStatus: boolean) => {
+        if (!currentStatus) {
+            // Trying to complete it -> ask for confirmation
+            setSubgoalToComplete(id);
+        } else {
+            // Un-completing -> proceed immediately
+            const updatedSubgoals = (activeGoal.subGoals || []).map(sg =>
+                sg.id === id ? { ...sg, completed: false } : sg
+            );
+            dispatch({
+                type: 'UPDATE_GOAL',
+                payload: { ...activeGoal, subGoals: updatedSubgoals }
+            });
+        }
     };
 
     const deleteSubgoal = (id: string) => {
@@ -420,66 +452,22 @@ export default function GoalDetailsPage() {
 
                     {/* AI Plan Generation Loading */}
                     {isGeneratingBreakdown && previewTasks.length === 0 && (
-                        <div className="p-8 text-center bg-violet-50/50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-900/30 rounded-xl space-y-3">
+                        <div className="p-8 text-center bg-transparent border border-dashed border-violet-200 dark:border-violet-900/50 rounded-xl space-y-3">
                             <Loader2 className="w-6 h-6 animate-spin text-violet-500 mx-auto" />
                             <p className="text-sm text-violet-600 dark:text-violet-400 font-medium">Аналізую ціль та формую кроки...</p>
                         </div>
                     )}
 
-                    {/* AI Plan Preview Inline */}
-                    {!isGeneratingBreakdown && previewTasks.length > 0 && (
-                        <div className="bg-gradient-to-br from-violet-50/50 to-purple-50/50 dark:from-violet-900/10 dark:to-purple-900/10 border border-violet-200 dark:border-violet-900/50 rounded-xl overflow-hidden shadow-sm">
-                            <div className="p-4 border-b border-violet-100 dark:border-violet-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <h5 className="text-sm font-bold flex items-center gap-2 text-violet-700 dark:text-violet-400">
-                                    <Sparkles className="w-4 h-4" />
-                                    Запропоновані кроки AI
-                                </h5>
-                                <div className="flex gap-2">
-                                    <Button variant="ghost" size="sm" onClick={() => setPreviewTasks([])} className="h-8 text-xs hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-600 dark:text-violet-400">Скасувати</Button>
-                                    <Button size="sm" onClick={() => handleAIBreakdown(true)} disabled={isGeneratingBreakdown} className="h-8 text-xs bg-white dark:bg-slate-800 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 hover:bg-violet-50 dark:hover:bg-slate-700 shadow-sm">
-                                        <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                                        Перегенерувати
-                                    </Button>
-                                    <Button size="sm" onClick={confirmPreviewTasks} disabled={previewTasks.length === 0} className="h-8 text-xs bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
-                                        <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-                                        Зберегти все
-                                    </Button>
-                                </div>
-                            </div>
-
-                            <div className="p-4 space-y-3">
-                                {previewTasks.map((task) => (
-                                    <div key={task.id} className="p-3 bg-white dark:bg-card border border-violet-100 dark:border-violet-900/30 rounded-lg space-y-2 group transition-all hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700">
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div className="font-semibold text-sm mt-0.5 leading-tight">{task.title}</div>
-                                            <button
-                                                onClick={() => removePreviewTask(task.id)}
-                                                className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-all shrink-0 md:opacity-0 group-hover:opacity-100"
-                                                title="Видалити"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                        <Input
-                                            placeholder="Коментар для AI (при перегенерації) або для себе..."
-                                            value={task.hint}
-                                            onChange={(e) => updatePreviewTaskHint(task.id, e.target.value)}
-                                            className="h-8 text-xs bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-violet-500"
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
 
                     {/* Subgoals List */}
                     <div className="bg-white dark:bg-card border border-slate-200 dark:border-border rounded-xl overflow-hidden shadow-sm">
-                        {activeGoal.subGoals && activeGoal.subGoals.length > 0 ? (
+                        {((activeGoal.subGoals && activeGoal.subGoals.filter(sg => !sg.completed).length > 0) || previewTasks.length > 0) ? (
                             <div className="divide-y divide-slate-100 dark:divide-border/50">
-                                {activeGoal.subGoals.map((sg) => (
+                                {/* Regular Active Subgoals */}
+                                {(activeGoal.subGoals || []).filter(sg => !sg.completed).map((sg) => (
                                     <div key={sg.id} className="p-3.5 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-secondary/20 transition-colors group">
                                         <button
-                                            onClick={() => toggleSubgoal(sg.id)}
+                                            onClick={() => toggleSubgoal(sg.id, sg.completed)}
                                             className={cn("shrink-0 transition-colors", sg.completed ? "text-emerald-500" : "text-slate-300 dark:text-slate-600 hover:text-emerald-400")}
                                         >
                                             {sg.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
@@ -493,6 +481,53 @@ export default function GoalDetailsPage() {
                                         </button>
                                     </div>
                                 ))}
+
+                                {/* AI Preview Subgoals */}
+                                {!isGeneratingBreakdown && previewTasks.length > 0 && (
+                                    <div className="border-t-2 border-dashed border-violet-200 dark:border-violet-900/50 bg-violet-50/10 dark:bg-violet-900/5">
+                                        <div className="p-3 text-xs font-semibold text-violet-600 dark:text-violet-400 flex items-center gap-1.5 uppercase tracking-wide bg-violet-50/50 dark:bg-violet-900/20">
+                                            <Sparkles className="w-3.5 h-3.5" /> Запропоновані кроки AI
+                                        </div>
+                                        <div className="divide-y divide-violet-100 dark:divide-violet-900/30">
+                                            {previewTasks.map((task) => (
+                                                <div key={task.id} className="p-3.5 flex items-center gap-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-colors group">
+                                                    <Sparkles className="w-5 h-5 text-violet-400 shrink-0" />
+                                                    <Input
+                                                        value={task.title}
+                                                        onChange={(e) => updatePreviewTaskHint(task.id, e.target.value)}
+                                                        className="text-sm flex-1 bg-transparent border-none h-auto p-0 focus-visible:ring-0 shadow-none font-medium text-slate-700 dark:text-slate-200"
+                                                    />
+                                                    <button
+                                                        onClick={() => removePreviewTask(task.id)}
+                                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {/* Regeneration Context Area */}
+                                        <div className="p-4 bg-violet-50/80 dark:bg-violet-900/20 space-y-3">
+                                            <Input
+                                                placeholder="Вам не подобаються ці кроки? Напишіть коментар для AI..."
+                                                value={regenerationFeedback}
+                                                onChange={(e) => setRegenerationFeedback(e.target.value)}
+                                                className="h-9 text-sm bg-white dark:bg-card border-violet-200 dark:border-violet-800 focus-visible:ring-violet-500"
+                                            />
+                                            <div className="flex flex-wrap items-center justify-end gap-2">
+                                                <Button variant="ghost" size="sm" onClick={() => setPreviewTasks([])} className="h-8 text-xs text-slate-500 hover:text-slate-700">Скасувати</Button>
+                                                <Button size="sm" onClick={() => handleAIBreakdown(true)} disabled={isGeneratingBreakdown} className="h-8 text-xs bg-white dark:bg-slate-800 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 hover:bg-violet-50 shadow-sm">
+                                                    <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                                                    Перегенерувати
+                                                </Button>
+                                                <Button size="sm" onClick={confirmPreviewTasks} disabled={previewTasks.length === 0} className="h-8 text-xs bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
+                                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                                                    Зберегти кроки
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="p-8 text-center text-slate-400 dark:text-muted-foreground/60 text-sm italic">
@@ -690,6 +725,30 @@ export default function GoalDetailsPage() {
                     color={area?.color}
                 />
             )}
+
+            <Dialog open={!!subgoalToComplete} onOpenChange={(open) => !open && setSubgoalToComplete(null)}>
+                <DialogContent className="max-w-md bg-white dark:bg-card">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                            Завершити крок?
+                        </DialogTitle>
+                        <DialogDescription>
+                            Ви дійсно виконали цей крок?
+                            Це також автоматично завершить пов'язане завдання з вашого списку дій,
+                            після чого крок зникне зі списку поточних.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter className="gap-2 sm:gap-0 mt-4">
+                        <Button variant="ghost" onClick={() => setSubgoalToComplete(null)}>Скасувати</Button>
+                        <Button onClick={confirmSubgoalCompletion} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <CheckCircle2 className="w-4 h-4 mr-2" />
+                            Так, виконано!
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
