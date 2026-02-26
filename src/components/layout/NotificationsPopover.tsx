@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
     Popover,
@@ -20,6 +21,7 @@ export function NotificationsPopover() {
     const { state, dispatch } = useData();
     const { notifications } = state;
     const [isOpen, setIsOpen] = React.useState(false);
+    const router = useRouter();
 
     const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -38,6 +40,16 @@ export function NotificationsPopover() {
     const handleMarkRead = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         dispatch({ type: 'MARK_NOTIFICATIONS_READ', payload: { ids: [id] } });
+    };
+
+    const handleNotificationClick = (notification: Notification) => {
+        if (!notification.read) {
+            dispatch({ type: 'MARK_NOTIFICATIONS_READ', payload: { ids: [notification.id] } });
+        }
+        if (notification.link) {
+            setIsOpen(false);
+            router.push(notification.link);
+        }
     };
 
     const getIcon = (type: string) => {
@@ -100,9 +112,11 @@ export function NotificationsPopover() {
                                 {groupNotifs.map((notification) => (
                                     <div
                                         key={notification.id}
+                                        onClick={() => handleNotificationClick(notification)}
                                         className={cn(
-                                            "flex gap-3 p-4 border-b border-border/40 hover:bg-muted/30 transition-colors relative group",
-                                            !notification.read && "bg-primary/5 hover:bg-primary/10"
+                                            "flex gap-3 p-4 border-b border-border/40 hover:bg-muted/30 transition-colors relative group text-left",
+                                            !notification.read && "bg-primary/5 hover:bg-primary/10",
+                                            notification.link ? "cursor-pointer" : "cursor-default"
                                         )}
                                     >
                                         <div className={cn("mt-1 p-1.5 rounded-full bg-background border shadow-sm h-fit shrink-0",

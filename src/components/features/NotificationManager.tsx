@@ -217,7 +217,7 @@ export function NotificationManager() {
                                     title: 'Оновіть метрику',
                                     message: `Ви ще не внесли дані для "${metric.name}" сьогодні.`,
                                     type: 'info',
-                                    link: '/metrics'
+                                    link: `/areas/${metric.areaId}`
                                 });
                                 localStorage.setItem(storageKey, 'true');
                             }
@@ -237,7 +237,7 @@ export function NotificationManager() {
             } else if (type === 'area') {
                 sendNotification({ title: 'Тест: Сфера', message: 'Сфера "Здоров\'я" потребує вашої уваги.', type: 'error', link: '/areas' });
             } else if (type === 'metric') {
-                sendNotification({ title: 'Тест: Метрика', message: 'Нагадування оновити метрику "Вага" сьогодні.', type: 'info', link: '/metrics' });
+                sendNotification({ title: 'Тест: Метрика', message: 'Нагадування оновити метрику "Вага" сьогодні.', type: 'info', link: '/areas' });
             }
         };
 
