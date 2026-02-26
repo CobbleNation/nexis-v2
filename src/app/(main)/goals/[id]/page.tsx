@@ -6,7 +6,7 @@ import { Goal, LifeArea, MetricDefinition, Action } from '@/types';
 import { formatGoalMetricDisplay } from '@/lib/goal-utils';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { uk } from 'date-fns/locale';
-import { Target, Calendar, CheckCircle2, AlertTriangle, Trash2, Edit, X, Trophy, TrendingUp, TrendingDown, Minus, PlayCircle, PauseCircle, ChevronRight, ExternalLink, Loader2, ArrowLeft, Plus, Circle, ListChecks, Sparkles } from 'lucide-react';
+import { Target, Calendar, CheckCircle2, AlertTriangle, Trash2, Edit, X, Trophy, TrendingUp, TrendingDown, Minus, PlayCircle, PauseCircle, ChevronRight, ExternalLink, Loader2, ArrowLeft, Plus, Circle, ListChecks, Sparkles, RefreshCw } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useData } from '@/lib/store';
@@ -43,8 +43,6 @@ export default function GoalDetailsPage() {
     const [newSubgoalTitle, setNewSubgoalTitle] = useState('');
     const [isGeneratingBreakdown, setIsGeneratingBreakdown] = useState(false);
     const [previewTasks, setPreviewTasks] = useState<{ id: string; title: string; hint: string }[]>([]);
-    const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-
     // Use live data from store
     const activeGoal = state.goals.find(g => g.id === goalId);
 
@@ -100,13 +98,19 @@ export default function GoalDetailsPage() {
         ? checkAchievement(activeGoal.metricCurrentValue, activeGoal.metricTargetValue, activeGoal.metricDirection)
         : false;
 
-    const handleAIBreakdown = async () => {
+    const handleAIBreakdown = async (isRegeneration: boolean = false) => {
         const activeStepsCount = activeGoal.subGoals?.filter(sg => !sg.completed).length || 0;
         const requestedCount = Math.max(0, 7 - activeStepsCount);
 
         if (requestedCount <= 0) {
             toast.info("Максимальна кількість активних кроків (7). Виконайте або видаліть існуючі, щоб згенерувати нові.");
             return;
+        }
+
+        let feedback = undefined;
+        if (isRegeneration && previewTasks.length > 0) {
+            const comments = previewTasks.map(t => `- ${t.title}${t.hint ? ` (Коментар/Побажання: ${t.hint})` : ''}`).join('\n');
+            feedback = `Ось поточні запропоновані кроки та мої коментарі до них:\n${comments}\nБудь ласка, перегенеруй список кроків враховуючи ці побажання. Ти можеш замінити деякі кроки, змінити їх, або додати нові, щоб краще відповідати моїм коментарям.`;
         }
 
         setIsGeneratingBreakdown(true);
@@ -118,7 +122,8 @@ export default function GoalDetailsPage() {
                     goalTitle: activeGoal.title,
                     goalDescription: activeGoal.description,
                     area: area?.title,
-                    requestedCount
+                    requestedCount,
+                    feedback
                 })
             });
 
@@ -133,7 +138,6 @@ export default function GoalDetailsPage() {
                     hint: ''
                 }));
                 setPreviewTasks(newPreviewTasks);
-                setIsPreviewOpen(true);
             } else {
                 toast.info("AI не знайшов варіантів для цієї цілі.");
             }
@@ -156,7 +160,6 @@ export default function GoalDetailsPage() {
 
     const confirmPreviewTasks = () => {
         if (previewTasks.length === 0) {
-            setIsPreviewOpen(false);
             return;
         }
 
@@ -200,7 +203,6 @@ export default function GoalDetailsPage() {
         });
 
         toast.success(`Збережено ${previewTasks.length} кроків!`);
-        setIsPreviewOpen(false);
         setPreviewTasks([]);
     };
 
@@ -387,7 +389,7 @@ export default function GoalDetailsPage() {
                                         });
                                         setShowUpgrade(true);
                                     } else {
-                                        handleAIBreakdown();
+                                        handleAIBreakdown(false);
                                     }
                                 }}
                             >
@@ -415,6 +417,60 @@ export default function GoalDetailsPage() {
                             </Button>
                         </div>
                     </div>
+
+                    {/* AI Plan Generation Loading */}
+                    {isGeneratingBreakdown && previewTasks.length === 0 && (
+                        <div className="p-8 text-center bg-violet-50/50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-900/30 rounded-xl space-y-3">
+                            <Loader2 className="w-6 h-6 animate-spin text-violet-500 mx-auto" />
+                            <p className="text-sm text-violet-600 dark:text-violet-400 font-medium">Аналізую ціль та формую кроки...</p>
+                        </div>
+                    )}
+
+                    {/* AI Plan Preview Inline */}
+                    {!isGeneratingBreakdown && previewTasks.length > 0 && (
+                        <div className="bg-gradient-to-br from-violet-50/50 to-purple-50/50 dark:from-violet-900/10 dark:to-purple-900/10 border border-violet-200 dark:border-violet-900/50 rounded-xl overflow-hidden shadow-sm">
+                            <div className="p-4 border-b border-violet-100 dark:border-violet-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <h5 className="text-sm font-bold flex items-center gap-2 text-violet-700 dark:text-violet-400">
+                                    <Sparkles className="w-4 h-4" />
+                                    Запропоновані кроки AI
+                                </h5>
+                                <div className="flex gap-2">
+                                    <Button variant="ghost" size="sm" onClick={() => setPreviewTasks([])} className="h-8 text-xs hover:bg-violet-100 dark:hover:bg-violet-900/30 text-violet-600 dark:text-violet-400">Скасувати</Button>
+                                    <Button size="sm" onClick={() => handleAIBreakdown(true)} disabled={isGeneratingBreakdown} className="h-8 text-xs bg-white dark:bg-slate-800 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 hover:bg-violet-50 dark:hover:bg-slate-700 shadow-sm">
+                                        <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                                        Перегенерувати
+                                    </Button>
+                                    <Button size="sm" onClick={confirmPreviewTasks} disabled={previewTasks.length === 0} className="h-8 text-xs bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
+                                        <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                                        Зберегти все
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="p-4 space-y-3">
+                                {previewTasks.map((task) => (
+                                    <div key={task.id} className="p-3 bg-white dark:bg-card border border-violet-100 dark:border-violet-900/30 rounded-lg space-y-2 group transition-all hover:shadow-md hover:border-violet-300 dark:hover:border-violet-700">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="font-semibold text-sm mt-0.5 leading-tight">{task.title}</div>
+                                            <button
+                                                onClick={() => removePreviewTask(task.id)}
+                                                className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-all shrink-0 md:opacity-0 group-hover:opacity-100"
+                                                title="Видалити"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                        <Input
+                                            placeholder="Коментар для AI (при перегенерації) або для себе..."
+                                            value={task.hint}
+                                            onChange={(e) => updatePreviewTaskHint(task.id, e.target.value)}
+                                            className="h-8 text-xs bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 focus-visible:ring-violet-500"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Subgoals List */}
                     <div className="bg-white dark:bg-card border border-slate-200 dark:border-border rounded-xl overflow-hidden shadow-sm">
@@ -616,54 +672,7 @@ export default function GoalDetailsPage() {
                 </div>
             </div>
 
-            <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-                <DialogContent className="max-w-2xl bg-white dark:bg-card">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Sparkles className="w-5 h-5 text-violet-500" />
-                            Затвердження AI Плану
-                        </DialogTitle>
-                        <DialogDescription>
-                            Перегляньте запропоновані кроки, видаліть зайві або додайте свої коментарі до кожного.
-                        </DialogDescription>
-                    </DialogHeader>
 
-                    <div className="py-4 space-y-4 max-h-[60vh] overflow-y-auto pr-2">
-                        {previewTasks.length === 0 ? (
-                            <div className="text-center py-8 text-muted-foreground">Немає кроків для відображення.</div>
-                        ) : (
-                            previewTasks.map((task) => (
-                                <div key={task.id} className="p-4 border rounded-xl bg-slate-50 dark:bg-slate-900/50 space-y-3 group transition-colors hover:border-violet-200 dark:hover:border-violet-800">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div className="font-semibold text-sm mt-0.5 leading-tight">{task.title}</div>
-                                        <button
-                                            onClick={() => removePreviewTask(task.id)}
-                                            className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-md transition-all shrink-0 md:opacity-0 group-hover:opacity-100"
-                                            title="Видалити"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <Input
-                                        placeholder="Додати коментар чи деталь (опціонально)..."
-                                        value={task.hint}
-                                        onChange={(e) => updatePreviewTaskHint(task.id, e.target.value)}
-                                        className="h-9 text-sm bg-white dark:bg-card border-slate-200 dark:border-slate-800"
-                                    />
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    <DialogFooter className="gap-2 sm:gap-0 mt-2">
-                        <Button variant="ghost" onClick={() => setIsPreviewOpen(false)}>Скасувати</Button>
-                        <Button onClick={confirmPreviewTasks} disabled={previewTasks.length === 0} className="bg-violet-600 hover:bg-violet-700 text-white">
-                            <CheckCircle2 className="w-4 h-4 mr-2" />
-                            Зберегти Кроки
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
 
             <GoalReflectionDialog
                 goal={activeGoal}

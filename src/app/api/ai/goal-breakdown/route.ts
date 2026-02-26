@@ -15,7 +15,7 @@ const openai = new OpenAI({
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { goalTitle, goalDescription, area, requestedCount } = body;
+        const { goalTitle, goalDescription, area, requestedCount, feedback } = body;
 
         // 1. Auth & Pro Check
         const cookieStore = await cookies();
@@ -46,7 +46,7 @@ Goal Title: ${goalTitle}
 Description: ${goalDescription || 'No description provided'}
 Area: ${area || 'General'}
 
-Break this goal down into actionable sub-tasks following the system instructions.
+${feedback ? `Previous feedback/comments from the user:\n${feedback}\nPlease adjust the sub-tasks accordingly. Be sure to regenerate the list considering these notes.` : 'Break this goal down into actionable sub-tasks following the system instructions.'}
 ${countInstruction}
 `;
 
