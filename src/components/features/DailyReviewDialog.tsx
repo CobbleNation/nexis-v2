@@ -17,11 +17,13 @@ interface DailyReviewResponse {
 
 import { useSubscription } from '@/hooks/useSubscription';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.ReactNode }) {
     const { isPro } = useSubscription() || { isPro: false };
     const { state } = useData();
     const [isOpen, setIsOpen] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
     const [review, setReview] = useState<DailyReviewResponse | null>(null);
@@ -114,15 +116,40 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
 
     // Note: Removed useEffect that auto-triggered generateReview
 
-    if (!isPro) return null;
-
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(open) => {
+            if (open && !isPro) {
+                setShowUpgradeModal(true);
+            } else {
+                setIsOpen(open);
+            }
+        }}>
             <DialogTrigger asChild>
-                {customTrigger ? customTrigger : (
+                {customTrigger ? (
+                    React.cloneElement(customTrigger as React.ReactElement, {
+                        onClick: (e: any) => {
+                            if (!isPro) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setShowUpgradeModal(true);
+                            } else {
+                                // Let DialogTrigger handle it via trigger's own props
+                                const origOnClick = (customTrigger as any).props?.onClick;
+                                if (origOnClick) origOnClick(e);
+                            }
+                        }
+                    } as any)
+                ) : (
                     <Button
                         variant="outline"
                         className="gap-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40"
+                        onClick={(e) => {
+                            if (!isPro) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setShowUpgradeModal(true);
+                            }
+                        }}
                     >
                         <Sparkles className="w-4 h-4" />
                         AI Аналіз Дня
@@ -264,6 +291,13 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                     </>
                 )}
             </DialogContent>
+
+            <UpgradeModal
+                open={showUpgradeModal}
+                onOpenChange={setShowUpgradeModal}
+                title="AI Аналіз Дня"
+                description="Персональний коуч, який проаналізує вашу продуктивність за день та розставить пріоритети на завтра. Доступно у Pro версії."
+            />
         </Dialog>
     );
 }

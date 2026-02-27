@@ -14,6 +14,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from '@/components/ui/badge';
 import { v4 as uuidv4 } from 'uuid';
 import { Action } from '@/types';
+import { useSubscription } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 interface GoalBreakdownModalProps {
     customTrigger?: React.ReactNode;
@@ -36,6 +38,9 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
     const [selectedGoalId, setSelectedGoalId] = useState<string | null>(null);
     const [proposal, setProposal] = useState<StrategyProposal | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+
+    const { isPro } = useSubscription() || { isPro: false };
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const activeGoals = state.goals.filter(g => g.status === 'active' || g.status === 'paused');
 
@@ -320,10 +325,36 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
     ) : null;
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(open) => {
+            if (open && !isPro) {
+                setShowUpgradeModal(true);
+            } else {
+                setIsOpen(open);
+            }
+        }}>
             <DialogTrigger asChild>
-                {customTrigger ? customTrigger : (
-                    <Button variant="outline" className="gap-2">
+                {customTrigger ? (
+                    React.cloneElement(customTrigger as React.ReactElement, {
+                        onClick: (e: any) => {
+                            if (!isPro) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setShowUpgradeModal(true);
+                            } else {
+                                // Extract original onClick safely
+                                const origOnClick = (customTrigger as any).props?.onClick;
+                                if (origOnClick) origOnClick(e);
+                            }
+                        }
+                    } as any)
+                ) : (
+                    <Button variant="outline" className="gap-2" onClick={(e) => {
+                        if (!isPro) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowUpgradeModal(true);
+                        }
+                    }}>
                         <BrainCircuit className="w-4 h-4 text-violet-500" />
                         AI Стратегія
                     </Button>
@@ -489,6 +520,13 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                     )}
                 </DialogFooter>
             </DialogContent>
+
+            <UpgradeModal
+                open={showUpgradeModal}
+                onOpenChange={setShowUpgradeModal}
+                title="AI Стратегія"
+                description="Штучний інтелект проаналізує вашу ціль і розкладе її на дієві кроки. Доступно у Pro версії."
+            />
         </Dialog>
     );
 }

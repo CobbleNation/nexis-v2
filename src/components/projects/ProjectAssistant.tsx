@@ -11,6 +11,8 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { MetricCreationWizard } from '@/components/metrics/MetricCreationWizard';
+import { useSubscription } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 interface ProjectAssistantProps {
     project: Project;
@@ -29,7 +31,8 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
     const [wizardInitialState, setWizardInitialState] = useState<{
         title: string;
         unit?: string;
-        description?: string;
+        target?: number;
+        direction?: 'increase' | 'decrease' | 'neutral';
     } | null>(null);
 
     // Track added items to visually disable them
@@ -41,8 +44,17 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
     const [refineInstruction, setRefineInstruction] = useState('');
     const [isRefining, setIsRefining] = useState(false);
 
+    // AI Restrictions
+    const { isPro } = useSubscription() || { isPro: false };
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
     const handleGenerate = async () => {
         setIsLoading(true);
+        if (!isPro) {
+            setIsLoading(false);
+            setIsOpen(true); // Ensure component is open to show modal later if needed, or handle differently. Actually, let's just trigger the modal.
+            return;
+        }
         setIsOpen(true);
         setIsCollapsed(false);
         try {
@@ -136,8 +148,7 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
         // Open Wizard for new metric
         setWizardInitialState({
             title: suggestion.name,
-            unit: suggestion.unit,
-            description: suggestion.rationale
+            unit: suggestion.unit
         });
         setIsMetricWizardOpen(true);
     };
@@ -364,10 +375,11 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
                 <DialogContent className="max-w-3xl h-[80vh] p-0 overflow-hidden bg-slate-50 dark:bg-background border-none">
                     {wizardInitialState && (
                         <MetricCreationWizard
-                            initialTitle={wizardInitialState.title}
-                            initialUnit={wizardInitialState.unit}
-                            initialDescription={wizardInitialState.description}
+                            initialTitle={wizardInitialState.title || ""}
                             initialAreaId={project.areaId}
+                            initialUnit={wizardInitialState.unit}
+                            initialTarget={wizardInitialState.target}
+                            initialDirection={wizardInitialState.direction}
                             onComplete={handleWizardComplete}
                             onCancel={() => {
                                 setIsMetricWizardOpen(false);
@@ -377,6 +389,13 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
                     )}
                 </DialogContent>
             </Dialog>
+
+            <UpgradeModal
+                open={showUpgradeModal}
+                onOpenChange={setShowUpgradeModal}
+                title="AI Асистент Проекту"
+                description="Аналізуйте проекти, автоматично створюйте задачі та метрики з AI. Доступно у Pro версії."
+            />
         </>
     );
 }
