@@ -22,7 +22,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { useSubscription } from '@/hooks/useSubscription';
 import { Input } from '@/components/ui/input';
 import { GoalBreakdownResponse } from '@/lib/ai/types';
-import { QuickAddModal } from '@/components/features/QuickAddModal';
+import { AddGoalStepModal } from '@/components/goals/AddGoalStepModal';
 import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 export default function GoalDetailsPage() {
@@ -749,12 +749,12 @@ export default function GoalDetailsPage() {
                 description={upgradeContext.description}
             />
 
-            <QuickAddModal
+            <AddGoalStepModal
                 open={showQuickAdd}
                 onOpenChange={setShowQuickAdd}
-                defaultTab="task"
-                defaultLinkedGoalId={activeGoal.id}
-                onActionCreated={handleAddStepFromModal}
+                goalId={activeGoal.id}
+                areaId={activeGoal.areaId}
+                onStepAdded={handleAddStepFromModal}
             />
         </div>
     );
