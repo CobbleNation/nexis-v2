@@ -255,31 +255,33 @@ export function TaskFilters({
                     </button>
                     {datesOpen && (
                         <div className="px-3 pb-3 space-y-3 overflow-hidden">
-                            {/* Date From */}
-                            <div className="space-y-1.5 w-full">
-                                <label className="text-xs font-medium text-slate-500 dark:text-muted-foreground pl-0.5">
-                                    З
-                                </label>
-                                <input
-                                    type="date"
-                                    value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
-                                    onChange={(e) => setDateFrom(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
-                                    className="w-full min-w-0 flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
-                                />
-                            </div>
+                            <div className="flex items-center gap-2">
+                                {/* Date From */}
+                                <div className="space-y-1 w-1/2">
+                                    <label className="text-[10px] font-medium text-slate-500 dark:text-muted-foreground pl-1 uppercase tracking-wider">
+                                        З
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
+                                        onChange={(e) => setDateFrom(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
+                                        className="w-full min-w-0 px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-orange-500/50 dark:focus:ring-primary/50 focus:border-orange-400 dark:focus:border-primary transition-all"
+                                    />
+                                </div>
 
-                            {/* Date To */}
-                            <div className="space-y-1.5 w-full">
-                                <label className="text-xs font-medium text-slate-500 dark:text-muted-foreground pl-0.5">
-                                    По
-                                </label>
-                                <input
-                                    type="date"
-                                    value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
-                                    onChange={(e) => setDateTo(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
-                                    min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
-                                    className="w-full min-w-0 flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
-                                />
+                                {/* Date To */}
+                                <div className="space-y-1 w-1/2">
+                                    <label className="text-[10px] font-medium text-slate-500 dark:text-muted-foreground pl-1 uppercase tracking-wider">
+                                        По
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
+                                        onChange={(e) => setDateTo(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
+                                        min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
+                                        className="w-full min-w-0 px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-orange-500/50 dark:focus:ring-primary/50 focus:border-orange-400 dark:focus:border-primary transition-all"
+                                    />
+                                </div>
                             </div>
 
                             {/* Summary + Clear */}
