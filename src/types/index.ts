@@ -26,7 +26,7 @@ export interface Action {
     userId: string;
     title: string;
     description?: string;
-    // Nexis: Cleaned up structure
+    // Zynorvia: Cleaned up structure
     type: 'task' | 'routine_instance'; // 'habit' deprecated in favor of routine system
     status: 'pending' | 'in-progress' | 'completed' | 'canceled' | 'deferred';
     completed: boolean;
@@ -45,7 +45,7 @@ export interface Action {
     expectedResult?: string;
     frequency?: string;
 
-    // Nexis New Fields
+    // Zynorvia New Fields
     fromRoutineId?: string;
     isFocus?: boolean;
     energyLevel?: 'high' | 'medium' | 'low'; // Post-completion check

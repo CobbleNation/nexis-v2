@@ -34,7 +34,7 @@ export default function PaymentSuccessPage() {
                         </div>
                         <CardTitle className="text-2xl font-bold text-green-700 dark:text-green-400">Оплата Успішна!</CardTitle>
                         <CardDescription>
-                            Дякуємо за підписку на Nexis Pro.
+                            Дякуємо за підписку на Zynorvia Pro.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="pb-6">

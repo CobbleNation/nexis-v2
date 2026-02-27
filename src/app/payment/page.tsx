@@ -119,7 +119,7 @@ export default function PaymentPage() {
                                 <CardContent className="space-y-6">
                                     <div className="flex justify-between items-start pb-6 border-b border-border/40">
                                         <div>
-                                            <h4 className="font-bold text-lg">Nexis Pro</h4>
+                                            <h4 className="font-bold text-lg">Zynorvia Pro</h4>
                                             <p className="text-sm text-muted-foreground">Щомісячна підписка</p>
                                         </div>
                                         <div className="text-right">

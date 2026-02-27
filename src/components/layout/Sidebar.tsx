@@ -165,7 +165,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                     <div className="w-4 h-4 bg-primary rounded-sm rotate-45 shadow-sm shadow-primary/20" />
                 </div>
-                <span className="text-xl font-bold tracking-tight text-foreground">Nexis</span>
+                <span className="text-xl font-bold tracking-tight text-foreground">Zynorvia</span>
             </div>
 
             {/* Global Create Button */}

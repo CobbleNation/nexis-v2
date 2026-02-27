@@ -68,7 +68,7 @@ export default function SettingsPage() {
                 if (!res.ok) throw new Error('Помилка скидання');
 
                 toast.success('Акаунт успішно очищено', { id: toastId });
-                localStorage.removeItem('nexis-data');
+                localStorage.removeItem('zynorvia-data');
                 // Reload to refresh state
                 window.location.reload();
             } catch (e) {
@@ -211,7 +211,7 @@ export default function SettingsPage() {
                             <Card className="border-none shadow-sm bg-white dark:bg-card rounded-3xl">
                                 <CardHeader>
                                     <CardTitle>Зовнішній вигляд</CardTitle>
-                                    <CardDescription>Налаштуйте, як виглядає Nexis.</CardDescription>
+                                    <CardDescription>Налаштуйте, як виглядає Zynorvia.</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
                                     <div className="space-y-4">
@@ -464,7 +464,7 @@ export default function SettingsPage() {
                                                 <h4 className="font-bold text-foreground text-sm">Перезапустити туторіал</h4>
                                             </div>
                                             <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                                                Пройти навчання з початку, щоб згадати всі функції Nexis.
+                                                Пройти навчання з початку, щоб згадати всі функції Zynorvia.
                                             </p>
                                         </div>
                                         <Button

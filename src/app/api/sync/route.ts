@@ -35,7 +35,7 @@ export async function GET() {
             try {
                 await db.insert(users).values({
                     id: userId,
-                    email: `restored_${userId.substring(0, 6)}@nexis.system`,
+                    email: `restored_${userId.substring(0, 6)}@zynorvia.system`,
                     name: 'User',
                     passwordHash: 'placeholder_hash_needs_reset',
                     createdAt: new Date(),

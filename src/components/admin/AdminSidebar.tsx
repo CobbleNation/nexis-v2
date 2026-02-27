@@ -35,7 +35,7 @@ function AdminSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             <div className="p-6 border-b border-slate-800">
                 <Link href="/admin" className="flex items-center gap-2" onClick={onNavigate}>
                     <span className="text-xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-                        Nexis Admin
+                        Zynorvia Admin
                     </span>
                 </Link>
             </div>
@@ -96,7 +96,7 @@ export function AdminSidebar() {
             {/* Mobile Header Bar + Sheet */}
             <div className="md:hidden fixed top-0 left-0 right-0 z-50 h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4">
                 <span className="text-lg font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-                    Nexis Admin
+                    Zynorvia Admin
                 </span>
                 <Sheet open={open} onOpenChange={setOpen}>
                     <SheetTrigger asChild>

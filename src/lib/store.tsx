@@ -474,7 +474,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     // Sync changes to Local Storage - REMOVED for DB Only approach
     // useEffect(() => {
     //     if (!state.isLoading && user && user.id) {
-    //         const storageKey = `nexis-data-${user.id}`;
+    //         const storageKey = `zynorvia-data-${user.id}`;
     //         const dataToSave = { ...state, isLoading: false };
     //         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
     //     }

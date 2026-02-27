@@ -83,7 +83,7 @@ export const seedOnboardingData = (dispatch: (action: any) => void, areas: LifeA
     const project: Project = {
         id: SEED_DATA_IDS.PROJECT,
         title: 'Налаштування особистої системи',
-        description: 'Організація простору в Nexis та створення перших записів.',
+        description: 'Організація простору в Zynorvia та створення перших записів.',
         status: 'active',
         areaId: workArea?.id || 'general',
         deadline: nextMonth.toISOString(),
@@ -138,7 +138,7 @@ export const seedOnboardingData = (dispatch: (action: any) => void, areas: LifeA
         title: 'Особиста система розвитку',
         type: 'article',
         status: 'to_consume',
-        author: 'Nexis System',
+        author: 'Zynorvia System',
         url: '#',
         areaId: growthArea?.id || 'general',
         createdAt: now.toISOString(),

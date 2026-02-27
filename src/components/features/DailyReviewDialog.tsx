@@ -31,7 +31,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
 
     useEffect(() => {
         if (isOpen) {
-            const stored = localStorage.getItem('nexis-ai-daily-usage');
+            const stored = localStorage.getItem('zynorvia-ai-daily-usage');
             if (stored) {
                 const data = JSON.parse(stored);
                 const today = new Date().toDateString();
@@ -100,7 +100,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                 count: limits.count + 1,
                 lastRun: Date.now()
             };
-            localStorage.setItem('nexis-ai-daily-usage', JSON.stringify(newLimits));
+            localStorage.setItem('zynorvia-ai-daily-usage', JSON.stringify(newLimits));
             setLimits({ count: newLimits.count, lastRun: newLimits.lastRun });
 
         } catch (error) {
@@ -204,7 +204,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                                     </p>
                                 </div>
                                 <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/30">
-                                    <span className="text-xs font-bold text-white">Nexis AI</span>
+                                    <span className="text-xs font-bold text-white">Zynorvia AI</span>
                                 </div>
                             </div>
 

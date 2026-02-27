@@ -46,7 +46,7 @@ export function useSubscription() {
     const getDailyAiUsage = () => {
         if (typeof window === 'undefined') return 0;
         const today = new Date().toISOString().split('T')[0];
-        const key = `nexis_ai_usage_${today}`;
+        const key = `zynorvia_ai_usage_${today}`;
         return parseInt(localStorage.getItem(key) || '0', 10);
     };
 
@@ -60,7 +60,7 @@ export function useSubscription() {
         if (isPro) return;
         if (typeof window === 'undefined') return;
         const today = new Date().toISOString().split('T')[0];
-        const key = `nexis_ai_usage_${today}`;
+        const key = `zynorvia_ai_usage_${today}`;
         const current = getDailyAiUsage();
         localStorage.setItem(key, (current + 1).toString());
     };

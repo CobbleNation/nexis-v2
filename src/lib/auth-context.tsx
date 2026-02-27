@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Force-clear any remaining cookies via POST
             fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
             // Clear all auth-related localStorage
-            localStorage.removeItem('nexis-data');
+            localStorage.removeItem('zynorvia-data');
             localStorage.removeItem('onboarding_step');
             localStorage.removeItem('onboarding_active');
             setUser(null);
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function logout() {
         // 1. Clear local state immediately
-        localStorage.removeItem('nexis-data');
+        localStorage.removeItem('zynorvia-data');
         localStorage.removeItem('onboarding_step');
         localStorage.removeItem('onboarding_active');
         setUser(null);
@@ -202,7 +202,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         try {
             await fetch('/api/auth/delete', { method: 'POST' });
-            localStorage.removeItem('nexis-data');
+            localStorage.removeItem('zynorvia-data');
             setUser(null);
             router.push('/login');
         } catch (e) {

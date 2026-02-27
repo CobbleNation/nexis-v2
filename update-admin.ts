@@ -8,11 +8,11 @@ async function main() {
         console.log('Updating admin user role...');
         await db.update(users)
             .set({ role: 'admin', subscriptionTier: 'pro' })
-            .where(eq(users.email, 'admin@nexis.com'));
+            .where(eq(users.email, 'admin@zynorvia.com'));
 
         console.log('User updated successfully.');
 
-        const [user] = await db.select().from(users).where(eq(users.email, 'admin@nexis.com'));
+        const [user] = await db.select().from(users).where(eq(users.email, 'admin@zynorvia.com'));
         console.log('Updated user:', user);
     } catch (error) {
         console.error('Error updating user:', error);

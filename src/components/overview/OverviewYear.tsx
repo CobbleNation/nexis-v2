@@ -31,7 +31,7 @@ export function OverviewYear({ filteredGoals, activeArea }: OverviewYearProps) {
 
     // --- 4. MAJOR CHANGES (Milestones) ---
     const majorChanges = [
-        { title: 'Запуск Nexis 2.0', desc: 'Персональна система', type: 'project', link: '/projects' },
+        { title: 'Запуск Zynorvia 2.0', desc: 'Персональна система', type: 'project', link: '/projects' },
         { title: 'Новий рівень фінансів', desc: 'Досягнуто цілі', type: 'goal', link: '/goals' },
         { title: 'Зміна режиму дня', desc: 'Ранні підйоми', type: 'habit', link: '/timeline' }
     ];

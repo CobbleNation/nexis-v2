@@ -32,10 +32,10 @@ export async function POST(req: Request) {
             amount: AMOUNT,
             merchantPaymInfo: {
                 reference: REFERENCE,
-                destination: 'Nexis Pro Subscription (1 Month)',
+                destination: 'Zynorvia Pro Subscription (1 Month)',
                 basketOrder: [
                     {
-                        name: 'Nexis Pro - Monthly',
+                        name: 'Zynorvia Pro - Monthly',
                         qty: 1,
                         sum: AMOUNT,
                         unit: 'month'
