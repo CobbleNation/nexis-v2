@@ -30,6 +30,8 @@ export function QuickAddModal({
     defaultTab = 'task',
     defaultAreaId = 'all',
     defaultProjectId,
+    defaultLinkedGoalId,
+    onActionCreated,
     initialData
 }: {
     open: boolean;
@@ -37,6 +39,8 @@ export function QuickAddModal({
     defaultTab?: string;
     defaultAreaId?: string;
     defaultProjectId?: string;
+    defaultLinkedGoalId?: string;
+    onActionCreated?: (action: Action) => void;
     initialData?: {
         title?: string;
         description?: string;
@@ -438,11 +442,15 @@ export function QuickAddModal({
                         duration: parseInt(duration),
                         startTime: startTime || undefined,
                         subtasks: subtasks.length > 0 ? subtasks : undefined,
+                        linkedGoalId: defaultLinkedGoalId, // Attach goal directly
                         reminderAt: reminderType !== 'none'
                             ? (reminderType === 'custom' ? reminderCustomTime : calculateReminderTime(date, startTime, reminderType))
                             : undefined
                     };
                     dispatch({ type: 'ADD_ACTION', payload: newTask });
+                    if (onActionCreated) {
+                        onActionCreated(newTask);
+                    }
                     // Onboarding step advance removed
                     toast.success(isFocus ? "Фокус-завдання створено" : "Завдання створено");
                     break;

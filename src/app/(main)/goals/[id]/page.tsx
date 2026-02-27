@@ -22,6 +22,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { useSubscription } from '@/hooks/useSubscription';
 import { Input } from '@/components/ui/input';
 import { GoalBreakdownResponse } from '@/lib/ai/types';
+import { QuickAddModal } from '@/components/features/QuickAddModal';
+import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 export default function GoalDetailsPage() {
     const params = useParams();
@@ -40,7 +42,8 @@ export default function GoalDetailsPage() {
     const { HAS_SUBGOALS, HAS_AI_GOAL_BREAKDOWN } = useSubscription()?.limits || { HAS_SUBGOALS: false, HAS_AI_GOAL_BREAKDOWN: false };
     const [showUpgrade, setShowUpgrade] = useState(false);
     const [upgradeContext, setUpgradeContext] = useState({ title: '', description: '' });
-    const [isAddingSubgoal, setIsAddingSubgoal] = useState(false);
+    const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [isAddingSubgoal, setIsAddingSubgoal] = useState(false); // Can be kept for compatibility or removed later
     const [newSubgoalTitle, setNewSubgoalTitle] = useState('');
     const [isGeneratingBreakdown, setIsGeneratingBreakdown] = useState(false);
     const [previewTasks, setPreviewTasks] = useState<{ id: string; title: string; hint: string }[]>([]);
@@ -221,6 +224,16 @@ export default function GoalDetailsPage() {
         setNewSubgoalTitle('');
         setIsAddingSubgoal(false);
         toast.success("Крок додано");
+    };
+
+    const handleAddStepFromModal = (action: Action) => {
+        const newSubgoal = { id: action.id, title: action.title, completed: false };
+        const updatedSubgoals = [...(activeGoal.subGoals || []), newSubgoal];
+
+        dispatch({
+            type: 'UPDATE_GOAL',
+            payload: { ...activeGoal, subGoals: updatedSubgoals }
+        });
     };
 
     const confirmSubgoalCompletion = () => {
@@ -434,15 +447,7 @@ export default function GoalDetailsPage() {
                                 size="sm"
                                 className="h-8 text-xs gap-1.5 bg-slate-100 dark:bg-secondary hover:bg-slate-200 text-slate-600 dark:text-muted-foreground"
                                 onClick={() => {
-                                    if (!HAS_SUBGOALS) {
-                                        setUpgradeContext({
-                                            title: "Деталізація цілей",
-                                            description: "Pro дозволяє створювати необмежену кількість підцілей для кращого контролю прогресу."
-                                        });
-                                        setShowUpgrade(true);
-                                    } else {
-                                        setIsAddingSubgoal(true);
-                                    }
+                                    setShowQuickAdd(true);
                                 }}
                             >
                                 <Plus className="w-3.5 h-3.5" />
@@ -537,22 +542,7 @@ export default function GoalDetailsPage() {
                             </div>
                         )}
 
-                        {/* Add Subgoal Input */}
-                        {isAddingSubgoal && (
-                            <div className="p-3 border-t border-slate-100 dark:border-border bg-slate-50/50 dark:bg-secondary/10 flex gap-2">
-                                <Input
-                                    value={newSubgoalTitle}
-                                    onChange={e => setNewSubgoalTitle(e.target.value)}
-                                    placeholder="Назва кроку..."
-                                    className="h-10 text-sm bg-white dark:bg-card"
-                                    autoFocus
-                                    onKeyDown={e => e.key === 'Enter' && addSubgoal()}
-                                />
-                                <Button size="sm" onClick={addSubgoal} disabled={!newSubgoalTitle.trim()} className="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">
-                                    <Plus className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        )}
+                        {/* Add Subgoal Input is removed. Replaced by QuickAddModal */}
                     </div>
                 </div>
 
@@ -751,6 +741,21 @@ export default function GoalDetailsPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <UpgradeModal
+                open={showUpgrade}
+                onOpenChange={setShowUpgrade}
+                title={upgradeContext.title}
+                description={upgradeContext.description}
+            />
+
+            <QuickAddModal
+                open={showQuickAdd}
+                onOpenChange={setShowQuickAdd}
+                defaultTab="task"
+                defaultLinkedGoalId={activeGoal.id}
+                onActionCreated={handleAddStepFromModal}
+            />
         </div>
     );
 }
