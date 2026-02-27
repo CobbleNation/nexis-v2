@@ -10,7 +10,7 @@ import { ActionCard } from './ActionCard';
 import { TaskFilters } from './TaskFilters';
 import { useState } from 'react';
 import { format } from 'date-fns';
-
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active' | 'completed' | 'deferred' | 'incomplete' }) {
     const { state, dispatch } = useData();
     // Use local date for "Today" comparison to match input[type="date"] values
@@ -200,23 +200,72 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                         <Calendar className="w-6 h-6 text-orange-500" />
                         Завдання
                     </h2>
-                    <button
-                        onClick={() => setShowFilters(!showFilters)}
-                        className={cn(
-                            "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-                            showFilters
-                                ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400"
-                                : "bg-slate-100 dark:bg-secondary/50 text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground"
-                        )}
-                    >
-                        <SlidersHorizontal className="w-4 h-4" />
-                        <span className="hidden sm:inline">Фільтри</span>
-                        {hasActiveFilters && (
-                            <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                {selectedAreas.length + selectedProjects.length + (dateFrom || dateTo ? 1 : 0)}
-                            </span>
-                        )}
-                    </button>
+                    {/* Desktop Filter Toggle */}
+                    <div className="hidden md:block">
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={cn(
+                                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                                showFilters
+                                    ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                                    : "bg-slate-100 dark:bg-secondary/50 text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground"
+                            )}
+                        >
+                            <SlidersHorizontal className="w-4 h-4" />
+                            <span className="hidden sm:inline">Фільтри</span>
+                            {hasActiveFilters && (
+                                <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                    {selectedAreas.length + selectedProjects.length + (dateFrom || dateTo ? 1 : 0)}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+
+                    {/* Mobile Filter Toggle */}
+                    <div className="md:hidden">
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <button
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
+                                        hasActiveFilters
+                                            ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                                            : "bg-slate-100 dark:bg-secondary/50 text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground"
+                                    )}
+                                >
+                                    <SlidersHorizontal className="w-4 h-4" />
+                                    {hasActiveFilters && (
+                                        <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                            {selectedAreas.length + selectedProjects.length + (dateFrom || dateTo ? 1 : 0)}
+                                        </span>
+                                    )}
+                                </button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="w-[85vw] sm:w-[400px] p-0 flex flex-col border-l-orange-100 dark:border-l-border">
+                                <SheetHeader className="p-6 pb-2 text-left border-b border-slate-100 dark:border-border">
+                                    <SheetTitle className="flex items-center gap-2">
+                                        <SlidersHorizontal className="w-5 h-5 text-orange-500" />
+                                        Фільтри Завдань
+                                    </SheetTitle>
+                                    <SheetDescription className="hidden">Налаштування фільтрації завдань</SheetDescription>
+                                </SheetHeader>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                                    <TaskFilters
+                                        selectedAreas={selectedAreas}
+                                        setSelectedAreas={setSelectedAreas}
+                                        selectedProjects={selectedProjects}
+                                        setSelectedProjects={setSelectedProjects}
+                                        dateFrom={dateFrom}
+                                        setDateFrom={setDateFrom}
+                                        dateTo={dateTo}
+                                        setDateTo={setDateTo}
+                                        hasActiveFilters={hasActiveFilters}
+                                        clearFilters={clearFilters}
+                                    />
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
                 </div>
                 <p className="text-muted-foreground text-sm">
                     {filter === 'current' && "Поточний фокус та завдання на сьогодні."}
@@ -276,23 +325,7 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                 </div>
             </div>
 
-            {/* Mobile Filter Sheet (below content on mobile) */}
-            {showFilters && (
-                <div className="md:hidden px-4 pb-4">
-                    <TaskFilters
-                        selectedAreas={selectedAreas}
-                        setSelectedAreas={setSelectedAreas}
-                        selectedProjects={selectedProjects}
-                        setSelectedProjects={setSelectedProjects}
-                        dateFrom={dateFrom}
-                        setDateFrom={setDateFrom}
-                        dateTo={dateTo}
-                        setDateTo={setDateTo}
-                        hasActiveFilters={hasActiveFilters}
-                        clearFilters={clearFilters}
-                    />
-                </div>
-            )}
+
         </div>
     );
 }
