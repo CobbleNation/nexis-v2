@@ -9,7 +9,6 @@ import { useState, Suspense } from 'react';
 import { useData } from '@/lib/store';
 import { InboxView } from '@/components/actions/InboxView';
 import { TasksView } from '@/components/actions/TasksView';
-import { RoutinesView } from '@/components/actions/RoutinesView';
 import { FocusView } from '@/components/actions/FocusView';
 import { HabitsView } from '@/components/actions/HabitsView';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -25,13 +24,12 @@ function ActionsPageContent() {
         params.set('tab', val);
         router.push(`/actions?${params.toString()}`);
     };
-    const [taskFilter, setTaskFilter] = useState<'current' | 'active' | 'completed' | 'deferred' | 'incomplete'>('current');
+    const [taskFilter, setTaskFilter] = useState<'active' | 'completed' | 'deferred' | 'incomplete'>('active');
 
     // Counters
     const inboxCount = state.actions.filter(a => a.type === 'task' && !a.completed && !a.date).length;
     const activeTasksCount = state.actions.filter(a => a.type === 'task' && !a.completed).length;
     const activeHabitsCount = state.habits.filter(h => h.status === 'active').length;
-    const routinesCount = state.routines.length;
     const focusCount = state.actions.filter(a => a.isFocus && !a.completed).length;
 
     return (
@@ -75,12 +73,6 @@ function ActionsPageContent() {
                                         {activeTasksCount}
                                     </span>
                                 </TabsTrigger>
-                                <TabsTrigger value="routines" className="shrink-0 gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 text-sm md:text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-primary/20 whitespace-nowrap">
-                                    <RefreshCw className="h-4 w-4" /> <span className="hidden sm:inline">Рутина</span>
-                                    <span className="bg-white/20 text-current text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                                        {routinesCount}
-                                    </span>
-                                </TabsTrigger>
                                 <TabsTrigger value="habits" className="shrink-0 gap-1.5 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 text-sm md:text-base font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground dark:data-[state=active]:bg-primary dark:text-muted-foreground dark:data-[state=active]:text-primary-foreground rounded-xl transition-all data-[state=active]:shadow-md shadow-primary/20 whitespace-nowrap">
                                     <Zap className="h-4 w-4" /> <span className="hidden sm:inline">Звички</span>
                                     <span className="bg-white/20 text-current text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
@@ -101,7 +93,6 @@ function ActionsPageContent() {
                     {activeTab === 'tasks' && (
                         <div className="flex px-4 md:px-0 pb-4 gap-4 overflow-x-auto no-scrollbar md:pl-12">
                             {[
-                                { id: 'current', label: 'Поточні' },
                                 { id: 'active', label: 'Активні' },
                                 { id: 'completed', label: 'Виконані' },
                                 { id: 'deferred', label: 'Відкладені' },
@@ -134,10 +125,6 @@ function ActionsPageContent() {
 
                     <TabsContent value="tasks" className="h-full m-0 data-[state=active]:flex flex-col">
                         <TasksView filter={taskFilter} />
-                    </TabsContent>
-
-                    <TabsContent value="routines" className="h-full m-0 data-[state=active]:flex flex-col">
-                        <RoutinesView />
                     </TabsContent>
 
                     <TabsContent value="habits" className="h-full m-0 data-[state=active]:flex flex-col">

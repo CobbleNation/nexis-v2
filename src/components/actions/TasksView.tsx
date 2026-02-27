@@ -11,7 +11,7 @@ import { TaskFilters } from './TaskFilters';
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
-export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active' | 'completed' | 'deferred' | 'incomplete' }) {
+export function TasksView({ filter = 'active' }: { filter?: 'active' | 'completed' | 'deferred' | 'incomplete' }) {
     const { state, dispatch } = useData();
     // Use local date for "Today" comparison to match input[type="date"] values
     const today = new Date();
@@ -35,16 +35,6 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
     const allActions = state.actions.filter(a => a.type === 'task' || a.type === 'routine_instance');
 
     switch (filter) {
-        case 'current':
-            // "Current": Focus subset (Today OR Focus OR Recently Touched)
-            // Excludes Deferred, Canceled, Completed
-            filteredTasks = allActions.filter(a =>
-                !a.completed &&
-                a.status !== 'canceled' &&
-                a.status !== 'deferred' &&
-                (a.date === todayStr || a.isFocus)
-            );
-            break;
         case 'active':
             // "Active": "Planned tasks"
             // Includes: Future, Specific Date, Area-bound (if we treat areas as planned?)
@@ -268,7 +258,6 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                     </div>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                    {filter === 'current' && "Поточний фокус та завдання на сьогодні."}
                     {filter === 'active' && "Всі заплановані завдання."}
                     {filter === 'deferred' && "Свідомо відкладені завдання."}
                     {filter === 'completed' && "Історія успіху."}
@@ -301,7 +290,6 @@ export function TasksView({ filter = 'current' }: { filter?: 'current' | 'active
                     {filteredTasks.length === 0 && (
                         <div className="p-12 text-center text-muted-foreground bg-white dark:bg-card/50 rounded-3xl border border-dashed border-slate-200 dark:border-border">
                             <p>
-                                {filter === 'current' && "Фокус чистий. Час обрати нову мету!"}
                                 {filter === 'active' && "Всі завдання виконані."}
                                 {filter === 'deferred' && "Немає відкладених завдань."}
                                 {filter === 'completed' && "Історія порожня."}
