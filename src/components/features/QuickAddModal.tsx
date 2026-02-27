@@ -633,7 +633,6 @@ export function QuickAddModal({
     const ENTITIES = [
         { id: 'task', label: 'Завдання', icon: CheckSquare, color: 'text-orange-500', bg: 'bg-orange-500/10' },
         { id: 'habit', label: 'Звичка', icon: Zap, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-        { id: 'routine', label: 'Рутина', icon: Repeat, color: 'text-orange-500', bg: 'bg-orange-500/10' },
         { id: 'event', label: 'Подія', icon: Calendar, color: 'text-orange-500', bg: 'bg-orange-500/10' },
         { id: 'content', label: 'Контент', icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-500/10' },
         { id: 'project', label: 'Проект', icon: Folder, color: 'text-blue-500', bg: 'bg-blue-500/10' },

@@ -79,6 +79,10 @@ export const goals = sqliteTable('goals', {
     metricTargetValue: real('metric_target_value'),
     metricStartValue: real('metric_start_value'),
     metricCurrentValue: real('metric_current_value'),
+    metricDirection: text('metric_direction'),
+    additionalMetricIds: text('additional_metric_ids', { mode: 'json' }).$type<string[]>(),
+    horizon: text('horizon'),
+    expectedImpact: text('expected_impact'),
 
     // Sub-goals are for Tactical milestones or just checklist
     subGoals: text('sub_goals', { mode: 'json' }).$type<{ id: string; title: string; completed: boolean }[]>(),
@@ -100,7 +104,9 @@ export const projects = sqliteTable('projects', {
     title: text('title').notNull(),
     description: text('description'),
     status: text('status').default('active').notNull(), // active, completed, paused
+    startDate: checkTimestamp('start_date'),
     deadline: checkTimestamp('deadline'),
+    metricIds: text('metric_ids', { mode: 'json' }).$type<string[]>(),
 
     // M:N Relation
     goalIds: text('goal_ids', { mode: 'json' }).$type<string[]>(),
@@ -121,6 +127,7 @@ export const actions = sqliteTable('actions', {
     completed: boolean('completed').default(false).notNull(),
     areaId: text('area_id'),
     projectId: text('project_id').references(() => projects.id, { onDelete: 'set null' }),
+    linkedGoalId: text('linked_goal_id').references(() => goals.id, { onDelete: 'set null' }),
     dueDate: checkTimestamp('due_date'),
     scheduledTime: text('scheduled_time'), // "14:00" - Legacy? Keeping for safety.
 
@@ -130,6 +137,11 @@ export const actions = sqliteTable('actions', {
     duration: integer('duration'), // minutes
     isFocus: boolean('is_focus').default(false),
     subtasks: text('subtasks', { mode: 'json' }).$type<{ id: string; title: string; completed: boolean }[]>(),
+    fromRoutineId: text('from_routine_id'),
+    energyLevel: text('energy_level'),
+    impact: text('impact'),
+    reminderAt: text('reminder_at'),
+    reminderSent: boolean('reminder_sent').default(false),
 
     // Habit specific
     frequency: text('frequency'), // daily, weekly, custom
