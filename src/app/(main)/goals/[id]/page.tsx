@@ -469,19 +469,20 @@ export default function GoalDetailsPage() {
                     <div className="bg-white dark:bg-card border border-slate-200 dark:border-border rounded-xl overflow-hidden shadow-sm">
                         {((activeGoal.subGoals && activeGoal.subGoals.filter(sg => !sg.completed).length > 0) || previewTasks.length > 0) ? (
                             <div className="divide-y divide-slate-100 dark:divide-border/50">
-                                {/* Regular Active Subgoals */}
                                 {(activeGoal.subGoals || []).filter(sg => !sg.completed).map((sg) => (
-                                    <div key={sg.id} className="p-3.5 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-secondary/20 transition-colors group">
+                                    <div key={sg.id} onClick={(e) => {
+                                        // Handle mobile specific issues where a generic tap might have weird propagation
+                                    }} className="p-3.5 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-secondary/20 transition-colors group relative">
                                         <button
                                             onClick={() => toggleSubgoal(sg.id, sg.completed)}
-                                            className={cn("shrink-0 transition-colors", sg.completed ? "text-emerald-500" : "text-slate-300 dark:text-slate-600 hover:text-emerald-400")}
+                                            className={cn("shrink-0 transition-colors relative z-10", sg.completed ? "text-emerald-500" : "text-slate-300 dark:text-slate-600 hover:text-emerald-400")}
                                         >
                                             {sg.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                                         </button>
                                         <span className={cn("text-sm flex-1", sg.completed && "line-through text-muted-foreground decoration-slate-300")}>{sg.title}</span>
                                         <button
                                             onClick={() => deleteSubgoal(sg.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-900/20"
+                                            className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 relative z-10"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
