@@ -117,20 +117,20 @@ export function TaskFilters({
                         )}
                     </button>
                     {areasOpen && (
-                        <div className="px-2 pb-1.5 space-y-0">
+                        <div className="px-2 pb-1.5 space-y-0 max-h-[250px] overflow-y-auto custom-scrollbar">
                             {/* Select All */}
                             {state.areas.length > 0 && (
                                 <button
                                     onClick={selectAllAreas}
                                     className={cn(
-                                        "w-full flex items-center justify-between px-3 py-1.5 text-xs rounded-lg transition-all mb-1",
+                                        "w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all mb-2 border",
                                         selectedAreas.length === state.areas.length
-                                            ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400"
-                                            : "text-slate-400 dark:text-muted-foreground hover:bg-slate-50 dark:hover:bg-secondary/30 hover:text-slate-600 dark:hover:text-slate-300"
+                                            ? "bg-orange-500 text-white border-orange-600 shadow-sm"
+                                            : "bg-white dark:bg-card border-slate-200 dark:border-border text-slate-700 dark:text-foreground hover:bg-slate-50 dark:hover:bg-secondary/50 shadow-sm"
                                     )}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <CheckCheck className="w-3.5 h-3.5" />
+                                        <CheckCheck className="w-4 h-4" />
                                         <span>{selectedAreas.length === state.areas.length ? 'Зняти всі' : 'Обрати всі'}</span>
                                     </div>
                                 </button>
@@ -187,20 +187,20 @@ export function TaskFilters({
                         )}
                     </button>
                     {projectsOpen && (
-                        <div className="px-2 pb-1.5 space-y-0">
+                        <div className="px-2 pb-1.5 space-y-0 max-h-[250px] overflow-y-auto custom-scrollbar">
                             {/* Select All */}
                             {activeProjects.length > 0 && (
                                 <button
                                     onClick={selectAllProjects}
                                     className={cn(
-                                        "w-full flex items-center justify-between px-3 py-1.5 text-xs rounded-lg transition-all mb-1",
+                                        "w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all mb-2 border",
                                         selectedProjects.length === activeProjects.length
-                                            ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                                            : "text-slate-400 dark:text-muted-foreground hover:bg-slate-50 dark:hover:bg-secondary/30 hover:text-slate-600 dark:hover:text-slate-300"
+                                            ? "bg-blue-500 text-white border-blue-600 shadow-sm"
+                                            : "bg-white dark:bg-card border-slate-200 dark:border-border text-slate-700 dark:text-foreground hover:bg-slate-50 dark:hover:bg-secondary/50 shadow-sm"
                                     )}
                                 >
                                     <div className="flex items-center gap-2">
-                                        <CheckCheck className="w-3.5 h-3.5" />
+                                        <CheckCheck className="w-4 h-4" />
                                         <span>{selectedProjects.length === activeProjects.length ? 'Зняти всі' : 'Обрати всі'}</span>
                                     </div>
                                 </button>
@@ -254,9 +254,9 @@ export function TaskFilters({
                         )}
                     </button>
                     {datesOpen && (
-                        <div className="px-3 pb-3 space-y-3">
+                        <div className="px-3 pb-3 space-y-3 overflow-hidden">
                             {/* Date From */}
-                            <div className="space-y-1.5">
+                            <div className="space-y-1.5 w-full">
                                 <label className="text-xs font-medium text-slate-500 dark:text-muted-foreground pl-0.5">
                                     З
                                 </label>
@@ -264,12 +264,12 @@ export function TaskFilters({
                                     type="date"
                                     value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
                                     onChange={(e) => setDateFrom(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
+                                    className="w-full min-w-0 flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
                                 />
                             </div>
 
                             {/* Date To */}
-                            <div className="space-y-1.5">
+                            <div className="space-y-1.5 w-full">
                                 <label className="text-xs font-medium text-slate-500 dark:text-muted-foreground pl-0.5">
                                     По
                                 </label>
@@ -278,7 +278,7 @@ export function TaskFilters({
                                     value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
                                     onChange={(e) => setDateTo(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
                                     min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
-                                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
+                                    className="w-full min-w-0 flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/30 dark:focus:ring-primary/30 focus:border-orange-400 dark:focus:border-primary transition-all"
                                 />
                             </div>
 
