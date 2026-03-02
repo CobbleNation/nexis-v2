@@ -23,6 +23,11 @@ export const DailyRecapCard: React.FC<DailyRecapCardProps> = ({ onOpenJournal })
     const todayJournal = state.journal.find((j: any) => j.date.startsWith(todayStr));
 
     const handleAnalyzeDay = async () => {
+        if (!isPro) {
+            setShowUpgrade(true);
+            return;
+        }
+
         if (!todayJournal) {
             toast.error("Спочатку заповніть журнал!");
             onOpenJournal();
@@ -94,24 +99,22 @@ export const DailyRecapCard: React.FC<DailyRecapCardProps> = ({ onOpenJournal })
                             </p>
 
                             {/* Analysis Block */}
-                            {isPro && (
-                                <div
-                                    onClick={todayJournal ? handleAnalyzeDay : onOpenJournal}
-                                    className="mt-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center gap-3 cursor-pointer hover:bg-indigo-500/20 transition-colors group"
-                                >
-                                    <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300">
-                                        {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                            <div
+                                onClick={todayJournal ? handleAnalyzeDay : onOpenJournal}
+                                className="mt-4 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center gap-3 cursor-pointer hover:bg-indigo-500/20 transition-colors group"
+                            >
+                                <div className="h-8 w-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300">
+                                    {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-white group-hover:text-indigo-200 transition-colors">
+                                        {todayJournal ? "Отримати пояснення дня" : "Заповніть журнал для аналізу"}
                                     </div>
-                                    <div>
-                                        <div className="text-sm font-bold text-white group-hover:text-indigo-200 transition-colors">
-                                            {todayJournal ? "Отримати пояснення дня" : "Заповніть журнал для аналізу"}
-                                        </div>
-                                        <div className="text-xs text-indigo-200/60">
-                                            {todayJournal ? "AI знайде прихований зміст подій" : "Спочатку запишіть думки"}
-                                        </div>
+                                    <div className="text-xs text-indigo-200/60">
+                                        {todayJournal ? "AI знайде прихований зміст подій" : "Спочатку запишіть думки"}
                                     </div>
                                 </div>
-                            )}
+                            </div>
                         </>
                     ) : (
                         <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2">

@@ -52,7 +52,7 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
         setIsLoading(true);
         if (!isPro) {
             setIsLoading(false);
-            setIsOpen(true); // Ensure component is open to show modal later if needed, or handle differently. Actually, let's just trigger the modal.
+            setShowUpgradeModal(true);
             return;
         }
         setIsOpen(true);
