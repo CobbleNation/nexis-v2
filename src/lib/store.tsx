@@ -537,11 +537,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             // "data" is the payload. For ADD_ACTION, payload is the Action object.
             // For DELETE_ACTION, payload is { id }.
             // The API expects { type: "ADD_ACTION", data: { ... } }
-            await fetch('/api/sync', {
+            const res = await fetch('/api/sync', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: action.type, data: action.payload }),
             });
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(`Server returned ${res.status}: ${text}`);
+            }
             if (action.type === 'ADD_JOURNAL') {
                 // console.log('Synced Journal:', action.payload); 
             }
