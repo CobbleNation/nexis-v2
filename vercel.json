@@ -1,12 +1,9 @@
 {
-    "builds": [
-        {
-            "src": "package.json",
-            "use": "@vercel/next",
-            "config": {
-                "maxLambdaSize": "100mb"
-            }
+    "functions": {
+        "src/app/api/**/*": {
+            "memory": 1024,
+            "maxDuration": 60,
+            "includeFiles": "node_modules/@libsql/client/**"
         }
-    ],
-    "framework": "nextjs"
+    }
 }
