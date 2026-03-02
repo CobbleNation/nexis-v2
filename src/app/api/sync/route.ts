@@ -186,10 +186,6 @@ export async function GET() {
             library: userLibrary,
             habits: userHabits,
             habitLogs: userHabitLogs
-        }, {
-            headers: {
-                'Cache-Control': 'no-store, max-age=0, must-revalidate',
-            },
         });
     } catch (error) {
         console.error('GET /api/sync error:', error);
@@ -224,7 +220,7 @@ export async function POST(req: Request) {
             if (typeof actionData.dueDate === 'string' && actionData.dueDate) actionData.dueDate = new Date(actionData.dueDate);
             // if (typeof actionData.date === 'string' && actionData.date) actionData.date = new Date(actionData.date); // Keep as string for YYYY-MM-DD representation
 
-            await db.insert(actions).values({ ...actionData, userId }).onConflictDoUpdate({ target: actions.id, set: { ...actionData, userId } });
+            await db.insert(actions).values({ ...actionData, userId }).onConflictDoUpdate({ target: actions.id, set: actionData });
         } else if (type === 'DELETE_ACTION') {
             await db.delete(actions).where(eq(actions.id, data.id));
         } else if (type === 'TOGGLE_ACTION') {
@@ -242,7 +238,7 @@ export async function POST(req: Request) {
             if (typeof goalData.deadline === 'string' && goalData.deadline) goalData.deadline = new Date(goalData.deadline);
             if (typeof goalData.endDate === 'string' && goalData.endDate) goalData.endDate = new Date(goalData.endDate);
 
-            await db.insert(goals).values({ ...goalData, userId }).onConflictDoUpdate({ target: goals.id, set: { ...goalData, userId } });
+            await db.insert(goals).values({ ...goalData, userId }).onConflictDoUpdate({ target: goals.id, set: goalData });
         } else if (type === 'UPDATE_GOAL') {
             const goalData = { ...data };
             if (typeof goalData.createdAt === 'string') goalData.createdAt = new Date(goalData.createdAt);
@@ -253,7 +249,7 @@ export async function POST(req: Request) {
 
             // Note: We don't strictly enforce 30-day rule here in Sync to avoid blocking data consistency if client was allowed.
             // Client UI and specific API routes are the first line of defense. 
-            await db.insert(goals).values({ ...goalData, userId }).onConflictDoUpdate({ target: goals.id, set: { ...goalData, userId } });
+            await db.insert(goals).values({ ...goalData, userId }).onConflictDoUpdate({ target: goals.id, set: goalData });
         } else if (type === 'DELETE_GOAL') {
             await db.delete(goals).where(and(eq(goals.id, data.id), eq(goals.userId, userId)));
         } else if (type === 'ADD_NOTE') {
@@ -323,7 +319,7 @@ export async function POST(req: Request) {
             if (typeof areaData.createdAt === 'string') areaData.createdAt = new Date(areaData.createdAt);
             if (typeof areaData.updatedAt === 'string') areaData.updatedAt = new Date(areaData.updatedAt);
 
-            await db.insert(lifeAreas).values({ ...areaData, userId }).onConflictDoUpdate({ target: lifeAreas.id, set: { ...areaData, userId } });
+            await db.insert(lifeAreas).values({ ...areaData, userId }).onConflictDoUpdate({ target: lifeAreas.id, set: areaData });
         } else if (type === 'DELETE_AREA') {
             await db.delete(lifeAreas).where(eq(lifeAreas.id, data.id));
         } else if (type === 'ADD_PROJECT' || type === 'UPDATE_PROJECT') {
@@ -332,13 +328,13 @@ export async function POST(req: Request) {
             if (typeof projectData.updatedAt === 'string') projectData.updatedAt = new Date(projectData.updatedAt);
             if (typeof projectData.deadline === 'string' && projectData.deadline) projectData.deadline = new Date(projectData.deadline);
 
-            await db.insert(projects).values({ ...projectData, userId }).onConflictDoUpdate({ target: projects.id, set: { ...projectData, userId } });
+            await db.insert(projects).values({ ...projectData, userId }).onConflictDoUpdate({ target: projects.id, set: projectData });
         } else if (type === 'ADD_ROUTINE' || type === 'UPDATE_ROUTINE') {
             const routineData = { ...data };
             if (typeof routineData.createdAt === 'string') routineData.createdAt = new Date(routineData.createdAt);
             if (typeof routineData.updatedAt === 'string') routineData.updatedAt = new Date(routineData.updatedAt);
 
-            await db.insert(routines).values({ ...routineData, userId }).onConflictDoUpdate({ target: routines.id, set: { ...routineData, userId } });
+            await db.insert(routines).values({ ...routineData, userId }).onConflictDoUpdate({ target: routines.id, set: routineData });
         } else if (type === 'DELETE_ROUTINE') {
             await db.delete(routines).where(eq(routines.id, data.id));
         } else if (type === 'UPDATE_NOTE') {
@@ -346,7 +342,7 @@ export async function POST(req: Request) {
             if (typeof noteData.createdAt === 'string') noteData.createdAt = new Date(noteData.createdAt);
             if (typeof noteData.updatedAt === 'string') noteData.updatedAt = new Date(noteData.updatedAt);
             if (typeof noteData.date === 'string' && noteData.date) noteData.date = new Date(noteData.date);
-            await db.insert(notes).values({ ...noteData, userId }).onConflictDoUpdate({ target: notes.id, set: { ...noteData, userId } });
+            await db.insert(notes).values({ ...noteData, userId }).onConflictDoUpdate({ target: notes.id, set: noteData });
         } else if (type === 'DELETE_NOTE') {
             await db.delete(notes).where(eq(notes.id, data.id));
         } else if (type === 'ADD_JOURNAL' || type === 'UPDATE_JOURNAL') {
@@ -354,28 +350,28 @@ export async function POST(req: Request) {
             if (typeof journalData.createdAt === 'string') journalData.createdAt = new Date(journalData.createdAt);
             if (typeof journalData.updatedAt === 'string') journalData.updatedAt = new Date(journalData.updatedAt);
             if (typeof journalData.date === 'string') journalData.date = new Date(journalData.date);
-            await db.insert(journalEntries).values({ ...journalData, userId }).onConflictDoUpdate({ target: journalEntries.id, set: { ...journalData, userId } });
+            await db.insert(journalEntries).values({ ...journalData, userId }).onConflictDoUpdate({ target: journalEntries.id, set: journalData });
         } else if (type === 'DELETE_JOURNAL') {
             await db.delete(journalEntries).where(eq(journalEntries.id, data.id));
         } else if (type === 'ADD_FILE' || type === 'UPDATE_FILE') {
             const fileData = { ...data };
             if (typeof fileData.createdAt === 'string') fileData.createdAt = new Date(fileData.createdAt);
             if (typeof fileData.updatedAt === 'string') fileData.updatedAt = new Date(fileData.updatedAt);
-            await db.insert(fileAssets).values({ ...fileData, userId }).onConflictDoUpdate({ target: fileAssets.id, set: { ...fileData, userId } });
+            await db.insert(fileAssets).values({ ...fileData, userId }).onConflictDoUpdate({ target: fileAssets.id, set: fileData });
         } else if (type === 'DELETE_FILE') {
             await db.delete(fileAssets).where(eq(fileAssets.id, data.id));
         } else if (type === 'ADD_LIBRARY_ITEM' || type === 'UPDATE_LIBRARY_ITEM') {
             const libData = { ...data };
             if (typeof libData.createdAt === 'string') libData.createdAt = new Date(libData.createdAt);
             if (typeof libData.updatedAt === 'string') libData.updatedAt = new Date(libData.updatedAt);
-            await db.insert(libraryItems).values({ ...libData, userId }).onConflictDoUpdate({ target: libraryItems.id, set: { ...libData, userId } });
+            await db.insert(libraryItems).values({ ...libData, userId }).onConflictDoUpdate({ target: libraryItems.id, set: libData });
         } else if (type === 'DELETE_LIBRARY_ITEM') {
             await db.delete(libraryItems).where(eq(libraryItems.id, data.id));
         } else if (type === 'ADD_HABIT' || type === 'UPDATE_HABIT') {
             const habitData = { ...data };
             if (typeof habitData.createdAt === 'string') habitData.createdAt = new Date(habitData.createdAt);
             if (typeof habitData.updatedAt === 'string') habitData.updatedAt = new Date(habitData.updatedAt);
-            await db.insert(habits).values({ ...habitData, userId }).onConflictDoUpdate({ target: habits.id, set: { ...habitData, userId } });
+            await db.insert(habits).values({ ...habitData, userId }).onConflictDoUpdate({ target: habits.id, set: habitData });
         } else if (type === 'DELETE_HABIT') {
             await db.delete(habits).where(eq(habits.id, data.id));
         } else if (type === 'LOG_HABIT') {
@@ -385,7 +381,7 @@ export async function POST(req: Request) {
             // Schema likely has createdAt for sync.
             // Assume schema matches HabitLog interface.
             // We should ensure date is string YYYY-MM-DD
-            await db.insert(habitLogs).values({ ...logData, userId }).onConflictDoUpdate({ target: habitLogs.id, set: { ...logData, userId } });
+            await db.insert(habitLogs).values({ ...logData, userId }).onConflictDoUpdate({ target: habitLogs.id, set: logData });
         } else if (type === 'DELETE_HABIT_LOG') {
             await db.delete(habitLogs).where(eq(habitLogs.id, data.id));
         }

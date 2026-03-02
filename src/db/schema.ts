@@ -121,7 +121,6 @@ export const actions = sqliteTable('actions', {
     id: text('id').primaryKey(),
     userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
     title: text('title').notNull(),
-    description: text('description'), // Missing column added
     type: text('type').notNull(), // 'task' | 'habit'
     status: text('status').default('pending').notNull(),
     priority: text('priority').default('medium'), // low, medium, high
