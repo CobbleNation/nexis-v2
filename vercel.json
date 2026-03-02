@@ -1,0 +1,12 @@
+{
+    "builds": [
+        {
+            "src": "package.json",
+            "use": "@vercel/next",
+            "config": {
+                "maxLambdaSize": "100mb"
+            }
+        }
+    ],
+    "framework": "nextjs"
+}
