@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { NotificationsPopover } from '@/components/layout/NotificationsPopover';
 import { useAuth } from '@/lib/auth-context';
 import { useFilteredData, useData } from '@/lib/store';
-
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { ContextState } from '@/components/overview/ContextState';
 import { calculateFocusLevel } from '@/lib/metrics';
 import { useMemo } from 'react';
@@ -39,26 +39,8 @@ export function Header() {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3">
-
+                    <ThemeToggle />
                     <NotificationsPopover />
-
-                    {/* Profile */}
-                    <Link href="/settings" className="flex items-center gap-3 md:px-3 md:py-1.5 rounded-full md:border md:border-border/60 md:bg-white/50 md:dark:bg-slate-800/50 md:hover:bg-white md:dark:hover:bg-slate-800 transition-all md:shadow-sm">
-                        <Avatar className="h-9 w-9 md:h-8 md:w-8 border-2 border-primary/30 shadow-md ring-2 ring-primary/10 md:ring-0 md:border-white md:dark:border-slate-700">
-                            <AvatarImage src={user?.avatar} />
-                            <AvatarFallback className="bg-primary text-primary-foreground font-bold text-xs md:text-[10px]">
-                                {user?.name?.substring(0, 2).toUpperCase() || 'TM'}
-                            </AvatarFallback>
-                        </Avatar>
-                        <div className="hidden md:block text-left pr-1">
-                            <div className="flex flex-col">
-                                <span className="text-sm font-bold text-foreground leading-none mb-0.5">{user?.name || 'User'}</span>
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                                    {user?.subscriptionTier === 'pro' ? 'Pro Plan' : 'Free Plan'}
-                                </span>
-                            </div>
-                        </div>
-                    </Link>
                 </div>
             </header>
 

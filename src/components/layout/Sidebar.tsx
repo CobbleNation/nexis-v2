@@ -26,6 +26,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useData } from '@/lib/store'; // Added import
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useState, useMemo } from 'react';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { DailyReviewDialog } from '@/components/features/DailyReviewDialog';
@@ -301,19 +302,53 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 ))}
             </nav>
 
-            {/* Bottom Actions */}
-            <div className="p-4 mt-auto border-t border-border/40 bg-slate-50/50 dark:bg-slate-900/50">
+            {/* Bottom Actions and Profile */}
+            <div className="p-4 mt-auto border-t border-border/40 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
                 {/* Upgrade Card (Only for Free Plan) */}
                 {!isPro && (
                     <div className="mb-0">
                         <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2 border-primary/20 text-primary hover:text-primary hover:bg-primary/5">
                             <Link href="/pricing" onClick={handleNavigation}>
                                 <Zap className="w-4 h-4 fill-current" />
-                                <span className="text-xs font-bold">Upgrade to Pro</span>
+                                <span className="text-xs font-bold">Перейти на Pro</span>
                             </Link>
                         </Button>
                     </div>
                 )}
+
+                {/* User Profile - Compact */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left">
+                            <Avatar className="h-9 w-9 shrink-0 border border-border shadow-sm">
+                                <AvatarImage src={user?.avatar} />
+                                <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs uppercase">
+                                    {user?.name?.substring(0, 2) || 'US'}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                                <p className="text-sm font-semibold text-foreground truncate leading-tight mb-0.5">
+                                    {user?.name || 'Користувач'}
+                                </p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                                    {isPro ? 'Pro План' : 'Безкоштовний План'}
+                                </p>
+                            </div>
+                            <Settings className="w-4 h-4 text-muted-foreground shrink-0" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 mb-2">
+                        <DropdownMenuItem asChild>
+                            <Link href="/settings" className="flex items-center cursor-pointer w-full">
+                                <Settings className="mr-2 h-4 w-4" /> Налаштування
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={logout} className="text-red-500 hover:text-red-600 focus:text-red-600 cursor-pointer">
+                            <LogOut className="mr-2 h-4 w-4" /> Вийти
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
