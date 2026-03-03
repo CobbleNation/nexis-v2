@@ -1,15 +1,42 @@
 import { OpenAI } from 'openai';
 import { NextRequest, NextResponse } from 'next/server';
 import { DAILY_REVIEW_SYSTEM_PROMPT } from '@/lib/ai/prompts';
+import { verifyJWT } from '@/lib/auth-utils';
+import { cookies } from 'next/headers';
+import { db } from '@/db';
+import { users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const runtime = 'edge';
-
 export async function POST(req: NextRequest) {
     try {
+        // 1. Auth & Pro Check
+        const cookieStore = await cookies();
+        const token = cookieStore.get('access_token')?.value;
+
+        if (!token) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const payload = await verifyJWT(token);
+        if (!payload || !payload.userId) {
+            return NextResponse.json({ error: 'Invalid Token' }, { status: 401 });
+        }
+
+        const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        if (user.subscriptionTier !== 'pro' && user.role !== 'admin') {
+            return NextResponse.json({ error: 'Pro subscription required' }, { status: 403 });
+        }
+
+        // 2. Parse Input
         const { completedTasks, pendingTasks, goals } = await req.json();
 
         // Construct context for the AI

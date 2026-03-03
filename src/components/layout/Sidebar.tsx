@@ -18,7 +18,8 @@ import {
     Zap,
     Plus,
     ChevronDown,
-    Brain
+    Brain,
+    Lock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
@@ -202,7 +203,8 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                                     )}
                                                 >
                                                     <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                                    <span>{item.name}</span>
+                                                    <span className="flex-1">{item.name}</span>
+                                                    {!isPro && <Lock className="w-3.5 h-3.5 text-amber-400/60" />}
                                                 </button>
                                             } />
                                         </div>
@@ -218,7 +220,8 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                                     )}
                                                 >
                                                     <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                                    <span>{item.name}</span>
+                                                    <span className="flex-1">{item.name}</span>
+                                                    {!isPro && <Lock className="w-3.5 h-3.5 text-violet-400/60" />}
                                                 </button>
                                             } />
                                         </div>

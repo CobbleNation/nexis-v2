@@ -90,7 +90,14 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                 })
             });
 
-            if (!response.ok) throw new Error("Failed to generate review");
+            if (!response.ok) {
+                if (response.status === 403) {
+                    setShowUpgradeModal(true);
+                    setStep('info');
+                    return;
+                }
+                throw new Error("Failed to generate review");
+            }
 
             const data = await response.json();
             setReview(data);
