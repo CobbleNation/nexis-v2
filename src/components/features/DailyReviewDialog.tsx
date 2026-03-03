@@ -123,40 +123,50 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
 
     // Note: Removed useEffect that auto-triggered generateReview
 
-    return (
-        <Dialog open={isOpen} onOpenChange={(open) => {
-            if (open && !isPro) {
-                setShowUpgradeModal(true);
-            } else {
-                setIsOpen(open);
-            }
-        }}>
-            <DialogTrigger asChild>
+    if (!isPro) {
+        return (
+            <>
                 {customTrigger ? (
                     React.cloneElement(customTrigger as React.ReactElement, {
                         onClick: (e: any) => {
-                            if (!isPro) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setShowUpgradeModal(true);
-                            } else {
-                                // Let DialogTrigger handle it via trigger's own props
-                                const origOnClick = (customTrigger as any).props?.onClick;
-                                if (origOnClick) origOnClick(e);
-                            }
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowUpgradeModal(true);
                         }
-                    } as any)
+                    })
                 ) : (
                     <Button
                         variant="outline"
                         className="gap-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40"
                         onClick={(e) => {
-                            if (!isPro) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setShowUpgradeModal(true);
-                            }
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setShowUpgradeModal(true);
                         }}
+                    >
+                        <Sparkles className="w-4 h-4" />
+                        AI Аналіз Дня
+                    </Button>
+                )}
+                <UpgradeModal
+                    open={showUpgradeModal}
+                    onOpenChange={setShowUpgradeModal}
+                    title="AI Аналіз Дня"
+                    description="Персональний коуч, який проаналізує вашу продуктивність за день та розставить пріоритети на завтра. Доступно у Pro версії."
+                />
+            </>
+        );
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {customTrigger ? (
+                    customTrigger
+                ) : (
+                    <Button
+                        variant="outline"
+                        className="gap-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40"
                     >
                         <Sparkles className="w-4 h-4" />
                         AI Аналіз Дня
@@ -298,13 +308,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                     </>
                 )}
             </DialogContent>
-
-            <UpgradeModal
-                open={showUpgradeModal}
-                onOpenChange={setShowUpgradeModal}
-                title="AI Аналіз Дня"
-                description="Персональний коуч, який проаналізує вашу продуктивність за день та розставить пріоритети на завтра. Доступно у Pro версії."
-            />
         </Dialog>
+
     );
 }

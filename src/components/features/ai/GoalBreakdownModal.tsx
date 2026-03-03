@@ -324,37 +324,44 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
         </>
     ) : null;
 
-    return (
-        <Dialog open={isOpen} onOpenChange={(open) => {
-            if (open && !isPro) {
-                setShowUpgradeModal(true);
-            } else {
-                setIsOpen(open);
-            }
-        }}>
-            <DialogTrigger asChild>
+    if (!isPro) {
+        return (
+            <>
                 {customTrigger ? (
                     React.cloneElement(customTrigger as React.ReactElement, {
                         onClick: (e: any) => {
-                            if (!isPro) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setShowUpgradeModal(true);
-                            } else {
-                                // Extract original onClick safely
-                                const origOnClick = (customTrigger as any).props?.onClick;
-                                if (origOnClick) origOnClick(e);
-                            }
-                        }
-                    } as any)
-                ) : (
-                    <Button variant="outline" className="gap-2" onClick={(e) => {
-                        if (!isPro) {
                             e.preventDefault();
                             e.stopPropagation();
                             setShowUpgradeModal(true);
                         }
+                    })
+                ) : (
+                    <Button variant="outline" className="gap-2" onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setShowUpgradeModal(true);
                     }}>
+                        <BrainCircuit className="w-4 h-4 text-violet-500" />
+                        AI Стратегія
+                    </Button>
+                )}
+                <UpgradeModal
+                    open={showUpgradeModal}
+                    onOpenChange={setShowUpgradeModal}
+                    title="AI Стратегія"
+                    description="Персональний коуч, який проаналізує вашу ціль та розробить покроковий план її досягнення. Доступно у Pro версії."
+                />
+            </>
+        );
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                {customTrigger ? (
+                    customTrigger
+                ) : (
+                    <Button variant="outline" className="gap-2">
                         <BrainCircuit className="w-4 h-4 text-violet-500" />
                         AI Стратегія
                     </Button>
@@ -364,7 +371,6 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
                 onOpenAutoFocus={(e) => {
                     // Prevent mobile keyboard from opening on mount
                     if (step === 'select') {
-                        e.preventDefault();
                     }
                 }}
                 className={cn(
