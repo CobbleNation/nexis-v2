@@ -63,23 +63,6 @@ export default function LandingPage() {
                 </Button>
               </Link>
             )}
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="lg" className="rounded-full text-base h-12 px-8 border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <Play className="mr-2 w-4 h-4 fill-current" /> Дивитись демо
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl p-0 overflow-hidden bg-transparent border-none shadow-none">
-                <DialogTitle className="sr-only">Демонстрація додатку Zynorvia</DialogTitle>
-                <div className="relative aspect-video rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-                  <img
-                    src="/demo.png"
-                    alt="Zynorvia Demo"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
 
           {/* Hero Image / Dashboard Mockup */}
@@ -294,7 +277,7 @@ export default function LandingPage() {
 
                 <div className="space-y-6">
                   <WorkflowStep title="1. Бачення" desc="Визнач свої Сфери Життя та довгострокові Цілі." />
-                  <WorkflowStep title="2. Виконання" desc="Розіб'и цілі на Проекти та Завдання. Фокусуйся на головному." />
+                  <WorkflowStep title="2. Виконання" desc="Розбий цілі на Проекти та Завдання. Фокусуйся на головному." />
                   <WorkflowStep title="3. Рефлексія" desc="Використовуй Журнал та Тижневий Огляд для корекції курсу." />
                 </div>
 
