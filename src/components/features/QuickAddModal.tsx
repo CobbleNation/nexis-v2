@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarPicker } from "@/components/ui/calendar"
+import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useData } from "@/lib/store"
 import { toast } from "sonner"
@@ -1098,13 +1101,31 @@ export function QuickAddModal({
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1.5 animate-in slide-in-from-top-2">
-                                        <input
-                                            type="date"
-                                            value={date}
-                                            onChange={(e) => setDate(e.target.value)}
-                                            className="h-8 w-full px-2 bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-primary/50 shadow-sm rounded-md text-xs font-medium text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/10"
-                                        />
+                                    <div className="space-y-1.5 animate-in slide-in-from-top-2 flex flex-col">
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "h-8 w-full justify-between text-left font-normal bg-white dark:bg-secondary/20 border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-primary/50 shadow-sm text-xs dark:text-foreground px-3",
+                                                        !date && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <span>{date ? format(new Date(date), "PPP") : "Обрати дату"}</span>
+                                                    <Calendar className="h-3.5 w-3.5 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <CalendarPicker
+                                                    mode="single"
+                                                    selected={date ? new Date(date) : undefined}
+                                                    onSelect={(d) => {
+                                                        if (d) setDate(format(d, 'yyyy-MM-dd'));
+                                                    }}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
                                         <p className="text-[10px] text-muted-foreground">
                                             {isProjectScheduled
                                                 ? "Проект буде мати статус 'Planned' до цієї дати."
@@ -1116,17 +1137,35 @@ export function QuickAddModal({
 
                             {/* Date (Hide for Habit, Routine AND Project) */}
                             {type !== 'habit' && type !== 'routine' && type !== 'project' && (
-                                <div className="space-y-1.5">
+                                <div className="space-y-1.5 flex flex-col">
                                     <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                                         {type === 'project' ? 'Дедлайн' : 'Дата'} {['task', 'event', 'content'].includes(type) && contentType !== 'library' && <span className="text-red-500">*</span>}
                                     </label>
-                                    <input
-                                        id="onboarding-task-date"
-                                        type="date"
-                                        value={date}
-                                        onChange={(e) => { setDate(e.target.value); checkAndAdvance('create-task-date'); }}
-                                        className="h-8 w-full px-2 bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-primary/50 shadow-sm rounded-md text-xs font-medium text-slate-700 dark:text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500/10"
-                                    />
+                                    <Popover>
+                                        <PopoverTrigger asChild id="onboarding-task-date">
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "h-8 w-full justify-between text-left font-normal bg-white dark:bg-secondary/20 border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-primary/50 shadow-sm text-xs dark:text-foreground px-3",
+                                                    !date && "text-muted-foreground"
+                                                )}
+                                                onClick={() => checkAndAdvance('create-task-date')}
+                                            >
+                                                <span>{date ? format(new Date(date), "PPP") : "Обрати дату"}</span>
+                                                <Calendar className="h-3.5 w-3.5 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <CalendarPicker
+                                                mode="single"
+                                                selected={date ? new Date(date) : undefined}
+                                                onSelect={(d) => {
+                                                    if (d) setDate(format(d, 'yyyy-MM-dd'));
+                                                }}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
                             )}
 

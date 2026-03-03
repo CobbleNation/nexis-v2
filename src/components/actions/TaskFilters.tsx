@@ -6,6 +6,10 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { useState } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarPicker } from "@/components/ui/calendar"
+import { Button } from "@/components/ui/button"
+import { Calendar as CalendarIcon } from "lucide-react"
 
 interface TaskFiltersProps {
     selectedAreas: string[];
@@ -261,12 +265,28 @@ export function TaskFilters({
                                     <label className="text-[10px] font-medium text-slate-500 dark:text-muted-foreground pl-1 uppercase tracking-wider">
                                         З
                                     </label>
-                                    <input
-                                        type="date"
-                                        value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
-                                        onChange={(e) => setDateFrom(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
-                                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-orange-500/50 dark:focus:ring-primary/50 focus:border-orange-400 dark:focus:border-primary transition-all"
-                                    />
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground hover:bg-slate-50 dark:hover:bg-secondary/50 justify-between font-normal h-auto text-left transition-all",
+                                                    !dateFrom && "text-muted-foreground"
+                                                )}
+                                            >
+                                                {dateFrom ? format(dateFrom, 'yyyy-MM-dd') : <span>Оберіть дату</span>}
+                                                <CalendarIcon className="h-3.5 w-3.5 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <CalendarPicker
+                                                mode="single"
+                                                selected={dateFrom || undefined}
+                                                onSelect={(d) => setDateFrom(d || null)}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
 
                                 {/* Date To */}
@@ -274,13 +294,28 @@ export function TaskFilters({
                                     <label className="text-[10px] font-medium text-slate-500 dark:text-muted-foreground pl-1 uppercase tracking-wider">
                                         По
                                     </label>
-                                    <input
-                                        type="date"
-                                        value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
-                                        onChange={(e) => setDateTo(e.target.value ? new Date(e.target.value + 'T00:00:00') : null)}
-                                        min={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : undefined}
-                                        className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-orange-500/50 dark:focus:ring-primary/50 focus:border-orange-400 dark:focus:border-primary transition-all"
-                                    />
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full px-2.5 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-border bg-white dark:bg-secondary/30 text-slate-700 dark:text-foreground hover:bg-slate-50 dark:hover:bg-secondary/50 justify-between font-normal h-auto text-left transition-all",
+                                                    !dateTo && "text-muted-foreground"
+                                                )}
+                                            >
+                                                {dateTo ? format(dateTo, 'yyyy-MM-dd') : <span>Оберіть дату</span>}
+                                                <CalendarIcon className="h-3.5 w-3.5 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <CalendarPicker
+                                                mode="single"
+                                                selected={dateTo || undefined}
+                                                onSelect={(d) => setDateTo(d || null)}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
                             </div>
 

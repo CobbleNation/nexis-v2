@@ -199,12 +199,12 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                             <DailyReviewDialog customTrigger={
                                                 <button
                                                     className={cn(
-                                                        "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10"
+                                                        "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-left rounded-lg transition-all duration-200 group text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10"
                                                     )}
                                                 >
-                                                    <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                                    <span className="flex-1">{item.name}</span>
-                                                    {!isPro && <Lock className="w-3.5 h-3.5 text-amber-400/60" />}
+                                                    <item.icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
+                                                    <span className="flex-1 truncate">{item.name}</span>
+                                                    {!isPro && <Lock className="w-3.5 h-3.5 shrink-0 text-amber-400/60" />}
                                                 </button>
                                             } />
                                         </div>
@@ -216,12 +216,12 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                             <GoalBreakdownModal customTrigger={
                                                 <button
                                                     className={cn(
-                                                        "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/10"
+                                                        "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-left rounded-lg transition-all duration-200 group text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/10"
                                                     )}
                                                 >
-                                                    <item.icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                                                    <span className="flex-1">{item.name}</span>
-                                                    {!isPro && <Lock className="w-3.5 h-3.5 text-violet-400/60" />}
+                                                    <item.icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
+                                                    <span className="flex-1 truncate">{item.name}</span>
+                                                    {!isPro && <Lock className="w-3.5 h-3.5 shrink-0 text-violet-400/60" />}
                                                 </button>
                                             } />
                                         </div>
