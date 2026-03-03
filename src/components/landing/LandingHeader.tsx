@@ -61,7 +61,7 @@ export function LandingHeader() {
                                     <DropdownMenuLabel>Мій Акаунт</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Link href="/dashboard" className="cursor-pointer flex items-center w-full">
+                                        <Link href="/overview" className="cursor-pointer flex items-center w-full">
                                             <LayoutDashboard className="mr-2 h-4 w-4" />
                                             <span>Перейти в застосунок</span>
                                         </Link>
@@ -158,7 +158,7 @@ export function LandingHeader() {
                     </Link>
                     <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                         {user ? (
-                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                            <Link href="/overview" onClick={() => setMobileMenuOpen(false)}>
                                 <Button className="w-full rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold flex items-center justify-center gap-2">
                                     Перейти в продукт <ArrowRight className="w-4 h-4" />
                                 </Button>
