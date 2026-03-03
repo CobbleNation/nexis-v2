@@ -8,8 +8,8 @@ export function useSubscription() {
 
     // Default to FREE if no tier specified
     const tier: SubscriptionTier = user?.subscriptionTier || SUBSCRIPTION_PLAN.FREE;
-    // Admin gets full access
-    const isPro = tier === SUBSCRIPTION_PLAN.PRO || user?.role === 'admin';
+    // Check if user is on PRO plan
+    const isPro = tier === SUBSCRIPTION_PLAN.PRO;
     const limits = LIMITS[tier];
 
     const checkLimit = (feature: keyof typeof LIMITS['free']) => {

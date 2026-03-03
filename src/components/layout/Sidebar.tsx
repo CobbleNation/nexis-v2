@@ -54,7 +54,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const searchParams = useSearchParams();
     const { user, logout } = useAuth();
     const { state } = useData(); // Added useData
-    const isPro = user?.subscriptionTier === 'pro' || user?.role === 'admin';
+    const isPro = user?.subscriptionTier === 'pro';
 
     // Helper to close sheet on mobile
     const handleNavigation = () => {
