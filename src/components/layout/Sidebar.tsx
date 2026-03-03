@@ -303,13 +303,28 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
             {/* Upgrade Card (Only for Free Plan) */}
             {!isPro && (
-                <div className="mb-0">
-                    <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2 border-primary/20 text-primary hover:text-primary hover:bg-primary/5">
-                        <Link href="/pricing" onClick={handleNavigation}>
-                            <Zap className="w-4 h-4 fill-current" />
-                            <span className="text-xs font-bold">Перейти на Pro</span>
-                        </Link>
-                    </Button>
+                <div className="p-4 mt-auto pb-6">
+                    <div className="p-4 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-amber-500/10 dark:from-amber-500/20 dark:to-orange-500/10 border border-amber-500/20 rounded-2xl relative overflow-hidden group">
+                        <div className="absolute -top-4 -right-4 p-4 opacity-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 pointer-events-none">
+                            <Sparkles className="w-24 h-24 text-amber-500" />
+                        </div>
+                        <div className="relative z-10 flex flex-col gap-2">
+                            <div className="flex items-center gap-2 mb-0.5">
+                                <div className="p-1.5 bg-amber-500/20 rounded-lg">
+                                    <Zap className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 fill-current" />
+                                </div>
+                                <span className="text-sm font-bold text-foreground">Перейти на Pro</span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground leading-relaxed mb-1.5 pr-2">
+                                Розблокуйте всі AI інструменти та преміум функції для максимальної продуктивності.
+                            </p>
+                            <Button asChild size="sm" className="w-full bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/20 transition-all font-semibold rounded-xl text-xs h-9">
+                                <Link href="/pricing" onClick={handleNavigation}>
+                                    Оновити зараз
+                                </Link>
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             )}
             <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
