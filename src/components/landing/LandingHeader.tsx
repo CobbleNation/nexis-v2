@@ -1,18 +1,23 @@
 "use client"
 
 import Link from "next/link"
-import { Sparkles, Menu, X, ArrowRight } from "lucide-react"
+import { Sparkles, Menu, X, ArrowRight, LogOut, Settings, LayoutDashboard, Monitor, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ThemeToggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useData } from "@/lib/store"
+import { useAuth } from "@/lib/auth-context"
+import { useTheme } from "next-themes"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export function LandingHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { state } = useData();
-    const { user } = state;
+    const { user, logout } = useAuth();
+    const { theme, setTheme } = useTheme();
+    const isPro = user?.subscriptionTier === 'pro';
 
     return (
         <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-white/50 dark:bg-[#020817]/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/20">
@@ -31,21 +36,88 @@ export function LandingHeader() {
                 </nav>
 
                 <div className="flex items-center gap-3">
-                    <ThemeToggle />
                     {user ? (
-                        <Link href="/dashboard" className="hidden sm:flex items-center gap-3 hover:opacity-80 transition-opacity">
-                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                {user.name}
-                            </span>
-                            <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-800">
-                                <AvatarImage src={user.avatar} />
-                                <AvatarFallback className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-bold text-xs flex items-center justify-center">
-                                    {user.name?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                            </Avatar>
-                        </Link>
+                        <div className="hidden sm:flex items-center gap-3">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="flex items-center gap-2 py-1 pl-1 pr-3 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors outline-none ring-0">
+                                        <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-800 shrink-0">
+                                            <AvatarImage src={user.avatar} />
+                                            <AvatarFallback className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-bold text-xs flex items-center justify-center">
+                                                {user.name?.charAt(0) || 'U'}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col items-start">
+                                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 leading-tight">
+                                                {user.name}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium leading-tight">
+                                                {isPro ? 'Pro План' : 'Безкоштовно'}
+                                            </span>
+                                        </div>
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 mt-2">
+                                    <DropdownMenuLabel>Мій Акаунт</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/dashboard" className="cursor-pointer flex items-center w-full">
+                                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                                            <span>Перейти в застосунок</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/settings" className="cursor-pointer flex items-center w-full">
+                                            <Settings className="mr-2 h-4 w-4" />
+                                            <span>Налаштування</span>
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+
+                                    <div className="p-2">
+                                        <p className="text-xs font-medium text-slate-500 mb-2 px-2">Тема</p>
+                                        <div className="flex items-center justify-between gap-1">
+                                            <Button
+                                                variant={theme === 'light' ? 'secondary' : 'ghost'}
+                                                size="sm"
+                                                className="w-full h-8 px-2 justify-center"
+                                                onClick={() => setTheme('light')}
+                                            >
+                                                <Sun className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant={theme === 'dark' ? 'secondary' : 'ghost'}
+                                                size="sm"
+                                                className="w-full h-8 px-2 justify-center"
+                                                onClick={() => setTheme('dark')}
+                                            >
+                                                <Moon className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant={theme === 'system' ? 'secondary' : 'ghost'}
+                                                size="sm"
+                                                className="w-full h-8 px-2 justify-center"
+                                                onClick={() => setTheme('system')}
+                                            >
+                                                <Monitor className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onClick={() => logout()}
+                                        className="text-red-600 focus:text-red-500 focus:bg-red-100 dark:focus:bg-red-900/30 cursor-pointer"
+                                    >
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        <span>Вийти з акаунта</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
                     ) : (
                         <>
+                            <ThemeToggle />
                             <Link href="/login" className="hidden sm:block">
                                 <Button variant="ghost" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
                                     Увійти
