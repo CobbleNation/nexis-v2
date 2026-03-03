@@ -1,14 +1,18 @@
 "use client"
 
 import Link from "next/link"
-import { Sparkles, Menu, X } from "lucide-react"
+import { Sparkles, Menu, X, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ThemeToggle"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useData } from "@/lib/store"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
 export function LandingHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { state } = useData();
+    const { user } = state;
 
     return (
         <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-white/50 dark:bg-[#020817]/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/20">
@@ -28,16 +32,32 @@ export function LandingHeader() {
 
                 <div className="flex items-center gap-3">
                     <ThemeToggle />
-                    <Link href="/login" className="hidden sm:block">
-                        <Button variant="ghost" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
-                            Увійти
-                        </Button>
-                    </Link>
-                    <Link href="/register" className="hidden sm:block">
-                        <Button className="rounded-full px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold shadow-lg shadow-slate-900/20 transition-all hover:scale-105 active:scale-95">
-                            Спробувати безкоштовно
-                        </Button>
-                    </Link>
+                    {user ? (
+                        <Link href="/dashboard" className="hidden sm:flex items-center gap-3 hover:opacity-80 transition-opacity">
+                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                {user.name}
+                            </span>
+                            <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-800">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-bold text-xs flex items-center justify-center">
+                                    {user.name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                            </Avatar>
+                        </Link>
+                    ) : (
+                        <>
+                            <Link href="/login" className="hidden sm:block">
+                                <Button variant="ghost" className="text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
+                                    Увійти
+                                </Button>
+                            </Link>
+                            <Link href="/register" className="hidden sm:block">
+                                <Button className="rounded-full px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold shadow-lg shadow-slate-900/20 transition-all hover:scale-105 active:scale-95">
+                                    Спробувати безкоштовно
+                                </Button>
+                            </Link>
+                        </>
+                    )}
 
                     {/* Mobile hamburger */}
                     <button
@@ -65,16 +85,26 @@ export function LandingHeader() {
                         Тарифи
                     </Link>
                     <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                        <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                            <Button variant="ghost" className="w-full justify-center text-slate-600 dark:text-slate-300">
-                                Увійти
-                            </Button>
-                        </Link>
-                        <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                            <Button className="w-full rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold">
-                                Спробувати безкоштовно
-                            </Button>
-                        </Link>
+                        {user ? (
+                            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                                <Button className="w-full rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold flex items-center justify-center gap-2">
+                                    Перейти в продукт <ArrowRight className="w-4 h-4" />
+                                </Button>
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                                    <Button variant="ghost" className="w-full justify-center text-slate-600 dark:text-slate-300">
+                                        Увійти
+                                    </Button>
+                                </Link>
+                                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                                    <Button className="w-full rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold">
+                                        Спробувати безкоштовно
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

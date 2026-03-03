@@ -3,6 +3,7 @@ import { ArrowRight, CheckCircle2, Layout, Target, Zap, BarChart3, Lock, Globe, 
 import { Button } from "@/components/ui/button"
 import { LandingHeader } from "@/components/landing/LandingHeader"
 import { LandingFooter } from "@/components/landing/LandingFooter"
+import { useData } from "@/lib/store"
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,8 @@ import {
 } from "@/components/ui/dialog"
 
 export default function LandingPage() {
+  const { state } = useData();
+  const { user } = state;
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#020817] text-slate-900 dark:text-slate-50 transition-colors duration-500 overflow-x-hidden">
 
@@ -45,11 +48,19 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-            <Link href="/login">
-              <Button size="lg" className="rounded-full text-base h-12 px-8 bg-orange-600 hover:bg-orange-500 text-white shadow-xl shadow-orange-500/20 transition-all hover:scale-105">
-                Запустити додаток <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
+            {user ? (
+              <Link href="/dashboard">
+                <Button size="lg" className="rounded-full text-base h-12 px-8 bg-orange-600 hover:bg-orange-500 text-white shadow-xl shadow-orange-500/20 transition-all hover:scale-105">
+                  Перейти в продукт <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button size="lg" className="rounded-full text-base h-12 px-8 bg-orange-600 hover:bg-orange-500 text-white shadow-xl shadow-orange-500/20 transition-all hover:scale-105">
+                  Запустити додаток <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </Link>
+            )}
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="lg" className="rounded-full text-base h-12 px-8 border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -210,9 +221,15 @@ export default function LandingPage() {
 
             {/* Overlay Text */}
             <div className="absolute inset-0 flex items-center justify-center bg-black/5 dark:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px]">
-              <Link href="/login">
-                <Button size="lg" className="rounded-full shadow-2xl scale-110">Увійти в Простір</Button>
-              </Link>
+              {user ? (
+                <Link href="/dashboard">
+                  <Button size="lg" className="rounded-full shadow-2xl scale-110">Відкрити Додаток</Button>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <Button size="lg" className="rounded-full shadow-2xl scale-110">Увійти в Простір</Button>
+                </Link>
+              )}
             </div>
           </div>
         </section>
@@ -280,11 +297,19 @@ export default function LandingPage() {
                 </div>
 
                 <div className="pt-4">
-                  <Link href="/login">
-                    <Button className="gap-2">
-                      Почати за Методом <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <Link href="/dashboard">
+                      <Button className="gap-2">
+                        Продовжити роботу <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link href="/login">
+                      <Button className="gap-2">
+                        Почати за Методом <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
 
@@ -327,11 +352,19 @@ export default function LandingPage() {
                 Приєднуйся до тисяч людей, які вже перейшли на Zynorvia. Жодних карток. Чистий фокус.
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link href="/login">
-                  <Button size="lg" className="rounded-full h-14 px-10 text-lg bg-orange-500 hover:bg-orange-400 text-white border-0">
-                    Почати Зараз
-                  </Button>
-                </Link>
+                {user ? (
+                  <Link href="/dashboard">
+                    <Button size="lg" className="rounded-full h-14 px-10 text-lg bg-orange-500 hover:bg-orange-400 text-white border-0">
+                      Повернутись до справ
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/login">
+                    <Button size="lg" className="rounded-full h-14 px-10 text-lg bg-orange-500 hover:bg-orange-400 text-white border-0">
+                      Почати Зараз
+                    </Button>
+                  </Link>
+                )}
               </div>
               <p className="text-xs text-slate-400 dark:text-slate-500 mt-8">
                 Безкоштовно назавжди для особистого використання.
