@@ -99,6 +99,10 @@ export function QuickAddModal({
     const [libAuthor, setLibAuthor] = React.useState('');
     const [fileType, setFileType] = React.useState<FileAsset['type']>('document');
 
+    // Contextual Toggles
+    const [isJournalBackfill, setIsJournalBackfill] = React.useState(false);
+    const [hasProjectDeadline, setHasProjectDeadline] = React.useState(false);
+
     // Habit Specific
     const [habitMinimum, setHabitMinimum] = React.useState('');
     const [habitTimeOfDay, setHabitTimeOfDay] = React.useState<'morning' | 'afternoon' | 'evening' | 'anytime'>('anytime');
@@ -231,10 +235,11 @@ export function QuickAddModal({
             setLibUrl('');
             setLibAuthor('');
             setFileType('document');
-            setHabitMinimum('');
             setHabitTimeOfDay('anytime');
             setRelatedMetricIds([]);
             setIsProjectScheduled(false);
+            setIsJournalBackfill(false);
+            setHasProjectDeadline(false);
 
             // Handle Initial Data Pre-fill (From Voice Assistant etc.)
             if (initialData) {
@@ -305,7 +310,6 @@ export function QuickAddModal({
         // 1. Task Validation
         if (type === 'task') {
             if (!title.trim()) errors.push("Назва");
-            if (!date) errors.push("Дата");
             if (!duration) errors.push("Тривалість");
             if (!areaId) errors.push("Сфера");
         }
@@ -338,6 +342,7 @@ export function QuickAddModal({
         else if (type === 'project') {
             if (!title.trim()) errors.push("Назва");
             if (!areaId) errors.push("Сфера");
+            if (hasProjectDeadline && !date) errors.push("Дедлайн");
         }
 
         // 6. Goal Validation
@@ -357,12 +362,12 @@ export function QuickAddModal({
         else if (type === 'content') {
             if (contentType === 'note') {
                 if (!title.trim()) errors.push("Назва");
-                if (!date) errors.push("Дата");
                 if (!areaId) errors.push("Сфера");
             }
             else if (contentType === 'journal') {
                 if (!description.trim()) errors.push("Зміст запису");
                 if (!journalMood) errors.push("Настрій");
+                if (isJournalBackfill && !date) errors.push("Дата");
             }
             else if (contentType === 'file') {
                 if (!title.trim()) errors.push("Назва");
@@ -439,7 +444,7 @@ export function QuickAddModal({
                         status: 'pending',
                         completed: false,
                         priority: isFocus ? 'high' : 'medium', // Implicit priority
-                        date: date, // Explicitly set date
+                        date: date || undefined, // Set date only if provided (can be empty)
                         isFocus,
                         duration: parseInt(duration),
                         startTime: startTime || undefined,
@@ -502,7 +507,7 @@ export function QuickAddModal({
                         status: isProjectScheduled ? 'planned' : 'active',
                         goalIds: [],
                         startDate: isProjectScheduled ? date : undefined,
-                        deadline: !isProjectScheduled && date ? new Date(date).toISOString() : undefined,
+                        deadline: hasProjectDeadline && date ? new Date(date).toISOString() : undefined,
                         metricIds: selectedMetricIds,
                     };
                     dispatch({ type: 'ADD_PROJECT', payload: newProject });
@@ -543,7 +548,7 @@ export function QuickAddModal({
                             title,
                             content: description,
                             relatedAreaIds: [selectedArea],
-                            date,
+                            date: new Date().toISOString(), // Always created now
                             tags: [],
                             audioUrl: finalAudioUrl
                         };
@@ -552,7 +557,7 @@ export function QuickAddModal({
                     } else if (contentType === 'journal') {
                         const newEntry: JournalEntry = {
                             ...common,
-                            date, // User selected date
+                            date: isJournalBackfill ? date : new Date().toISOString(), // Use selected date if backfilling, else now
                             content: description,
                             mood: parseInt(journalMood),
                             tags: []
@@ -1090,22 +1095,61 @@ export function QuickAddModal({
                                 <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-border">
                                     <div className="flex items-center justify-between">
                                         <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                                            {isProjectScheduled ? 'Запланований старт' : 'Дедлайн'}
+                                            Дедлайн
                                         </label>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-[10px] text-slate-400">
-                                                {isProjectScheduled ? 'Відкласти' : 'Активний'}
-                                            </span>
+                                            <Switch checked={hasProjectDeadline} onCheckedChange={setHasProjectDeadline} className="scale-75 data-[state=checked]:bg-blue-500" />
                                         </div>
                                     </div>
+                                    {hasProjectDeadline && (
+                                        <div className="space-y-1.5 flex flex-col mt-2">
+                                            <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                                Виконати до <span className="text-red-500">*</span>
+                                            </label>
+                                            <Input
+                                                type="date"
+                                                value={date}
+                                                onChange={(e) => setDate(e.target.value)}
+                                                className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
-                            {/* Date (Hide for Habit, Routine AND Project) */}
-                            {type !== 'habit' && type !== 'routine' && type !== 'project' && (
+                            {/* Journal Backfill Toggle */}
+                            {type === 'content' && contentType === 'journal' && (
+                                <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-border">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                            Заповнити за минулі дні?
+                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <Switch checked={isJournalBackfill} onCheckedChange={setIsJournalBackfill} className="scale-75 data-[state=checked]:bg-purple-500" />
+                                        </div>
+                                    </div>
+                                    {isJournalBackfill && (
+                                        <div className="space-y-1.5 flex flex-col mt-2">
+                                            <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                                Дата <span className="text-red-500">*</span>
+                                            </label>
+                                            <Input
+                                                type="date"
+                                                value={date}
+                                                onChange={(e) => setDate(e.target.value)}
+                                                className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
+                                                max={new Date().toISOString().split("T")[0]}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Date (Generic) */}
+                            {type !== 'habit' && type !== 'routine' && type !== 'project' && !(type === 'content' && ['note', 'file', 'library', 'journal'].includes(contentType)) && (
                                 <div className="space-y-1.5 flex flex-col">
                                     <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                                        {type === 'project' ? 'Дедлайн' : 'Дата'} {['task', 'event', 'content'].includes(type) && contentType !== 'library' && <span className="text-red-500">*</span>}
+                                        {type === 'task' ? 'Виконати до' : 'Дата'} {type === 'event' && <span className="text-red-500">*</span>}
                                     </label>
                                     <Input
                                         type="date"
