@@ -127,7 +127,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
         return (
             <>
                 {customTrigger ? (
-                    React.cloneElement(customTrigger as React.ReactElement, {
+                    React.cloneElement(customTrigger as React.ReactElement<any>, {
                         onClick: (e: any) => {
                             e.preventDefault();
                             e.stopPropagation();

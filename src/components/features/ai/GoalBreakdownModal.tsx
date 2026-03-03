@@ -328,7 +328,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
         return (
             <>
                 {customTrigger ? (
-                    React.cloneElement(customTrigger as React.ReactElement, {
+                    React.cloneElement(customTrigger as React.ReactElement<any>, {
                         onClick: (e: any) => {
                             e.preventDefault();
                             e.stopPropagation();
