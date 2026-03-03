@@ -21,19 +21,16 @@ import {
     Brain,
     Lock
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/lib/auth-context';
-import { useData } from '@/lib/store'; // Added import
 import { useTheme } from 'next-themes';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useState, useMemo } from 'react';
-import { Sun, Moon, Monitor } from 'lucide-react'; // Added theme icons
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { DailyReviewDialog } from '@/components/features/DailyReviewDialog';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { GoalBreakdownModal } from '@/components/features/ai/GoalBreakdownModal';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
+import { useData } from '@/lib/store';
+import { cn } from '@/lib/utils';
 
 // Navigation Groups
 interface NavItem {
@@ -57,7 +54,6 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const searchParams = useSearchParams();
     const { user, logout } = useAuth();
     const { state } = useData(); // Added useData
-    const { theme, setTheme } = useTheme();
     const isPro = user?.subscriptionTier === 'pro';
 
     // Helper to close sheet on mobile
@@ -305,89 +301,19 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 ))}
             </nav>
 
-            {/* Bottom Actions and Profile */}
-            <div className="p-4 mt-auto border-t border-border/40 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
-                {/* Upgrade Card (Only for Free Plan) */}
-                {!isPro && (
-                    <div className="mb-0">
-                        <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2 border-primary/20 text-primary hover:text-primary hover:bg-primary/5">
-                            <Link href="/pricing" onClick={handleNavigation}>
-                                <Zap className="w-4 h-4 fill-current" />
-                                <span className="text-xs font-bold">Перейти на Pro</span>
-                            </Link>
-                        </Button>
-                    </div>
-                )}
-
-                {/* User Profile - Compact */}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <button className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer text-left focus:outline-none">
-                            <Avatar className="h-10 w-10 shrink-0 border border-border shadow-sm">
-                                <AvatarImage src={user?.avatar} />
-                                <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs uppercase">
-                                    {user?.name?.substring(0, 2) || 'US'}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0 overflow-hidden">
-                                <p className="text-sm font-semibold text-foreground truncate leading-tight mb-0.5">
-                                    {user?.name || 'Користувач'}
-                                </p>
-                                <p className="text-[11px] font-medium text-muted-foreground truncate">
-                                    {isPro ? 'Pro План' : 'Безкоштовний План'}
-                                </p>
-                            </div>
-                            <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 opacity-50" />
-                        </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-64 mb-2 p-2">
-                        <div className="px-2 py-1.5 mb-1">
-                            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Тема</div>
-                            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-lg">
-                                <button
-                                    onClick={() => setTheme('light')}
-                                    className={cn("flex-1 flex justify-center p-1.5 rounded-md transition-all", theme === 'light' ? "bg-white dark:bg-slate-700 shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
-                                    title="Світла"
-                                >
-                                    <Sun className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => setTheme('dark')}
-                                    className={cn("flex-1 flex justify-center p-1.5 rounded-md transition-all", theme === 'dark' ? "bg-white dark:bg-slate-700 shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
-                                    title="Темна"
-                                >
-                                    <Moon className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={() => setTheme('system')}
-                                    className={cn("flex-1 flex justify-center p-1.5 rounded-md transition-all", theme === 'system' ? "bg-white dark:bg-slate-700 shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
-                                    title="Системна"
-                                >
-                                    <Monitor className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild className="p-2 cursor-pointer">
-                            <Link href="/overview" className="flex items-center w-full">
-                                <LayoutDashboard className="mr-2 h-4 w-4" /> Перейти в застосунок
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild className="p-2 cursor-pointer">
-                            <Link href="/settings" className="flex items-center w-full">
-                                <Settings className="mr-2 h-4 w-4" /> Налаштування
-                            </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={logout} className="p-2 text-red-500 hover:text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/50 cursor-pointer">
-                            <LogOut className="mr-2 h-4 w-4" /> Вийти
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
-
+            {/* Upgrade Card (Only for Free Plan) */}
+            {!isPro && (
+                <div className="mb-0">
+                    <Button asChild variant="outline" size="sm" className="w-full justify-start gap-2 border-primary/20 text-primary hover:text-primary hover:bg-primary/5">
+                        <Link href="/pricing" onClick={handleNavigation}>
+                            <Zap className="w-4 h-4 fill-current" />
+                            <span className="text-xs font-bold">Перейти на Pro</span>
+                        </Link>
+                    </Button>
+                </div>
+            )}
             <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
-        </div>
+        </div >
     );
 }
 
