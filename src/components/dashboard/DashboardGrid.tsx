@@ -8,7 +8,7 @@ import { ProjectProgress } from './ProjectProgress';
 
 export function DashboardGrid() {
     return (
-        <div className="p-2 space-y-6 max-w-[1600px] mx-auto">
+        <div className="p-2 space-y-6">
             {/* Row 1: Stats */}
             <StatsCards />
 
