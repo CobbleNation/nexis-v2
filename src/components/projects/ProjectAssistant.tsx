@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Project, Action, MetricDefinition } from '@/types';
 import { useData } from '@/lib/store';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Plus, Check, MessageSquareMore, ChevronUp, ChevronDown, Send } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Check, MessageSquareMore, ChevronUp, ChevronDown, Send, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ProjectSuggestionResponse } from '@/lib/ai/types';
@@ -220,9 +220,20 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
                         <Button
                             onClick={handleGenerate}
                             disabled={isLoading}
-                            className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20"
+                            className={cn(
+                                "w-full sm:w-auto shadow-lg",
+                                !isPro
+                                    ? "bg-slate-100 text-slate-500 border border-slate-200 shadow-none dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
+                                    : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20"
+                            )}
                         >
-                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                            {isLoading ? (
+                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                            ) : !isPro ? (
+                                <Lock className="w-4 h-4 mr-2" />
+                            ) : (
+                                <Sparkles className="w-4 h-4 mr-2" />
+                            )}
                             Аналізувати
                         </Button>
                     )}
