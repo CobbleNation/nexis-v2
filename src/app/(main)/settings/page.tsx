@@ -158,7 +158,7 @@ export default function SettingsPage() {
                                                 ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800"
                                                 : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                                         )}>
-                                            {user.subscriptionTier === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                                            {user.subscriptionTier === 'pro' ? 'Pro План' : 'Безкоштовний План'}
                                         </div>
                                     </div>
                                 </CardHeader>
@@ -341,7 +341,7 @@ export default function SettingsPage() {
                                                 ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-800"
                                                 : "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
                                         )}>
-                                            {user.subscriptionTier === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                                            {user.subscriptionTier === 'pro' ? 'Pro План' : 'Безкоштовний План'}
                                         </div>
                                     </div>
                                 </CardHeader>
