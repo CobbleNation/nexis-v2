@@ -39,7 +39,6 @@ export function Header() {
 
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3">
-                    <ThemeToggle />
                     <NotificationsPopover />
                 </div>
             </header>

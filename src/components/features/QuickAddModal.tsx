@@ -1,7 +1,7 @@
 import { useOnboarding } from "@/components/onboarding/OnboardingProvider";
 import * as React from "react"
 import { useState } from "react"
-import { CheckSquare, Calendar, FileText, Target, Hash, BarChart3, Repeat, Clock, Plus, Trash2, AlertCircle, List, Folder, BookOpen, HardDrive, Paperclip, Link as LinkIcon, Video, Layout, Zap, X } from "lucide-react"
+import { ArrowRight, Calendar, Check, ChevronRight, Clock, Hash, Image as ImageIcon, Link2, ListTodo, Loader2, Mic, Paperclip, Play, Plus, Target, Type, X, AlertCircle, CheckSquare, FileText, BarChart3, Repeat, Trash2, List, Folder, BookOpen, HardDrive, Link as LinkIcon, Video, Layout, Zap } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -11,10 +11,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarPicker } from "@/components/ui/calendar"
-import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { uk } from 'date-fns/locale';
 import { useData } from "@/lib/store"
 import { toast } from "sonner"
 import { Action, Goal, Note, AppEvent, MetricDefinition, MetricEntry, Routine, Project, JournalEntry, FileAsset, LibraryItem, Habit } from "@/types"
@@ -1097,40 +1096,7 @@ export function QuickAddModal({
                                             <span className="text-[10px] text-slate-400">
                                                 {isProjectScheduled ? 'Відкласти' : 'Активний'}
                                             </span>
-                                            <Switch checked={isProjectScheduled} onCheckedChange={setIsProjectScheduled} className="scale-75 data-[state=checked]:bg-blue-500" />
                                         </div>
-                                    </div>
-
-                                    <div className="space-y-1.5 animate-in slide-in-from-top-2 flex flex-col">
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant={"outline"}
-                                                    className={cn(
-                                                        "h-8 w-full justify-between text-left font-normal bg-white dark:bg-secondary/20 border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-primary/50 shadow-sm text-xs dark:text-foreground px-3",
-                                                        !date && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    <span>{date ? format(new Date(date), "PPP") : "Обрати дату"}</span>
-                                                    <Calendar className="h-3.5 w-3.5 opacity-50" />
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <CalendarPicker
-                                                    mode="single"
-                                                    selected={date ? new Date(date) : undefined}
-                                                    onSelect={(d) => {
-                                                        if (d) setDate(format(d, 'yyyy-MM-dd'));
-                                                    }}
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {isProjectScheduled
-                                                ? "Проект буде мати статус 'Planned' до цієї дати."
-                                                : "Дата завершення проекту (необов'язково)."}
-                                        </p>
                                     </div>
                                 </div>
                             )}
@@ -1141,31 +1107,15 @@ export function QuickAddModal({
                                     <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                                         {type === 'project' ? 'Дедлайн' : 'Дата'} {['task', 'event', 'content'].includes(type) && contentType !== 'library' && <span className="text-red-500">*</span>}
                                     </label>
-                                    <Popover>
-                                        <PopoverTrigger asChild id="onboarding-task-date">
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "h-8 w-full justify-between text-left font-normal bg-white dark:bg-secondary/20 border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-primary/50 shadow-sm text-xs dark:text-foreground px-3",
-                                                    !date && "text-muted-foreground"
-                                                )}
-                                                onClick={() => checkAndAdvance('create-task-date')}
-                                            >
-                                                <span>{date ? format(new Date(date), "PPP") : "Обрати дату"}</span>
-                                                <Calendar className="h-3.5 w-3.5 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <CalendarPicker
-                                                mode="single"
-                                                selected={date ? new Date(date) : undefined}
-                                                onSelect={(d) => {
-                                                    if (d) setDate(format(d, 'yyyy-MM-dd'));
-                                                }}
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                                    <Input
+                                        type="date"
+                                        value={date}
+                                        onChange={(e) => {
+                                            setDate(e.target.value);
+                                            checkAndAdvance('create-task-date');
+                                        }}
+                                        className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
+                                    />
                                 </div>
                             )}
 
@@ -1496,7 +1446,7 @@ export function QuickAddModal({
                     </div>
 
                 </DialogContent>
-            </Dialog>
+            </Dialog >
 
             <UpgradeModal
                 open={showUpgrade}

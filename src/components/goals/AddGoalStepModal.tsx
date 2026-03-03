@@ -6,11 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Action } from '@/types/index';
 import { v4 as uuidv4 } from 'uuid';
 import { useData } from '@/lib/store';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { uk } from 'date-fns/locale';
-import { CalendarIcon, Target } from 'lucide-react';
+import { Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -33,14 +29,14 @@ export function AddGoalStepModal({
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
-    // Explicit Date management instead of just string to integrate with Calendar
-    const [date, setDate] = useState<Date>(new Date());
+    // Native Date Input uses YYYY-MM-DD format strings natively
+    const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     React.useEffect(() => {
         if (open) {
             setTitle('');
             setDescription('');
-            setDate(new Date());
+            setDate(new Date().toISOString().split('T')[0]);
         }
     }, [open]);
 
@@ -52,7 +48,7 @@ export function AddGoalStepModal({
 
         const newId = uuidv4();
         const now = new Date().toISOString();
-        const formattedDate = format(date, 'yyyy-MM-dd');
+        const formattedDate = date; // Already in YYYY-MM-DD from input[type="date"]
 
         const newTask: Action = {
             id: newId,
@@ -116,31 +112,12 @@ export function AddGoalStepModal({
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Дата виконання</label>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal border-slate-200 dark:border-slate-800",
-                                        !date && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
-                                    {date ? format(date, "d MMMM", { locale: uk }) : <span>Оберіть дату</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={(newDate) => {
-                                        if (newDate) setDate(newDate)
-                                    }}
-                                    initialFocus
-                                    locale={uk}
-                                />
-                            </PopoverContent>
-                        </Popover>
+                        <Input
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            className="bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                        />
                     </div>
                 </div>
 

@@ -4,11 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar as CalendarPicker } from "@/components/ui/calendar"
-import { CalendarIcon } from "lucide-react"
-import { format } from "date-fns"
-import { cn } from "@/lib/utils"
 import { useData } from '@/lib/store';
 import { Project } from '@/types';
 import { toast } from 'sonner';
@@ -128,54 +123,22 @@ export function EditProjectDialog({ project, open, onOpenChange }: EditProjectDi
                     <div className="grid grid-cols-2 gap-4">
                         <div className="grid gap-2">
                             <label className="text-sm font-medium">Дата початку</label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                            "w-full justify-between text-left font-normal",
-                                            !startDate && "text-muted-foreground"
-                                        )}
-                                    >
-                                        {startDate ? format(new Date(startDate), "PPP") : <span>Оберіть дату</span>}
-                                        <CalendarIcon className="h-4 w-4 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <CalendarPicker
-                                        mode="single"
-                                        selected={startDate ? new Date(startDate) : undefined}
-                                        onSelect={(d) => setStartDate(d ? format(d, 'yyyy-MM-dd') : '')}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
+                            <Input
+                                type="date"
+                                value={startDate ? startDate.split('T')[0] : ''}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="w-full"
+                            />
                         </div>
 
                         <div className="grid gap-2">
                             <label className="text-sm font-medium">Дедлайн</label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                            "w-full justify-between text-left font-normal",
-                                            !deadline && "text-muted-foreground"
-                                        )}
-                                    >
-                                        {deadline ? format(new Date(deadline), "PPP") : <span>Оберіть дату</span>}
-                                        <CalendarIcon className="h-4 w-4 opacity-50" />
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <CalendarPicker
-                                        mode="single"
-                                        selected={deadline ? new Date(deadline) : undefined}
-                                        onSelect={(d) => setDeadline(d ? format(d, 'yyyy-MM-dd') : '')}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
+                            <Input
+                                type="date"
+                                value={deadline ? deadline.split('T')[0] : ''}
+                                onChange={(e) => setDeadline(e.target.value)}
+                                className="w-full"
+                            />
                         </div>
                     </div>
                 </div>

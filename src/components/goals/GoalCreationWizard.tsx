@@ -6,9 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar as CalendarPicker } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon } from "lucide-react";
 import { useData } from '@/lib/store';
 import { Loader2, Target, Compass, Flag, ChevronRight, ChevronLeft, ArrowUpRight, Plus, X, Info, TrendingUp, TrendingDown, Minus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -712,31 +709,18 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
                         {(goalType === 'strategic' || goalType === 'tactical') && (
                             <div className="bg-white dark:bg-card p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-border space-y-3">
-                                <Label className="text-sm font-semibold">Дедлайн</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild id="goal-deadline-input">
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "h-11 justify-between text-left font-normal text-base dark:text-foreground bg-slate-50 dark:bg-secondary/20",
-                                                !deadline && "text-muted-foreground",
-                                                dateError && "border-red-300 focus-visible:ring-red-200"
-                                            )}
-                                            onClick={() => checkAndAdvance('create-goal-deadline')}
-                                        >
-                                            {deadline ? format(new Date(deadline), "PPP") : <span>Оберіть дату</span>}
-                                            <CalendarIcon className="h-4 w-4 opacity-50" />
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                        <CalendarPicker
-                                            mode="single"
-                                            selected={deadline ? new Date(deadline) : undefined}
-                                            onSelect={(d) => setDeadline(d ? format(d, 'yyyy-MM-dd') : '')}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
+                                <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    Крайня дата (Дедлайн)
+                                </label>
+                                <Input
+                                    type="date"
+                                    value={deadline}
+                                    onChange={(e) => setDeadline(e.target.value)}
+                                    className={cn("h-11 bg-white dark:bg-secondary/20 border-slate-200 dark:border-border text-base dark:text-foreground",
+                                        dateError && "border-red-300 focus-visible:ring-red-200")}
+                                    id="goal-deadline-input"
+                                    onFocus={() => checkAndAdvance('create-goal-deadline')}
+                                />
 
                                 {dateError ? (
                                     <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2">

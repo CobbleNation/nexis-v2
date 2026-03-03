@@ -6,9 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
+import { Label } from '@/components/ui/label'; // Added Label import
 import { Calendar as CalendarIcon, Trash2, CheckCircle2, Save, X, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useData } from '@/lib/store';
@@ -39,7 +37,11 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
             else if (type === 'routine') item = state.routines.find(r => r.id === itemId);
 
             if (item) {
-                setFormData({ ...item });
+                // Format dates for native input type="date"
+                const formattedItem = { ...item };
+                if (formattedItem.date) formattedItem.date = formattedItem.date.split('T')[0];
+                if (formattedItem.deadline) formattedItem.deadline = formattedItem.deadline.split('T')[0];
+                setFormData(formattedItem);
             } else {
                 setFormData({});
             }
@@ -229,34 +231,18 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
                         {(type === 'task' || type === 'event' || type === 'project' || (type === 'goal' && formData.deadline)) && (
                             <div className="space-y-4">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Дата</label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "h-8 w-full justify-between text-left font-normal bg-white dark:bg-secondary/20 border-slate-200 dark:border-border shadow-sm text-xs dark:text-foreground px-3",
-                                                    !formData.date && !formData.deadline && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <span>{formData.date || formData.deadline ? format(new Date(formData.date || formData.deadline), "PPP") : "Обрати дату"}</span>
-                                                <CalendarIcon className="h-3.5 w-3.5 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="end">
-                                            <Calendar
-                                                mode="single"
-                                                selected={formData.date ? new Date(formData.date) : (formData.deadline ? new Date(formData.deadline) : undefined)}
-                                                onSelect={(d: Date | undefined) => {
-                                                    if (d) {
-                                                        const key = (type === 'goal' || type === 'project') ? 'deadline' : 'date';
-                                                        setFormData({ ...formData, [key]: format(d, 'yyyy-MM-dd') });
-                                                    }
-                                                }}
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                                    <div className="space-y-2">
+                                        <Label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Дата</Label>
+                                        <Input
+                                            type="date"
+                                            value={formData.date || formData.deadline || ''}
+                                            onChange={(e) => {
+                                                const key = (type === 'goal' || type === 'project') ? 'deadline' : 'date';
+                                                setFormData({ ...formData, [key]: e.target.value });
+                                            }}
+                                            className="h-8 w-full bg-white dark:bg-secondary/20 border-slate-200 dark:border-border shadow-sm text-xs dark:text-foreground px-3"
+                                        />
+                                    </div>
                                 </div>
 
                                 {(type === 'task' || type === 'event') && (
