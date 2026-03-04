@@ -58,7 +58,7 @@ function ProjectsContent() {
 
                                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md w-fit mb-3">
                                     <Layers className="w-3.5 h-3.5" />
-                                    {tasksCount} tasks
+                                    {tasksCount} завдань
                                 </div>
 
                                 {/* Progress Section or Empty State */}

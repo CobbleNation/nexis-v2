@@ -351,11 +351,11 @@ export default function ProjectPage() {
                                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 dark:border-border/50">
                                         <div className="bg-slate-50 dark:bg-secondary/20 p-3 rounded-xl">
                                             <div className="text-2xl font-bold text-slate-700 dark:text-foreground">{completedTasks.length}</div>
-                                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Ready</div>
+                                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Готово</div>
                                         </div>
                                         <div className="bg-slate-50 dark:bg-secondary/20 p-3 rounded-xl">
                                             <div className="text-2xl font-bold text-slate-700 dark:text-foreground">{activeTasks.length}</div>
-                                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pending</div>
+                                            <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">В очікуванні</div>
                                         </div>
                                     </div>
                                 </div>
