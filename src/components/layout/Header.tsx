@@ -37,13 +37,14 @@ export function Header() {
 
     return (
         <div className="sticky top-0 z-40 w-full bg-background/50 backdrop-blur-md border-b border-border/40">
-            <header className="flex h-16 items-center justify-between gap-3 px-6 md:px-8">
+            <header className="flex h-16 items-center justify-between gap-1 sm:gap-3 px-4 sm:px-6 md:px-8">
+                {/* Search Bar - Global Search Component */}
+                <GlobalSearch />
+
+
                 {/* Right Side Actions */}
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-full border border-slate-200/50 dark:border-slate-700/50">
-                        <GlobalSearch />
-                        <NotificationsPopover />
-                    </div>
+                    <NotificationsPopover />
 
                     {/* User Profile - Compact */}
                     <DropdownMenu>

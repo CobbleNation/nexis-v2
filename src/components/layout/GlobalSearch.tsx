@@ -397,7 +397,7 @@ export function GlobalSearch() {
 
     // --- Default: search bar (closed state) ---
     return (
-        <div ref={containerRef} className="relative flex-1 max-w-2xl mx-2 md:mx-12 flex justify-end md:block">
+        <div ref={containerRef} className="relative flex-1 max-w-2xl ml-2 md:mx-12 flex justify-end md:block">
             {/* Desktop Search */}
             <div className="hidden md:block relative group transition-all duration-300 z-10 w-full">
                 {/* Glow Effect */}
