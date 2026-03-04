@@ -1,105 +1,217 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '@/lib/store';
-import { Target, CheckCircle2, Circle, X, Plus } from 'lucide-react';
+import { Target, CheckCircle2, Circle, X, Plus, Sparkles, Play, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { isToday, format } from 'date-fns';
+import { isToday } from 'date-fns';
 import { SelectFocusModal, FocusItem } from './SelectFocusModal';
 
 const FOCUS_STORAGE_KEY = 'nexis-day-focus';
+
+interface StoredFocus {
+    date: string;
+    item: FocusItem;
+    isAuto: boolean;
+}
 
 function getTodayKey() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function loadFocusFromStorage(): FocusItem | null {
+function loadFocusFromStorage(): StoredFocus | null {
     try {
         const raw = localStorage.getItem(FOCUS_STORAGE_KEY);
         if (!raw) return null;
-        const { date, item } = JSON.parse(raw);
-        if (date !== getTodayKey()) return null; // Expired — new day
-        return item as FocusItem;
+        const stored: StoredFocus = JSON.parse(raw);
+        if (stored.date !== getTodayKey()) return null;
+        return stored;
     } catch {
         return null;
     }
 }
 
-function saveFocusToStorage(item: FocusItem) {
+function saveFocusToStorage(item: FocusItem, isAuto: boolean) {
     localStorage.setItem(FOCUS_STORAGE_KEY, JSON.stringify({
         date: getTodayKey(),
-        item
+        item,
+        isAuto
     }));
+}
+
+function formatElapsed(seconds: number): string {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 export function FocusToday() {
     const { state, dispatch } = useData();
     const [isFocusMode, setIsFocusMode] = useState(false);
+    const [sessionActive, setSessionActive] = useState(false);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
     const [selectModalOpen, setSelectModalOpen] = useState(false);
     const [focusItem, setFocusItem] = useState<FocusItem | null>(null);
+    const [isAutoFocus, setIsAutoFocus] = useState(false);
 
-    // Load focus from localStorage on mount (client only)
+    // Auto-compute focus based on today's activity
+    const autoFocusSuggestion = useMemo((): FocusItem | null => {
+        // 1. Find highest-priority incomplete task for today
+        const todayTasks = state.actions.filter(
+            a => a.type === 'task' && !a.completed && a.date && isToday(new Date(a.date))
+        );
+        const priorityWeight: Record<string, number> = { high: 3, medium: 2, low: 1 };
+        const topTask = todayTasks.sort(
+            (a, b) => (priorityWeight[b.priority || 'low'] || 1) - (priorityWeight[a.priority || 'low'] || 1)
+        )[0];
+
+        if (topTask) {
+            const project = topTask.projectId ? state.projects.find(p => p.id === topTask.projectId) : null;
+            return {
+                type: 'task',
+                id: topTask.id,
+                title: topTask.title,
+                relatedProjectTitle: project?.title
+            };
+        }
+
+        // 2. Fallback: project with most incomplete tasks
+        const activeProjects = state.projects.filter(p => p.status !== 'completed' && p.status !== 'deferred');
+        const topProject = activeProjects
+            .map(p => ({
+                project: p,
+                count: state.actions.filter(a => a.projectId === p.id && !a.completed).length
+            }))
+            .sort((a, b) => b.count - a.count)[0];
+
+        if (topProject && topProject.count > 0) {
+            return {
+                type: 'project',
+                id: topProject.project.id,
+                title: topProject.project.title,
+                relatedTasksCount: topProject.count
+            };
+        }
+
+        // 3. Fallback: active goal
+        const activeGoal = state.goals.find(g => g.status === 'active');
+        if (activeGoal) {
+            return { type: 'goal', id: activeGoal.id, title: activeGoal.title };
+        }
+
+        return null;
+    }, [state.actions, state.projects, state.goals]);
+
+    // 1. Load focus from localStorage on mount (runs once)
     useEffect(() => {
-        setFocusItem(loadFocusFromStorage());
-    }, []);
+        const stored = loadFocusFromStorage();
+        if (stored) {
+            setFocusItem(stored.item);
+            setIsAutoFocus(stored.isAuto);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // 2. Apply auto-focus suggestion when store data loads (if no focus is set)
+    useEffect(() => {
+        if (autoFocusSuggestion && !loadFocusFromStorage()) {
+            setFocusItem(prev => {
+                if (!prev) {
+                    saveFocusToStorage(autoFocusSuggestion, true);
+                    setIsAutoFocus(true);
+                    return autoFocusSuggestion;
+                }
+                return prev;
+            });
+        }
+    }, [autoFocusSuggestion]); // re-run when state data populates
 
     const handleSelectFocus = (item: FocusItem) => {
-        saveFocusToStorage(item);
+        saveFocusToStorage(item, false);
         setFocusItem(item);
+        setIsAutoFocus(false);
     };
 
     const handleClearFocus = () => {
         localStorage.removeItem(FOCUS_STORAGE_KEY);
         setFocusItem(null);
+        setIsAutoFocus(false);
+        setIsFocusMode(false);
+        setSessionActive(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        setElapsedSeconds(0);
     };
 
-    // Related info for the selected focus item
+    const handleStartSession = () => {
+        setSessionActive(true);
+        setElapsedSeconds(0);
+        timerRef.current = setInterval(() => {
+            setElapsedSeconds(s => s + 1);
+        }, 1000);
+    };
+
+    const handleEndSession = () => {
+        setSessionActive(false);
+        setIsFocusMode(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        setElapsedSeconds(0);
+    };
+
+    useEffect(() => {
+        return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    }, []);
+
+    // Related tasks for the focus item (shown in focus mode)
+    const relatedTasks = useMemo(() => {
+        if (!focusItem) return [];
+        if (focusItem.type === 'project') {
+            return state.actions.filter(a => a.projectId === focusItem.id && !a.completed).slice(0, 5);
+        }
+        if (focusItem.type === 'goal') {
+            return state.actions.filter(a => a.linkedGoalId === focusItem.id && !a.completed).slice(0, 5);
+        }
+        if (focusItem.type === 'task') {
+            const task = state.actions.find(a => a.id === focusItem.id);
+            if (task) return [task];
+        }
+        return [];
+    }, [focusItem, state.actions]);
+
+    // Related info for the selected focus item (card badges)
     const relatedInfo = useMemo(() => {
         if (!focusItem) return null;
-
         if (focusItem.type === 'task') {
             const task = state.actions.find(a => a.id === focusItem.id);
             if (!task) return null;
             const project = task.projectId ? state.projects.find(p => p.id === task.projectId) : null;
-            const todayHabits = state.habits.slice(0, 1); // Show first habit as example
             return {
                 projectTitle: project?.title,
-                relatedTasksCount: project
-                    ? state.actions.filter(a => a.projectId === project.id && !a.completed).length
-                    : undefined,
-                habitTitle: todayHabits[0]?.title,
                 isCompleted: task.completed
             };
         }
-
         if (focusItem.type === 'project') {
-            const project = state.projects.find(p => p.id === focusItem.id);
-            if (!project) return null;
             return {
                 relatedTasksCount: state.actions.filter(a => a.projectId === focusItem.id && !a.completed).length,
             };
         }
-
         if (focusItem.type === 'goal') {
-            const goal = state.goals.find(g => g.id === focusItem.id);
-            if (!goal) return null;
             return {
                 relatedTasksCount: state.actions.filter(a => a.linkedGoalId === focusItem.id && !a.completed).length,
             };
         }
-
         return null;
-    }, [focusItem, state.actions, state.projects, state.habits, state.goals]);
+    }, [focusItem, state.actions, state.projects]);
 
-    // Secondary tasks (for when no explicit focus — show today's task list)
     const todayTasks = useMemo(() => {
         return state.actions
             .filter(a => a.date && isToday(new Date(a.date)))
             .sort((a, b) => {
                 if (a.completed !== b.completed) return a.completed ? 1 : -1;
-                const priorityWeight: Record<string, number> = { high: 3, medium: 2, low: 1 };
-                return (priorityWeight[b.priority || 'low'] || 0) - (priorityWeight[a.priority || 'low'] || 0);
+                const pw: Record<string, number> = { high: 3, medium: 2, low: 1 };
+                return (pw[b.priority || 'low'] || 0) - (pw[a.priority || 'low'] || 0);
             });
     }, [state.actions]);
 
@@ -113,30 +225,101 @@ export function FocusToday() {
         }
     };
 
-    // FOCUS MODE — full-screen immersion
+    // ─── FOCUS MODE (Full-Screen) ────────────────────────────────────────────
     if (isFocusMode && focusItem) {
         return (
-            <div className="relative flex flex-col items-center justify-center h-full min-h-[400px] bg-orange-500 text-white rounded-3xl p-10 md:p-14 shadow-lg animate-in zoom-in-95 duration-300">
-                <button
-                    onClick={() => setIsFocusMode(false)}
-                    className="absolute top-6 right-6 p-2 bg-black/10 hover:bg-black/20 rounded-full transition"
-                >
-                    <X className="w-5 h-5" />
-                </button>
-                <div className="p-4 bg-black/10 rounded-full mb-6">
-                    <Target className="w-10 h-10 opacity-90" />
+            <div className="relative flex flex-col h-full min-h-[480px] bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-3xl p-8 md:p-12 shadow-xl shadow-orange-500/30 animate-in zoom-in-95 duration-300 overflow-hidden">
+                {/* Background decoration */}
+                <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-black/10 rounded-full blur-2xl pointer-events-none" />
+
+                {/* Top bar */}
+                <div className="flex items-center justify-between mb-8 z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                            <Target className="w-4 h-4" />
+                        </div>
+                        <span className="text-orange-100 font-bold text-sm uppercase tracking-widest">Фокус-режим</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {sessionActive && (
+                            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                                <Timer className="w-4 h-4 animate-pulse" />
+                                <span className="font-mono font-black text-sm">{formatElapsed(elapsedSeconds)}</span>
+                            </div>
+                        )}
+                        <button
+                            onClick={handleEndSession}
+                            className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition"
+                            title="Вийти з фокус-режиму"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
-                <h2 className="text-orange-100 font-bold text-sm uppercase tracking-widest mb-4">Поточний фокус</h2>
-                <h1 className="text-3xl md:text-5xl font-black text-center mb-10 leading-tight max-w-3xl">
-                    {focusItem.title}
-                </h1>
-                <button className="px-12 py-5 bg-white text-orange-600 font-black text-lg md:text-xl rounded-2xl shadow-xl hover:scale-105 transition-transform uppercase tracking-wider">
-                    Почати
-                </button>
+
+                {/* Focus title */}
+                <div className="flex-1 flex flex-col items-center justify-center text-center z-10 py-4">
+                    <h1 className="text-3xl md:text-5xl font-black leading-tight max-w-2xl mb-6">
+                        {focusItem.title}
+                    </h1>
+
+                    {/* Related tasks checklist */}
+                    {relatedTasks.length > 0 && (
+                        <div className="w-full max-w-md mt-2 mb-8 space-y-2">
+                            {relatedTasks.map(task => (
+                                <div
+                                    key={task.id}
+                                    className={cn(
+                                        "flex items-center gap-3 px-5 py-3 bg-white/10 hover:bg-white/20 rounded-2xl cursor-pointer transition-colors text-left",
+                                        task.completed && "opacity-50"
+                                    )}
+                                    onClick={(e) => toggleTask(task.id, e)}
+                                >
+                                    {task.completed
+                                        ? <CheckCircle2 className="w-5 h-5 text-white/80 shrink-0" />
+                                        : <Circle className="w-5 h-5 text-white/60 shrink-0" />
+                                    }
+                                    <span className={cn(
+                                        "text-sm font-bold",
+                                        task.completed && "line-through text-white/50"
+                                    )}>
+                                        {task.title}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Start / Active indicator */}
+                    {!sessionActive ? (
+                        <button
+                            onClick={handleStartSession}
+                            className="flex items-center gap-3 px-12 py-5 bg-white text-orange-600 font-black text-lg rounded-2xl shadow-2xl hover:scale-105 transition-transform"
+                        >
+                            <Play className="w-6 h-6" />
+                            Почати
+                        </button>
+                    ) : (
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="flex items-center gap-2 text-orange-100 text-sm font-medium">
+                                <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse" />
+                                Сесія активна
+                            </div>
+                            <button
+                                onClick={handleEndSession}
+                                className="px-10 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-base rounded-2xl border border-white/30 transition"
+                            >
+                                Завершити сесію
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
         );
     }
 
+    // ─── NORMAL VIEW ─────────────────────────────────────────────────────────
     return (
         <>
             <div className="flex flex-col md:flex-row gap-8 h-full bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-background border border-orange-200/80 dark:border-orange-900/40 rounded-3xl p-6 md:p-10 shadow-sm relative overflow-hidden">
@@ -154,33 +337,38 @@ export function FocusToday() {
                             Фокус Дня
                         </h2>
                         {focusItem && (
-                            <button
-                                onClick={handleClearFocus}
-                                className="ml-auto p-1.5 hover:bg-orange-200/50 dark:hover:bg-orange-900/30 rounded-full transition text-orange-500/60 hover:text-orange-600"
-                                title="Скинути фокус"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
+                            <div className="ml-auto flex items-center gap-2">
+                                {isAutoFocus && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-200/60 dark:bg-orange-900/40 text-[10px] font-bold text-orange-700 dark:text-orange-300 uppercase tracking-wider">
+                                        <Sparkles className="w-3 h-3" />
+                                        Авто
+                                    </span>
+                                )}
+                                <button
+                                    onClick={handleClearFocus}
+                                    className="p-1.5 hover:bg-orange-200/50 dark:hover:bg-orange-900/30 rounded-full transition text-orange-500/60 hover:text-orange-600"
+                                    title="Скинути фокус"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         )}
                     </div>
 
                     {/* Focus Item or Empty State */}
                     {focusItem ? (
-                        <div
-                            className="group cursor-pointer"
-                            onClick={() => setIsFocusMode(true)}
-                        >
-                            <div className="flex flex-col p-6 md:p-8 bg-white/70 dark:bg-card/70 backdrop-blur-md border border-orange-200/50 dark:border-orange-900/30 rounded-3xl transition-all shadow-sm group-hover:shadow-md hover:bg-white dark:hover:bg-card">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-col p-6 md:p-8 bg-white/70 dark:bg-card/70 backdrop-blur-md border border-orange-200/50 dark:border-orange-900/30 rounded-3xl shadow-sm">
                                 <div className="flex items-start gap-4">
                                     <div className="w-9 h-9 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
                                         <Target className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-2xl md:text-3xl font-black leading-tight tracking-tight text-foreground group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">
+                                        <h3 className="text-2xl md:text-3xl font-black leading-tight tracking-tight text-foreground">
                                             {focusItem.title}
                                         </h3>
 
-                                        {/* Related info */}
+                                        {/* Related info badges */}
                                         {relatedInfo && (
                                             <div className="flex flex-wrap gap-2 mt-4">
                                                 {relatedInfo.projectTitle && (
@@ -188,14 +376,9 @@ export function FocusToday() {
                                                         Проєкт: {relatedInfo.projectTitle}
                                                     </span>
                                                 )}
-                                                {relatedInfo.relatedTasksCount !== undefined && relatedInfo.relatedTasksCount > 0 && (
+                                                {'relatedTasksCount' in relatedInfo && relatedInfo.relatedTasksCount !== undefined && relatedInfo.relatedTasksCount > 0 && (
                                                     <span className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                                                         Задач: {relatedInfo.relatedTasksCount}
-                                                    </span>
-                                                )}
-                                                {relatedInfo.habitTitle && (
-                                                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                                                        Звичка: {relatedInfo.habitTitle}
                                                     </span>
                                                 )}
                                             </div>
@@ -204,9 +387,22 @@ export function FocusToday() {
                                 </div>
                             </div>
 
-                            <p className="text-xs text-orange-600/60 dark:text-orange-400/40 text-center mt-2 font-medium">
-                                Натисніть щоб увійти в режим фокусу
-                            </p>
+                            {/* Action buttons */}
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => setIsFocusMode(true)}
+                                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold text-sm transition shadow-md shadow-orange-500/20"
+                                >
+                                    <Play className="w-4 h-4" />
+                                    Увійти у фокус-режим
+                                </button>
+                                <button
+                                    onClick={() => setSelectModalOpen(true)}
+                                    className="px-4 py-3 border border-orange-200 dark:border-orange-900/40 hover:bg-orange-50 dark:hover:bg-orange-950/30 rounded-2xl text-sm font-bold text-orange-700 dark:text-orange-400 transition"
+                                >
+                                    Змінити
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-orange-200/80 dark:border-orange-900/40 rounded-3xl gap-4 text-center">
