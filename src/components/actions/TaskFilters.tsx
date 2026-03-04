@@ -14,8 +14,8 @@ interface TaskFiltersProps {
     setSelectedAreas: (areas: string[]) => void;
     selectedProjects: string[];
     setSelectedProjects: (projects: string[]) => void;
-    dateFrom: Date | null;
-    setDateFrom: (date: Date | null) => void;
+    withDeadline: boolean;
+    setWithDeadline: (val: boolean) => void;
     dateTo: Date | null;
     setDateTo: (date: Date | null) => void;
     hasActiveFilters: boolean;
@@ -27,8 +27,8 @@ export function TaskFilters({
     setSelectedAreas,
     selectedProjects,
     setSelectedProjects,
-    dateFrom,
-    setDateFrom,
+    withDeadline,
+    setWithDeadline,
     dateTo,
     setDateTo,
     hasActiveFilters,
@@ -68,7 +68,7 @@ export function TaskFilters({
         }
     };
 
-    const hasDateFilter = dateFrom !== null || dateTo !== null;
+    const hasDateFilter = withDeadline || dateTo !== null;
     const activeCount = selectedAreas.length + selectedProjects.length + (hasDateFilter ? 1 : 0);
 
     return (
@@ -246,7 +246,7 @@ export function TaskFilters({
                                 : <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-muted-foreground" />
                             }
                             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-muted-foreground">
-                                Дати
+                                Дедлайни
                             </span>
                         </div>
                         {hasDateFilter && (
@@ -256,42 +256,45 @@ export function TaskFilters({
                         )}
                     </button>
                     {datesOpen && (
-                        <div className="px-3 pb-3 space-y-3 overflow-hidden">
-                            <div className="flex flex-col gap-2">
-                                {/* Date From */}
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-muted-foreground/80 tracking-wider">З</label>
-                                    <Input
-                                        type="date"
-                                        value={dateFrom ? format(dateFrom, 'yyyy-MM-dd') : ''}
-                                        onChange={(e) => setDateFrom(e.target.value ? new Date(e.target.value) : null)}
-                                        className="h-8 text-xs bg-slate-50 dark:bg-secondary/30"
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400 dark:text-muted-foreground/80 tracking-wider">По</label>
+                        <div className="px-3 pb-3 space-y-4 overflow-hidden">
+                            <div className="flex flex-col gap-3">
+                                {/* Only with deadline Checkbox */}
+                                <label className="flex items-center gap-2.5 cursor-pointer group">
+                                    <div className={cn(
+                                        "w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all",
+                                        withDeadline
+                                            ? "bg-emerald-500 border-emerald-600 text-white"
+                                            : "border-slate-300 dark:border-slate-600 bg-transparent group-hover:border-emerald-400"
+                                    )}>
+                                        {withDeadline && <Check className="w-3 h-3" />}
+                                    </div>
+                                    <span className="text-sm font-medium text-slate-700 dark:text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                        Тільки з дедлайном
+                                    </span>
+                                </label>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-slate-500 dark:text-muted-foreground">Закінчується до:</label>
                                     <Input
                                         type="date"
                                         value={dateTo ? format(dateTo, 'yyyy-MM-dd') : ''}
                                         onChange={(e) => setDateTo(e.target.value ? new Date(e.target.value) : null)}
-                                        className="h-8 text-xs bg-slate-50 dark:bg-secondary/30"
+                                        className="h-8 text-xs bg-slate-50 dark:bg-secondary/50 border-slate-200 dark:border-border"
                                     />
                                 </div>
                             </div>
 
                             {/* Summary + Clear */}
                             {hasDateFilter && (
-                                <div className="flex items-center justify-between pt-1">
-                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                                        {dateFrom && dateTo
-                                            ? `${format(dateFrom, 'dd.MM.yy', { locale: uk })} — ${format(dateTo, 'dd.MM.yy', { locale: uk })}`
-                                            : dateFrom
-                                                ? `З ${format(dateFrom, 'dd.MM.yy', { locale: uk })}`
-                                                : `По ${format(dateTo!, 'dd.MM.yy', { locale: uk })}`
+                                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-border">
+                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[150px]">
+                                        {dateTo
+                                            ? `До ${format(dateTo, 'dd.MM.yy', { locale: uk })}`
+                                            : `З дедлайном`
                                         }
                                     </span>
                                     <button
-                                        onClick={() => { setDateFrom(null); setDateTo(null); }}
+                                        onClick={() => { setWithDeadline(false); setDateTo(null); }}
                                         className="text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                                     >
                                         <X className="w-3.5 h-3.5" />

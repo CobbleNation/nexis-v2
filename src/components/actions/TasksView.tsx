@@ -19,14 +19,14 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
 
     const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
     const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
-    const [dateFrom, setDateFrom] = useState<Date | null>(null);
+    const [withDeadline, setWithDeadline] = useState(false);
     const [dateTo, setDateTo] = useState<Date | null>(null);
 
-    const hasActiveFilters = selectedAreas.length > 0 || selectedProjects.length > 0 || dateFrom !== null || dateTo !== null;
+    const hasActiveFilters = selectedAreas.length > 0 || selectedProjects.length > 0 || withDeadline || dateTo !== null;
     const clearFilters = () => {
         setSelectedAreas([]);
         setSelectedProjects([]);
-        setDateFrom(null);
+        setWithDeadline(false);
         setDateTo(null);
     };
 
@@ -75,13 +75,14 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
     if (selectedProjects.length > 0) {
         filteredTasks = filteredTasks.filter(a => a.projectId && selectedProjects.includes(a.projectId));
     }
-    if (dateFrom || dateTo) {
-        const fromStr = dateFrom ? format(dateFrom, 'yyyy-MM-dd') : null;
-        const toStr = dateTo ? format(dateTo, 'yyyy-MM-dd') : null;
+    if (withDeadline) {
+        filteredTasks = filteredTasks.filter(a => !!a.date);
+    }
+    if (dateTo) {
+        const toStr = format(dateTo, 'yyyy-MM-dd');
         filteredTasks = filteredTasks.filter(a => {
             if (!a.date) return false;
-            if (fromStr && a.date < fromStr) return false;
-            if (toStr && a.date > toStr) return false;
+            if (a.date > toStr) return false;
             return true;
         });
     }
@@ -205,7 +206,7 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
                             <span className="hidden sm:inline">Фільтри</span>
                             {hasActiveFilters && (
                                 <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                    {selectedAreas.length + selectedProjects.length + (dateFrom || dateTo ? 1 : 0)}
+                                    {selectedAreas.length + selectedProjects.length + (withDeadline || dateTo ? 1 : 0)}
                                 </span>
                             )}
                         </button>
@@ -226,7 +227,7 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
                                     <SlidersHorizontal className="w-4 h-4" />
                                     {hasActiveFilters && (
                                         <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                                            {selectedAreas.length + selectedProjects.length + (dateFrom || dateTo ? 1 : 0)}
+                                            {selectedAreas.length + selectedProjects.length + (withDeadline || dateTo ? 1 : 0)}
                                         </span>
                                     )}
                                 </button>
@@ -245,8 +246,8 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
                                         setSelectedAreas={setSelectedAreas}
                                         selectedProjects={selectedProjects}
                                         setSelectedProjects={setSelectedProjects}
-                                        dateFrom={dateFrom}
-                                        setDateFrom={setDateFrom}
+                                        withDeadline={withDeadline}
+                                        setWithDeadline={setWithDeadline}
                                         dateTo={dateTo}
                                         setDateTo={setDateTo}
                                         hasActiveFilters={hasActiveFilters}
@@ -275,8 +276,8 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
                             setSelectedAreas={setSelectedAreas}
                             selectedProjects={selectedProjects}
                             setSelectedProjects={setSelectedProjects}
-                            dateFrom={dateFrom}
-                            setDateFrom={setDateFrom}
+                            withDeadline={withDeadline}
+                            setWithDeadline={setWithDeadline}
                             dateTo={dateTo}
                             setDateTo={setDateTo}
                             hasActiveFilters={hasActiveFilters}
