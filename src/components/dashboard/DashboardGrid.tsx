@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { LifeStatus } from './LifeStatus';
+import { OverviewHeader } from './OverviewHeader';
+import { StartDayPanel } from './StartDayPanel';
+import { TasksTodayList } from './TasksTodayList';
 import { FocusToday } from './FocusToday';
 import { LifeBalance } from './LifeBalance';
 import { ActiveProjectsOverview } from './ActiveProjectsOverview';
@@ -16,6 +18,10 @@ export function DashboardGrid() {
     const [quickAddOpen, setQuickAddOpen] = useState(false);
     const [quickAddTab, setQuickAddTab] = useState<'tasks' | 'goals' | 'projects' | 'notes'>('tasks');
 
+    // Day progress state
+    // In a real app, this might stick in localStorage or global state based on tasks
+    const [isDayStarted, setIsDayStarted] = useState(false);
+
     const handleOpenAddModal = (type: string) => {
         if (type === 'project') setQuickAddTab('projects');
         else if (type === 'metric') setQuickAddTab('goals'); // Metrics are usually under goals or separate
@@ -26,33 +32,40 @@ export function DashboardGrid() {
     };
 
     return (
-        <div className="p-2 md:p-6 space-y-6 max-w-7xl mx-auto">
-            {/* Top Section: Life Status */}
-            <LifeStatus />
+        <div className="w-full px-4 md:px-8 py-8 space-y-8">
+            {/* Header: Focus Ring & Momentum */}
+            <OverviewHeader />
 
-            {/* Main Grid: 3 Columns Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 auto-rows-[minmax(350px,auto)] mt-8">
+            {!isDayStarted ? (
+                <StartDayPanel onStartDay={() => setIsDayStarted(true)} />
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-6 auto-rows-max">
+                    {/* SECTION 1: Focus of the Day (Full width of the grid) */}
+                    <div className="lg:col-span-3">
+                        <FocusToday />
+                    </div>
 
-                {/* Left Column (Life Balance & Projects) */}
-                <div className="lg:col-span-3 flex flex-col gap-6">
-                    <LifeBalance />
-                    <ActiveProjectsOverview />
-                </div>
+                    {/* SECTION 2: Tasks Today */}
+                    <div className="lg:col-span-2 flex flex-col gap-6">
+                        <TasksTodayList />
+                    </div>
 
-                {/* Center Column (Focus Today & Quick Actions) */}
-                <div className="lg:col-span-6 flex flex-col gap-6">
-                    <FocusToday />
-                    <div className="h-auto">
+                    {/* SECTION 4 & 5 & 6: Right Column */}
+                    <div className="lg:col-span-1 flex flex-col gap-6">
+                        <WeeklyActivity />
                         <QuickActions onOpenAddModal={handleOpenAddModal} />
+                        <AIInsight />
+                    </div>
+
+                    {/* SECTION 3 & 8: Life Balance & Active Projects (Bottom Row or fitting into columns) */}
+                    <div className="lg:col-span-1 flex flex-col gap-6">
+                        <LifeBalance />
+                    </div>
+                    <div className="lg:col-span-2 flex flex-col gap-6">
+                        <ActiveProjectsOverview />
                     </div>
                 </div>
-
-                {/* Right Column (Weekly Activity & AI Insight) */}
-                <div className="lg:col-span-3 flex flex-col gap-6">
-                    <WeeklyActivity />
-                    <AIInsight />
-                </div>
-            </div>
+            )}
 
             {/* Modals triggered from QuickActions */}
             <QuickAddModal
