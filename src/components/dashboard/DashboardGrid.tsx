@@ -71,7 +71,7 @@ export function DashboardGrid() {
             <QuickAddModal
                 open={quickAddOpen}
                 onOpenChange={setQuickAddOpen}
-                defaultTab="task"
+                defaultTab={quickAddTab}
             />
             {/* Additional modals (Create Project etc) would go here based on available components. 
                 Using QuickAddModal for demonstration as it usually supports adding various entities. 
