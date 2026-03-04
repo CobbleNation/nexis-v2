@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Button } from '@/components/ui/button';
 
 type SearchCategory = 'all' | 'actions' | 'goals' | 'projects' | 'notes' | 'areas';
 
@@ -54,13 +55,14 @@ export function GlobalSearch() {
     // Close on click outside (desktop only)
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            if (isOpen && window.innerWidth < 768) return; // Ignore on mobile
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+    }, [isOpen]);
 
     const results = useMemo(() => {
         if (!query.trim()) return [];
@@ -433,13 +435,15 @@ export function GlobalSearch() {
             </div>
 
             {/* Mobile Search Icon */}
-            <button
-                className="md:hidden flex items-center justify-center p-2 rounded-full text-foreground/80 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden relative text-muted-foreground hover:text-foreground dark:hover:bg-slate-800 rounded-full h-10 w-10 shrink-0"
                 onClick={() => setIsOpen(true)}
                 aria-label="Відкрити пошук"
             >
-                <Search className="h-6 w-6" />
-            </button>
+                <Search className="h-5 w-5" />
+            </Button>
         </div>
     );
 }

@@ -37,7 +37,7 @@ export function Header() {
 
     return (
         <div className="sticky top-0 z-40 w-full bg-background/50 backdrop-blur-md border-b border-border/40">
-            <header className="flex h-16 items-center justify-between gap-4 px-6 md:px-8">
+            <header className="flex h-16 items-center justify-between gap-3 px-6 md:px-8">
                 {/* Search Bar - Global Search Component */}
                 <GlobalSearch />
 

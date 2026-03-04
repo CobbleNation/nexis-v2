@@ -175,7 +175,10 @@ export function NotificationsPopover() {
 
             {/* Mobile: Fullscreen overlay */}
             {isOpen && typeof document !== 'undefined' && createPortal(
-                <div className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150">
+                <div
+                    className="md:hidden fixed inset-0 z-[9000] bg-background flex flex-col h-[100dvh] w-screen overflow-hidden overscroll-none touch-none animate-in fade-in duration-150"
+                    onPointerDown={(e) => e.stopPropagation()}
+                >
                     {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 shrink-0">
                         <div className="flex items-center gap-2">
