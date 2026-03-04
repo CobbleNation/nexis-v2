@@ -59,7 +59,7 @@ export function Header() {
                                 <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0 opacity-50 hidden md:block" />
                             </button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-64 mt-2 p-2 hidden sm:block">
+                        <DropdownMenuContent align="end" className="w-64 mt-2 p-2">
                             <div className="px-2 py-1.5 mb-2">
                                 <p className="text-sm font-semibold text-foreground truncate leading-tight mb-0.5">
                                     {user?.name || 'Користувач'}
