@@ -37,7 +37,6 @@ export function TaskFilters({
     const { state } = useData();
     const [areasOpen, setAreasOpen] = useState(true);
     const [projectsOpen, setProjectsOpen] = useState(true);
-    const [datesOpen, setDatesOpen] = useState(false);
 
     const toggleArea = (id: string) => {
         if (selectedAreas.includes(id)) setSelectedAreas(selectedAreas.filter(a => a !== id));
@@ -235,16 +234,9 @@ export function TaskFilters({
                 </div>
 
                 {/* ─── Dates Section ─── */}
-                <div>
-                    <button
-                        onClick={() => setDatesOpen(!datesOpen)}
-                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-slate-50 dark:hover:bg-secondary/30 transition-colors"
-                    >
+                <div className="py-2">
+                    <div className="w-full flex items-center justify-between px-4 py-2">
                         <div className="flex items-center gap-2">
-                            {datesOpen
-                                ? <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-muted-foreground" />
-                                : <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-muted-foreground" />
-                            }
                             <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-muted-foreground">
                                 Дедлайни
                             </span>
@@ -254,26 +246,37 @@ export function TaskFilters({
                                 ✓
                             </span>
                         )}
-                    </button>
-                    {datesOpen && (
-                        <div className="px-3 pb-3 space-y-4 overflow-hidden">
-                            <div className="flex flex-col gap-3">
-                                {/* Only with deadline Checkbox */}
-                                <label className="flex items-center gap-2.5 cursor-pointer group">
-                                    <div className={cn(
-                                        "w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all",
-                                        withDeadline
-                                            ? "bg-emerald-500 border-emerald-600 text-white"
-                                            : "border-slate-300 dark:border-slate-600 bg-transparent group-hover:border-emerald-400"
-                                    )}>
-                                        {withDeadline && <Check className="w-3 h-3" />}
-                                    </div>
-                                    <span className="text-sm font-medium text-slate-700 dark:text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                        Тільки з дедлайном
-                                    </span>
-                                </label>
+                    </div>
+                    <div className="px-4 pb-3 space-y-4">
+                        <div className="flex flex-col gap-3">
+                            {/* Only with deadline Checkbox */}
+                            <label
+                                className="flex items-center gap-2.5 cursor-pointer group select-none"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    if (withDeadline) {
+                                        setWithDeadline(false);
+                                        setDateTo(null);
+                                    } else {
+                                        setWithDeadline(true);
+                                    }
+                                }}
+                            >
+                                <div className={cn(
+                                    "w-4 h-4 rounded-[4px] border flex items-center justify-center transition-all shrink-0",
+                                    withDeadline
+                                        ? "bg-emerald-500 border-emerald-600 text-white"
+                                        : "border-slate-300 dark:border-slate-600 bg-transparent group-hover:border-emerald-400"
+                                )}>
+                                    {withDeadline && <Check className="w-3 h-3" />}
+                                </div>
+                                <span className="text-sm font-medium text-slate-700 dark:text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                    З дедлайном
+                                </span>
+                            </label>
 
-                                <div className="space-y-1.5">
+                            {withDeadline && (
+                                <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
                                     <label className="text-xs font-semibold text-slate-500 dark:text-muted-foreground">Закінчується до:</label>
                                     <Input
                                         type="date"
@@ -282,27 +285,27 @@ export function TaskFilters({
                                         className="h-8 text-xs bg-slate-50 dark:bg-secondary/50 border-slate-200 dark:border-border"
                                     />
                                 </div>
-                            </div>
-
-                            {/* Summary + Clear */}
-                            {hasDateFilter && (
-                                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-border">
-                                    <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[150px]">
-                                        {dateTo
-                                            ? `До ${format(dateTo, 'dd.MM.yy', { locale: uk })}`
-                                            : `З дедлайном`
-                                        }
-                                    </span>
-                                    <button
-                                        onClick={() => { setWithDeadline(false); setDateTo(null); }}
-                                        className="text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                    >
-                                        <X className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
                             )}
                         </div>
-                    )}
+
+                        {/* Summary + Clear */}
+                        {hasDateFilter && (
+                            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-border">
+                                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium truncate max-w-[150px]">
+                                    {dateTo
+                                        ? `До ${format(dateTo, 'dd.MM.yy', { locale: uk })}`
+                                        : `З дедлайном`
+                                    }
+                                </span>
+                                <button
+                                    onClick={() => { setWithDeadline(false); setDateTo(null); }}
+                                    className="text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
