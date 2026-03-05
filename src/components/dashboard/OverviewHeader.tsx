@@ -94,84 +94,77 @@ export function OverviewHeader() {
         return currentStreak > 0 ? currentStreak : 0;
     }, [state.actions, state.habitLogs]);
 
-    const radius = 28;
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (circumference * focusIndex) / 100;
+    // SVG ring constants - use viewBox based approach, no radius/circumference vars needed
+    const R = 22;
+    const CIRC = 2 * Math.PI * R;
+    const dashOffset = CIRC - (CIRC * focusIndex) / 100;
 
     return (
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-            <div className="flex items-center flex-1">
-                {/* Focus Ring with Popover Explainer */}
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <button className="w-full bg-white dark:bg-card px-3 md:px-6 py-3 md:py-4 rounded-2xl md:rounded-3xl border border-border/50 shadow-sm flex items-center gap-3 md:gap-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors text-left group">
-                            <div className="relative w-12 h-12 md:w-16 md:h-16 flex items-center justify-center shrink-0">
-                                <svg className="w-full h-full transform -rotate-90">
-                                    <circle cx="28" cy="28" r={radius} className="stroke-slate-100 dark:stroke-slate-800 fill-none" strokeWidth="5" />
-                                    <circle
-                                        cx="28" cy="28" r={radius}
-                                        className="stroke-orange-500 fill-none transition-all duration-1000 ease-out"
-                                        strokeWidth="5"
-                                        strokeDasharray={circumference}
-                                        strokeDashoffset={strokeDashoffset}
-                                        strokeLinecap="round"
-                                    />
-                                </svg>
-                                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                    <span className="text-xs font-black tracking-tighter">{focusIndex}%</span>
-                                </div>
+        <div className="flex items-center justify-between gap-3 w-full">
+            {/* Left side: Focus ring + label */}
+            <Popover>
+                <PopoverTrigger asChild>
+                    <button className="flex items-center gap-3 group text-left hover:opacity-80 transition-opacity min-w-0">
+                        {/* SVG ring */}
+                        <div className="relative w-14 h-14 shrink-0">
+                            <svg viewBox="0 0 56 56" className="w-full h-full -rotate-90">
+                                <circle cx="28" cy="28" r={R} fill="none" className="stroke-slate-200 dark:stroke-slate-700" strokeWidth="5" />
+                                <circle
+                                    cx="28" cy="28" r={R} fill="none"
+                                    className="stroke-orange-500 transition-all duration-1000 ease-out"
+                                    strokeWidth="5"
+                                    strokeDasharray={CIRC}
+                                    strokeDashoffset={dashOffset}
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-[11px] font-black tabular-nums">{focusIndex}%</span>
                             </div>
-                            <div className="flex flex-col relative pr-2 md:pr-4">
-                                <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
-                                    Фокус дня
-                                    <Info className="w-3 h-3 text-muted-foreground/60 group-hover:text-muted-foreground transition-colors" />
-                                </h2>
-                                <p className="text-lg md:text-xl font-black tracking-tight leading-none text-foreground">
-                                    {getFocusStatusName(focusIndex)}
-                                </p>
-                            </div>
-                        </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-64 p-4 rounded-2xl shadow-xl border-border/50" sideOffset={8}>
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-2 border-b border-border/50 pb-2 mb-1 text-sm font-bold">
-                                Фокус {focusIndex}%
-                                <span className="text-xs font-normal text-muted-foreground">/ 100%</span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">Задачі (до 50%)</span>
-                                <span className="font-medium">
-                                    {focusData.tasksScore}% <span className="text-xs text-muted-foreground ml-1">({focusData.tasksCompleted}/{focusData.tasksTotal})</span>
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">Звички (до 30%)</span>
-                                <span className="font-medium">
-                                    {focusData.habitsScore}% <span className="text-xs text-muted-foreground ml-1">({focusData.habitsCompleted}/{focusData.habitsTotal})</span>
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-muted-foreground">Метрики (до 20%)</span>
-                                <span className="font-medium">
-                                    {focusData.metricsScore}% <span className="text-xs text-muted-foreground ml-1">({focusData.hasMetricsUpdate ? 'так' : 'ні'})</span>
-                                </span>
-                            </div>
-                            <p className="text-[10px] text-muted-foreground/80 mt-2 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl">
-                                Розраховується лише на основі запланованого і виконаного сьогодні.
-                            </p>
                         </div>
-                    </PopoverContent>
-                </Popover>
-            </div>
+                        <div className="min-w-0">
+                            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                                Фокус дня <Info className="w-3 h-3 shrink-0" />
+                            </div>
+                            <div className="text-base font-black tracking-tight text-foreground leading-none mt-0.5 truncate">
+                                {getFocusStatusName(focusIndex)}
+                            </div>
+                        </div>
+                    </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-4 rounded-2xl shadow-xl border-border/50" sideOffset={8}>
+                    <div className="flex flex-col gap-3">
+                        <div className="flex items-center gap-2 border-b border-border/50 pb-2 mb-1 text-sm font-bold">
+                            Фокус {focusIndex}%
+                            <span className="text-xs font-normal text-muted-foreground">/ 100%</span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Задачі (до 50%)</span>
+                            <span className="font-medium">{focusData.tasksScore}% <span className="text-xs text-muted-foreground">({focusData.tasksCompleted}/{focusData.tasksTotal})</span></span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Звички (до 30%)</span>
+                            <span className="font-medium">{focusData.habitsScore}% <span className="text-xs text-muted-foreground">({focusData.habitsCompleted}/{focusData.habitsTotal})</span></span>
+                        </div>
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Метрики (до 20%)</span>
+                            <span className="font-medium">{focusData.metricsScore}% <span className="text-xs text-muted-foreground">({focusData.hasMetricsUpdate ? 'так' : 'ні'})</span></span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground/80 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl">
+                            Розраховується лише на основі запланованого і виконаного сьогодні.
+                        </p>
+                    </div>
+                </PopoverContent>
+            </Popover>
 
-            {/* Momentum */}
-            <div className="bg-white dark:bg-card px-3 md:px-6 py-3 md:py-4 rounded-2xl md:rounded-3xl border border-border/50 shadow-sm flex items-center gap-3">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
-                    <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+            {/* Right side: Streak */}
+            <div className="flex items-center gap-2 shrink-0">
+                <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
+                    <Flame className="w-4 h-4 text-orange-500" />
                 </div>
-                <div className="flex flex-col">
-                    <span className="font-black text-lg md:text-xl tracking-tight leading-none">{streak} дні(в)</span>
-                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Продуктивності</span>
+                <div>
+                    <div className="font-black text-base tracking-tight leading-none">{streak} дн.</div>
+                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Стрік</div>
                 </div>
             </div>
         </div>

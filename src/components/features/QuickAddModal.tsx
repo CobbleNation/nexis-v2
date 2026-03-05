@@ -754,14 +754,14 @@ export function QuickAddModal({
 
                     {/* Content Logic Layer: Sub-selector for Content */}
                     {type === 'content' && (
-                        <div className="bg-purple-50/50 dark:bg-purple-900/10 border-b border-purple-100/50 dark:border-purple-900/20 p-2 flex justify-center gap-2 shrink-0">
+                        <div className="bg-purple-50/50 dark:bg-purple-900/10 border-b border-purple-100/50 dark:border-purple-900/20 px-2 py-2 flex overflow-x-auto gap-2 shrink-0 scrollbar-none">
                             {CONTENT_TYPES.map(ct => (
                                 <button
                                     key={ct.id}
                                     id={`content-tab-${ct.id}`}
                                     onClick={() => setContentType(ct.id as any)}
                                     className={cn(
-                                        "flex items-center gap-1.5 px-4 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all",
+                                        "flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 whitespace-nowrap",
                                         contentType === ct.id ? "bg-purple-500 text-white shadow-md shadow-purple-200 dark:shadow-none" : "text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/30"
                                     )}
                                 >

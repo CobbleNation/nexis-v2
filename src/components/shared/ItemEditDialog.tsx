@@ -228,7 +228,36 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
                         )}
 
                         {/* Date & Time */}
-                        {(type === 'task' || type === 'event' || type === 'project' || (type === 'goal' && formData.deadline)) && (
+                        {type === 'task' && (
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">
+                                        Почати з <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={formData.date || ''}
+                                        onChange={e => setFormData({ ...formData, date: e.target.value })}
+                                        className="h-8 w-full min-w-0 max-w-full text-xs bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border rounded-md px-2 text-foreground appearance-none block box-border"
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">
+                                        Виконати до
+                                    </label>
+                                    <input
+                                        type="date"
+                                        value={formData.dueDate ? (typeof formData.dueDate === 'string' ? formData.dueDate.split('T')[0] : '') : ''}
+                                        onChange={e => setFormData({ ...formData, dueDate: e.target.value || undefined })}
+                                        className="h-8 w-full min-w-0 max-w-full text-xs bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border rounded-md px-2 text-foreground appearance-none block box-border"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Date for non-task types */}
+                        {(type === 'event' || type === 'project' || (type === 'goal' && formData.deadline)) && (
                             <div className="space-y-4">
                                 <div className="space-y-1.5">
                                     <div className="space-y-2">
@@ -245,7 +274,7 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
                                     </div>
                                 </div>
 
-                                {(type === 'task' || type === 'event') && (
+                                {(type === 'event') && (
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Час початку</label>
                                         <div className="relative">
