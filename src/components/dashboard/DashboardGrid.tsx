@@ -32,12 +32,12 @@ export function DashboardGrid() {
     };
 
     return (
-        <div className="w-full px-4 md:px-8 py-8 space-y-8">
+        <div className="w-full px-0 md:px-4 lg:px-8 py-3 md:py-6 space-y-4 md:space-y-8">
             {/* Header: Focus Ring & Momentum */}
             <OverviewHeader />
 
             {/* Dashboard Grid — always visible */}
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-6 auto-rows-max">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr_1fr] gap-4 md:gap-6 auto-rows-max">
                 {/* SECTION 1: Focus of the Day (Full width of the grid) */}
                 <div className="lg:col-span-3">
                     <FocusToday />

@@ -197,6 +197,25 @@ export async function GET() {
     }
 }
 
+// Only keep fields that exist in the 'actions' DB schema to prevent unknown column errors
+function sanitizeAction(data: Record<string, any>) {
+    const ALLOWED_ACTION_FIELDS = new Set([
+        'id', 'userId', 'title', 'description', 'type', 'status', 'priority', 'completed',
+        'areaId', 'projectId', 'linkedGoalId', 'dueDate', 'scheduledTime',
+        'date', 'startTime', 'duration', 'isFocus', 'subtasks',
+        'fromRoutineId', 'energyLevel', 'impact', 'reminderAt', 'reminderSent',
+        'frequency', 'streak', 'lastCompletedAt', 'isSystemDefault',
+        'createdAt', 'updatedAt'
+    ]);
+    const sanitized: Record<string, any> = {};
+    for (const key of Object.keys(data)) {
+        if (ALLOWED_ACTION_FIELDS.has(key)) {
+            sanitized[key] = data[key];
+        }
+    }
+    return sanitized;
+}
+
 export async function POST(req: Request) {
     try {
         const cookieStore = await cookies();
@@ -218,13 +237,20 @@ export async function POST(req: Request) {
         console.log(`Sync POST received: ${type}`);
 
         if (type === 'ADD_ACTION' || type === 'UPDATE_ACTION') {
-            const actionData = { ...data };
-            if (typeof actionData.createdAt === 'string') actionData.createdAt = new Date(actionData.createdAt);
-            if (typeof actionData.updatedAt === 'string') actionData.updatedAt = new Date(actionData.updatedAt);
-            if (typeof actionData.dueDate === 'string' && actionData.dueDate) actionData.dueDate = new Date(actionData.dueDate);
-            // if (typeof actionData.date === 'string' && actionData.date) actionData.date = new Date(actionData.date); // Keep as string for YYYY-MM-DD representation
+            const rawData = sanitizeAction({ ...data });
+            if (typeof rawData.createdAt === 'string') rawData.createdAt = new Date(rawData.createdAt);
+            if (typeof rawData.updatedAt === 'string') rawData.updatedAt = new Date(rawData.updatedAt);
+            // dueDate is a timestamp column in DB - convert if string
+            if (typeof rawData.dueDate === 'string' && rawData.dueDate) rawData.dueDate = new Date(rawData.dueDate);
+            // reminderAt, startTime, date are `text` columns, keep them as strings
+            if (rawData.reminderAt !== undefined && typeof rawData.reminderAt !== 'string') rawData.reminderAt = String(rawData.reminderAt);
+            // Strip empty string timestamps to null to avoid DB errors
+            if (rawData.reminderAt === '') rawData.reminderAt = null;
+            if (rawData.startTime === '') rawData.startTime = null;
+            if (rawData.date === '') rawData.date = null;
+            const actionData = rawData;
 
-            await db.insert(actions).values({ ...actionData, userId }).onConflictDoUpdate({ target: actions.id, set: { ...actionData, userId } });
+            await db.insert(actions).values({ ...actionData, userId } as any).onConflictDoUpdate({ target: actions.id, set: { ...actionData, userId } as any });
         } else if (type === 'DELETE_ACTION') {
             await db.delete(actions).where(eq(actions.id, data.id));
         } else if (type === 'TOGGLE_ACTION') {

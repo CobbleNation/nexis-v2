@@ -99,34 +99,34 @@ export function OverviewHeader() {
     const strokeDashoffset = circumference - (circumference * focusIndex) / 100;
 
     return (
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div className="flex items-center gap-6">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+            <div className="flex items-center flex-1">
                 {/* Focus Ring with Popover Explainer */}
                 <Popover>
                     <PopoverTrigger asChild>
-                        <button className="bg-white dark:bg-card px-6 py-4 rounded-3xl border border-border/50 shadow-sm flex items-center gap-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors text-left group">
-                            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                        <button className="w-full bg-white dark:bg-card px-3 md:px-6 py-3 md:py-4 rounded-2xl md:rounded-3xl border border-border/50 shadow-sm flex items-center gap-3 md:gap-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors text-left group">
+                            <div className="relative w-12 h-12 md:w-16 md:h-16 flex items-center justify-center shrink-0">
                                 <svg className="w-full h-full transform -rotate-90">
-                                    <circle cx="32" cy="32" r={radius} className="stroke-slate-100 dark:stroke-slate-800 fill-none" strokeWidth="6" />
+                                    <circle cx="28" cy="28" r={radius} className="stroke-slate-100 dark:stroke-slate-800 fill-none" strokeWidth="5" />
                                     <circle
-                                        cx="32" cy="32" r={radius}
+                                        cx="28" cy="28" r={radius}
                                         className="stroke-orange-500 fill-none transition-all duration-1000 ease-out"
-                                        strokeWidth="6"
+                                        strokeWidth="5"
                                         strokeDasharray={circumference}
                                         strokeDashoffset={strokeDashoffset}
                                         strokeLinecap="round"
                                     />
                                 </svg>
                                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                                    <span className="text-sm font-black tracking-tighter">{focusIndex}%</span>
+                                    <span className="text-xs font-black tracking-tighter">{focusIndex}%</span>
                                 </div>
                             </div>
-                            <div className="flex flex-col relative pr-4">
+                            <div className="flex flex-col relative pr-2 md:pr-4">
                                 <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
                                     Фокус дня
                                     <Info className="w-3 h-3 text-muted-foreground/60 group-hover:text-muted-foreground transition-colors" />
                                 </h2>
-                                <p className="text-xl font-black tracking-tight leading-none text-foreground">
+                                <p className="text-lg md:text-xl font-black tracking-tight leading-none text-foreground">
                                     {getFocusStatusName(focusIndex)}
                                 </p>
                             </div>
@@ -165,12 +165,12 @@ export function OverviewHeader() {
             </div>
 
             {/* Momentum */}
-            <div className="bg-white dark:bg-card px-6 py-4 rounded-3xl border border-border/50 shadow-sm flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center">
-                    <Flame className="w-5 h-5 text-orange-500" />
+            <div className="bg-white dark:bg-card px-3 md:px-6 py-3 md:py-4 rounded-2xl md:rounded-3xl border border-border/50 shadow-sm flex items-center gap-3">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
+                    <Flame className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
                 </div>
                 <div className="flex flex-col">
-                    <span className="font-black text-xl tracking-tight leading-none">{streak} дні(в)</span>
+                    <span className="font-black text-lg md:text-xl tracking-tight leading-none">{streak} дні(в)</span>
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Продуктивності</span>
                 </div>
             </div>
