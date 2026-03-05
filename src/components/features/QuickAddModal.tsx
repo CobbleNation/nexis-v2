@@ -1043,7 +1043,7 @@ export function QuickAddModal({
                         </div>
 
                         {/* Right Column: Metadata Sidebar */}
-                        <div className="bg-slate-50/50 dark:bg-card/50 p-4 space-y-5 h-auto sm:h-full sm:overflow-y-auto">
+                        <div className="bg-slate-50/50 dark:bg-card/50 p-4 space-y-5 h-auto sm:h-full sm:overflow-y-auto overflow-x-hidden">
 
                             {/* Area (Hide for Journal) */}
                             {!(type === 'content' && contentType === 'journal') && (
@@ -1149,8 +1149,8 @@ export function QuickAddModal({
 
                             {/* Date (Generic) */}
                             {type !== 'habit' && type !== 'routine' && type !== 'project' && !(type === 'content' && ['note', 'file', 'library', 'journal'].includes(contentType)) && (
-                                <div className="flex flex-col gap-4">
-                                    <div className="space-y-1.5 flex flex-col">
+                                <div className="flex flex-col gap-4 w-full max-w-full overflow-hidden">
+                                    <div className="space-y-1.5">
                                         <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                                             {type === 'task' ? 'Почати з' : 'Дата'} <span className="text-red-500">*</span>
                                         </label>
@@ -1161,12 +1161,12 @@ export function QuickAddModal({
                                                 setDate(e.target.value);
                                                 checkAndAdvance('create-task-date');
                                             }}
-                                            className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
+                                            className="h-8 w-full text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border block"
                                             required
                                         />
                                     </div>
                                     {type === 'task' && (
-                                        <div className="space-y-1.5 flex flex-col">
+                                        <div className="space-y-1.5">
                                             <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                                                 Виконати до
                                             </label>
@@ -1174,7 +1174,7 @@ export function QuickAddModal({
                                                 type="date"
                                                 value={dueDate}
                                                 onChange={(e) => setDueDate(e.target.value)}
-                                                className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
+                                                className="h-8 w-full text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border block"
                                             />
                                         </div>
                                     )}
