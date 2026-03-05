@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { useData } from '@/lib/store';
 import { isToday, subDays, isSameDay } from 'date-fns';
 import { Flame } from 'lucide-react';
-import { AppState } from '@/types';
+import { AppState } from '@/lib/store';
 
 // Calculate a 0-100 score strictly based on today's activity
 function calculateTodayScore(state: AppState): number {
