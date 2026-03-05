@@ -2,10 +2,12 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from '@/lib/store';
-import { Target, CheckCircle2, Circle, X, Plus, Sparkles, Play, Timer } from 'lucide-react';
+import { Target, CheckCircle2, Circle, X, Plus, Sparkles, Play, Timer, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isToday } from 'date-fns';
 import { SelectFocusModal, FocusItem } from './SelectFocusModal';
+import { useSubscription } from '@/hooks/useSubscription';
+import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 const FOCUS_STORAGE_KEY = 'nexis-day-focus';
 
@@ -13,6 +15,7 @@ interface StoredFocus {
     date: string;
     item: FocusItem;
     isAuto: boolean;
+    aiReasoning?: string | null;
 }
 
 function getTodayKey() {
@@ -32,11 +35,12 @@ function loadFocusFromStorage(): StoredFocus | null {
     }
 }
 
-function saveFocusToStorage(item: FocusItem, isAuto: boolean) {
+function saveFocusToStorage(item: FocusItem, isAuto: boolean, aiReasoning?: string | null) {
     localStorage.setItem(FOCUS_STORAGE_KEY, JSON.stringify({
         date: getTodayKey(),
         item,
-        isAuto
+        isAuto,
+        aiReasoning
     }));
 }
 
@@ -50,13 +54,20 @@ function formatElapsed(seconds: number): string {
 
 export function FocusToday() {
     const { state, dispatch } = useData();
+    const { isPro } = useSubscription();
+
     const [isFocusMode, setIsFocusMode] = useState(false);
     const [sessionActive, setSessionActive] = useState(false);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const [selectModalOpen, setSelectModalOpen] = useState(false);
+
+    // Focus state
     const [focusItem, setFocusItem] = useState<FocusItem | null>(null);
     const [isAutoFocus, setIsAutoFocus] = useState(false);
+    const [aiReasoning, setAiReasoning] = useState<string | null>(null);
+    const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     // Auto-compute focus based on today's activity
     const autoFocusSuggestion = useMemo((): FocusItem | null => {
@@ -106,33 +117,21 @@ export function FocusToday() {
         return null;
     }, [state.actions, state.projects, state.goals]);
 
-    // 1. Load focus from localStorage on mount (runs once)
+    // Load focus from localStorage on mount
     useEffect(() => {
         const stored = loadFocusFromStorage();
         if (stored) {
             setFocusItem(stored.item);
             setIsAutoFocus(stored.isAuto);
+            setAiReasoning(stored.aiReasoning || null);
         }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // 2. Apply auto-focus suggestion when store data loads (if no focus is set)
-    useEffect(() => {
-        if (autoFocusSuggestion && !loadFocusFromStorage()) {
-            setFocusItem(prev => {
-                if (!prev) {
-                    saveFocusToStorage(autoFocusSuggestion, true);
-                    setIsAutoFocus(true);
-                    return autoFocusSuggestion;
-                }
-                return prev;
-            });
-        }
-    }, [autoFocusSuggestion]); // re-run when state data populates
+    }, []);
 
     const handleSelectFocus = (item: FocusItem) => {
         saveFocusToStorage(item, false);
         setFocusItem(item);
         setIsAutoFocus(false);
+        setAiReasoning(null);
     };
 
     const handleClearFocus = () => {
@@ -141,6 +140,7 @@ export function FocusToday() {
         setIsAutoFocus(false);
         setIsFocusMode(false);
         setSessionActive(false);
+        setAiReasoning(null);
         if (timerRef.current) clearInterval(timerRef.current);
         setElapsedSeconds(0);
     };
@@ -163,6 +163,40 @@ export function FocusToday() {
     useEffect(() => {
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
     }, []);
+
+    const handleAiFocusClick = () => {
+        if (!isPro) {
+            setShowUpgradeModal(true);
+            return;
+        }
+
+        setIsAiAnalyzing(true);
+
+        // Simulate AI thinking time
+        setTimeout(() => {
+            if (autoFocusSuggestion) {
+                // Determine mock reasoning based on type
+                let reason = "AI визначив це як найефективніший крок для вашого дня.";
+                if (autoFocusSuggestion.type === 'task') {
+                    if (autoFocusSuggestion.relatedProjectTitle) {
+                        reason = `Ця задача є найпріоритетнішою у вашому ключовому проєкті "${autoFocusSuggestion.relatedProjectTitle}". Її виконання дасть найбільший прогрес сьогодні.`;
+                    } else {
+                        reason = `Ця задача має найвищий пріоритет на сьогодні згідно з попереднім плануванням.`;
+                    }
+                } else if (autoFocusSuggestion.type === 'project') {
+                    reason = `Цей проєкт містить найбільше активних задач (${autoFocusSuggestion.relatedTasksCount || 0}), що потребують вашої уваги прямо зараз.`;
+                } else if (autoFocusSuggestion.type === 'goal') {
+                    reason = `Ця ціль є активною і визначає ваш довгостроковий стратегічний напрямок, що потребує щоденного фокусу.`;
+                }
+
+                saveFocusToStorage(autoFocusSuggestion, true, reason);
+                setFocusItem(autoFocusSuggestion);
+                setIsAutoFocus(true);
+                setAiReasoning(reason);
+            }
+            setIsAiAnalyzing(false);
+        }, 1200);
+    };
 
     // Related tasks for the focus item (shown in focus mode)
     const relatedTasks = useMemo(() => {
@@ -228,29 +262,31 @@ export function FocusToday() {
     // ─── FOCUS MODE (Full-Screen) ────────────────────────────────────────────
     if (isFocusMode && focusItem) {
         return (
-            <div className="relative flex flex-col h-full min-h-[480px] bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-3xl p-8 md:p-12 shadow-xl shadow-orange-500/30 animate-in zoom-in-95 duration-300 overflow-hidden">
+            <div className="relative flex flex-col h-full min-h-[480px] bg-slate-50 dark:bg-card border border-border/50 text-foreground rounded-3xl p-8 md:p-12 shadow-sm animate-in zoom-in-95 duration-300 overflow-hidden">
                 {/* Background decoration */}
-                <div className="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-black/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/10 dark:bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
 
                 {/* Top bar */}
                 <div className="flex items-center justify-between mb-8 z-10">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 rounded-full flex items-center justify-center">
                             <Target className="w-4 h-4" />
                         </div>
-                        <span className="text-orange-100 font-bold text-sm uppercase tracking-widest">Фокус-режим</span>
+                        <span className="text-orange-600 dark:text-orange-400 font-bold text-sm uppercase tracking-widest">
+                            Фокус-режим
+                        </span>
                     </div>
                     <div className="flex items-center gap-3">
                         {sessionActive && (
-                            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                                <Timer className="w-4 h-4 animate-pulse" />
-                                <span className="font-mono font-black text-sm">{formatElapsed(elapsedSeconds)}</span>
+                            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-border/50 shadow-sm px-4 py-2 rounded-full">
+                                <Timer className="w-4 h-4 text-orange-500 animate-pulse" />
+                                <span className="font-mono font-black text-sm text-foreground">{formatElapsed(elapsedSeconds)}</span>
                             </div>
                         )}
                         <button
                             onClick={handleEndSession}
-                            className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition"
+                            className="p-2 bg-white dark:bg-slate-800 border border-border/50 hover:bg-slate-100 dark:hover:bg-slate-700 text-muted-foreground rounded-full transition"
                             title="Вийти з фокус-режиму"
                         >
                             <X className="w-5 h-5" />
@@ -260,7 +296,7 @@ export function FocusToday() {
 
                 {/* Focus title */}
                 <div className="flex-1 flex flex-col items-center justify-center text-center z-10 py-4">
-                    <h1 className="text-3xl md:text-5xl font-black leading-tight max-w-2xl mb-6">
+                    <h1 className="text-3xl md:text-5xl font-black leading-tight max-w-2xl mb-6 text-foreground">
                         {focusItem.title}
                     </h1>
 
@@ -271,18 +307,18 @@ export function FocusToday() {
                                 <div
                                     key={task.id}
                                     className={cn(
-                                        "flex items-center gap-3 px-5 py-3 bg-white/10 hover:bg-white/20 rounded-2xl cursor-pointer transition-colors text-left",
-                                        task.completed && "opacity-50"
+                                        "flex items-center gap-3 px-5 py-3 bg-white dark:bg-slate-800/50 border border-border/50 hover:border-orange-200 dark:hover:border-orange-500/30 rounded-2xl cursor-pointer transition-colors text-left shadow-sm",
+                                        task.completed && "opacity-50 bg-slate-50 dark:bg-slate-900/30 border-transparent"
                                     )}
                                     onClick={(e) => toggleTask(task.id, e)}
                                 >
                                     {task.completed
-                                        ? <CheckCircle2 className="w-5 h-5 text-white/80 shrink-0" />
-                                        : <Circle className="w-5 h-5 text-white/60 shrink-0" />
+                                        ? <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                                        : <Circle className="w-5 h-5 text-muted-foreground shrink-0" />
                                     }
                                     <span className={cn(
-                                        "text-sm font-bold",
-                                        task.completed && "line-through text-white/50"
+                                        "text-sm font-bold text-foreground",
+                                        task.completed && "line-through text-muted-foreground"
                                     )}>
                                         {task.title}
                                     </span>
@@ -295,20 +331,20 @@ export function FocusToday() {
                     {!sessionActive ? (
                         <button
                             onClick={handleStartSession}
-                            className="flex items-center gap-3 px-12 py-5 bg-white text-orange-600 font-black text-lg rounded-2xl shadow-2xl hover:scale-105 transition-transform"
+                            className="flex items-center gap-3 px-12 py-5 bg-orange-500 text-white hover:bg-orange-600 font-black text-lg rounded-2xl shadow-lg shadow-orange-500/20 hover:scale-105 transition-transform"
                         >
                             <Play className="w-6 h-6" />
                             Почати
                         </button>
                     ) : (
                         <div className="flex flex-col items-center gap-4">
-                            <div className="flex items-center gap-2 text-orange-100 text-sm font-medium">
-                                <span className="inline-block w-2 h-2 rounded-full bg-white animate-pulse" />
+                            <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 text-sm font-bold">
+                                <span className="inline-block w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                                 Сесія активна
                             </div>
                             <button
                                 onClick={handleEndSession}
-                                className="px-10 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-base rounded-2xl border border-white/30 transition"
+                                className="px-10 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-foreground font-bold text-base rounded-2xl border border-border/50 shadow-sm transition"
                             >
                                 Завершити сесію
                             </button>
@@ -324,7 +360,7 @@ export function FocusToday() {
         <>
             <div className="flex flex-col md:flex-row gap-8 h-full bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-background border border-orange-200/80 dark:border-orange-900/40 rounded-3xl p-6 md:p-10 shadow-sm relative overflow-hidden">
                 {/* Background Decoration */}
-                <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/10 dark:bg-orange-500/5 rounded-full blur-3xl" />
+                <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/10 dark:bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
 
                 {/* Left: Focus Content */}
                 <div className="flex-1 flex flex-col justify-center z-10">
@@ -338,12 +374,6 @@ export function FocusToday() {
                         </h2>
                         {focusItem && (
                             <div className="ml-auto flex items-center gap-2">
-                                {isAutoFocus && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-200/60 dark:bg-orange-900/40 text-[10px] font-bold text-orange-700 dark:text-orange-300 uppercase tracking-wider">
-                                        <Sparkles className="w-3 h-3" />
-                                        Авто
-                                    </span>
-                                )}
                                 <button
                                     onClick={handleClearFocus}
                                     className="p-1.5 hover:bg-orange-200/50 dark:hover:bg-orange-900/30 rounded-full transition text-orange-500/60 hover:text-orange-600"
@@ -383,6 +413,19 @@ export function FocusToday() {
                                                 )}
                                             </div>
                                         )}
+
+                                        {/* AI Reasoning display if auto generated */}
+                                        {isAutoFocus && aiReasoning && (
+                                            <div className="mt-5 flex items-start gap-2.5 bg-gradient-to-br from-orange-50/80 to-amber-50/80 dark:from-orange-900/20 dark:to-orange-950/20 p-3 rounded-2xl border border-orange-200/60 dark:border-orange-500/20 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                                <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-800/50 flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Bot className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                                                </div>
+                                                <p className="text-sm text-orange-900 dark:text-orange-200 leading-relaxed max-w-sm">
+                                                    <span className="font-bold opacity-80 uppercase tracking-widest text-[10px] block mb-1">AI Аналіз</span>
+                                                    {aiReasoning}
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -410,16 +453,35 @@ export function FocusToday() {
                                 <Target className="w-7 h-7" />
                             </div>
                             <div>
-                                <p className="font-bold text-orange-900 dark:text-orange-200">Фокус дня не визначено</p>
+                                <p className="font-bold text-orange-900 dark:text-orange-200 text-lg tracking-tight">Фокус дня не визначено</p>
                                 <p className="text-sm text-orange-700/60 dark:text-orange-400/50 mt-1">Оберіть головну ціль для підвищення продуктивності</p>
                             </div>
-                            <button
-                                onClick={() => setSelectModalOpen(true)}
-                                className="flex items-center gap-2 px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-bold text-sm transition shadow-md shadow-orange-500/20"
-                            >
-                                <Plus className="w-4 h-4" />
-                                Обрати фокус дня
-                            </button>
+                            <div className="flex flex-col sm:flex-row items-center gap-3 mt-2 w-full sm:w-auto">
+                                <button
+                                    onClick={() => setSelectModalOpen(true)}
+                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 border border-orange-200 dark:border-orange-900/40 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-700 dark:text-orange-400 rounded-2xl font-bold text-sm transition"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Вручну
+                                </button>
+                                <button
+                                    onClick={handleAiFocusClick}
+                                    disabled={isAiAnalyzing}
+                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-2xl font-bold text-sm transition shadow-md shadow-orange-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    {isAiAnalyzing ? (
+                                        <>
+                                            <Sparkles className="w-4 h-4 animate-spin" />
+                                            Аналізую...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-4 h-4" />
+                                            AI Фокус
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -473,6 +535,13 @@ export function FocusToday() {
                 open={selectModalOpen}
                 onOpenChange={setSelectModalOpen}
                 onSelect={handleSelectFocus}
+            />
+
+            <UpgradeModal
+                open={showUpgradeModal}
+                onOpenChange={setShowUpgradeModal}
+                title="AI Фокус Дня"
+                description="Розумний аналіз ваших завдань та пріоритетів для вибору ідеального фокусу на день доступний лише в Pro версії."
             />
         </>
     );

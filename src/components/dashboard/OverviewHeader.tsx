@@ -2,13 +2,49 @@
 
 import { useMemo } from 'react';
 import { useData } from '@/lib/store';
-import { calculateFocusLevel } from '@/lib/metrics';
 import { isToday, subDays, isSameDay } from 'date-fns';
 import { Flame } from 'lucide-react';
+import { AppState } from '@/types';
+
+// Calculate a 0-100 score strictly based on today's activity
+function calculateTodayScore(state: AppState): number {
+    const today = new Date();
+
+    // 1. Tasks (50%)
+    const todayTasks = state.actions.filter(a => a.date && isSameDay(new Date(a.date), today));
+    const tasksTotal = todayTasks.length;
+    const tasksCompleted = todayTasks.filter(a => a.completed).length;
+    let tasksScore = 0;
+    if (tasksTotal > 0) {
+        tasksScore = (tasksCompleted / tasksTotal) * 50;
+    } else if (state.actions.some(a => a.completed && isSameDay(new Date(a.updatedAt), today))) {
+        // If no tasks explicitly assigned to today, but user completed some task today
+        tasksScore = 50;
+    }
+
+    // 2. Habits (30%)
+    const activeHabits = state.habits.filter(h => h.status === 'active');
+    const habitsTotal = activeHabits.length;
+    const habitsCompleted = state.habitLogs.filter(l => isSameDay(new Date(l.date), today) && l.completed).length;
+    let habitsScore = 0;
+    if (habitsTotal > 0) {
+        // Cap at 30 if they complete more than expected
+        habitsScore = Math.min((habitsCompleted / habitsTotal) * 30, 30);
+    } else {
+        habitsScore = 30; // Free points if no habits tracked
+    }
+
+    // 3. Metrics (20%)
+    // Check if user updated any metric today
+    const hasMetricUpdateToday = state.metricEntries.some(e => isSameDay(new Date(e.date), today));
+    const metricsScore = hasMetricUpdateToday ? 20 : 0;
+
+    return Math.round(tasksScore + habitsScore + metricsScore);
+}
 
 export function OverviewHeader() {
     const { state } = useData();
-    const metrics = useMemo(() => calculateFocusLevel(state), [state]);
+    const focusIndex = useMemo(() => calculateTodayScore(state), [state]);
 
     // Calculate Momentum (Streak of productive days)
     const streak = useMemo(() => {
@@ -31,7 +67,6 @@ export function OverviewHeader() {
         return currentStreak > 0 ? currentStreak : 4;
     }, [state.actions, state.habitLogs]);
 
-    const focusIndex = metrics.score;
     // Calculate circumference for strokeDasharray
     const radius = 28;
     const circumference = 2 * Math.PI * radius;
