@@ -728,7 +728,7 @@ export function QuickAddModal({
                     </button>
 
                     {/* Header (Entity Selector) */}
-                    <div className="bg-slate-50/80 dark:bg-card/50 border-b border-slate-100 dark:border-border p-2 pr-12 sm:pr-2 flex overflow-x-auto gap-1 shrink-0 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                    <div className="bg-slate-50/80 dark:bg-card/50 border-b border-slate-100 dark:border-border p-2 flex overflow-x-auto gap-1 shrink-0 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                         {ENTITIES.map(ent => (
                             <button
                                 key={ent.id}
@@ -1149,32 +1149,32 @@ export function QuickAddModal({
 
                             {/* Date (Generic) */}
                             {type !== 'habit' && type !== 'routine' && type !== 'project' && !(type === 'content' && ['note', 'file', 'library', 'journal'].includes(contentType)) && (
-                                <div className="flex flex-col gap-4 w-full max-w-full overflow-hidden">
-                                    <div className="space-y-1.5">
-                                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                <div className="flex flex-col gap-4 min-w-0 w-full">
+                                    <div className="space-y-1.5 min-w-0">
+                                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">
                                             {type === 'task' ? 'Почати з' : 'Дата'} <span className="text-red-500">*</span>
                                         </label>
-                                        <Input
+                                        <input
                                             type="date"
                                             value={date}
                                             onChange={(e) => {
                                                 setDate(e.target.value);
                                                 checkAndAdvance('create-task-date');
                                             }}
-                                            className="h-8 w-full text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border block"
                                             required
+                                            className="h-8 w-full min-w-0 max-w-full text-xs bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border rounded-md px-2 text-foreground appearance-none block box-border"
                                         />
                                     </div>
                                     {type === 'task' && (
-                                        <div className="space-y-1.5">
-                                            <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                        <div className="space-y-1.5 min-w-0">
+                                            <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider block">
                                                 Виконати до
                                             </label>
-                                            <Input
+                                            <input
                                                 type="date"
                                                 value={dueDate}
                                                 onChange={(e) => setDueDate(e.target.value)}
-                                                className="h-8 w-full text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border block"
+                                                className="h-8 w-full min-w-0 max-w-full text-xs bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border rounded-md px-2 text-foreground appearance-none block box-border"
                                             />
                                         </div>
                                     )}
