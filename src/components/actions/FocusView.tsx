@@ -52,11 +52,11 @@ export function FocusView() {
         <div className="h-full flex flex-col items-center justify-center p-4">
             <div className="max-w-xl w-full space-y-8">
                 <div className="text-center space-y-4">
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-900 dark:bg-primary text-white mb-2 ring-8 ring-slate-100 dark:ring-secondary/50">
-                        <Zap className="w-10 h-10" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-slate-900 dark:bg-primary text-white mb-2 ring-8 ring-slate-100 dark:ring-secondary/50">
+                        <Zap className="w-8 h-8 md:w-10 md:h-10" />
                     </div>
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-foreground">Ваш Фокус</h2>
-                    <p className="text-muted-foreground">Саме те, що має значення сьогодні. (Макс 3)</p>
+                    <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-foreground">Ваш Фокус</h2>
+                    <p className="text-muted-foreground text-sm md:text-base">Саме те, що має значення сьогодні. (Макс 3)</p>
                 </div>
 
                 {/* Focus Slots */}

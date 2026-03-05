@@ -39,12 +39,7 @@ export function TasksTodayList() {
     const activeTasks = filteredTasks.filter(t => !t.completed);
     const completedTasks = filteredTasks.filter(t => t.completed);
 
-    // Prepare list with active first, then completed. Limit to 7.
-    let displayTasks = [...activeTasks, ...completedTasks];
-    const hasMore = displayTasks.length > 7;
-    if (hasMore) {
-        displayTasks = displayTasks.slice(0, 7);
-    }
+    const displayTasks = [...activeTasks, ...completedTasks];
 
     const toggleTask = (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
@@ -105,7 +100,7 @@ export function TasksTodayList() {
                     <p className="text-xs text-muted-foreground">Для обраної сфери на сьогодні</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-1 overflow-y-auto">
+                <div className="flex-1 min-h-0 flex flex-col gap-1 overflow-y-auto pr-1 pb-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
                     {/* Active tasks */}
                     {displayTasks.filter(t => !t.completed).length > 0 && (
                         <div className="mb-2">
@@ -156,16 +151,16 @@ export function TasksTodayList() {
                         </div>
                     )}
 
-                    {/* Show more button */}
-                    {hasMore && (
+                    {/* Link to all actions */}
+                    <div className="mt-auto pt-4 shrink-0">
                         <Link
                             href="/actions"
-                            className="mt-4 w-full flex items-center justify-center gap-2 py-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-900/80 rounded-2xl text-xs font-bold text-muted-foreground hover:text-foreground transition-colors"
+                            className="w-full flex items-center justify-center gap-2 py-3 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900/40 dark:hover:bg-slate-900/80 rounded-2xl text-xs font-bold text-muted-foreground hover:text-foreground transition-colors"
                         >
-                            Показати більше ({filteredTasks.length - 7})
+                            Керувати всіма завданнями
                             <ChevronRight className="w-4 h-4" />
                         </Link>
-                    )}
+                    </div>
                 </div>
             )}
         </div>

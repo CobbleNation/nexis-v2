@@ -2,12 +2,25 @@
 
 import { useMemo } from 'react';
 import { useData } from '@/lib/store';
-import { isToday, subDays, isSameDay } from 'date-fns';
-import { Flame } from 'lucide-react';
+import { isSameDay, subDays } from 'date-fns';
+import { Flame, Info } from 'lucide-react';
 import { AppState } from '@/lib/store';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+
+interface FocusScoreData {
+    score: number;
+    tasksScore: number;
+    habitsScore: number;
+    metricsScore: number;
+    tasksCompleted: number;
+    tasksTotal: number;
+    habitsCompleted: number;
+    habitsTotal: number;
+    hasMetricsUpdate: boolean;
+}
 
 // Calculate a 0-100 score strictly based on today's activity
-function calculateTodayScore(state: AppState): number {
+function calculateTodayScore(state: AppState): FocusScoreData {
     const today = new Date();
 
     // 1. Tasks (50%)
@@ -17,9 +30,6 @@ function calculateTodayScore(state: AppState): number {
     let tasksScore = 0;
     if (tasksTotal > 0) {
         tasksScore = (tasksCompleted / tasksTotal) * 50;
-    } else if (state.actions.some(a => a.completed && isSameDay(new Date(a.updatedAt), today))) {
-        // If no tasks explicitly assigned to today, but user completed some task today
-        tasksScore = 50;
     }
 
     // 2. Habits (30%)
@@ -28,23 +38,41 @@ function calculateTodayScore(state: AppState): number {
     const habitsCompleted = state.habitLogs.filter(l => isSameDay(new Date(l.date), today) && l.completed).length;
     let habitsScore = 0;
     if (habitsTotal > 0) {
-        // Cap at 30 if they complete more than expected
         habitsScore = Math.min((habitsCompleted / habitsTotal) * 30, 30);
-    } else {
-        habitsScore = 30; // Free points if no habits tracked
     }
 
     // 3. Metrics (20%)
-    // Check if user updated any metric today
     const hasMetricUpdateToday = state.metricEntries.some(e => isSameDay(new Date(e.date), today));
     const metricsScore = hasMetricUpdateToday ? 20 : 0;
 
-    return Math.round(tasksScore + habitsScore + metricsScore);
+    const totalScore = Math.round(tasksScore + habitsScore + metricsScore);
+
+    return {
+        score: totalScore,
+        tasksScore: Math.round(tasksScore),
+        habitsScore: Math.round(habitsScore),
+        metricsScore: Math.round(metricsScore),
+        tasksCompleted,
+        tasksTotal,
+        habitsCompleted,
+        habitsTotal,
+        hasMetricsUpdate: hasMetricUpdateToday
+    };
+}
+
+function getFocusStatusName(score: number): string {
+    if (score === 0) return 'Відсутній';
+    if (score < 40) return 'Низький';
+    if (score < 60) return 'Середній';
+    if (score < 80) return 'Гарний';
+    if (score < 100) return 'Високий';
+    return 'Максимальний';
 }
 
 export function OverviewHeader() {
     const { state } = useData();
-    const focusIndex = useMemo(() => calculateTodayScore(state), [state]);
+    const focusData = useMemo(() => calculateTodayScore(state), [state]);
+    const focusIndex = focusData.score;
 
     // Calculate Momentum (Streak of productive days)
     const streak = useMemo(() => {
@@ -63,11 +91,9 @@ export function OverviewHeader() {
             }
         }
 
-        // Fallback mockup as per requirements if streak is 0
-        return currentStreak > 0 ? currentStreak : 4;
+        return currentStreak > 0 ? currentStreak : 0;
     }, [state.actions, state.habitLogs]);
 
-    // Calculate circumference for strokeDasharray
     const radius = 28;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (circumference * focusIndex) / 100;
@@ -75,31 +101,67 @@ export function OverviewHeader() {
     return (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-6">
-                {/* Focus Ring */}
-                <div className="bg-white dark:bg-card px-6 py-4 rounded-3xl border border-border/50 shadow-sm flex items-center gap-5">
-                    <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                        <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="32" cy="32" r={radius} className="stroke-slate-100 dark:stroke-slate-800 fill-none" strokeWidth="6" />
-                            <circle
-                                cx="32" cy="32" r={radius}
-                                className="stroke-orange-500 fill-none transition-all duration-1000 ease-out"
-                                strokeWidth="6"
-                                strokeDasharray={circumference}
-                                strokeDashoffset={strokeDashoffset}
-                                strokeLinecap="round"
-                            />
-                        </svg>
-                        <div className="absolute inset-0 flex items-center justify-center flex-col">
-                            <span className="text-sm font-black tracking-tighter">{focusIndex}%</span>
+                {/* Focus Ring with Popover Explainer */}
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <button className="bg-white dark:bg-card px-6 py-4 rounded-3xl border border-border/50 shadow-sm flex items-center gap-5 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors text-left group">
+                            <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                                <svg className="w-full h-full transform -rotate-90">
+                                    <circle cx="32" cy="32" r={radius} className="stroke-slate-100 dark:stroke-slate-800 fill-none" strokeWidth="6" />
+                                    <circle
+                                        cx="32" cy="32" r={radius}
+                                        className="stroke-orange-500 fill-none transition-all duration-1000 ease-out"
+                                        strokeWidth="6"
+                                        strokeDasharray={circumference}
+                                        strokeDashoffset={strokeDashoffset}
+                                        strokeLinecap="round"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center flex-col">
+                                    <span className="text-sm font-black tracking-tighter">{focusIndex}%</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col relative pr-4">
+                                <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
+                                    Фокус дня
+                                    <Info className="w-3 h-3 text-muted-foreground/60 group-hover:text-muted-foreground transition-colors" />
+                                </h2>
+                                <p className="text-xl font-black tracking-tight leading-none text-foreground">
+                                    {getFocusStatusName(focusIndex)}
+                                </p>
+                            </div>
+                        </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-4 rounded-2xl shadow-xl border-border/50" sideOffset={8}>
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-2 border-b border-border/50 pb-2 mb-1 text-sm font-bold">
+                                Фокус {focusIndex}%
+                                <span className="text-xs font-normal text-muted-foreground">/ 100%</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-muted-foreground">Задачі (до 50%)</span>
+                                <span className="font-medium">
+                                    {focusData.tasksScore}% <span className="text-xs text-muted-foreground ml-1">({focusData.tasksCompleted}/{focusData.tasksTotal})</span>
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-muted-foreground">Звички (до 30%)</span>
+                                <span className="font-medium">
+                                    {focusData.habitsScore}% <span className="text-xs text-muted-foreground ml-1">({focusData.habitsCompleted}/{focusData.habitsTotal})</span>
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-muted-foreground">Метрики (до 20%)</span>
+                                <span className="font-medium">
+                                    {focusData.metricsScore}% <span className="text-xs text-muted-foreground ml-1">({focusData.hasMetricsUpdate ? 'так' : 'ні'})</span>
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground/80 mt-2 bg-slate-50 dark:bg-slate-900/50 p-2 rounded-xl">
+                                Розраховується лише на основі запланованого і виконаного сьогодні.
+                            </p>
                         </div>
-                    </div>
-                    <div className="flex flex-col">
-                        <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Фокус дня</h2>
-                        <p className="text-xl font-black tracking-tight leading-none text-foreground">
-                            {focusIndex > 80 ? 'Максимальний' : focusIndex > 50 ? 'Оптимальний' : 'Низький'}
-                        </p>
-                    </div>
-                </div>
+                    </PopoverContent>
+                </Popover>
             </div>
 
             {/* Momentum */}

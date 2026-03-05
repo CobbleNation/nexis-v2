@@ -8,8 +8,11 @@ import { isToday } from 'date-fns';
 import { SelectFocusModal, FocusItem } from './SelectFocusModal';
 import { useSubscription } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/common/UpgradeModal';
+import { FocusHistoryModal, FocusSessionLog } from './FocusHistoryModal';
+import { History } from 'lucide-react';
 
 const FOCUS_STORAGE_KEY = 'nexis-day-focus';
+const FOCUS_HISTORY_KEY = 'nexis-focus-history';
 
 interface StoredFocus {
     date: string;
@@ -68,6 +71,8 @@ export function FocusToday() {
     const [aiReasoning, setAiReasoning] = useState<string | null>(null);
     const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [historyModalOpen, setHistoryModalOpen] = useState(false);
+    const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
 
     // Auto-compute focus based on today's activity
     const autoFocusSuggestion = useMemo((): FocusItem | null => {
@@ -148,14 +153,36 @@ export function FocusToday() {
     const handleStartSession = () => {
         setSessionActive(true);
         setElapsedSeconds(0);
+        setSessionStartTime(new Date().toISOString());
         timerRef.current = setInterval(() => {
             setElapsedSeconds(s => s + 1);
         }, 1000);
     };
 
     const handleEndSession = () => {
+        if (sessionActive && focusItem && sessionStartTime && elapsedSeconds > 0) {
+            // Save to history
+            const log: FocusSessionLog = {
+                id: Math.random().toString(36).substring(2, 9),
+                focusItemId: focusItem.id,
+                focusItemTitle: focusItem.title,
+                durationSeconds: Math.floor(elapsedSeconds),
+                startTime: sessionStartTime,
+                endTime: new Date().toISOString()
+            };
+            try {
+                const existingRaw = localStorage.getItem(FOCUS_HISTORY_KEY);
+                const existing = existingRaw ? JSON.parse(existingRaw) : [];
+                existing.push(log);
+                localStorage.setItem(FOCUS_HISTORY_KEY, JSON.stringify(existing));
+            } catch (e) {
+                console.error("Failed to save focus history", e);
+            }
+        }
+
         setSessionActive(false);
         setIsFocusMode(false);
+        setSessionStartTime(null);
         if (timerRef.current) clearInterval(timerRef.current);
         setElapsedSeconds(0);
     };
@@ -273,13 +300,23 @@ export function FocusToday() {
                         <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400 rounded-full flex items-center justify-center">
                             <Target className="w-4 h-4" />
                         </div>
-                        <span className="text-orange-600 dark:text-orange-400 font-bold text-sm uppercase tracking-widest">
+                        <span className="text-orange-600 dark:text-orange-400 font-bold text-sm uppercase tracking-widest hidden sm:inline-block">
                             Фокус-режим
                         </span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        {!sessionActive && (
+                            <button
+                                onClick={() => setHistoryModalOpen(true)}
+                                className="flex items-center gap-1.5 p-2 sm:px-4 sm:py-2 bg-white dark:bg-slate-800 border border-border/50 hover:bg-slate-100 dark:hover:bg-slate-700 text-muted-foreground rounded-full sm:rounded-2xl transition shadow-sm text-sm font-bold"
+                                title="Історія сесій"
+                            >
+                                <History className="w-4 h-4" />
+                                <span className="hidden sm:inline-block">Історія</span>
+                            </button>
+                        )}
                         {sessionActive && (
-                            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-border/50 shadow-sm px-4 py-2 rounded-full">
+                            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-border/50 shadow-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">
                                 <Timer className="w-4 h-4 text-orange-500 animate-pulse" />
                                 <span className="font-mono font-black text-sm text-foreground">{formatElapsed(elapsedSeconds)}</span>
                             </div>
@@ -296,7 +333,7 @@ export function FocusToday() {
 
                 {/* Focus title */}
                 <div className="flex-1 flex flex-col items-center justify-center text-center z-10 py-4">
-                    <h1 className="text-3xl md:text-5xl font-black leading-tight max-w-2xl mb-6 text-foreground">
+                    <h1 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight max-w-2xl mb-6 text-foreground break-words hyphens-auto">
                         {focusItem.title}
                     </h1>
 
@@ -374,6 +411,13 @@ export function FocusToday() {
                         </h2>
                         {focusItem && (
                             <div className="ml-auto flex items-center gap-2">
+                                <button
+                                    onClick={() => setHistoryModalOpen(true)}
+                                    className="p-1.5 hover:bg-orange-200/50 dark:hover:bg-orange-900/30 rounded-full transition text-orange-500/60 hover:text-orange-600"
+                                    title="Історія сесій"
+                                >
+                                    <History className="w-4 h-4" />
+                                </button>
                                 <button
                                     onClick={handleClearFocus}
                                     className="p-1.5 hover:bg-orange-200/50 dark:hover:bg-orange-900/30 rounded-full transition text-orange-500/60 hover:text-orange-600"
@@ -535,6 +579,11 @@ export function FocusToday() {
                 open={selectModalOpen}
                 onOpenChange={setSelectModalOpen}
                 onSelect={handleSelectFocus}
+            />
+
+            <FocusHistoryModal
+                open={historyModalOpen}
+                onOpenChange={setHistoryModalOpen}
             />
 
             <UpgradeModal

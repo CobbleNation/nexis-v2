@@ -91,9 +91,9 @@ export function InboxView() {
     return (
         <div className="space-y-8 w-full h-full flex flex-col p-4 md:p-8">
             <div className="text-center space-y-2 py-4">
-                <h2 className="text-3xl font-bold flex items-center justify-center gap-3 text-slate-800 dark:text-foreground">
-                    <div className="bg-orange-100 dark:bg-primary/20 p-3 rounded-2xl text-orange-600 dark:text-primary">
-                        <Inbox className="w-8 h-8" />
+                <h2 className="text-2xl md:text-3xl font-bold flex items-center justify-center gap-3 text-slate-800 dark:text-foreground">
+                    <div className="bg-orange-100 dark:bg-primary/20 p-2 md:p-3 rounded-2xl text-orange-600 dark:text-primary">
+                        <Inbox className="w-6 h-6 md:w-8 md:h-8" />
                     </div>
                     Вхідні
                 </h2>
@@ -186,6 +186,6 @@ export function InboxView() {
                 title="Ліміт завдань досягнуто"
                 description="У Free-версії доступно до 10 активних завдань. Перейдіть на Pro для безлімітного планування."
             />
-        </div>
+        </div >
     );
 }

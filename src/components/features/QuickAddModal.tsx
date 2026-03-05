@@ -68,6 +68,7 @@ export function QuickAddModal({
         const d = new Date();
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     });
+    const [dueDate, setDueDate] = React.useState<string>(''); // Optional deadline
 
     // Dynamic Fields State
     const [description, setDescription] = React.useState('');
@@ -445,6 +446,7 @@ export function QuickAddModal({
                         completed: false,
                         priority: isFocus ? 'high' : 'medium', // Implicit priority
                         date: date || undefined, // Set date only if provided (can be empty)
+                        dueDate: dueDate || undefined, // New dueDate field
                         isFocus,
                         duration: parseInt(duration),
                         startTime: startTime || undefined,
@@ -1147,19 +1149,35 @@ export function QuickAddModal({
 
                             {/* Date (Generic) */}
                             {type !== 'habit' && type !== 'routine' && type !== 'project' && !(type === 'content' && ['note', 'file', 'library', 'journal'].includes(contentType)) && (
-                                <div className="space-y-1.5 flex flex-col">
-                                    <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                                        {type === 'task' ? 'Виконати до' : 'Дата'} {type === 'event' && <span className="text-red-500">*</span>}
-                                    </label>
-                                    <Input
-                                        type="date"
-                                        value={date}
-                                        onChange={(e) => {
-                                            setDate(e.target.value);
-                                            checkAndAdvance('create-task-date');
-                                        }}
-                                        className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
-                                    />
+                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-2">
+                                    <div className="space-y-1.5 flex flex-col flex-1">
+                                        <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                            {type === 'task' ? 'Почати з' : 'Дата'} <span className="text-red-500">*</span>
+                                        </label>
+                                        <Input
+                                            type="date"
+                                            value={date}
+                                            onChange={(e) => {
+                                                setDate(e.target.value);
+                                                checkAndAdvance('create-task-date');
+                                            }}
+                                            className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
+                                            required
+                                        />
+                                    </div>
+                                    {type === 'task' && (
+                                        <div className="space-y-1.5 flex flex-col flex-1">
+                                            <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                                Виконати до <span className="text-muted-foreground/50 lowercase font-normal">(необов'язково)</span>
+                                            </label>
+                                            <Input
+                                                type="date"
+                                                value={dueDate}
+                                                onChange={(e) => setDueDate(e.target.value)}
+                                                className="h-8 text-xs bg-white dark:bg-secondary/20 border-slate-200 dark:border-border"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
