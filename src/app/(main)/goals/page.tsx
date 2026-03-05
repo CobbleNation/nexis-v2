@@ -1,46 +1,276 @@
 'use client';
 
 import { useFilteredData, useData } from '@/lib/store';
-import { Progress } from '@/components/ui/progress';
-import { Target, CheckCircle2, Circle, Clock, ArrowRight, Folder, ChevronRight, Plus, Layers, TrendingUp } from 'lucide-react';
+import { Target, CheckCircle2, Circle, Clock, ArrowRight, TrendingUp, Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { Goal } from '@/types';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { formatGoalMetricDisplay } from '@/lib/goal-utils';
-
+import { Plus } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+
+const HORIZON_LABELS: Record<string, string> = {
+    week: 'Тиждень',
+    month: 'Місяць',
+    quarter: 'Квартал',
+    year: 'Рік',
+    custom: 'Свій',
+};
+
+const GOAL_TYPE_LABELS: Record<string, string> = {
+    vision: 'Довгострокова',
+    strategic: 'Стратегічна',
+    tactical: 'Тактична',
+};
+
+const PRIORITY_LABELS: Record<string, string> = {
+    high: 'Високий',
+    medium: 'Середній',
+    low: 'Низький',
+};
+
+type SortOption = 'deadline' | 'progress_desc' | 'progress_asc' | 'title' | 'created';
+
+function FilterChip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+    return (
+        <button
+            onClick={onClick}
+            className={cn(
+                'px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all shrink-0',
+                active
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'bg-slate-100 dark:bg-secondary text-slate-600 dark:text-muted-foreground hover:bg-slate-200 dark:hover:bg-secondary/80'
+            )}
+        >
+            {label}
+        </button>
+    );
+}
 
 function GoalsContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const currentTab = searchParams.get('tab') || 'goals';
+    const currentTab = searchParams.get('tab') || 'active';
 
-    const { filteredGoals, filteredProjects, areas } = useFilteredData();
-    const { state } = useData();
-
-    const activeGoals = filteredGoals.filter(g => g.status === 'active' || !g.status);
-    const achievedGoals = filteredGoals.filter(g => g.status === 'achieved' || g.status === 'completed');
-    const partialGoals = filteredGoals.filter(g => g.status === 'not_achieved');
-    const stoppedGoals = filteredGoals.filter(g => g.status === 'paused' || g.status === 'abandoned');
-
+    const { filteredGoals, areas } = useFilteredData();
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
 
-    const openDetails = (goal: Goal) => {
-        router.push(`/goals/${goal.id}`);
+    // Filter state
+    const [search, setSearch] = useState('');
+    const [areaFilter, setAreaFilter] = useState<string>('');
+    const [horizonFilter, setHorizonFilter] = useState<string>('');
+    const [typeFilter, setTypeFilter] = useState<string>('');
+    const [priorityFilter, setPriorityFilter] = useState<string>('');
+    const [sortBy, setSortBy] = useState<SortOption>('deadline');
+
+    // Bucket goals by status tab
+    const goalsByTab = useMemo(() => {
+        const active = filteredGoals.filter(g => g.status === 'active' || !g.status);
+        const achieved = filteredGoals.filter(g => g.status === 'achieved' || g.status === 'completed');
+        const partial = filteredGoals.filter(g => g.status === 'not_achieved');
+        const paused = filteredGoals.filter(g => g.status === 'paused' || g.status === 'abandoned');
+        return { active, achieved, partial, paused };
+    }, [filteredGoals]);
+
+    // Apply local filters + sort
+    const applyFilters = (goals: Goal[]) => {
+        let result = goals;
+
+        if (search.trim()) {
+            const s = search.toLowerCase();
+            result = result.filter(g =>
+                g.title.toLowerCase().includes(s) ||
+                (g.description || '').toLowerCase().includes(s)
+            );
+        }
+        if (areaFilter) result = result.filter(g => g.areaId === areaFilter);
+        if (horizonFilter) result = result.filter(g => g.horizon === horizonFilter);
+        if (typeFilter) result = result.filter(g => g.type === typeFilter);
+        if (priorityFilter) result = result.filter(g => g.priority === priorityFilter);
+
+        result = [...result].sort((a, b) => {
+            if (sortBy === 'deadline') {
+                if (!a.deadline) return 1;
+                if (!b.deadline) return -1;
+                return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
+            }
+            if (sortBy === 'progress_desc') return (b.progress || 0) - (a.progress || 0);
+            if (sortBy === 'progress_asc') return (a.progress || 0) - (b.progress || 0);
+            if (sortBy === 'title') return a.title.localeCompare(b.title, 'uk');
+            if (sortBy === 'created') {
+                return new Date(b.createdAt as string || 0).getTime() - new Date(a.createdAt as string || 0).getTime();
+            }
+            return 0;
+        });
+
+        return result;
+    };
+
+    const activeCount = goalsByTab.active.length;
+    const achievedCount = goalsByTab.achieved.length;
+    const partialCount = goalsByTab.partial.length;
+    const pausedCount = goalsByTab.paused.length;
+
+    const openDetails = (goal: Goal) => router.push(`/goals/${goal.id}`);
+
+    const activeFiltersCount = [areaFilter, horizonFilter, typeFilter, priorityFilter].filter(Boolean).length + (search ? 1 : 0);
+
+    const clearFilters = () => {
+        setSearch('');
+        setAreaFilter('');
+        setHorizonFilter('');
+        setTypeFilter('');
+        setPriorityFilter('');
+        setSortBy('deadline');
     };
 
     return (
-        <div id="goals-container" className="space-y-8 animate-in fade-in duration-500">
+        <div id="goals-container" className="space-y-6 animate-in fade-in duration-500">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-foreground">Цілі та Проекти</h1>
                     <p className="text-muted-foreground">Перетворюйте бачення на реальність.</p>
                 </div>
+            </div>
+
+            {/* Search + Filter bar */}
+            <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                        <Input
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            placeholder="Пошук цілей..."
+                            className="pl-9 h-9 rounded-xl bg-white dark:bg-card border-slate-200 dark:border-border text-sm"
+                        />
+                        {search && (
+                            <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        )}
+                    </div>
+                    <Button
+                        variant={showFilters ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setShowFilters(v => !v)}
+                        className={cn('gap-1.5 rounded-xl shrink-0 h-9', showFilters && 'bg-primary text-primary-foreground')}
+                    >
+                        <SlidersHorizontal className="h-4 w-4" />
+                        Фільтри
+                        {activeFiltersCount > 0 && (
+                            <span className="bg-white/20 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </Button>
+                    {activeFiltersCount > 0 && (
+                        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-xs text-muted-foreground h-9 px-2">
+                            <X className="h-3.5 w-3.5 mr-1" /> Скинути
+                        </Button>
+                    )}
+                </div>
+
+                {/* Expanded Filter Panel */}
+                <AnimatePresence>
+                    {showFilters && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="bg-white dark:bg-card border border-slate-100 dark:border-border rounded-2xl p-4 space-y-4">
+                                {/* Area filter */}
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mb-2">Сфера</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <FilterChip label="Всі" active={!areaFilter} onClick={() => setAreaFilter('')} />
+                                        {areas.map(area => (
+                                            <FilterChip
+                                                key={area.id}
+                                                label={area.title}
+                                                active={areaFilter === area.id}
+                                                onClick={() => setAreaFilter(areaFilter === area.id ? '' : area.id)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Horizon */}
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mb-2">Горизонт</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <FilterChip label="Всі" active={!horizonFilter} onClick={() => setHorizonFilter('')} />
+                                        {Object.entries(HORIZON_LABELS).map(([val, label]) => (
+                                            <FilterChip
+                                                key={val}
+                                                label={label}
+                                                active={horizonFilter === val}
+                                                onClick={() => setHorizonFilter(horizonFilter === val ? '' : val)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Type */}
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mb-2">Тип</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <FilterChip label="Всі" active={!typeFilter} onClick={() => setTypeFilter('')} />
+                                        {Object.entries(GOAL_TYPE_LABELS).map(([val, label]) => (
+                                            <FilterChip
+                                                key={val}
+                                                label={label}
+                                                active={typeFilter === val}
+                                                onClick={() => setTypeFilter(typeFilter === val ? '' : val)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Priority */}
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mb-2">Пріоритет</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <FilterChip label="Всі" active={!priorityFilter} onClick={() => setPriorityFilter('')} />
+                                        {Object.entries(PRIORITY_LABELS).map(([val, label]) => (
+                                            <FilterChip
+                                                key={val}
+                                                label={label}
+                                                active={priorityFilter === val}
+                                                onClick={() => setPriorityFilter(priorityFilter === val ? '' : val)}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Sort */}
+                                <div>
+                                    <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider mb-2">Сортування</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {([
+                                            ['deadline', 'Дедлайн'],
+                                            ['progress_desc', 'Прогрес ↓'],
+                                            ['progress_asc', 'Прогрес ↑'],
+                                            ['title', 'Назва А-Я'],
+                                            ['created', 'Нові спочатку'],
+                                        ] as [SortOption, string][]).map(([val, label]) => (
+                                            <FilterChip key={val} label={label} active={sortBy === val} onClick={() => setSortBy(val)} />
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             <Tabs value={currentTab} onValueChange={(val) => router.push(`/goals?tab=${val}`)} className="space-y-6">
@@ -49,86 +279,63 @@ function GoalsContent() {
                         <TabsTrigger value="active" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
                             Активні
                             <span className="bg-secondary text-secondary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                                {activeGoals.length}
+                                {activeCount}
                             </span>
                         </TabsTrigger>
                         <TabsTrigger value="achieved" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
                             Досягнуті
                             <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                                {achievedGoals.length}
+                                {achievedCount}
                             </span>
                         </TabsTrigger>
                         <TabsTrigger value="partial" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
                             Не повністю
                             <span className="bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                                {partialGoals.length}
+                                {partialCount}
                             </span>
                         </TabsTrigger>
                         <TabsTrigger value="paused" className="gap-2 bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-primary dark:data-[state=active]:text-primary data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary dark:data-[state=active]:border-primary rounded-none px-2 pb-3 transition-all text-muted-foreground hover:text-foreground">
                             Зупинені
                             <span className="bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-                                {stoppedGoals.length}
+                                {pausedCount}
                             </span>
                         </TabsTrigger>
                     </TabsList>
                 </div>
 
-                <TabsContent value="active" className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
-                    {activeGoals.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center p-16 text-center border-2 border-dashed border-slate-200 dark:border-border rounded-3xl bg-slate-50/50 dark:bg-card/20">
-                            <div className="h-16 w-16 bg-white dark:bg-card rounded-2xl shadow-sm flex items-center justify-center mb-4">
-                                <Target className="h-8 w-8 text-slate-300 dark:text-muted-foreground" />
-                            </div>
-                            <h3 className="text-lg font-bold text-foreground">Немає Активних Цілей</h3>
-                            <p className="text-muted-foreground max-w-md mt-2 mb-6">
-                                Ви ще не встановили цілей. Визначте, як виглядає успіх.
-                                <br />
-                                <span className="text-xs mt-2 block">Натисніть (+), щоб створити першу ціль.</span>
-                            </p>
-                        </div>
-                    ) : (
-                        <GoalsList goals={activeGoals} areas={areas} openDetails={openDetails} onCreate={() => setShowCreateModal(true)} />
-                    )}
-                </TabsContent>
-
-                <TabsContent value="achieved" className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    {achievedGoals.length === 0 ? (
-                        <div className="text-center p-12 text-muted-foreground border-2 border-dashed border-slate-200 dark:border-border rounded-3xl bg-slate-50/50 dark:bg-card/20">
-                            Ще немає досягнутих цілей. Продовжуйте працювати!
-                        </div>
-                    ) : (
-                        <GoalsList goals={achievedGoals} areas={areas} openDetails={openDetails} />
-                    )}
-                </TabsContent>
-
-                <TabsContent value="partial" className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    {partialGoals.length === 0 ? (
-                        <div className="text-center p-12 text-muted-foreground border-2 border-dashed border-slate-200 dark:border-border rounded-3xl bg-slate-50/50 dark:bg-card/20">
-                            Немає цілей, виконаних частково.
-                        </div>
-                    ) : (
-                        <GoalsList goals={partialGoals} areas={areas} openDetails={openDetails} />
-                    )}
-                </TabsContent>
-
-                <TabsContent value="paused" className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                    {stoppedGoals.length === 0 ? (
-                        <div className="text-center p-12 text-muted-foreground border-2 border-dashed border-slate-200 dark:border-border rounded-3xl bg-slate-50/50 dark:bg-card/20">
-                            Немає зупинених або архівних цілей.
-                        </div>
-                    ) : (
-                        <GoalsList goals={stoppedGoals} areas={areas} openDetails={openDetails} />
-                    )}
-                </TabsContent>
-
-
+                {(['active', 'achieved', 'partial', 'paused'] as const).map(tab => {
+                    const source = tab === 'active' ? goalsByTab.active : tab === 'achieved' ? goalsByTab.achieved : tab === 'partial' ? goalsByTab.partial : goalsByTab.paused;
+                    const filtered = applyFilters(source);
+                    return (
+                        <TabsContent key={tab} value={tab} className="space-y-8 animate-in fade-in slide-in-from-left-4 duration-300">
+                            {filtered.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center p-16 text-center border-2 border-dashed border-slate-200 dark:border-border rounded-3xl bg-slate-50/50 dark:bg-card/20">
+                                    <div className="h-16 w-16 bg-white dark:bg-card rounded-2xl shadow-sm flex items-center justify-center mb-4">
+                                        <Target className="h-8 w-8 text-slate-300 dark:text-muted-foreground" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-foreground">
+                                        {source.length === 0 ? 'Немає цілей' : 'Нічого не знайдено'}
+                                    </h3>
+                                    <p className="text-muted-foreground max-w-md mt-2 mb-6 text-sm">
+                                        {source.length === 0
+                                            ? 'Натисніть (+), щоб створити першу ціль.'
+                                            : 'Спробуйте змінити або скинути фільтри.'}
+                                    </p>
+                                    {activeFiltersCount > 0 && (
+                                        <Button variant="outline" size="sm" onClick={clearFilters}>
+                                            <X className="h-3.5 w-3.5 mr-1.5" /> Скинути фільтри
+                                        </Button>
+                                    )}
+                                </div>
+                            ) : (
+                                <GoalsList goals={filtered} areas={areas} openDetails={openDetails} onCreate={tab === 'active' ? () => setShowCreateModal(true) : undefined} />
+                            )}
+                        </TabsContent>
+                    );
+                })}
             </Tabs>
 
-            <QuickAddModal
-                open={showCreateModal}
-                onOpenChange={setShowCreateModal}
-                defaultTab="goal"
-            />
+            <QuickAddModal open={showCreateModal} onOpenChange={setShowCreateModal} defaultTab="goal" />
         </div>
     );
 }
@@ -148,7 +355,7 @@ const GoalsList = ({ goals, areas, openDetails, onCreate }: { goals: Goal[], are
                         key={goal.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ delay: index * 0.05 }}
                         className={cn(
                             "rounded-[2rem] p-6 shadow-sm border flex flex-col justify-between min-h-[300px] cursor-pointer transition-all duration-300 group hover:shadow-md relative bg-white dark:bg-card",
                             "hover:border-primary/20",
@@ -171,11 +378,18 @@ const GoalsList = ({ goals, areas, openDetails, onCreate }: { goals: Goal[], are
                                     {area && <span className={cn("w-2.5 h-2.5 rounded-full shrink-0", !area.color?.startsWith('#') && !area.color?.startsWith('rgb') && area.color)} style={(area.color?.startsWith('#') || area.color?.startsWith('rgb')) ? { backgroundColor: area.color } : undefined} />}
                                     <span>{area?.title || 'Загальне'}</span>
                                 </div>
-                                <div className={cn(
-                                    "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                                    isSuccess ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30" : "bg-slate-50 text-slate-400 dark:bg-slate-800"
-                                )}>
-                                    {isSuccess ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                                <div className="flex items-center gap-1.5">
+                                    {goal.horizon && (
+                                        <span className="text-[10px] font-bold text-muted-foreground bg-slate-50 dark:bg-secondary/50 px-2 py-0.5 rounded-full">
+                                            {HORIZON_LABELS[goal.horizon] || goal.horizon}
+                                        </span>
+                                    )}
+                                    <div className={cn(
+                                        "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                                        isSuccess ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30" : "bg-slate-50 text-slate-400 dark:bg-slate-800"
+                                    )}>
+                                        {isSuccess ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                                    </div>
                                 </div>
                             </div>
 
