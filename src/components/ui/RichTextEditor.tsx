@@ -6,7 +6,7 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { Bold, Italic, List, ListOrdered, Heading1, Heading2, Quote, Redo, Undo, Strikethrough } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface RichTextEditorProps {
     content: string;
@@ -16,6 +16,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, placeholder = 'Start writing...', className }: RichTextEditorProps) {
+    // Track if we've already set the initial content to avoid resetting mid-typing
+    const isInitialized = useRef(false);
+
     const editor = useEditor({
         extensions: [
             StarterKit,
@@ -23,7 +26,7 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
                 placeholder,
             }),
         ],
-        content: content, // Initial content
+        content: content, // Initial content only
         editorProps: {
             attributes: {
                 class: 'prose prose-sm sm:prose-base dark:prose-invert focus:outline-none min-h-[150px] max-w-none text-slate-700 dark:text-foreground leading-relaxed',
@@ -33,18 +36,22 @@ export function RichTextEditor({ content, onChange, placeholder = 'Start writing
             onChange(editor.getHTML());
         },
         immediatelyRender: false,
+        onCreate: () => {
+            isInitialized.current = true;
+        },
     });
 
-    // Sync content if it changes externally (controlled component behavior)
+    // Only sync external content when the dialog is opened fresh (content goes from '' to something)
+    // We do NOT sync on every change to avoid interfering with typing (e.g., "1." being cleared)
     useEffect(() => {
-        if (editor && content !== editor.getHTML()) {
-            // Only update if content is meaningfully different to avoid cursor jumps
-            // Simple check: if empty, clear. If not, only set content if editor is empty?
-            // Actually, for a simple controlled input, let's just respect the initial prop mostly, 
-            // but if we want to reset the form we need this.
-            if (content === '') {
-                editor.commands.clearContent();
-            }
+        if (!editor) return;
+        // Only reset to external content when content cleared (form reset) or editor is empty
+        const editorIsEmpty = editor.isEmpty;
+        if (content === '') {
+            editor.commands.clearContent();
+        } else if (editorIsEmpty && content) {
+            // Editor is empty but we have content - set it (opening dialog)
+            editor.commands.setContent(content);
         }
     }, [content, editor]);
 
