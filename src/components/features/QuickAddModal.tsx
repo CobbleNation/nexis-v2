@@ -728,7 +728,7 @@ export function QuickAddModal({
                     </button>
 
                     {/* Header (Entity Selector) */}
-                    <div className="bg-slate-50/80 dark:bg-card/50 border-b border-slate-100 dark:border-border p-2 flex overflow-x-auto gap-1 shrink-0 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                    <div className="bg-slate-50/80 dark:bg-card/50 border-b border-slate-100 dark:border-border p-2 pr-12 sm:pr-2 flex overflow-x-auto gap-1 shrink-0 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                         {ENTITIES.map(ent => (
                             <button
                                 key={ent.id}
