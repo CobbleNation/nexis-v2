@@ -1149,8 +1149,8 @@ export function QuickAddModal({
 
                             {/* Date (Generic) */}
                             {type !== 'habit' && type !== 'routine' && type !== 'project' && !(type === 'content' && ['note', 'file', 'library', 'journal'].includes(contentType)) && (
-                                <div className="flex flex-col sm:flex-row gap-4 sm:gap-2">
-                                    <div className="space-y-1.5 flex flex-col flex-1">
+                                <div className="flex flex-col gap-4">
+                                    <div className="space-y-1.5 flex flex-col">
                                         <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
                                             {type === 'task' ? 'Почати з' : 'Дата'} <span className="text-red-500">*</span>
                                         </label>
@@ -1166,9 +1166,9 @@ export function QuickAddModal({
                                         />
                                     </div>
                                     {type === 'task' && (
-                                        <div className="space-y-1.5 flex flex-col flex-1">
+                                        <div className="space-y-1.5 flex flex-col">
                                             <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                                                Виконати до <span className="text-muted-foreground/50 lowercase font-normal">(необов'язково)</span>
+                                                Виконати до
                                             </label>
                                             <Input
                                                 type="date"
