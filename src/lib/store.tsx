@@ -426,6 +426,32 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(appReducer, INITIAL_STATE);
     const { user } = useAuth();
 
+    // Notification persistence helpers (localStorage, keyed per user, 3-month TTL)
+    const NOTIF_STORAGE_KEY = (uid: string) => `nexis-notifications-${uid}`;
+    const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
+
+    const loadNotificationsFromStorage = (uid: string): import('@/types').Notification[] => {
+        try {
+            const raw = localStorage.getItem(NOTIF_STORAGE_KEY(uid));
+            if (!raw) return [];
+            const parsed: import('@/types').Notification[] = JSON.parse(raw);
+            const cutoff = Date.now() - THREE_MONTHS_MS;
+            return parsed.filter(n => new Date(n.date).getTime() > cutoff);
+        } catch {
+            return [];
+        }
+    };
+
+    const saveNotificationsToStorage = (uid: string, notifications: import('@/types').Notification[]) => {
+        try {
+            const cutoff = Date.now() - THREE_MONTHS_MS;
+            const toSave = notifications.filter(n => new Date(n.date).getTime() > cutoff);
+            localStorage.setItem(NOTIF_STORAGE_KEY(uid), JSON.stringify(toSave));
+        } catch {
+            // ignore storage errors
+        }
+    };
+
     // Reset state when user logs out
     useEffect(() => {
         if (!user) {
@@ -438,12 +464,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (!user) return; // Don't load if no user
 
         const loadData = async () => {
+            // Load saved notifications from localStorage BEFORE server sync
+            const storedNotifications = loadNotificationsFromStorage(user.id);
+
             // 2. Always Sync with Server (Source of Truth)
             try {
                 const res = await fetch('/api/sync');
                 if (res.ok) {
                     const apiData = await res.json();
-                    dispatch({ type: 'INIT_DATA', payload: apiData });
+                    // Merge stored notifications (not in DB) into the API data
+                    const merged = [
+                        ...storedNotifications,
+                        // Avoid duplicates
+                    ].filter((n, i, arr) => arr.findIndex(x => x.id === n.id) === i);
+                    dispatch({ type: 'INIT_DATA', payload: { ...apiData, notifications: merged } });
+                } else {
+                    // Server failed, still restore notifications from storage
+                    dispatch({ type: 'ADD_NOTIFICATION', payload: storedNotifications[0] });
                 }
             } catch (e) {
                 console.error("Sync failed", e);
@@ -455,10 +492,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         loadData();
     }, [user]);
 
+
     // Force Sync User Profile (Name/Avatar) from Auth to State
     useEffect(() => {
         if (user && user.name && user.name !== state.user.name) {
-            // calculated avatar fallback if needed, but usually we just want the name sync
             dispatch({
                 type: 'INIT_DATA',
                 payload: {
@@ -470,6 +507,12 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             });
         }
     }, [user, state.user.name, state.user.avatar]);
+
+    // Persist notifications to localStorage whenever they change
+    useEffect(() => {
+        if (!user?.id || state.isLoading) return;
+        saveNotificationsToStorage(user.id, state.notifications);
+    }, [state.notifications, user?.id, state.isLoading]);
 
     // Sync changes to Local Storage - REMOVED for DB Only approach
     // useEffect(() => {

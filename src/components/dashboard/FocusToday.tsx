@@ -289,7 +289,7 @@ export function FocusToday() {
     // ─── FOCUS MODE (Full-Screen) ────────────────────────────────────────────
     if (isFocusMode && focusItem) {
         return (
-            <div className="relative flex flex-col h-full min-h-[480px] bg-slate-50 dark:bg-card border border-border/50 text-foreground rounded-3xl p-8 md:p-12 shadow-sm animate-in zoom-in-95 duration-300 overflow-hidden">
+            <div className="relative flex flex-col h-full min-h-[380px] bg-slate-50 dark:bg-card border border-border/50 text-foreground rounded-3xl p-4 sm:p-8 md:p-12 shadow-sm animate-in zoom-in-95 duration-300 overflow-hidden">
                 {/* Background decoration */}
                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/10 dark:bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute -left-10 -bottom-10 w-48 h-48 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
@@ -333,7 +333,7 @@ export function FocusToday() {
 
                 {/* Focus title */}
                 <div className="flex-1 flex flex-col items-center justify-center text-center z-10 py-4">
-                    <h1 className="text-2xl sm:text-3xl md:text-5xl font-black leading-tight max-w-2xl mb-6 text-foreground break-words hyphens-auto">
+                    <h1 className="text-lg sm:text-2xl md:text-4xl font-black leading-tight max-w-2xl mb-4 md:mb-6 text-foreground break-words hyphens-auto">
                         {focusItem.title}
                     </h1>
 
