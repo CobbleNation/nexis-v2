@@ -395,7 +395,7 @@ export function FocusToday() {
     // ─── NORMAL VIEW ─────────────────────────────────────────────────────────
     return (
         <>
-            <div className="flex flex-col md:flex-row gap-8 h-full bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-background border border-orange-200/80 dark:border-orange-900/40 rounded-3xl p-6 md:p-10 shadow-sm relative overflow-hidden">
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8 h-full bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/40 dark:to-background border border-orange-200/80 dark:border-orange-900/40 rounded-3xl p-4 md:p-10 shadow-sm relative overflow-hidden">
                 {/* Background Decoration */}
                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-orange-500/10 dark:bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -432,13 +432,13 @@ export function FocusToday() {
                     {/* Focus Item or Empty State */}
                     {focusItem ? (
                         <div className="flex flex-col gap-4">
-                            <div className="flex flex-col p-6 md:p-8 bg-white/70 dark:bg-card/70 backdrop-blur-md border border-orange-200/50 dark:border-orange-900/30 rounded-3xl shadow-sm">
+                            <div className="flex flex-col p-4 md:p-8 bg-white/70 dark:bg-card/70 backdrop-blur-md border border-orange-200/50 dark:border-orange-900/30 rounded-3xl shadow-sm">
                                 <div className="flex items-start gap-4">
                                     <div className="w-9 h-9 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
                                         <Target className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="text-2xl md:text-3xl font-black leading-tight tracking-tight text-foreground">
+                                        <h3 className="text-base sm:text-xl md:text-2xl font-black leading-tight tracking-tight text-foreground">
                                             {focusItem.title}
                                         </h3>
 
