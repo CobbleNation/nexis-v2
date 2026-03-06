@@ -29,7 +29,7 @@ function ContentPageContent() {
     const { user } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { isPro, tier } = useSubscription();
+    const { tier, isPro, checkLimit } = useSubscription();
     const [upgradeOpen, setUpgradeOpen] = useState(false);
 
     const currentTab = searchParams.get('tab') || 'notes';
@@ -131,7 +131,7 @@ function ContentPageContent() {
                     <div className="hidden md:flex gap-2 items-center pr-2">
                         <div className="relative w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            {tier === SUBSCRIPTION_PLAN.FREE && !LIMITS[SUBSCRIPTION_PLAN.FREE].HAS_SEARCH ? (
+                            {!checkLimit('HAS_SEARCH') ? (
                                 <div
                                     onClick={() => setUpgradeOpen(true)}
                                     className="relative cursor-pointer"

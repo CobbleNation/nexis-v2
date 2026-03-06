@@ -52,6 +52,20 @@ export const LIMITS = {
     }
 };
 
-export const CHECK_LIMIT = (tier: SubscriptionTier = 'free', feature: keyof typeof LIMITS['free']) => {
+export const CHECK_LIMIT = (
+    tier: SubscriptionTier = 'free',
+    feature: keyof typeof LIMITS['free'],
+    customLimits?: Record<string, any> | null
+) => {
+    // 1. Determine the override key (e.g., 'MAX_GOALS' -> 'maxGoals', 'HAS_FULL_AI' -> 'hasFullAi')
+    // We convert UPPER_SNAKE_CASE to camelCase to match the DB/API structure
+    const overrideKey = feature.toLowerCase().replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+
+    // 2. Check if a custom limit override exists and is not null
+    if (customLimits && customLimits[overrideKey] !== undefined && customLimits[overrideKey] !== null) {
+        return customLimits[overrideKey];
+    }
+
+    // 3. Fallback to the standard subscription plan default
     return LIMITS[tier][feature];
 };

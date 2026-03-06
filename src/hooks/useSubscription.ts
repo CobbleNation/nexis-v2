@@ -1,5 +1,5 @@
 import { useAuth } from '@/lib/auth-context';
-import { LIMITS, SUBSCRIPTION_PLAN, SubscriptionTier } from '@/lib/limits';
+import { LIMITS, SUBSCRIPTION_PLAN, SubscriptionTier, CHECK_LIMIT } from '@/lib/limits';
 import { useData } from '@/lib/store';
 
 export function useSubscription() {
@@ -10,37 +10,45 @@ export function useSubscription() {
     const tier: SubscriptionTier = user?.subscriptionTier || SUBSCRIPTION_PLAN.FREE;
     // Check if user is on PRO plan
     const isPro = tier === SUBSCRIPTION_PLAN.PRO;
-    const limits = LIMITS[tier];
 
+    // Create a merged limits object for backwards compatibility where `limits.MAX_GOALS` was used directly
+    const customLimits = user?.customLimits;
+
+    // We import CHECK_LIMIT from limits.ts but we can't easily destructure it. 
+    // Wait, let's just use CHECK_LIMIT properly
     const checkLimit = (feature: keyof typeof LIMITS['free']) => {
-        return limits[feature];
+        return CHECK_LIMIT(tier, feature, customLimits);
     };
 
     // Specific limit checks
     const canCreateGoal = () => {
-        if (isPro) return true;
+        const limit = checkLimit('MAX_GOALS');
+        if (limit === Infinity) return true;
 
         // Count active goals (not completed/archived)
         const activeGoals = state.goals.filter(g => g.status !== 'completed' && g.status !== 'achieved' && g.status !== 'abandoned').length;
-        return activeGoals < (limits.MAX_GOALS as number);
+        return activeGoals < (limit as number);
     };
 
     const canCreateTask = () => {
-        if (isPro) return true;
+        const limit = checkLimit('MAX_TASKS');
+        if (limit === Infinity) return true;
 
         // Count active tasks
         const activeTasks = state.actions.filter(a => !a.completed && a.status !== 'canceled' && a.status !== 'deferred').length;
-        return activeTasks < (limits.MAX_TASKS as number);
+        return activeTasks < (limit as number);
     };
 
     const canCreateJournalEntry = () => {
-        if (isPro) return true;
-        return state.journal.length < (limits.MAX_JOURNAL_ENTRIES as number);
+        const limit = checkLimit('MAX_JOURNAL_ENTRIES');
+        if (limit === Infinity) return true;
+        return state.journal.length < (limit as number);
     };
 
     const canCreateNote = () => {
-        if (isPro) return true;
-        return state.notes.length < (limits.MAX_NOTES as number);
+        const limit = checkLimit('MAX_NOTES');
+        if (limit === Infinity) return true;
+        return state.notes.length < (limit as number);
     };
 
     const getDailyAiUsage = () => {
@@ -51,13 +59,17 @@ export function useSubscription() {
     };
 
     const canUseAiHint = () => {
-        if (isPro) return true;
+        const limit = checkLimit('MAX_AI_HINTS');
+        if (limit === Infinity) return true;
+
         const usage = getDailyAiUsage();
-        return usage < (limits.MAX_AI_HINTS as number);
+        return usage < (limit as number);
     };
 
     const recordAiHintUsage = () => {
-        if (isPro) return;
+        const limit = checkLimit('MAX_AI_HINTS');
+        if (limit === Infinity) return;
+
         if (typeof window === 'undefined') return;
         const today = new Date().toISOString().split('T')[0];
         const key = `zynorvia_ai_usage_${today}`;
@@ -68,7 +80,7 @@ export function useSubscription() {
     return {
         tier,
         isPro,
-        limits,
+        limits: LIMITS[tier], // Keep raw plan limits for any direct access that doesn't use checkLimit
         checkLimit,
         canCreateGoal,
         canCreateTask,

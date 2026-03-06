@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, userLimits } from '@/db/schema';
 import { verifyPassword, createAccessToken, createRefreshToken, setAuthCookies, createSession } from '@/lib/auth-utils';
 import { trackEvent } from '@/lib/analytics-server';
 import { z } from 'zod';
@@ -44,6 +44,9 @@ export async function POST(req: Request) {
             source: 'web'
         });
 
+        // Fetch Custom Limits
+        const [limits] = await db.select().from(userLimits).where(eq(userLimits.userId, user.id)).limit(1);
+
         return NextResponse.json({
             user: {
                 id: user.id,
@@ -54,7 +57,8 @@ export async function POST(req: Request) {
                 subscriptionTier: user.subscriptionTier,
                 onboardingCompleted: user.onboardingCompleted,
                 cardLast4: user.cardLast4,
-                cardToken: user.cardToken
+                cardToken: user.cardToken,
+                customLimits: limits ?? null
             }
         });
     } catch (err) {

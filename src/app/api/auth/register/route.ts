@@ -64,7 +64,8 @@ export async function POST(req: Request) {
                 subscriptionTier: newUser.subscriptionTier,
                 onboardingCompleted: newUser.onboardingCompleted,
                 cardLast4: newUser.cardLast4,
-                cardToken: newUser.cardToken
+                cardToken: newUser.cardToken,
+                customLimits: null
             }
         });
     } catch (err) {

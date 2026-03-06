@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid, ReferenceLine } from 'recharts';
 import { AnalyticsLockState } from '@/components/analytics/AnalyticsLockState';
 import { useSubscription } from '@/hooks/useSubscription';
-import { LIMITS, SUBSCRIPTION_PLAN } from '@/lib/limits';
+import { SUBSCRIPTION_PLAN } from '@/lib/limits';
 
 function InfoBadge({ text }: { text: string }) {
     return (
@@ -30,7 +30,7 @@ function InfoBadge({ text }: { text: string }) {
 
 export default function AnalyticsPage() {
     const { state } = useData();
-    const { isPro } = useSubscription();
+    const { isPro, checkLimit } = useSubscription();
     const dailyData = useMemo(() => getDailyDataRange(state, 60), [state]); // 60 days
     const trendData = useMemo(() => getTrendData(dailyData.slice(0, 14)), [dailyData]);
     const weeklyStats = useMemo(() => getWeeklyStats(dailyData), [dailyData]);
@@ -149,7 +149,7 @@ export default function AnalyticsPage() {
 
             {/* Paywall Check */}
             {
-                (!isPro && !LIMITS[SUBSCRIPTION_PLAN.FREE].HAS_HISTORY_ANALYTICS) ? (
+                (!checkLimit('HAS_HISTORY_ANALYTICS')) ? (
                     <AnalyticsLockState />
                 ) : (
                     <>

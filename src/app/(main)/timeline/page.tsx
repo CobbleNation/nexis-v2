@@ -16,7 +16,7 @@ import { YearView } from '@/components/timeline/YearView';
 import { ItemEditDialog } from '@/components/shared/ItemEditDialog';
 import { TimelineLockState } from '@/components/timeline/TimelineLockState';
 import { useSubscription } from '@/hooks/useSubscription';
-import { LIMITS, SUBSCRIPTION_PLAN } from '@/lib/limits';
+import { SUBSCRIPTION_PLAN } from '@/lib/limits';
 import { toast } from 'sonner';
 // ... other imports
 import { QuickAddModal } from '@/components/features/QuickAddModal';
@@ -25,7 +25,7 @@ type ViewMode = 'day' | 'week' | 'month' | 'year';
 
 export default function TimelinePage() {
     const { state, dispatch } = useData();
-    const { isPro, tier } = useSubscription();
+    const { isPro, tier, checkLimit } = useSubscription();
     const [viewModeLocal, setViewModeLocal] = useState<ViewMode>((state.period as ViewMode) || 'day');
     const currentViewMode = viewModeLocal;
 
@@ -186,7 +186,7 @@ export default function TimelinePage() {
                         )}
 
                         {currentViewMode === 'week' && (
-                            tier === SUBSCRIPTION_PLAN.FREE && !LIMITS[SUBSCRIPTION_PLAN.FREE].HAS_WEEKLY_VIEW ? (
+                            !checkLimit('HAS_WEEKLY_VIEW') ? (
                                 <TimelineLockState view="week" />
                             ) : (
                                 <WeekView
@@ -203,7 +203,7 @@ export default function TimelinePage() {
                         )}
 
                         {currentViewMode === 'month' && (
-                            tier === SUBSCRIPTION_PLAN.FREE && !LIMITS[SUBSCRIPTION_PLAN.FREE].HAS_MONTHLY_VIEW ? (
+                            !checkLimit('HAS_MONTHLY_VIEW') ? (
                                 <TimelineLockState view="month" />
                             ) : (
                                 <MonthView

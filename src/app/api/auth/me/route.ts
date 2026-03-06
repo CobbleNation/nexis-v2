@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, userLimits } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -32,6 +32,8 @@ export async function GET() {
         return NextResponse.json({ error: 'User not found' }, { status: 404, headers: noCacheHeaders });
     }
 
+    const [limits] = await db.select().from(userLimits).where(eq(userLimits.userId, user.id)).limit(1);
+
     return NextResponse.json({
         user: {
             id: user.id,
@@ -42,7 +44,8 @@ export async function GET() {
             onboardingCompleted: user.onboardingCompleted,
             role: user.role,
             cardLast4: user.cardLast4,
-            cardToken: user.cardToken
+            cardToken: user.cardToken,
+            customLimits: limits ?? null
         }
     }, { headers: noCacheHeaders });
 }

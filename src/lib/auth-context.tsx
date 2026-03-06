@@ -16,6 +16,7 @@ interface User {
     cardLast4?: string;
     cardToken?: string;
     role?: 'user' | 'admin' | 'manager' | 'support';
+    customLimits?: Record<string, any> | null;
 }
 
 interface AuthContextType {

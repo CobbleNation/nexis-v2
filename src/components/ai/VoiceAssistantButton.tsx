@@ -7,7 +7,6 @@ import { Mic } from 'lucide-react';
 import { VoiceOverlay } from './VoiceOverlay';
 import { cn } from '@/lib/utils';
 import { useSubscription } from '@/hooks/useSubscription';
-import { LIMITS, SUBSCRIPTION_PLAN } from '@/lib/limits';
 import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 interface VoiceAssistantButtonProps {
@@ -18,10 +17,10 @@ interface VoiceAssistantButtonProps {
 export function VoiceAssistantButton({ className, variant = 'nav' }: VoiceAssistantButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [showUpgrade, setShowUpgrade] = useState(false);
-    const { tier } = useSubscription();
+    const { checkLimit } = useSubscription();
 
     const handleOpen = () => {
-        if (!LIMITS[tier].HAS_VOICE) {
+        if (!checkLimit('HAS_VOICE')) {
             setShowUpgrade(true);
             return;
         }
