@@ -1,0 +1,3 @@
+zynorvia.com, www.zynorvia.com {
+    reverse_proxy web:3000
+}
