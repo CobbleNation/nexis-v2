@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+.DS_Store
+.next
+.next_bak
+.git
+.vscode
+*.md
+sqlite.db
+sqlite.db-shm
+sqlite.db-wal
