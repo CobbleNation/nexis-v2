@@ -393,3 +393,41 @@ export const analyticsDailyAgg = sqliteTable('analytics_daily_agg', {
     // Composite unique index for upsert
     pk: uniqueIndex('analytics_daily_agg_pk').on(table.date, table.eventName, table.plan),
 }));
+
+// --- Per-user custom limit overrides (set by admin) ---
+// NULL = use default for the user's subscription plan
+// Non-null = override for this specific user
+export const userLimits = sqliteTable('user_limits', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+
+    // Numeric overrides (null = use plan default)
+    maxGoals: integer('max_goals'),           // default FREE=3, PRO=Infinity
+    maxTasks: integer('max_tasks'),           // default FREE=10, PRO=Infinity
+    maxJournalEntries: integer('max_journal_entries'), // default FREE=20, PRO=Infinity
+    maxNotes: integer('max_notes'),           // default FREE=20, PRO=Infinity
+    maxAiHints: integer('max_ai_hints'),      // default FREE=2/day, PRO=Infinity
+
+    // Boolean feature overrides (null = use plan default)
+    hasSubgoals: integer('has_subgoals', { mode: 'boolean' }),
+    hasAiGoalBreakdown: integer('has_ai_goal_breakdown', { mode: 'boolean' }),
+    hasGoalAnalytics: integer('has_goal_analytics', { mode: 'boolean' }),
+    hasTaskPriority: integer('has_task_priority', { mode: 'boolean' }),
+    hasRecurringTasks: integer('has_recurring_tasks', { mode: 'boolean' }),
+    hasSmartFilters: integer('has_smart_filters', { mode: 'boolean' }),
+    hasAutoPlanning: integer('has_auto_planning', { mode: 'boolean' }),
+    hasWeeklyView: integer('has_weekly_view', { mode: 'boolean' }),
+    hasMonthlyView: integer('has_monthly_view', { mode: 'boolean' }),
+    hasTags: integer('has_tags', { mode: 'boolean' }),
+    hasSearch: integer('has_search', { mode: 'boolean' }),
+    hasAiSummaries: integer('has_ai_summaries', { mode: 'boolean' }),
+    hasHistoryAnalytics: integer('has_history_analytics', { mode: 'boolean' }),
+    hasFullAi: integer('has_full_ai', { mode: 'boolean' }),
+    hasVoice: integer('has_voice', { mode: 'boolean' }),
+
+    // Admin note about why these custom limits exist
+    adminNote: text('admin_note'),
+
+    updatedAt: checkTimestamp('updated_at').notNull().$defaultFn(() => new Date()),
+    updatedBy: text('updated_by').references(() => users.id, { onDelete: 'set null' }),
+});

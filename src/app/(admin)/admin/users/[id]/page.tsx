@@ -10,9 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Settings, RotateCcw, ShieldCheck } from 'lucide-react';
+import { LIMITS } from '@/lib/limits';
 
 interface UserDetails {
     id: string;
@@ -28,6 +31,51 @@ interface UserDetails {
     onboardingCompleted: boolean;
 }
 
+// Numeric limit fields with labels and plan defaults
+const NUMERIC_LIMITS = [
+    { key: 'maxGoals', label: 'Max Goals', descFree: '3', descPro: '∞' },
+    { key: 'maxTasks', label: 'Max Active Tasks', descFree: '10', descPro: '∞' },
+    { key: 'maxJournalEntries', label: 'Max Journal Entries', descFree: '20', descPro: '∞' },
+    { key: 'maxNotes', label: 'Max Notes', descFree: '20', descPro: '∞' },
+    { key: 'maxAiHints', label: 'Max AI Hints/day', descFree: '2', descPro: '∞' },
+] as const;
+
+// Boolean feature flags with labels
+const BOOL_LIMITS = [
+    { key: 'hasSubgoals', label: 'Sub-goals' },
+    { key: 'hasAiGoalBreakdown', label: 'AI Goal Breakdown' },
+    { key: 'hasGoalAnalytics', label: 'Goal Analytics' },
+    { key: 'hasTaskPriority', label: 'Task Priority' },
+    { key: 'hasRecurringTasks', label: 'Recurring Tasks' },
+    { key: 'hasSmartFilters', label: 'Smart Filters' },
+    { key: 'hasAutoPlanning', label: 'Auto Planning' },
+    { key: 'hasWeeklyView', label: 'Weekly View' },
+    { key: 'hasMonthlyView', label: 'Monthly View' },
+    { key: 'hasTags', label: 'Tags' },
+    { key: 'hasSearch', label: 'Search' },
+    { key: 'hasAiSummaries', label: 'AI Summaries' },
+    { key: 'hasHistoryAnalytics', label: 'History Analytics' },
+    { key: 'hasFullAi', label: 'Full AI Access' },
+    { key: 'hasVoice', label: 'Voice Input' },
+] as const;
+
+type NumericLimitKey = typeof NUMERIC_LIMITS[number]['key'];
+type BoolLimitKey = typeof BOOL_LIMITS[number]['key'];
+
+// null means "use plan default"
+type LimitsForm = {
+    [K in NumericLimitKey]: string;  // empty string = use plan default
+} & {
+    [K in BoolLimitKey]: boolean | null; // null = use plan default
+} & { adminNote: string };
+
+function getDefaultLimitsForm(): LimitsForm {
+    const form: any = { adminNote: '' };
+    NUMERIC_LIMITS.forEach(f => { form[f.key] = ''; });
+    BOOL_LIMITS.forEach(f => { form[f.key] = null; });
+    return form;
+}
+
 export default function UserDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
@@ -35,12 +83,15 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
     const [user, setUser] = useState<UserDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [savingLimits, setSavingLimits] = useState(false);
     const [formData, setFormData] = useState({
         role: '',
         subscriptionTier: '',
         name: '',
         onboardingCompleted: false
     });
+    const [limitsForm, setLimitsForm] = useState<LimitsForm>(getDefaultLimitsForm());
+    const [limitsLoading, setLimitsLoading] = useState(true);
 
     useEffect(() => {
         async function fetchUser() {
@@ -61,7 +112,34 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                 setLoading(false);
             }
         }
+
+        async function fetchLimits() {
+            try {
+                const res = await fetch(`/api/admin/users/${id}/limits`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.limits) {
+                    const form = getDefaultLimitsForm();
+                    NUMERIC_LIMITS.forEach(f => {
+                        const val = data.limits[f.key];
+                        form[f.key] = val !== null && val !== undefined ? String(val) : '';
+                    });
+                    BOOL_LIMITS.forEach(f => {
+                        const val = data.limits[f.key];
+                        form[f.key] = val !== null && val !== undefined ? Boolean(val) : null;
+                    });
+                    form.adminNote = data.limits.adminNote || '';
+                    setLimitsForm(form);
+                }
+            } catch {
+                // No custom limits yet - use defaults
+            } finally {
+                setLimitsLoading(false);
+            }
+        }
+
         fetchUser();
+        fetchLimits();
     }, [id]);
 
     const handleSave = async () => {
@@ -72,11 +150,9 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
             });
-
             if (res.ok) {
                 toast.success('User updated successfully');
                 const data = await res.json();
-                // Update local state to reflect changes firmly
                 setUser(prev => prev ? ({ ...prev, ...data.user }) : null);
             } else {
                 toast.error('Failed to update user');
@@ -86,6 +162,55 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleSaveLimits = async () => {
+        setSavingLimits(true);
+        try {
+            // Build payload: empty string -> null for numeric, already null for booleans
+            const payload: any = { adminNote: limitsForm.adminNote || null };
+            NUMERIC_LIMITS.forEach(f => {
+                const v = limitsForm[f.key];
+                payload[f.key] = v === '' ? null : parseInt(v, 10);
+            });
+            BOOL_LIMITS.forEach(f => {
+                payload[f.key] = limitsForm[f.key]; // null | boolean
+            });
+
+            const res = await fetch(`/api/admin/users/${id}/limits`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                toast.success('Custom limits saved');
+            } else {
+                toast.error('Failed to save limits');
+            }
+        } catch {
+            toast.error('Error saving limits');
+        } finally {
+            setSavingLimits(false);
+        }
+    };
+
+    const resetLimits = () => {
+        setLimitsForm(getDefaultLimitsForm());
+        toast.info('Limits reset to plan defaults (not saved yet)');
+    };
+
+    const planDefaults = LIMITS[formData.subscriptionTier === 'pro' ? 'pro' : 'free'];
+
+    // Tri-state for boolean: null = plan default, true = enabled, false = disabled
+    const cycleBoolLimit = (key: BoolLimitKey) => {
+        setLimitsForm(prev => {
+            const current = prev[key];
+            let next: boolean | null;
+            if (current === null) next = true;
+            else if (current === true) next = false;
+            else next = null;
+            return { ...prev, [key]: next };
+        });
     };
 
     if (loading) {
@@ -224,6 +349,172 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                     )}
                                 </Button>
                             </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Custom Limits Card */}
+                    <Card className="bg-slate-900 border-slate-800 text-slate-100">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Settings className="h-5 w-5 text-orange-500" />
+                                        Custom Limits Override
+                                    </CardTitle>
+                                    <CardDescription className="mt-1">
+                                        Override specific limits for this user. Leave blank (—) to use plan defaults.
+                                        Current plan: <span className="font-semibold text-orange-400">{formData.subscriptionTier.toUpperCase()}</span>
+                                    </CardDescription>
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={resetLimits}
+                                    className="text-slate-400 hover:text-slate-200 shrink-0"
+                                >
+                                    <RotateCcw className="h-4 w-4 mr-1" /> Reset all
+                                </Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {limitsLoading ? (
+                                <div className="flex justify-center py-6">
+                                    <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Numeric limits */}
+                                    <div>
+                                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-3">Numeric Limits</h3>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {NUMERIC_LIMITS.map(field => {
+                                                const planDefault = field.key === 'maxGoals'
+                                                    ? planDefaults.MAX_GOALS
+                                                    : field.key === 'maxTasks'
+                                                        ? planDefaults.MAX_TASKS
+                                                        : field.key === 'maxJournalEntries'
+                                                            ? planDefaults.MAX_JOURNAL_ENTRIES
+                                                            : field.key === 'maxNotes'
+                                                                ? planDefaults.MAX_NOTES
+                                                                : planDefaults.MAX_AI_HINTS;
+                                                const planDefaultStr = planDefault === Infinity ? '∞' : String(planDefault);
+                                                const isOverridden = limitsForm[field.key] !== '';
+
+                                                return (
+                                                    <div key={field.key} className="space-y-1">
+                                                        <div className="flex items-center justify-between">
+                                                            <label className="text-sm font-medium text-slate-300">{field.label}</label>
+                                                            <span className="text-xs text-slate-500">
+                                                                Plan default: <span className="font-mono">{planDefaultStr}</span>
+                                                                {isOverridden && <span className="ml-1.5 text-orange-400 font-semibold">(custom)</span>}
+                                                            </span>
+                                                        </div>
+                                                        <div className="relative">
+                                                            <Input
+                                                                type="number"
+                                                                min={0}
+                                                                placeholder={`— (default: ${planDefaultStr})`}
+                                                                value={limitsForm[field.key]}
+                                                                onChange={e => setLimitsForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                                                                className={`bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 ${isOverridden ? 'border-orange-500/50' : ''}`}
+                                                            />
+                                                            {isOverridden && (
+                                                                <button
+                                                                    onClick={() => setLimitsForm(prev => ({ ...prev, [field.key]: '' }))}
+                                                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs"
+                                                                    title="Reset to plan default"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <Separator className="bg-slate-800" />
+
+                                    {/* Boolean feature overrides */}
+                                    <div>
+                                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-1">Feature Flags</h3>
+                                        <p className="text-xs text-slate-600 mb-3">Click to cycle: <span className="text-slate-400">— (plan default)</span> → <span className="text-emerald-500">✓ Enabled</span> → <span className="text-rose-500">✗ Disabled</span></p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {BOOL_LIMITS.map(field => {
+                                                const featureKey = ('HAS_' + field.key.replace('has', '').replace(/([A-Z])/g, '_$1').toUpperCase()).replace('HAS__', 'HAS_') as keyof typeof planDefaults;
+                                                const planDefault = planDefaults[featureKey];
+                                                const value = limitsForm[field.key];
+                                                const isOverridden = value !== null;
+                                                const planDefaultStr = planDefault ? 'Enabled' : 'Disabled';
+
+                                                return (
+                                                    <button
+                                                        key={field.key}
+                                                        onClick={() => cycleBoolLimit(field.key)}
+                                                        className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${isOverridden
+                                                                ? value
+                                                                    ? 'border-emerald-600/50 bg-emerald-950/30'
+                                                                    : 'border-rose-600/50 bg-rose-950/30'
+                                                                : 'border-slate-800 bg-slate-950/50 hover:bg-slate-800/50'
+                                                            }`}
+                                                    >
+                                                        <div>
+                                                            <span className="text-sm font-medium text-slate-200">{field.label}</span>
+                                                            <span className="block text-xs text-slate-600">Plan: {planDefaultStr}</span>
+                                                        </div>
+                                                        <span className={`text-sm font-bold ${value === null
+                                                                ? 'text-slate-500'
+                                                                : value
+                                                                    ? 'text-emerald-400'
+                                                                    : 'text-rose-400'
+                                                            }`}>
+                                                            {value === null ? '—' : value ? '✓ On' : '✗ Off'}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <Separator className="bg-slate-800" />
+
+                                    {/* Admin note */}
+                                    <div className="space-y-2">
+                                        <Label className="text-slate-400">Admin Note (reason for custom limits)</Label>
+                                        <Textarea
+                                            placeholder="e.g. Beta tester, partner deal, promotional access..."
+                                            value={limitsForm.adminNote}
+                                            onChange={e => setLimitsForm(prev => ({ ...prev, adminNote: e.target.value }))}
+                                            className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 resize-none h-20"
+                                        />
+                                    </div>
+
+                                    <div className="flex justify-between items-center">
+                                        <p className="text-xs text-slate-600 flex items-center gap-1">
+                                            <ShieldCheck className="h-3.5 w-3.5" />
+                                            Changes are logged in the audit trail
+                                        </p>
+                                        <Button
+                                            onClick={handleSaveLimits}
+                                            disabled={savingLimits}
+                                            className="bg-orange-600 hover:bg-orange-700 min-w-[140px]"
+                                        >
+                                            {savingLimits ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Saving...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save className="mr-2 h-4 w-4" />
+                                                    Save Limits
+                                                </>
+                                            )}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
