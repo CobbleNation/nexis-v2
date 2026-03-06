@@ -33,30 +33,30 @@ interface UserDetails {
 
 // Numeric limit fields with labels and plan defaults
 const NUMERIC_LIMITS = [
-    { key: 'maxGoals', label: 'Максимум Цілей', descFree: '3', descPro: '∞' },
-    { key: 'maxTasks', label: 'Макс. Активних Завдань', descFree: '10', descPro: '∞' },
-    { key: 'maxJournalEntries', label: 'Макс. Записів у Журнал', descFree: '20', descPro: '∞' },
-    { key: 'maxNotes', label: 'Максимум Нотаток', descFree: '20', descPro: '∞' },
-    { key: 'maxAiHints', label: 'ШІ Підказок/день', descFree: '2', descPro: '∞' },
+    { key: 'maxGoals', label: 'Максимум Цілей', descFree: '3', descPro: '∞', hint: 'Скільки активних цілей користувач може створювати одночасно.' },
+    { key: 'maxTasks', label: 'Макс. Активних Завдань', descFree: '10', descPro: '∞', hint: 'Глобальний ліміт завдань. Впливає на можливість створення нових тасків.' },
+    { key: 'maxJournalEntries', label: 'Макс. Записів у Журнал', descFree: '20', descPro: '∞', hint: 'Загальна кількість записів у щоденнику.' },
+    { key: 'maxNotes', label: 'Максимум Нотаток', descFree: '20', descPro: '∞', hint: 'Максимальна кількість текстових нотаток у базі.' },
+    { key: 'maxAiHints', label: 'ШІ Підказок/день', descFree: '2', descPro: '∞', hint: 'Примусовий ліміт запитів до AI протягом дня (не рахуючи глобальних).' },
 ] as const;
 
 // Boolean feature flags with labels
 const BOOL_LIMITS = [
-    { key: 'hasSubgoals', label: 'Підцілі' },
-    { key: 'hasAiGoalBreakdown', label: 'ШІ Розбиття Цілей' },
-    { key: 'hasGoalAnalytics', label: 'Аналітика Цілей' },
-    { key: 'hasTaskPriority', label: 'Пріоритет Завдань' },
-    { key: 'hasRecurringTasks', label: 'Регулярні Завдання' },
-    { key: 'hasSmartFilters', label: 'Розумні Фільтри' },
-    { key: 'hasAutoPlanning', label: 'Автопланування' },
-    { key: 'hasWeeklyView', label: 'Тижневий Перегляд' },
-    { key: 'hasMonthlyView', label: 'Місячний Перегляд' },
-    { key: 'hasTags', label: 'Теги' },
-    { key: 'hasSearch', label: 'Пошук' },
-    { key: 'hasAiSummaries', label: 'ШІ Підсумки' },
-    { key: 'hasHistoryAnalytics', label: 'Аналітика Історії' },
-    { key: 'hasFullAi', label: 'Повний Доступ до ШІ' },
-    { key: 'hasVoice', label: 'Голосовий Ввід' },
+    { key: 'hasSubgoals', label: 'Підцілі', hint: 'Дозволяє дробити великі цілі на дрібні кроки.' },
+    { key: 'hasAiGoalBreakdown', label: 'ШІ Розбиття Цілей', hint: 'AI-генерація стратегії та покрокового плану цілі.' },
+    { key: 'hasGoalAnalytics', label: 'Аналітика Цілей', hint: 'Розширені сторінки з графіками прогресу цілі.' },
+    { key: 'hasTaskPriority', label: 'Пріоритет Завдань', hint: 'Можливість виставляти High/Medium/Low пріоритет таскам.' },
+    { key: 'hasRecurringTasks', label: 'Регулярні Завдання', hint: 'Завдання, які повторюються щотижня або щомісяця.' },
+    { key: 'hasSmartFilters', label: 'Розумні Фільтри', hint: 'Кастомні фільтри у списках (терміновість, дедлайни).' },
+    { key: 'hasAutoPlanning', label: 'Автопланування', hint: 'AI-допомога у формуванні плану на день.' },
+    { key: 'hasWeeklyView', label: 'Тижневий Перегляд', hint: 'Доступ до спеціальної сторінки тижневого огляду.' },
+    { key: 'hasMonthlyView', label: 'Місячний Перегляд', hint: 'Доступ до перегляду календарного місяця.' },
+    { key: 'hasTags', label: 'Теги', hint: 'Створення та використання кольорових тегів для групування.' },
+    { key: 'hasSearch', label: 'Пошук', hint: 'Універсальний пошук по всьому додатку (завдання, нотатки).' },
+    { key: 'hasAiSummaries', label: 'ШІ Підсумки', hint: 'Багатоденні та щотижневі автоматичні AI звіти та висновки.' },
+    { key: 'hasHistoryAnalytics', label: 'Аналітика Історії', hint: 'Розширена аналітика (вплив на настрій, кореляції).' },
+    { key: 'hasFullAi', label: 'Повний Доступ до ШІ', hint: 'Головний перемикач, відкриває всі AI-функції, зокрема Асистента проектів і Аналіз дня.' },
+    { key: 'hasVoice', label: 'Голосовий Ввід', hint: 'Можливість надиктовувати завдання та нотатки (модуль розпізнавання).' },
 ] as const;
 
 type NumericLimitKey = typeof NUMERIC_LIMITS[number]['key'];
@@ -409,6 +409,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                                                 {isOverridden && <span className="ml-1.5 text-orange-400 font-semibold">(власний)</span>}
                                                             </span>
                                                         </div>
+                                                        <p className="text-[10px] text-slate-500 leading-tight mb-1">{field.hint}</p>
                                                         <div className="relative">
                                                             <Input
                                                                 type="number"
@@ -448,30 +449,28 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                                 const isOverridden = value !== null;
                                                 const planDefaultStr = planDefault ? 'Доступно' : 'Недоступно';
 
+                                                const stateColors = isOverridden
+                                                    ? value
+                                                        ? { bg: 'bg-emerald-950/30', border: 'border-emerald-600/50', text: 'text-emerald-400' }
+                                                        : { bg: 'bg-rose-950/30', border: 'border-rose-600/50', text: 'text-rose-400' }
+                                                    : { bg: 'bg-slate-950/50 hover:bg-slate-800/50', border: 'border-slate-800', text: 'text-slate-200' };
+
                                                 return (
-                                                    <button
+                                                    <div
                                                         key={field.key}
                                                         onClick={() => cycleBoolLimit(field.key)}
-                                                        className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${isOverridden
-                                                            ? value
-                                                                ? 'border-emerald-600/50 bg-emerald-950/30'
-                                                                : 'border-rose-600/50 bg-rose-950/30'
-                                                            : 'border-slate-800 bg-slate-950/50 hover:bg-slate-800/50'
-                                                            }`}
+                                                        className={`flex flex-col gap-1 p-3 rounded-lg border cursor-pointer select-none transition-colors ${stateColors.bg} ${stateColors.border}`}
                                                     >
-                                                        <div>
-                                                            <span className="text-sm font-medium text-slate-200">{field.label}</span>
-                                                            <span className="block text-xs text-slate-600">План: {planDefaultStr}</span>
+                                                        <div className="flex items-center justify-between">
+                                                            <span className={`text-sm font-medium ${stateColors.text}`}>
+                                                                {field.label}
+                                                            </span>
+                                                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-950/50">
+                                                                {value === null ? '— План' : value ? '✓ Дозволено' : '✗ Заборонено'}
+                                                            </span>
                                                         </div>
-                                                        <span className={`text-sm font-bold ${value === null
-                                                            ? 'text-slate-500'
-                                                            : value
-                                                                ? 'text-emerald-400'
-                                                                : 'text-rose-400'
-                                                            }`}>
-                                                            {value === null ? '—' : value ? '✓ Так' : '✗ Ні'}
-                                                        </span>
-                                                    </button>
+                                                        <p className={`text-[10px] leading-tight ${stateColors.text} opacity-70`}>{field.hint}</p>
+                                                    </div>
                                                 );
                                             })}
                                         </div>
@@ -564,6 +563,6 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     </Card>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

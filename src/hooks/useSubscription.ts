@@ -17,6 +17,15 @@ export function useSubscription() {
     // We import CHECK_LIMIT from limits.ts but we can't easily destructure it. 
     // Wait, let's just use CHECK_LIMIT properly
     const checkLimit = (feature: keyof typeof LIMITS['free']) => {
+        const hasFullAi = CHECK_LIMIT(tier, 'HAS_FULL_AI', customLimits);
+        // If the user has Full AI access, it unlocks specific AI-driven features
+        if (hasFullAi === true && (
+            feature.startsWith('HAS_AI') ||
+            feature === 'HAS_HISTORY_ANALYTICS' ||
+            feature === 'HAS_VOICE'
+        )) {
+            return true;
+        }
         return CHECK_LIMIT(tier, feature, customLimits);
     };
 
