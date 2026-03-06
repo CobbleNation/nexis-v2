@@ -8,12 +8,32 @@ services:
     image: nexis-v2:latest
     container_name: nexis_web
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    # We no longer expose port 3000 directly to the host, Caddy will route traffic to it
+    expose:
+      - "3000"
     environment:
       # Add your actual production ENV variables here or to a .env in same dir
       - DATABASE_URL=${DATABASE_URL:-}
-      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-https://zynorvia.com}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-some-strong-secret}
     # If using Turso/external DB, you don't need a local DB service here.
     # If using local SQLite file, you'd need to map a volume to persist it.
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy_proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:
