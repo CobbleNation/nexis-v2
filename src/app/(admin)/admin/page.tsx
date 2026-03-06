@@ -26,11 +26,11 @@ export default function AdminDashboardPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <h1 className="text-3xl font-bold">Панель Адміністратора</h1>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="bg-slate-900 border-slate-800 text-slate-100">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-400">Total Users</CardTitle>
+                        <CardTitle className="text-sm font-medium text-slate-400">Всього Користувачів</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold">{loading ? '...' : stats.totalUsers}</div>
@@ -38,20 +38,20 @@ export default function AdminDashboardPage() {
                 </Card>
                 <Card className="bg-slate-900 border-slate-800 text-slate-100">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-400">Active Subscriptions</CardTitle>
+                        <CardTitle className="text-sm font-medium text-slate-400">Активні Підписки</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold">{loading ? '...' : stats.activeSubscriptions}</div>
-                        <p className="text-xs text-slate-500 mt-1">Pro Plan Users</p>
+                        <p className="text-xs text-slate-500 mt-1">Користувачі Pro</p>
                     </CardContent>
                 </Card>
                 <Card className="bg-slate-900 border-slate-800 text-slate-100">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-slate-400">System Defaults</CardTitle>
+                        <CardTitle className="text-sm font-medium text-slate-400">Системні Налаштування</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-3xl font-bold">{loading ? '...' : stats.systemDefaults}</div>
-                        <p className="text-xs text-slate-500 mt-1">Global Content Items</p>
+                        <p className="text-xs text-slate-500 mt-1">Глобальний Контент</p>
                     </CardContent>
                 </Card>
             </div>

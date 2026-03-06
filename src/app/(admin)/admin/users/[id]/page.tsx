@@ -33,30 +33,30 @@ interface UserDetails {
 
 // Numeric limit fields with labels and plan defaults
 const NUMERIC_LIMITS = [
-    { key: 'maxGoals', label: 'Max Goals', descFree: '3', descPro: '∞' },
-    { key: 'maxTasks', label: 'Max Active Tasks', descFree: '10', descPro: '∞' },
-    { key: 'maxJournalEntries', label: 'Max Journal Entries', descFree: '20', descPro: '∞' },
-    { key: 'maxNotes', label: 'Max Notes', descFree: '20', descPro: '∞' },
-    { key: 'maxAiHints', label: 'Max AI Hints/day', descFree: '2', descPro: '∞' },
+    { key: 'maxGoals', label: 'Максимум Цілей', descFree: '3', descPro: '∞' },
+    { key: 'maxTasks', label: 'Макс. Активних Завдань', descFree: '10', descPro: '∞' },
+    { key: 'maxJournalEntries', label: 'Макс. Записів у Журнал', descFree: '20', descPro: '∞' },
+    { key: 'maxNotes', label: 'Максимум Нотаток', descFree: '20', descPro: '∞' },
+    { key: 'maxAiHints', label: 'ШІ Підказок/день', descFree: '2', descPro: '∞' },
 ] as const;
 
 // Boolean feature flags with labels
 const BOOL_LIMITS = [
-    { key: 'hasSubgoals', label: 'Sub-goals' },
-    { key: 'hasAiGoalBreakdown', label: 'AI Goal Breakdown' },
-    { key: 'hasGoalAnalytics', label: 'Goal Analytics' },
-    { key: 'hasTaskPriority', label: 'Task Priority' },
-    { key: 'hasRecurringTasks', label: 'Recurring Tasks' },
-    { key: 'hasSmartFilters', label: 'Smart Filters' },
-    { key: 'hasAutoPlanning', label: 'Auto Planning' },
-    { key: 'hasWeeklyView', label: 'Weekly View' },
-    { key: 'hasMonthlyView', label: 'Monthly View' },
-    { key: 'hasTags', label: 'Tags' },
-    { key: 'hasSearch', label: 'Search' },
-    { key: 'hasAiSummaries', label: 'AI Summaries' },
-    { key: 'hasHistoryAnalytics', label: 'History Analytics' },
-    { key: 'hasFullAi', label: 'Full AI Access' },
-    { key: 'hasVoice', label: 'Voice Input' },
+    { key: 'hasSubgoals', label: 'Підцілі' },
+    { key: 'hasAiGoalBreakdown', label: 'ШІ Розбиття Цілей' },
+    { key: 'hasGoalAnalytics', label: 'Аналітика Цілей' },
+    { key: 'hasTaskPriority', label: 'Пріоритет Завдань' },
+    { key: 'hasRecurringTasks', label: 'Регулярні Завдання' },
+    { key: 'hasSmartFilters', label: 'Розумні Фільтри' },
+    { key: 'hasAutoPlanning', label: 'Автопланування' },
+    { key: 'hasWeeklyView', label: 'Тижневий Перегляд' },
+    { key: 'hasMonthlyView', label: 'Місячний Перегляд' },
+    { key: 'hasTags', label: 'Теги' },
+    { key: 'hasSearch', label: 'Пошук' },
+    { key: 'hasAiSummaries', label: 'ШІ Підсумки' },
+    { key: 'hasHistoryAnalytics', label: 'Аналітика Історії' },
+    { key: 'hasFullAi', label: 'Повний Доступ до ШІ' },
+    { key: 'hasVoice', label: 'Голосовий Ввід' },
 ] as const;
 
 type NumericLimitKey = typeof NUMERIC_LIMITS[number]['key'];
@@ -224,9 +224,9 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
     if (!user) {
         return (
             <div className="flex flex-col items-center justify-center h-96 space-y-4">
-                <h2 className="text-xl font-semibold text-slate-300">User not found</h2>
+                <h2 className="text-xl font-semibold text-slate-300">Користувача не знайдено</h2>
                 <Button variant="outline" onClick={() => router.push('/admin/users')}>
-                    <ArrowLeft className="mr-2 h-4 w-4" /> Back to Users
+                    <ArrowLeft className="mr-2 h-4 w-4" /> Повернутися до Користувачів
                 </Button>
             </div>
         );
@@ -266,12 +266,12 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                 <div className="md:col-span-2 space-y-6">
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader>
-                            <CardTitle>Account Settings</CardTitle>
-                            <CardDescription>Manage user profile and access</CardDescription>
+                            <CardTitle>Налаштування Акаунту</CardTitle>
+                            <CardDescription>Управління профілем та доступом</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-2">
-                                <Label>Display Name</Label>
+                                <Label>Ім'я Відображення</Label>
                                 <input
                                     type="text"
                                     value={formData.name}
@@ -282,7 +282,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label>Role</Label>
+                                    <Label>Роль</Label>
                                     <Select
                                         value={formData.role}
                                         onValueChange={(val) => setFormData({ ...formData, role: val })}
@@ -291,15 +291,15 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
-                                            <SelectItem value="user">User</SelectItem>
-                                            <SelectItem value="manager">Manager</SelectItem>
-                                            <SelectItem value="admin">Admin</SelectItem>
+                                            <SelectItem value="user">Користувач</SelectItem>
+                                            <SelectItem value="manager">Менеджер</SelectItem>
+                                            <SelectItem value="admin">Адміністратор</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label>Subscription Tier</Label>
+                                    <Label>Рівень Підписки</Label>
                                     <Select
                                         value={formData.subscriptionTier}
                                         onValueChange={(val) => setFormData({ ...formData, subscriptionTier: val })}
@@ -308,7 +308,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
-                                            <SelectItem value="free">Free</SelectItem>
+                                            <SelectItem value="free">Безкоштовний</SelectItem>
                                             <SelectItem value="pro">Pro</SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -317,9 +317,9 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
 
                             <div className="flex items-center justify-between p-4 border border-slate-800 rounded-lg bg-slate-950/50">
                                 <div>
-                                    <Label className="text-base">Onboarding Completed</Label>
+                                    <Label className="text-base">Онбординг Завершено</Label>
                                     <p className="text-sm text-slate-500">
-                                        Override onboarding status for testing
+                                        Перевизначити статус онбордингу
                                     </p>
                                 </div>
                                 <Switch
@@ -339,12 +339,12 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                     {saving ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Saving...
+                                            Збереження...
                                         </>
                                     ) : (
                                         <>
                                             <Save className="mr-2 h-4 w-4" />
-                                            Save Changes
+                                            Зберегти Зміни
                                         </>
                                     )}
                                 </Button>
@@ -359,11 +359,11 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                 <div>
                                     <CardTitle className="flex items-center gap-2">
                                         <Settings className="h-5 w-5 text-orange-500" />
-                                        Custom Limits Override
+                                        Власні Ліміти
                                     </CardTitle>
                                     <CardDescription className="mt-1">
-                                        Override specific limits for this user. Leave blank (—) to use plan defaults.
-                                        Current plan: <span className="font-semibold text-orange-400">{formData.subscriptionTier.toUpperCase()}</span>
+                                        Перевизначте індивідуальні ліміти для цього користувача. Залиште порожнім (—), щоб використовувати стандартні для плану.
+                                        Поточний план: <span className="font-semibold text-orange-400">{formData.subscriptionTier.toUpperCase()}</span>
                                     </CardDescription>
                                 </div>
                                 <Button
@@ -372,7 +372,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                     onClick={resetLimits}
                                     className="text-slate-400 hover:text-slate-200 shrink-0"
                                 >
-                                    <RotateCcw className="h-4 w-4 mr-1" /> Reset all
+                                    <RotateCcw className="h-4 w-4 mr-1" /> Скинути всі
                                 </Button>
                             </div>
                         </CardHeader>
@@ -385,7 +385,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                 <>
                                     {/* Numeric limits */}
                                     <div>
-                                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-3">Numeric Limits</h3>
+                                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-3">Ліміти Кількісні</h3>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             {NUMERIC_LIMITS.map(field => {
                                                 const planDefault = field.key === 'maxGoals'
@@ -405,15 +405,15 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                                         <div className="flex items-center justify-between">
                                                             <label className="text-sm font-medium text-slate-300">{field.label}</label>
                                                             <span className="text-xs text-slate-500">
-                                                                Plan default: <span className="font-mono">{planDefaultStr}</span>
-                                                                {isOverridden && <span className="ml-1.5 text-orange-400 font-semibold">(custom)</span>}
+                                                                План: <span className="font-mono">{planDefaultStr}</span>
+                                                                {isOverridden && <span className="ml-1.5 text-orange-400 font-semibold">(власний)</span>}
                                                             </span>
                                                         </div>
                                                         <div className="relative">
                                                             <Input
                                                                 type="number"
                                                                 min={0}
-                                                                placeholder={`— (default: ${planDefaultStr})`}
+                                                                placeholder={`— (замість: ${planDefaultStr})`}
                                                                 value={limitsForm[field.key]}
                                                                 onChange={e => setLimitsForm(prev => ({ ...prev, [field.key]: e.target.value }))}
                                                                 className={`bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 ${isOverridden ? 'border-orange-500/50' : ''}`}
@@ -422,7 +422,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                                                 <button
                                                                     onClick={() => setLimitsForm(prev => ({ ...prev, [field.key]: '' }))}
                                                                     className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs"
-                                                                    title="Reset to plan default"
+                                                                    title="Скинути до ліміту плану"
                                                                 >
                                                                     ✕
                                                                 </button>
@@ -438,38 +438,38 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
 
                                     {/* Boolean feature overrides */}
                                     <div>
-                                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-1">Feature Flags</h3>
-                                        <p className="text-xs text-slate-600 mb-3">Click to cycle: <span className="text-slate-400">— (plan default)</span> → <span className="text-emerald-500">✓ Enabled</span> → <span className="text-rose-500">✗ Disabled</span></p>
+                                        <h3 className="text-xs font-bold uppercase text-slate-500 tracking-widest mb-1">Функціональні Дозволи</h3>
+                                        <p className="text-xs text-slate-600 mb-3">Клікніть для зміни: <span className="text-slate-400">— (план)</span> → <span className="text-emerald-500">✓ Дозволено</span> → <span className="text-rose-500">✗ Заборонено</span></p>
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             {BOOL_LIMITS.map(field => {
                                                 const featureKey = ('HAS_' + field.key.replace('has', '').replace(/([A-Z])/g, '_$1').toUpperCase()).replace('HAS__', 'HAS_') as keyof typeof planDefaults;
                                                 const planDefault = planDefaults[featureKey];
                                                 const value = limitsForm[field.key];
                                                 const isOverridden = value !== null;
-                                                const planDefaultStr = planDefault ? 'Enabled' : 'Disabled';
+                                                const planDefaultStr = planDefault ? 'Доступно' : 'Недоступно';
 
                                                 return (
                                                     <button
                                                         key={field.key}
                                                         onClick={() => cycleBoolLimit(field.key)}
                                                         className={`flex items-center justify-between p-3 rounded-lg border transition-all text-left ${isOverridden
-                                                                ? value
-                                                                    ? 'border-emerald-600/50 bg-emerald-950/30'
-                                                                    : 'border-rose-600/50 bg-rose-950/30'
-                                                                : 'border-slate-800 bg-slate-950/50 hover:bg-slate-800/50'
+                                                            ? value
+                                                                ? 'border-emerald-600/50 bg-emerald-950/30'
+                                                                : 'border-rose-600/50 bg-rose-950/30'
+                                                            : 'border-slate-800 bg-slate-950/50 hover:bg-slate-800/50'
                                                             }`}
                                                     >
                                                         <div>
                                                             <span className="text-sm font-medium text-slate-200">{field.label}</span>
-                                                            <span className="block text-xs text-slate-600">Plan: {planDefaultStr}</span>
+                                                            <span className="block text-xs text-slate-600">План: {planDefaultStr}</span>
                                                         </div>
                                                         <span className={`text-sm font-bold ${value === null
-                                                                ? 'text-slate-500'
-                                                                : value
-                                                                    ? 'text-emerald-400'
-                                                                    : 'text-rose-400'
+                                                            ? 'text-slate-500'
+                                                            : value
+                                                                ? 'text-emerald-400'
+                                                                : 'text-rose-400'
                                                             }`}>
-                                                            {value === null ? '—' : value ? '✓ On' : '✗ Off'}
+                                                            {value === null ? '—' : value ? '✓ Так' : '✗ Ні'}
                                                         </span>
                                                     </button>
                                                 );
@@ -481,9 +481,9 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
 
                                     {/* Admin note */}
                                     <div className="space-y-2">
-                                        <Label className="text-slate-400">Admin Note (reason for custom limits)</Label>
+                                        <Label className="text-slate-400">Нотатка Адміністратора (причина)</Label>
                                         <Textarea
-                                            placeholder="e.g. Beta tester, partner deal, promotional access..."
+                                            placeholder="напр., Бета тестер, угода партнера, промо доступ..."
                                             value={limitsForm.adminNote}
                                             onChange={e => setLimitsForm(prev => ({ ...prev, adminNote: e.target.value }))}
                                             className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-600 resize-none h-20"
@@ -493,22 +493,22 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                     <div className="flex justify-between items-center">
                                         <p className="text-xs text-slate-600 flex items-center gap-1">
                                             <ShieldCheck className="h-3.5 w-3.5" />
-                                            Changes are logged in the audit trail
+                                            Зміни логуються
                                         </p>
                                         <Button
                                             onClick={handleSaveLimits}
                                             disabled={savingLimits}
-                                            className="bg-orange-600 hover:bg-orange-700 min-w-[140px]"
+                                            className="bg-orange-600 hover:bg-orange-700 min-w-[120px]"
                                         >
                                             {savingLimits ? (
                                                 <>
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Saving...
+                                                    Збереження...
                                                 </>
                                             ) : (
                                                 <>
                                                     <Save className="mr-2 h-4 w-4" />
-                                                    Save Limits
+                                                    Зберегти Ліміти
                                                 </>
                                             )}
                                         </Button>
@@ -523,17 +523,17 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                 <div className="space-y-6">
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader>
-                            <CardTitle>Activity Stats</CardTitle>
+                            <CardTitle>Статистика Активності</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
                                     <h4 className="text-2xl font-bold text-orange-500">{user.goalsCount}</h4>
-                                    <p className="text-xs text-slate-400 uppercase tracking-wider mt-1">Goals</p>
+                                    <p className="text-xs text-slate-400 uppercase tracking-wider mt-1">Цілі</p>
                                 </div>
                                 <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 text-center">
                                     <h4 className="text-2xl font-bold text-blue-500">{user.habitsCount}</h4>
-                                    <p className="text-xs text-slate-400 uppercase tracking-wider mt-1">Habits</p>
+                                    <p className="text-xs text-slate-400 uppercase tracking-wider mt-1">Звички</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -541,23 +541,23 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
 
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader>
-                            <CardTitle>Metadata</CardTitle>
+                            <CardTitle>Метадані</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <h4 className="text-sm font-medium text-slate-400">User ID</h4>
+                                <h4 className="text-sm font-medium text-slate-400">ID Користувача</h4>
                                 <p className="text-xs font-mono text-slate-300 mt-1 break-all bg-slate-950 p-2 rounded border border-slate-800">{user.id}</p>
                             </div>
                             <div>
-                                <h4 className="text-sm font-medium text-slate-400">Joined On</h4>
+                                <h4 className="text-sm font-medium text-slate-400">Дата Реєстрації</h4>
                                 <p className="text-sm text-slate-300 mt-1">
                                     {format(new Date(user.createdAt), 'PPpp')}
                                 </p>
                             </div>
                             <div>
-                                <h4 className="text-sm font-medium text-slate-400">Last Active</h4>
+                                <h4 className="text-sm font-medium text-slate-400">Остання Активність</h4>
                                 <p className="text-sm text-slate-300 mt-1">
-                                    {user.lastActive ? format(new Date(user.lastActive), 'PPpp') : 'Never'}
+                                    {user.lastActive ? format(new Date(user.lastActive), 'PPpp') : 'Ніколи'}
                                 </p>
                             </div>
                         </CardContent>

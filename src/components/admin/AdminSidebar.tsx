@@ -19,11 +19,11 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState } from 'react';
 
 const adminNavItems = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/users', label: 'Users', icon: Users },
-    { href: '/admin/content', label: 'Content', icon: Database },
-    { href: '/admin/analytics', label: 'Analytics', icon: Activity },
-    { href: '/admin/audit', label: 'Audit Logs', icon: ShieldAlert },
+    { href: '/admin', label: 'Головна', icon: LayoutDashboard },
+    { href: '/admin/users', label: 'Користувачі', icon: Users },
+    { href: '/admin/content', label: 'Контент', icon: Database },
+    { href: '/admin/analytics', label: 'Аналітика', icon: Activity },
+    { href: '/admin/audit', label: 'Журнал Аудиту', icon: ShieldAlert },
 ];
 
 function AdminSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -67,7 +67,7 @@ function AdminSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 <Link href="/overview" onClick={onNavigate}>
                     <Button variant="ghost" className="w-full justify-start gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
                         <ArrowLeft className="h-4 w-4" />
-                        Back to App
+                        Повернутися в додаток
                     </Button>
                 </Link>
                 <Button
@@ -76,7 +76,7 @@ function AdminSidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     onClick={logout}
                 >
                     <LogOut className="h-4 w-4" />
-                    Logout
+                    Вийти
                 </Button>
             </div>
         </div>

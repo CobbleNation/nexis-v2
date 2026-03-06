@@ -62,50 +62,50 @@ export default function UsersPage() {
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h1 className="text-2xl md:text-3xl font-bold">User Management</h1>
+                <h1 className="text-2xl md:text-3xl font-bold">Управління Користувачами</h1>
                 <div className="flex items-center gap-4">
                     <input
                         type="text"
-                        placeholder="Search users..."
+                        placeholder="Пошук користувачів..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="bg-slate-900 border border-slate-800 rounded-md px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-700 w-full sm:w-64"
                     />
                     <Badge variant="outline" className="text-slate-400 whitespace-nowrap">
-                        Total: {users.length}
+                        Всього: {users.length}
                     </Badge>
                 </div>
             </div>
 
             <Card className="bg-slate-900 border-slate-800 text-slate-100">
                 <CardHeader>
-                    <CardTitle>All Users</CardTitle>
+                    <CardTitle>Всі Користувачі</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border border-slate-800 overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-slate-800 hover:bg-slate-800/50">
-                                    <TableHead className="text-slate-400">User</TableHead>
-                                    <TableHead className="text-slate-400">Role</TableHead>
-                                    <TableHead className="text-slate-400">Plan</TableHead>
-                                    <TableHead className="text-slate-400">Engagement</TableHead>
-                                    <TableHead className="text-slate-400">Last Active</TableHead>
-                                    <TableHead className="text-right text-slate-400">Actions</TableHead>
+                                    <TableHead className="text-slate-400">Користувач</TableHead>
+                                    <TableHead className="text-slate-400">Роль</TableHead>
+                                    <TableHead className="text-slate-400">План</TableHead>
+                                    <TableHead className="text-slate-400">Активність</TableHead>
+                                    <TableHead className="text-slate-400">Остання активність</TableHead>
+                                    <TableHead className="text-right text-slate-400">Дії</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {loading && (
                                     <TableRow>
                                         <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                                            Loading...
+                                            Завантаження...
                                         </TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && users.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={6} className="h-24 text-center text-slate-500">
-                                            No users found.
+                                            Користувачів не знайдено.
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -141,10 +141,10 @@ export default function UsersPage() {
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-slate-400 text-sm">
-                                            {user.goalsCount} Goals
+                                            {user.goalsCount} Цілей
                                         </TableCell>
                                         <TableCell className="text-slate-400 text-sm">
-                                            {user.lastActive ? format(new Date(user.lastActive), 'MMM d, yyyy') : 'Never'}
+                                            {user.lastActive ? format(new Date(user.lastActive), 'MMM d, yyyy') : 'Ніколи'}
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Link

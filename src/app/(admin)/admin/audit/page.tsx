@@ -45,33 +45,33 @@ export default function AuditPage() {
         fetchLogs();
     }, []);
 
-    if (loading) return <div className="p-8 text-center text-slate-400">Loading logs...</div>;
+    if (loading) return <div className="p-8 text-center text-slate-400">Завантаження логів...</div>;
     if (error) return <div className="p-8 text-center text-red-400">{error}</div>;
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold">Audit Logs</h1>
+            <h1 className="text-3xl font-bold">Журнал Аудиту</h1>
 
             <Card className="bg-slate-900 border-slate-800 text-slate-100">
                 <CardHeader>
-                    <CardTitle>System Activity</CardTitle>
+                    <CardTitle>Активність Системи</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow className="border-slate-800 hover:bg-slate-800/50">
-                                <TableHead className="text-slate-400">Admin</TableHead>
-                                <TableHead className="text-slate-400">Action</TableHead>
-                                <TableHead className="text-slate-400">Entity</TableHead>
-                                <TableHead className="text-slate-400">Details</TableHead>
-                                <TableHead className="text-right text-slate-400">Time</TableHead>
+                                <TableHead className="text-slate-400">Адміністратор</TableHead>
+                                <TableHead className="text-slate-400">Дія</TableHead>
+                                <TableHead className="text-slate-400">Сутність</TableHead>
+                                <TableHead className="text-slate-400">Деталі</TableHead>
+                                <TableHead className="text-right text-slate-400">Час</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {logs.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                                        No activity recorded yet.
+                                        Активність ще не записана.
                                     </TableCell>
                                 </TableRow>
                             ) : (

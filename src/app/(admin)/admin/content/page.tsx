@@ -53,46 +53,46 @@ export default function ContentPage() {
             });
 
             if (res.ok) {
-                toast.success('System Default Created');
+                toast.success('Системне значення за замовчуванням створено');
                 setNewItemTitle('');
                 setIsDialogOpen(false);
                 fetchItems(activeTab);
             } else {
-                toast.error('Failed to create');
+                toast.error('Не вдалося створити');
             }
         } catch (error) {
-            toast.error('Error creating item');
+            toast.error('Помилка створення елемента');
         }
     }
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold">Content Defaults</h1>
+                <h1 className="text-3xl font-bold">Значення за замовчуванням</h1>
 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                         <Button className="gap-2 bg-orange-600 hover:bg-orange-700">
                             <Plus className="h-4 w-4" />
-                            Add Default {activeTab === 'habit' ? 'Habit' : 'Goal'}
+                            Додати {activeTab === 'habit' ? 'Звичку' : 'Ціль'}
                         </Button>
                     </DialogTrigger>
                     <DialogContent className="bg-slate-900 border-slate-800 text-slate-100">
                         <DialogHeader>
-                            <DialogTitle>Add System Default {activeTab === 'habit' ? 'Habit' : 'Goal'}</DialogTitle>
+                            <DialogTitle>Додати {activeTab === 'habit' ? 'Звичку' : 'Ціль'} за замовчуванням</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
-                                <Label>Title</Label>
+                                <Label>Заголовок</Label>
                                 <Input
                                     value={newItemTitle}
                                     onChange={(e) => setNewItemTitle(e.target.value)}
-                                    placeholder="e.g. Drink Water"
+                                    placeholder="напр., Пити воду"
                                     className="bg-slate-950 border-slate-800"
                                 />
                             </div>
                             <Button onClick={handleCreate} className="w-full bg-orange-600 hover:bg-orange-700">
-                                Create
+                                Створити
                             </Button>
                         </div>
                     </DialogContent>
@@ -101,39 +101,39 @@ export default function ContentPage() {
 
             <Tabs defaultValue="habit" onValueChange={setActiveTab} className="w-full">
                 <TabsList className="bg-slate-900 border border-slate-800">
-                    <TabsTrigger value="habit">Habits</TabsTrigger>
-                    <TabsTrigger value="goal">Goals</TabsTrigger>
-                    <TabsTrigger value="project">Projects</TabsTrigger>
+                    <TabsTrigger value="habit">Звички</TabsTrigger>
+                    <TabsTrigger value="goal">Цілі</TabsTrigger>
+                    <TabsTrigger value="project">Проекти</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="habit" className="mt-4">
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader>
-                            <CardTitle>Global Default Habits</CardTitle>
+                            <CardTitle>Глобальні Звички за Замовчуванням</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {loading ? <div>Loading...</div> : (
+                            {loading ? <div>Завантаження...</div> : (
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="border-slate-800">
-                                            <TableHead className="text-slate-400">Title</TableHead>
-                                            <TableHead className="text-slate-400">Frequency</TableHead>
-                                            <TableHead className="text-right text-slate-400">Actions</TableHead>
+                                            <TableHead className="text-slate-400">Заголовок</TableHead>
+                                            <TableHead className="text-slate-400">Частота</TableHead>
+                                            <TableHead className="text-right text-slate-400">Дії</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {items.map(item => (
                                             <TableRow key={item.id} className="border-slate-800 hover:bg-slate-800/50">
                                                 <TableCell className="font-medium">{item.title}</TableCell>
-                                                <TableCell><Badge variant="outline">{item.frequency || 'Daily'}</Badge></TableCell>
+                                                <TableCell><Badge variant="outline">{item.frequency === 'daily' ? 'Щоденно' : item.frequency || 'Щоденно'}</Badge></TableCell>
                                                 <TableCell className="text-right">
-                                                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300">Delete</Button>
+                                                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300">Видалити</Button>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
                                         {items.length === 0 && (
                                             <TableRow>
-                                                <TableCell colSpan={3} className="text-center py-8 text-slate-500">No defaults found</TableCell>
+                                                <TableCell colSpan={3} className="text-center py-8 text-slate-500">Замовчувань не знайдено</TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
@@ -146,15 +146,15 @@ export default function ContentPage() {
                 <TabsContent value="goal" className="mt-4">
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader>
-                            <CardTitle>Global Default Goals</CardTitle>
+                            <CardTitle>Глобальні Цілі за Замовчуванням</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            {loading ? <div>Loading...</div> : (
+                            {loading ? <div>Завантаження...</div> : (
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="border-slate-800">
-                                            <TableHead className="text-slate-400">Title</TableHead>
-                                            <TableHead className="text-right text-slate-400">Actions</TableHead>
+                                            <TableHead className="text-slate-400">Заголовок</TableHead>
+                                            <TableHead className="text-right text-slate-400">Дії</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -162,13 +162,13 @@ export default function ContentPage() {
                                             <TableRow key={item.id} className="border-slate-800 hover:bg-slate-800/50">
                                                 <TableCell className="font-medium">{item.title}</TableCell>
                                                 <TableCell className="text-right">
-                                                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300">Delete</Button>
+                                                    <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300">Видалити</Button>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
                                         {items.length === 0 && (
                                             <TableRow>
-                                                <TableCell colSpan={2} className="text-center py-8 text-slate-500">No defaults found</TableCell>
+                                                <TableCell colSpan={2} className="text-center py-8 text-slate-500">Замовчувань не знайдено</TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
@@ -179,7 +179,7 @@ export default function ContentPage() {
                 </TabsContent>
 
                 <TabsContent value="project" className="mt-4">
-                    <div className="p-8 text-center text-slate-500">Project templates coming soon.</div>
+                    <div className="p-8 text-center text-slate-500">Шаблони проектів незабаром.</div>
                 </TabsContent>
             </Tabs>
         </div>
