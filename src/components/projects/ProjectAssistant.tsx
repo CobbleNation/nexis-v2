@@ -45,12 +45,13 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
     const [isRefining, setIsRefining] = useState(false);
 
     // AI Restrictions
-    const { isPro } = useSubscription() || { isPro: false };
+    const { checkLimit } = useSubscription() || { checkLimit: () => false };
+    const HAS_FULL_AI = checkLimit('HAS_FULL_AI');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const handleGenerate = async () => {
         setIsLoading(true);
-        if (!isPro) {
+        if (!HAS_FULL_AI) {
             setIsLoading(false);
             setShowUpgradeModal(true);
             return;
@@ -222,14 +223,14 @@ export function ProjectAssistant({ project, areaName }: ProjectAssistantProps) {
                             disabled={isLoading}
                             className={cn(
                                 "w-full sm:w-auto shadow-lg",
-                                !isPro
+                                !HAS_FULL_AI
                                     ? "bg-slate-100 text-slate-500 border border-slate-200 shadow-none dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800"
                                     : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20"
                             )}
                         >
                             {isLoading ? (
                                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                            ) : !isPro ? (
+                            ) : !HAS_FULL_AI ? (
                                 <Lock className="w-4 h-4 mr-2" />
                             ) : (
                                 <Sparkles className="w-4 h-4 mr-2" />

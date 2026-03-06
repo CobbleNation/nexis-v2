@@ -36,7 +36,8 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
     const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState(1);
 
-    const { HAS_FULL_AI } = useSubscription()?.limits || { HAS_FULL_AI: false };
+    const { checkLimit } = useSubscription();
+    const HAS_FULL_AI = checkLimit('HAS_FULL_AI');
     const [showUpgrade, setShowUpgrade] = useState(false);
     const [upgradeContext, setUpgradeContext] = useState({ title: '', description: '' });
 

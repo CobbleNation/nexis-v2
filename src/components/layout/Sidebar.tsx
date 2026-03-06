@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { useData } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { useSubscription } from '@/hooks/useSubscription';
 
 // Navigation Groups
 interface NavItem {
@@ -55,6 +56,9 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     const { user, logout } = useAuth();
     const { state } = useData(); // Added useData
     const isPro = user?.subscriptionTier === 'pro';
+    const { checkLimit } = useSubscription() || { checkLimit: () => false };
+    const HAS_FULL_AI = checkLimit('HAS_FULL_AI');
+    const HAS_AI_GOAL_BREAKDOWN = checkLimit('HAS_AI_GOAL_BREAKDOWN');
 
     // Helper to close sheet on mobile
     const handleNavigation = () => {
@@ -204,7 +208,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                                 >
                                                     <item.icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
                                                     <span className="flex-1 truncate">{item.name}</span>
-                                                    {!isPro && <Lock className="w-3.5 h-3.5 shrink-0 text-amber-400/60" />}
+                                                    {!HAS_FULL_AI && <Lock className="w-3.5 h-3.5 shrink-0 text-amber-400/60" />}
                                                 </button>
                                             } />
                                         </div>
@@ -221,7 +225,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                                 >
                                                     <item.icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
                                                     <span className="flex-1 truncate">{item.name}</span>
-                                                    {!isPro && <Lock className="w-3.5 h-3.5 shrink-0 text-violet-400/60" />}
+                                                    {!HAS_AI_GOAL_BREAKDOWN && <Lock className="w-3.5 h-3.5 shrink-0 text-violet-400/60" />}
                                                 </button>
                                             } />
                                         </div>

@@ -39,9 +39,9 @@ export default function GoalDetailsPage() {
     const [selectedMetric, setSelectedMetric] = useState<MetricDefinition | null>(null);
 
     // Subgoals & Permissions
-    const subscription = useSubscription();
-    const { HAS_SUBGOALS, HAS_AI_GOAL_BREAKDOWN } = subscription?.limits || { HAS_SUBGOALS: false, HAS_AI_GOAL_BREAKDOWN: false };
-    const isPro = subscription?.isPro || false;
+    const { isPro, checkLimit } = useSubscription();
+    const HAS_SUBGOALS = checkLimit('HAS_SUBGOALS');
+    const HAS_AI_GOAL_BREAKDOWN = checkLimit('HAS_AI_GOAL_BREAKDOWN');
     const [showUpgrade, setShowUpgrade] = useState(false);
     const [upgradeContext, setUpgradeContext] = useState({ title: '', description: '' });
     const [showQuickAdd, setShowQuickAdd] = useState(false);
@@ -107,7 +107,7 @@ export default function GoalDetailsPage() {
         : false;
 
     const handleAIBreakdown = async (isRegeneration: boolean = false) => {
-        if (!isPro) {
+        if (!HAS_AI_GOAL_BREAKDOWN) {
             setShowUpgrade(true);
             return;
         }

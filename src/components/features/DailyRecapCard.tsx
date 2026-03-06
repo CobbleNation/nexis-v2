@@ -12,7 +12,8 @@ interface DailyRecapCardProps {
 
 export const DailyRecapCard: React.FC<DailyRecapCardProps> = ({ onOpenJournal }) => {
     const [showUpgrade, setShowUpgrade] = useState(false);
-    const { isPro } = useSubscription() || { isPro: false };
+    const { checkLimit } = useSubscription() || { checkLimit: () => false };
+    const HAS_FULL_AI = checkLimit('HAS_FULL_AI');
     const { state } = useData();
 
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -23,7 +24,7 @@ export const DailyRecapCard: React.FC<DailyRecapCardProps> = ({ onOpenJournal })
     const todayJournal = state.journal.find((j: any) => j.date.startsWith(todayStr));
 
     const handleAnalyzeDay = async () => {
-        if (!isPro) {
+        if (!HAS_FULL_AI) {
             setShowUpgrade(true);
             return;
         }

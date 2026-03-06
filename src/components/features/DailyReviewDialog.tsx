@@ -20,7 +20,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { UpgradeModal } from '@/components/common/UpgradeModal';
 
 export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.ReactNode }) {
-    const { isPro } = useSubscription() || { isPro: false };
+    const { checkLimit } = useSubscription() || { checkLimit: () => false };
+    const HAS_FULL_AI = checkLimit('HAS_FULL_AI');
     const { state } = useData();
     const [isOpen, setIsOpen] = useState(false);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -123,7 +124,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
 
     // Note: Removed useEffect that auto-triggered generateReview
 
-    if (!isPro) {
+    if (!HAS_FULL_AI) {
         return (
             <>
                 {customTrigger ? (

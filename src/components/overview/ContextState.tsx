@@ -29,7 +29,8 @@ interface ContextStateProps {
 }
 
 export function ContextState({ score, metrics, period, areaName, activeColor }: ContextStateProps) {
-    const { isPro } = useSubscription();
+    const { checkLimit, isPro } = useSubscription();
+    const HAS_HISTORY_ANALYTICS = checkLimit('HAS_HISTORY_ANALYTICS');
     const { state } = useData();
     const [showUpgrade, setShowUpgrade] = useState(false);
     const [showInfluencers, setShowInfluencers] = useState(false);
@@ -37,7 +38,7 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
 
     // Calculate Drivers (Only if Pro)
     const drivers = useMemo(() => {
-        if (!isPro) return [];
+        if (!HAS_HISTORY_ANALYTICS) return [];
 
         const dailyData = getDailyDataRange(state, 30);
         const results: CorrelationResult[] = [];
@@ -63,11 +64,11 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
             return true;
         }).sort((a, b) => Math.abs(b.impactPercent) - Math.abs(a.impactPercent)).slice(0, 5);
 
-    }, [isPro, state]);
+    }, [HAS_HISTORY_ANALYTICS, state]);
 
     const handleInfluenceClick = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (isPro) {
+        if (HAS_HISTORY_ANALYTICS) {
             setShowInfluencers(true);
         } else {
             setShowUpgrade(true);

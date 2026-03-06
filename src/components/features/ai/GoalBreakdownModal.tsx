@@ -39,7 +39,8 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
     const [proposal, setProposal] = useState<StrategyProposal | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const { isPro } = useSubscription() || { isPro: false };
+    const { checkLimit } = useSubscription() || { checkLimit: () => false };
+    const HAS_AI_GOAL_BREAKDOWN = checkLimit('HAS_AI_GOAL_BREAKDOWN');
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
     const activeGoals = state.goals.filter(g => g.status === 'active' || g.status === 'paused');
@@ -324,7 +325,7 @@ export function GoalBreakdownModal({ customTrigger }: GoalBreakdownModalProps) {
         </>
     ) : null;
 
-    if (!isPro) {
+    if (!HAS_AI_GOAL_BREAKDOWN) {
         return (
             <>
                 {customTrigger ? (
