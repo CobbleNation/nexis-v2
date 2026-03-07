@@ -39,18 +39,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check session on mount
     useEffect(() => {
         // If URL has ?logged_out=1, the user just explicitly logged out.
-        // Skip session recovery and force null.
         const params = new URLSearchParams(window.location.search);
         if (params.get('logged_out') === '1') {
-            // Force-clear any remaining cookies via POST
             fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
-            // Clear all auth-related localStorage
             localStorage.removeItem('zynorvia-data');
             localStorage.removeItem('onboarding_step');
             localStorage.removeItem('onboarding_active');
             setUser(null);
             setIsLoading(false);
-            // Clean URL
             window.history.replaceState({}, '', window.location.pathname);
             return;
         }
@@ -173,9 +169,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // Ignore — we'll still navigate away
         }
 
-        // 3. Hard navigate to login page with flag
-        // The flag ensures AuthProvider won't try to restore session on the login page
-        window.location.href = '/login?logged_out=1';
+        // 3. Hard navigate to landing page instead of login for broad cookie clearing
+        window.location.href = 'https://zynorvia.com/?logged_out=1';
     }
 
     async function updateProfile(data: Partial<User>) {
