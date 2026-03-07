@@ -52,8 +52,14 @@ export async function POST(req: Request) {
             source: 'web'
         });
 
-        // Fetch Custom Limits
-        const [limits] = await db.select().from(userLimits).where(eq(userLimits.userId, user.id)).limit(1);
+        // Fetch Custom Limits with defensive check
+        let limits = null;
+        try {
+            const [limitsResult] = await db.select().from(userLimits).where(eq(userLimits.userId, user.id)).limit(1);
+            limits = limitsResult || null;
+        } catch (err) {
+            console.warn("[Auth-Login] Failed to fetch user limits. Table user_limits might be missing.", err);
+        }
 
         return NextResponse.json({
             user: {
@@ -70,7 +76,10 @@ export async function POST(req: Request) {
             }
         });
     } catch (err) {
-        console.error("Login Error:", err);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error("Login Critical Error:", err);
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            message: process.env.NODE_ENV === 'development' ? (err as any).message : 'Please check server logs'
+        }, { status: 500 });
     }
 }

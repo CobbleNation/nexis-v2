@@ -147,12 +147,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             throw new Error(error.error || 'Registration failed');
         }
 
-        const data = await res.json();
-        if (data.user && typeof data.user.onboardingCompleted === 'undefined') {
-            data.user.onboardingCompleted = false;
-        }
-        setUser(data.user);
-        window.location.href = '/overview';
+        // No auto-login after register anymore since verification is required
+        // setUser(data.user);
+        // window.location.href = '/overview';
     }
 
     async function logout() {

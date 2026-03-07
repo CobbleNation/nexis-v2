@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users } from '@/db/schema';
+import { users, userLimits } from '@/db/schema';
 import { hashPassword, createAccessToken, createRefreshToken, setAuthCookies, createSession } from '@/lib/auth-utils';
 import { sendVerificationEmail } from '@/lib/email';
 import { randomBytes } from 'crypto';
@@ -51,7 +51,21 @@ export async function POST(req: Request) {
         }
 
         // Seed Default Life Areas
-        await seedLifeAreas(newUser.id);
+        await seedLifeAreas(newUser.id).catch(err => {
+            console.error("Failed to seed life areas, but continuing registration:", err);
+        });
+
+        // Initialize User Limits with defaults
+        try {
+            await db.insert(userLimits).values({
+                id: uuidv4(),
+                userId: newUser.id,
+                // Defaults will be null/plan-based, but having the record is safer
+                updatedAt: new Date()
+            });
+        } catch (err) {
+            console.error("Failed to initialize user limits, but continuing registration:", err);
+        }
 
         // DO NOT log in automatically anymore - require verification
         // await setAuthCookies(accessToken, refreshToken); 
@@ -73,10 +87,14 @@ export async function POST(req: Request) {
             }
         });
     } catch (err) {
-        console.error("Registration Error Details:", err);
+        console.error("Registration Critical Error:", err);
         if (err instanceof z.ZodError) {
             return NextResponse.json({ error: 'Invalid data', details: (err as any).errors }, { status: 400 });
         }
-        return NextResponse.json({ error: 'Internal Server Error', message: (err as any).message }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            message: (err as any).message,
+            stack: process.env.NODE_ENV === 'development' ? (err as any).stack : undefined
+        }, { status: 500 });
     }
 }

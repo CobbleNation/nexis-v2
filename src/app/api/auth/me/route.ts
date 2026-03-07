@@ -42,7 +42,14 @@ export async function GET() {
         return NextResponse.json({ error: 'User not found' }, { status: 404, headers: noCacheHeaders });
     }
 
-    const [limits] = await db.select().from(userLimits).where(eq(userLimits.userId, user.id)).limit(1);
+    // Fetch limits with defensive check
+    let limits = null;
+    try {
+        const [limitsResult] = await db.select().from(userLimits).where(eq(userLimits.userId, user.id)).limit(1);
+        limits = limitsResult || null;
+    } catch (err) {
+        console.warn("[Auth-Me] Failed to fetch user limits. Table user_limits might be missing.", err);
+    }
 
     return NextResponse.json({
         user: {

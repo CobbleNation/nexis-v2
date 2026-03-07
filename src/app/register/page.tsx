@@ -14,6 +14,7 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
     const { register, user, isLoading } = useAuth();
     const router = useRouter();
 
@@ -30,6 +31,7 @@ export default function RegisterPage() {
         try {
             await register({ name, email, password });
             toast.success('Акаунт успішно створено!');
+            setIsRegistered(true);
         } catch (err: any) {
             let message = "Виникла помилка при реєстрації. Спробуйте ще раз.";
             if (err.message === 'User already exists') {
@@ -44,6 +46,30 @@ export default function RegisterPage() {
             setIsSubmitting(false);
         }
     };
+
+    // Show registration success message
+    if (isRegistered) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#F7F5F2] dark:bg-slate-950 px-4">
+                <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-xl p-10 text-center space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                    <div className="h-20 w-20 rounded-full bg-orange-100 dark:bg-orange-500/10 flex items-center justify-center mx-auto">
+                        <Activity className="h-10 w-10 text-orange-600" />
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-2xl font-bold text-foreground">Перевірте пошту</h2>
+                        <p className="text-muted-foreground leading-relaxed">
+                            Ми надіслали лист для підтвердження на <strong>{email}</strong>. Будь ласка, перейдіть за посиланням у листі, щоб активувати свій акаунт.
+                        </p>
+                    </div>
+                    <div className="pt-4">
+                        <Button asChild variant="outline" className="w-full h-12 rounded-xl">
+                            <Link href="/login">Повернутися до входу</Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     // Show loading spinner while checking auth state
     if (isLoading || user) {
