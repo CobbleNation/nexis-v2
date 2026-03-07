@@ -86,6 +86,7 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
         sameSite: 'lax',
         maxAge: 15 * 60, // 15 min
         path: '/',
+        domain: process.env.NODE_ENV === 'production' ? '.zynorvia.com' : undefined,
     });
 
     cookieStore.set('refresh_token', refreshToken, {
@@ -94,13 +95,15 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
         sameSite: 'lax',
         maxAge: 30 * 24 * 60 * 60, // 30 days
         path: '/',
+        domain: process.env.NODE_ENV === 'production' ? '.zynorvia.com' : undefined,
     });
 }
 
 export async function clearAuthCookies() {
     const cookieStore = await cookies();
-    cookieStore.delete('access_token');
-    cookieStore.delete('refresh_token');
+    const domain = process.env.NODE_ENV === 'production' ? '.zynorvia.com' : undefined;
+    cookieStore.delete({ name: 'access_token', domain, path: '/' });
+    cookieStore.delete({ name: 'refresh_token', domain, path: '/' });
 }
 
 export async function getSession() {
