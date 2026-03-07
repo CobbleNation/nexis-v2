@@ -10,6 +10,9 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     } : undefined,
+    tls: {
+        rejectUnauthorized: false
+    }
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
