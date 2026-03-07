@@ -99,7 +99,7 @@ function LoginContent() {
                     <div className="space-y-2">
                         <div className="flex items-center justify-between ml-1">
                             <label className="text-sm font-medium text-foreground">Пароль</label>
-                            <Link href="/forgot-password" size="sm" className="text-xs text-orange-600 hover:text-orange-500 font-medium">Забули пароль?</Link>
+                            <Link href="/forgot-password" className="text-xs text-orange-600 hover:text-orange-500 font-medium">Забули пароль?</Link>
                         </div>
                         <Input
                             type="password"
