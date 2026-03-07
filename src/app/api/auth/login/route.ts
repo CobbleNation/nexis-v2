@@ -28,6 +28,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
         }
 
+        // Check if Email is Verified
+        if (!user.emailVerified) {
+            return NextResponse.json({
+                error: 'Email not verified',
+                unverified: true
+            }, { status: 403 });
+        }
+
         // Create Tokens
         const accessToken = await createAccessToken({ userId: user.id, role: user.role });
         const refreshToken = await createRefreshToken({ userId: user.id, role: user.role });

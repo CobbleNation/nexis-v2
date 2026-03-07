@@ -20,6 +20,8 @@ export const users = sqliteTable('users', {
     role: text('role', { enum: ['user', 'support', 'manager', 'admin'] }).default('user').notNull(),
     resetToken: text('reset_token'),
     resetTokenExpiry: checkTimestamp('reset_token_expiry'),
+    verificationToken: text('verification_token'),
+    verificationTokenExpiry: checkTimestamp('verification_token_expiry'),
     createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()), // defaultNow() equivalent handled in app or via hook if needed, or stick to Date.now()
     updatedAt: checkTimestamp('updated_at').notNull().$defaultFn(() => new Date()),
 
