@@ -1,13 +1,15 @@
 import nodemailer from 'nodemailer';
 
+const isLocal = process.env.EMAIL_HOST === '127.0.0.1' || process.env.EMAIL_HOST === 'localhost';
+
 const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT) || 465,
-    secure: true, // true for 465, false for other ports
-    auth: {
+    port: Number(process.env.EMAIL_PORT) || (isLocal ? 25 : 465),
+    secure: process.env.EMAIL_SECURE === 'true' || (!isLocal && (Number(process.env.EMAIL_PORT) === 465)),
+    auth: process.env.EMAIL_USER && process.env.EMAIL_PASS ? {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
-    },
+    } : undefined,
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
