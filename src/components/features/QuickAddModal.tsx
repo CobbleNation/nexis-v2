@@ -1043,7 +1043,7 @@ export function QuickAddModal({
                         </div>
 
                         {/* Right Column: Metadata Sidebar */}
-                        <div className="bg-slate-50/50 dark:bg-card/50 p-4 space-y-5 h-auto sm:h-full sm:overflow-y-auto overflow-x-hidden">
+                        <div className="bg-slate-50/50 dark:bg-card/50 p-4 space-y-5 h-auto sm:h-full sm:overflow-y-auto pb-32 sm:pb-5">
 
                             {/* Area (Hide for Journal) */}
                             {!(type === 'content' && contentType === 'journal') && (

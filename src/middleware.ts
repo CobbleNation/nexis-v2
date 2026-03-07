@@ -22,6 +22,30 @@ const PUBLIC_PATHS = [
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
+    const hostname = request.headers.get('host');
+
+    // Subdomain routing logic
+    if (hostname === 'admin.zynorvia.com') {
+        if (pathname === '/') {
+            return NextResponse.rewrite(new URL('/admin', request.url));
+        }
+        if (!pathname.startsWith('/admin') && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+            return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url));
+        }
+    }
+
+    if (hostname === 'app.zynorvia.com') {
+        if (pathname === '/') {
+            return NextResponse.rewrite(new URL('/overview', request.url));
+        }
+    }
+
+    if (hostname === 'zynorvia.com') {
+        // If user is on the main domain but trying to access app routes, redirect to app subdomain
+        if (pathname !== '/' && !PUBLIC_PATHS.some(path => pathname.startsWith(path)) && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+            return NextResponse.redirect(new URL(`https://app.zynorvia.com${pathname}`, request.url));
+        }
+    }
 
     // 1. Allow all public paths and the landing page — no auth checks at all
     if (pathname === '/' || PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
