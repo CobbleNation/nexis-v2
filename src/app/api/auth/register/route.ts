@@ -73,10 +73,10 @@ export async function POST(req: Request) {
             }
         });
     } catch (err) {
-        console.error("Registration Error:", err);
+        console.error("Registration Error Details:", err);
         if (err instanceof z.ZodError) {
             return NextResponse.json({ error: 'Invalid data', details: (err as any).errors }, { status: 400 });
         }
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error', message: (err as any).message }, { status: 500 });
     }
 }
