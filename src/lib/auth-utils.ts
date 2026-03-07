@@ -104,18 +104,18 @@ export async function clearAuthCookies() {
     const domains = [undefined, '.zynorvia.com', 'zynorvia.com', 'app.zynorvia.com', 'admin.zynorvia.com'];
 
     for (const domain of domains) {
-        cookieStore.set('access_token', '', {
+        // Set same attributes as when cookies were set to ensure they are cleared
+        const cookieOptions = {
             path: '/',
             domain: process.env.NODE_ENV === 'production' ? domain : undefined,
             maxAge: 0,
-            expires: new Date(0)
-        });
-        cookieStore.set('refresh_token', '', {
-            path: '/',
-            domain: process.env.NODE_ENV === 'production' ? domain : undefined,
-            maxAge: 0,
-            expires: new Date(0)
-        });
+            expires: new Date(0),
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax' as const,
+        };
+        cookieStore.set('access_token', '', cookieOptions);
+        cookieStore.set('refresh_token', '', cookieOptions);
     }
 }
 
