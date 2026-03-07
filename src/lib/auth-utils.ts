@@ -20,7 +20,7 @@ import { createAccessToken, createRefreshToken, verifyJWT } from './jwt-utils';
 export { createAccessToken, createRefreshToken, verifyJWT };
 
 // --- Token Hashing (SHA-256 for session lookup) ---
-async function hashToken(token: string): Promise<string> {
+export async function hashToken(token: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(token);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -101,7 +101,8 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
 
 export async function clearAuthCookies() {
     const cookieStore = await cookies();
-    const domains = [undefined, '.zynorvia.com', 'zynorvia.com', 'app.zynorvia.com', 'admin.zynorvia.com'];
+    // Only two domain targets are needed: wildcard and host-specific (undefined)
+    const domains = [undefined, '.zynorvia.com'];
 
     for (const domain of domains) {
         // Set same attributes as when cookies were set to ensure they are cleared
