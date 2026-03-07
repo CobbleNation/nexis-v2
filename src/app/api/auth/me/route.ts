@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { verifyJWT } from '@/lib/auth-utils';
+import { verifyJWT, hashToken } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
 import { db } from '@/db';
-import { users, userLimits } from '@/db/schema';
+import { users, userLimits, sessions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +24,16 @@ export async function GET() {
     const payload = await verifyJWT(token);
     if (!payload || !payload.userId) {
         return NextResponse.json({ error: 'Invalid Token' }, { status: 401, headers: noCacheHeaders });
+    }
+
+    // Double-check session in DB if refresh_token exists
+    const refreshToken = cookieStore.get('refresh_token')?.value;
+    if (refreshToken) {
+        const [session] = await db.select().from(sessions).where(eq(sessions.refreshTokenHash, await hashToken(refreshToken))).limit(1);
+        if (!session || session.expiresAt < new Date()) {
+            // Session revoked or expired - force logout by returning 401
+            return NextResponse.json({ error: 'Session Revoked' }, { status: 401, headers: noCacheHeaders });
+        }
     }
 
     const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
