@@ -102,8 +102,14 @@ export async function setAuthCookies(accessToken: string, refreshToken: string) 
 export async function clearAuthCookies() {
     const cookieStore = await cookies();
     const domain = process.env.NODE_ENV === 'production' ? '.zynorvia.com' : undefined;
-    cookieStore.delete({ name: 'access_token', domain, path: '/' });
-    cookieStore.delete({ name: 'refresh_token', domain, path: '/' });
+
+    // Clear domain-wide cookies
+    cookieStore.set('access_token', '', { path: '/', domain, maxAge: 0 });
+    cookieStore.set('refresh_token', '', { path: '/', domain, maxAge: 0 });
+
+    // Also clear host-specific cookies just in case they exist
+    cookieStore.set('access_token', '', { path: '/', maxAge: 0 });
+    cookieStore.set('refresh_token', '', { path: '/', maxAge: 0 });
 }
 
 export async function getSession() {
