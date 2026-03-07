@@ -61,7 +61,7 @@ export function UpgradeModal({ open, onOpenChange, title, description }: Upgrade
                     <DialogFooter className="flex-col gap-3 sm:gap-0 mt-2">
                         <Button className="w-full h-11 text-sm font-semibold bg-orange-600 hover:bg-orange-700 text-white shadow-lg shadow-orange-500/20 rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" asChild>
                             <Link href="/pricing" onClick={() => onOpenChange(false)}>
-                                Отримати Pro за $5/міс
+                                Отримати Pro за 199грн/міс
                             </Link>
                         </Button>
                         <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground" onClick={() => onOpenChange(false)}>

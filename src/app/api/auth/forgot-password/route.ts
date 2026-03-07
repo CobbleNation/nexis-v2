@@ -3,6 +3,7 @@ import { db } from '@/db'; // Assuming db is exported from '@/db' or '@/db/index
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
+import { sendPasswordResetEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
     try {
@@ -30,11 +31,13 @@ export async function POST(req: Request) {
             })
             .where(eq(users.id, user.id));
 
-        // Mock Email Sending
-        console.log('---------------------------------------------------');
-        console.log(`[Validation Mode] Password Reset Link for ${email}:`);
-        console.log(`http://localhost:3000/reset-password?token=${token}`);
-        console.log('---------------------------------------------------');
+        // Send Reset Email
+        try {
+            await sendPasswordResetEmail(email, token);
+        } catch (emailError) {
+            console.error('Failed to send reset email:', emailError);
+            return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+        }
 
         return NextResponse.json({ message: 'Reset link sent' });
     } catch (error) {

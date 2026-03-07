@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { hashPassword, createAccessToken, createRefreshToken, setAuthCookies, createSession } from '@/lib/auth-utils';
+import { sendVerificationEmail } from '@/lib/email';
+import { randomBytes } from 'crypto';
 import { trackEvent } from '@/lib/analytics-server';
 import { seedLifeAreas } from '@/lib/seed-areas';
 import { z } from 'zod';
@@ -25,6 +27,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'User already exists' }, { status: 409 });
         }
 
+        // Generate Verification Token
+        const verificationToken = randomBytes(32).toString('hex');
+        const tokenExpiry = new Date(Date.now() + 24 * 3600000); // 24 hours
+
         // Create User
         const hashedPassword = await hashPassword(password);
         const [newUser] = await db.insert(users).values({
@@ -32,19 +38,23 @@ export async function POST(req: Request) {
             name,
             email,
             passwordHash: hashedPassword,
+            verificationToken: verificationToken,
+            verificationTokenExpiry: tokenExpiry
         }).returning();
 
-        // Create Tokens
-        const accessToken = await createAccessToken({ userId: newUser.id });
-        const refreshToken = await createRefreshToken({ userId: newUser.id, role: newUser.role });
-
-        // Store session in DB and set cookies
-        await createSession(newUser.id, refreshToken);
+        // Send Verification Email
+        try {
+            await sendVerificationEmail(email, name, verificationToken);
+        } catch (emailError) {
+            console.error("Failed to send verification email:", emailError);
+            // We continue even if email fails, user can request again or admin can verify
+        }
 
         // Seed Default Life Areas
         await seedLifeAreas(newUser.id);
 
-        await setAuthCookies(accessToken, refreshToken);
+        // DO NOT log in automatically anymore - require verification
+        // await setAuthCookies(accessToken, refreshToken); 
 
         // Track Registration
         await trackEvent({
@@ -55,17 +65,11 @@ export async function POST(req: Request) {
         });
 
         return NextResponse.json({
+            message: 'Registration successful. Please check your email to verify your account.',
             user: {
                 id: newUser.id,
-                name: newUser.name,
                 email: newUser.email,
-                role: newUser.role,
-                avatar: newUser.avatar,
-                subscriptionTier: newUser.subscriptionTier,
-                onboardingCompleted: newUser.onboardingCompleted,
-                cardLast4: newUser.cardLast4,
-                cardToken: newUser.cardToken,
-                customLimits: null
+                name: newUser.name
             }
         });
     } catch (err) {
