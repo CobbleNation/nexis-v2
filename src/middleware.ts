@@ -28,6 +28,11 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const hostname = request.headers.get('host') || '';
 
+    // 0. IMMEDIATE EXEMPTIONS FOR CRITICAL AUTH FLOWS
+    if (pathname === '/api/auth/verify' || pathname === '/api/auth/forgot-password' || pathname === '/api/auth/reset-password') {
+        return NextResponse.next();
+    }
+
     // 1. PUBLIC PATHS CHECK (MUST BE FIRST)
     // Be very permissive about public paths to avoid 401s on critical auth flows
     const isPublic =

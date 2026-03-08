@@ -37,10 +37,9 @@ export async function GET(req: Request) {
             })
             .where(eq(users.id, user.id));
 
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
-        const secureBaseUrl = baseUrl.includes('zynorvia.com') ? baseUrl.replace('http://', 'https://') : baseUrl;
-
-        return NextResponse.redirect(new URL('/auth/verified', secureBaseUrl));
+        const response = NextResponse.redirect(new URL('/auth/verified', req.url));
+        response.headers.set('X-Verification-Source', 'route-handler');
+        return response;
     } catch (error) {
         console.error('Verification error:', error);
         return NextResponse.redirect(new URL('/login?error=internal_error', req.url));

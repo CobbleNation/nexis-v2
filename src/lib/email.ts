@@ -16,8 +16,12 @@ const transporter = nodemailer.createTransport({
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
-// Force https for production domain
-const BASE_URL = APP_URL.includes('zynorvia.com') ? APP_URL.replace('http://', 'https://') : APP_URL;
+const rawBaseUrl = APP_URL.replace(/\/$/, ''); // remove trailing slash
+const BASE_URL = rawBaseUrl.includes('zynorvia.com') && !rawBaseUrl.startsWith('https://')
+    ? `https://${rawBaseUrl.replace('http://', '')}`
+    : (rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`);
+
+console.log('[Email] Using BASE_URL:', BASE_URL);
 
 export async function sendVerificationEmail(email: string, name: string, token: string) {
     const verifyUrl = `${BASE_URL}/api/auth/verify?token=${token}`;
