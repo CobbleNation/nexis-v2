@@ -64,7 +64,7 @@ export default function PaymentsPage() {
             const res = await fetch('/api/admin/payments');
             if (res.ok) {
                 const data = await res.json();
-                setPayments(data);
+                setPayments(data.payments || []);
             } else {
                 toast.error('Failed to fetch payments');
             }
@@ -218,10 +218,10 @@ export default function PaymentsPage() {
                                                 <Badge
                                                     variant="outline"
                                                     className={`gap-1 ${payment.status === 'success'
-                                                            ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/5'
-                                                            : payment.status === 'failure'
-                                                                ? 'border-rose-500/50 text-rose-500 bg-rose-500/5'
-                                                                : 'border-orange-500/50 text-orange-500 bg-orange-500/5'
+                                                        ? 'border-emerald-500/50 text-emerald-500 bg-emerald-500/5'
+                                                        : payment.status === 'failure'
+                                                            ? 'border-rose-500/50 text-rose-500 bg-rose-500/5'
+                                                            : 'border-orange-500/50 text-orange-500 bg-orange-500/5'
                                                         }`}
                                                 >
                                                     {payment.status === 'success' && <CheckCircle2 className="h-3 w-3" />}

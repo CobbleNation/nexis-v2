@@ -113,7 +113,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
             const res = await fetch(`/api/admin/users/${id}/payments`);
             if (res.ok) {
                 const data = await res.json();
-                setPayments(data.payments);
+                setPayments(data.payments || []);
             }
         } catch (err) {
             console.error('Failed to fetch payments', err);
