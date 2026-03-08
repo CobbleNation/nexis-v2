@@ -74,7 +74,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 // Only redirect if we're on a protected route (not already on login/register/public)
                 const path = window.location.pathname;
-                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms'];
+                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms', '/auth/verify', '/auth/verified'];
                 if (!publicPaths.includes(path)) {
                     window.location.href = '/login';
                 }
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } else {
                 setUser(null);
                 const path = window.location.pathname;
-                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms'];
+                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms', '/auth/verify', '/auth/verified'];
                 if (!publicPaths.includes(path)) {
                     window.location.href = '/login';
                 }
