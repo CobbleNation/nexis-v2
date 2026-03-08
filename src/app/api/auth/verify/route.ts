@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq, and, gt } from 'drizzle-orm';
+import { createAccessToken, createRefreshToken, setAuthCookies, createSession } from '@/lib/auth-utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,6 +47,12 @@ export async function POST(req: Request) {
                 verificationTokenExpiry: null
             })
             .where(eq(users.id, user.id));
+
+        // Auto-login: Create session and set cookies
+        const accessToken = await createAccessToken({ userId: user.id, role: user.role });
+        const refreshToken = await createRefreshToken({ userId: user.id });
+        await createSession(user.id, refreshToken);
+        await setAuthCookies(accessToken, refreshToken);
 
         return NextResponse.json({ message: 'Success' });
     } catch (error) {

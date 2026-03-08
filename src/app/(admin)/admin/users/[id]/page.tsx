@@ -285,8 +285,8 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Badge variant={user.emailVerified ? 'outline' : 'destructive'} className={user.emailVerified ? "border-emerald-500 text-emerald-500" : ""}>
-                        {user.emailVerified ? 'ВЕРИФІКОВАНО' : 'НЕВЕРИФІКОВАНО'}
+                    <Badge variant={!!user.emailVerified ? 'outline' : 'destructive'} className={!!user.emailVerified ? "border-emerald-500 text-emerald-500" : ""}>
+                        {!!user.emailVerified ? 'ВЕРИФІКОВАНО' : 'НЕВЕРИФІКОВАНО'}
                     </Badge>
                     <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'} className="capitalize px-3 py-1 text-sm">
                         {user.role}

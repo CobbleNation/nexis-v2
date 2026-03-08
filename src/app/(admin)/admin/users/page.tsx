@@ -144,11 +144,11 @@ export default function UsersPage() {
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="outline" className={
-                                                user.emailVerified
+                                                !!user.emailVerified
                                                     ? 'border-emerald-500 text-emerald-500'
                                                     : 'border-rose-500 text-rose-500'
                                             }>
-                                                {user.emailVerified ? 'Підтверджено' : 'Непідтверджено'}
+                                                {!!user.emailVerified ? 'Підтверджено' : 'Непідтверджено'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-slate-400 text-sm">

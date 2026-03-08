@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 
 export default function VerifiedPage() {
     const [isLoaded, setIsLoaded] = useState(false);
-    const [countdown, setCountdown] = useState(3);
+    const [countdown, setCountdown] = useState(2);
     const router = useRouter();
 
     useEffect(() => {

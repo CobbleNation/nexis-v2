@@ -50,10 +50,12 @@ export async function POST(req: Request) {
             // We continue even if email fails, user can request again or admin can verify
         }
 
+        /* 
         // Seed Default Life Areas
         await seedLifeAreas(newUser.id).catch(err => {
             console.error("Failed to seed life areas, but continuing registration:", err);
         });
+        */
 
         // Initialize User Limits with defaults
         try {

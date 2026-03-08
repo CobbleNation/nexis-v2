@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, adminAuditLogs } from '@/db/schema';
+import {
+    users, goals, projects, actions, metricDefinitions, metricEntries,
+    calendarEvents, notes, focuses, checkIns, insights, periods,
+    experiments, routines, journalEntries, fileAssets, libraryItems,
+    habits, habitLogs, sessions, userLimits, lifeAreas, adminAuditLogs
+} from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
-import { eq, sql, desc, like, or } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 
 async function checkAdmin() {
@@ -137,22 +142,17 @@ export async function DELETE(
         if (mode === 'data') {
             // Delete all user data except the user record itself
             await db.transaction(async (tx) => {
-                // List of tables to clear for the user
                 const tables = [
-                    'goals', 'projects', 'actions', 'metric_definitions', 'metric_entries',
-                    'calendar_events', 'notes', 'focuses', 'check_ins', 'insights',
-                    'periods', 'experiments', 'routines', 'journal_entries', 'file_assets',
-                    'library_items', 'habits', 'habit_logs', 'sessions', 'user_limits'
+                    goals, projects, actions, metricDefinitions, metricEntries,
+                    calendarEvents, notes, focuses, checkIns, insights,
+                    periods, experiments, routines, journalEntries, fileAssets,
+                    libraryItems, habits, habitLogs, sessions, userLimits, lifeAreas
                 ];
 
-                for (const tableName of tables) {
-                    // Use execute with raw SQL for generic table deletion
-                    await tx.run(sql.raw(`DELETE FROM ${tableName} WHERE user_id = '${userId}'`));
+                for (const table of tables) {
+                    // Drizzle delete handles the condition based on the table's userId column
+                    await tx.delete(table).where(eq((table as any).userId, userId));
                 }
-
-                // Also sessions table has userId column (not user_id) in some schemas, 
-                // but our schema.ts says userId for sessions.
-
             });
 
             // Audit
