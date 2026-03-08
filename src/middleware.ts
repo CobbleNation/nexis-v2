@@ -32,6 +32,8 @@ export async function middleware(request: NextRequest) {
     // Be very permissive about public paths to avoid 401s on critical auth flows
     const isPublic =
         pathname === '/' ||
+        pathname.startsWith('/api/auth') ||
+        pathname.startsWith('/auth/') ||
         PUBLIC_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'));
 
     if (isPublic) {
@@ -83,7 +85,10 @@ export async function middleware(request: NextRequest) {
 
     if (!isAuthorized) {
         if (pathname.startsWith('/api/')) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json(
+                { error: 'Unauthorized', path: pathname },
+                { status: 401, headers: { 'X-Middleware-Path': pathname } }
+            );
         }
         return NextResponse.redirect(
             new URL(`/login?returnUrl=${encodeURIComponent(pathname)}`, request.url)
