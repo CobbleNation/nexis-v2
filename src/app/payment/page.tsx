@@ -76,7 +76,7 @@ export default function PaymentPage() {
                                     <div className="flex flex-col gap-4">
                                         <Button
                                             size="lg"
-                                            className="w-full h-14 text-lg font-bold bg-black hover:bg-zinc-800 text-white shadow-lg shadow-black/10 flex items-center justify-center gap-3"
+                                            className="w-full h-14 text-lg font-bold bg-black hover:bg-zinc-900 text-white shadow-lg shadow-black/10 flex items-center justify-center gap-3 rounded-2xl"
                                             onClick={handlePayment}
                                             disabled={isLoading}
                                         >
@@ -84,7 +84,7 @@ export default function PaymentPage() {
                                                 'Обробка...'
                                             ) : (
                                                 <>
-                                                    <CreditCard className="w-5 h-5" />
+                                                    <img src="https://monobank.ua/resources/logo-white.svg" alt="Monobank" className="h-6 w-auto mr-2" />
                                                     Оплатити через Monobank
                                                 </>
                                             )}

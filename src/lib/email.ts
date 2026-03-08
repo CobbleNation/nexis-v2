@@ -16,9 +16,11 @@ const transporter = nodemailer.createTransport({
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
+// Force https for production domain
+const BASE_URL = APP_URL.includes('zynorvia.com') ? APP_URL.replace('http://', 'https://') : APP_URL;
 
 export async function sendVerificationEmail(email: string, name: string, token: string) {
-    const verifyUrl = `${APP_URL}/api/auth/verify?token=${token}`;
+    const verifyUrl = `${BASE_URL}/api/auth/verify?token=${token}`;
 
     await transporter.sendMail({
         from: `"Zynorvia" <${process.env.EMAIL_USER}>`,
@@ -59,7 +61,7 @@ export async function sendVerificationEmail(email: string, name: string, token: 
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
-    const resetUrl = `${APP_URL}/reset-password?token=${token}`;
+    const resetUrl = `${BASE_URL}/reset-password?token=${token}`;
 
     await transporter.sendMail({
         from: `"Zynorvia" <${process.env.EMAIL_USER}>`,

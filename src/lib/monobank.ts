@@ -1,6 +1,6 @@
 import { createHmac } from 'crypto';
 
-const MONOBANK_TOKEN = 'umZ2JjSdPEl8_mHqpUTMbejeC_jkChAV1s7Ua4yOw_lo'; // Test token provided by user
+const MONOBANK_TOKEN = 'mdHcvEHHAWR7b5OAnZfuJxw'; // Production token provided by user
 const MONOBANK_API_URL = 'https://api.monobank.ua/api/merchant';
 
 interface CreateInvoiceParams {
