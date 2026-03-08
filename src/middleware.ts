@@ -26,9 +26,19 @@ const PUBLIC_PATHS = [
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const hostname = request.headers.get('host');
+    const hostname = request.headers.get('host') || '';
 
-    // Subdomain routing logic
+    // 1. PUBLIC PATHS CHECK (MUST BE FIRST)
+    // Be very permissive about public paths to avoid 401s on critical auth flows
+    const isPublic =
+        pathname === '/' ||
+        PUBLIC_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'));
+
+    if (isPublic) {
+        return NextResponse.next();
+    }
+
+    // 2. DOMAIN REDIRECTS (ONLY FOR NON-PUBLIC PATHS)
     if (hostname === 'admin.zynorvia.com') {
         if (pathname === '/') {
             return NextResponse.rewrite(new URL('/admin', request.url));
@@ -45,33 +55,24 @@ export async function middleware(request: NextRequest) {
     }
 
     if (hostname === 'zynorvia.com') {
-        // If user is on the main domain but trying to access app routes, redirect to app subdomain
-        if (pathname !== '/' && !PUBLIC_PATHS.some(path => pathname.startsWith(path)) && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+        // Redirect non-public app routes to the app subdomain
+        if (!pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
             return NextResponse.redirect(new URL(`https://app.zynorvia.com${pathname}`, request.url));
         }
     }
 
-    // 1. Allow all public paths and the landing page — no auth checks at all
-    if (pathname === '/' || PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
-        return NextResponse.next();
-    }
-
-    // 2. Everything else requires authentication
+    // 3. AUTHENTICATION (EVERYTHING ELSE)
     const accessToken = request.cookies.get('access_token')?.value;
     const refreshToken = request.cookies.get('refresh_token')?.value;
 
     let isAuthorized = false;
     let payload: any = null;
 
-    // Check access token first
     if (accessToken) {
         payload = await verifyJWT(accessToken);
-        if (payload) {
-            isAuthorized = true;
-        }
+        if (payload) isAuthorized = true;
     }
 
-    // If access token is invalid/expired, check refresh token
     if (!isAuthorized && refreshToken) {
         const refreshPayload = await verifyJWT(refreshToken);
         if (refreshPayload) {
@@ -80,26 +81,16 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // Not authenticated — redirect to login and clear any stale cookies
     if (!isAuthorized) {
-        const isApiRoute = pathname.startsWith('/api/');
-
-        if (isApiRoute) {
+        if (pathname.startsWith('/api/')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
-
-        const response = NextResponse.redirect(
+        return NextResponse.redirect(
             new URL(`/login?returnUrl=${encodeURIComponent(pathname)}`, request.url)
         );
-
-        // Clear any invalid cookies
-        response.cookies.delete('access_token');
-        response.cookies.delete('refresh_token');
-
-        return response;
     }
 
-    // 3. Admin route guard
+    // 4. ADMIN GUARD
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
         const role = payload?.role as string | undefined;
         if (role !== 'admin') {
