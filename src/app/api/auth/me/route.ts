@@ -18,7 +18,7 @@ export async function GET() {
     const token = cookieStore.get('access_token')?.value;
 
     if (!token) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401, headers: noCacheHeaders });
+        return NextResponse.json({ error: 'Unauthorized-ME' }, { status: 401, headers: noCacheHeaders });
     }
 
     const payload = await verifyJWT(token);

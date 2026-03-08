@@ -26,8 +26,8 @@ export default function ForgotPasswordPage() {
 
             setIsSent(true);
             toast.success('Інструкції надіслано на вашу пошту');
-        } catch (error) {
-            toast.error('Сталася помилка. Спробуйте пізніше.');
+        } catch (error: any) {
+            toast.error(error.message || 'Сталася помилка. Спробуйте пізніше.');
             console.error(error);
         } finally {
             setIsSubmitting(false);
