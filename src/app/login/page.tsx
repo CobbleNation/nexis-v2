@@ -18,17 +18,8 @@ function LoginContent() {
     const searchParams = useSearchParams();
 
     useEffect(() => {
-        const verified = searchParams.get('verified');
         const error = searchParams.get('error');
-
-        console.log('Login Page Params:', { verified, error });
-
-        if (verified === '1') {
-            toast.success('Пошту успішно підтверджено! Тепер ви можете увійти.');
-            // Clean up URL
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, '', newUrl);
-        } else if (error === 'invalid_token') {
+        if (error === 'invalid_token') {
             toast.error('Недійсний або прострочений токен підтвердження.');
             window.history.replaceState({}, '', window.location.pathname);
         }

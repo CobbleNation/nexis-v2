@@ -20,7 +20,7 @@ export async function POST(req: Request) {
         // Since we can't easily query > date in sqlite with some drivers directly in where clause without raw sql sometimes,
         // let's fetch by token first and validate in code for safety, or try standard gt()
 
-        const user = await db.select().from(users).where(eq(users.resetToken, token)).get();
+        const [user] = await db.select().from(users).where(eq(users.resetToken, token)).limit(1);
 
         if (!user) {
             return NextResponse.json({ error: 'Invalid or expired token' }, { status: 400 });

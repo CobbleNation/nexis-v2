@@ -35,7 +35,7 @@ export async function GET(req: Request) {
             })
             .where(eq(users.id, user.id));
 
-        return NextResponse.redirect(new URL('/login?verified=1', req.url));
+        return NextResponse.redirect(new URL('/auth/verified', req.url));
     } catch (error) {
         console.error('Verification error:', error);
         return NextResponse.redirect(new URL('/login?error=internal_error', req.url));
