@@ -11,8 +11,9 @@ export async function GET(req: Request) {
         const token = searchParams.get('token');
         console.log('[Verify] Request received with token:', token?.substring(0, 8) + '...');
 
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
         if (!token) {
-            return NextResponse.redirect(new URL('/login?error=missing_token', req.url));
+            return NextResponse.redirect(new URL('/login?error=missing_token', baseUrl));
         }
 
         // Find user with this token and check expiry
@@ -22,11 +23,11 @@ export async function GET(req: Request) {
             .limit(1);
 
         if (!user) {
-            return NextResponse.redirect(new URL('/login?error=invalid_token', req.url));
+            return NextResponse.redirect(new URL('/login?error=invalid_token', baseUrl));
         }
 
         if (user.verificationTokenExpiry && user.verificationTokenExpiry < new Date()) {
-            return NextResponse.redirect(new URL('/login?error=expired_token', req.url));
+            return NextResponse.redirect(new URL('/login?error=expired_token', baseUrl));
         }
 
         // Mark as verified
@@ -38,11 +39,12 @@ export async function GET(req: Request) {
             })
             .where(eq(users.id, user.id));
 
-        const response = NextResponse.redirect(new URL('/auth/verified', req.url));
+        const response = NextResponse.redirect(new URL('/auth/verified', baseUrl));
         response.headers.set('X-Verification-Source', 'route-handler');
         return response;
     } catch (error) {
         console.error('Verification error:', error);
-        return NextResponse.redirect(new URL('/login?error=internal_error', req.url));
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
+        return NextResponse.redirect(new URL('/login?error=internal_error', baseUrl));
     }
 }
