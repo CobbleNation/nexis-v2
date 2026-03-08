@@ -92,12 +92,10 @@ jobs:
                   - .env
             EOF
             
-            # Pull the latest image
+            # Full cleanup and restart to ensure new code is live
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            
-            # Restart the container
-            docker compose down
-            docker compose up -d
+            docker compose down --remove-orphans
+            docker compose up -d --force-recreate
             
             # Clean up old unused images to save disk space
-            docker image prune -f
+            docker image prune -a -f --filter "until=24h"

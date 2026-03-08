@@ -86,7 +86,7 @@ export async function middleware(request: NextRequest) {
     if (!isAuthorized) {
         if (pathname.startsWith('/api/')) {
             return NextResponse.json(
-                { error: 'Unauthorized', path: pathname },
+                { error: 'Unauthorized_v4', path: pathname, isPublic: isPublic },
                 { status: 401, headers: { 'X-Middleware-Path': pathname } }
             );
         }
@@ -111,6 +111,18 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|ico|webp)$).*)',
+        '/api/auth/:path*',
+        '/api/admin/:path*',
+        '/api/users/:path*',
+        '/api/ai/:path*',
+        '/admin/:path*',
+        '/overview/:path*',
+        '/settings/:path*',
+        '/goals/:path*',
+        '/projects/:path*',
+        '/areas/:path*',
+        '/auth/verified',
+        '/forgot-password',
+        '/reset-password',
     ],
 };
