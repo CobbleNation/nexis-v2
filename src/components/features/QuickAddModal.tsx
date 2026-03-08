@@ -1,4 +1,3 @@
-import { useOnboarding } from "@/components/onboarding/OnboardingProvider";
 import * as React from "react"
 import { useState } from "react"
 import { ArrowRight, Calendar, Check, ChevronRight, Clock, Hash, Image as ImageIcon, Link2, ListTodo, Loader2, Mic, Paperclip, Play, Plus, Target, Type, X, AlertCircle, CheckSquare, FileText, BarChart3, Repeat, Trash2, List, Folder, BookOpen, HardDrive, Link as LinkIcon, Video, Layout, Zap } from 'lucide-react';
@@ -53,7 +52,6 @@ export function QuickAddModal({
     };
 }) {
     // Basic State
-    const { nextStep, isActive, currentStep } = useOnboarding();
     const [type, setType] = React.useState<string>(defaultTab);
     const [title, setTitle] = React.useState('');
 
@@ -172,12 +170,7 @@ export function QuickAddModal({
 
     const { state, dispatch } = useData();
 
-    // Helper to advance onboarding
-    const checkAndAdvance = (expectedStep: string) => {
-        if (isActive && currentStep === expectedStep) {
-            setTimeout(() => nextStep(), 150);
-        }
-    };
+
 
     // Listen for external triggers (e.g., Daily Recap Card)
     React.useEffect(() => {
@@ -456,11 +449,11 @@ export function QuickAddModal({
                             ? (reminderType === 'custom' ? reminderCustomTime : calculateReminderTime(date, startTime, reminderType))
                             : undefined
                     };
+                    // Add to store
                     dispatch({ type: 'ADD_ACTION', payload: newTask });
                     if (onActionCreated) {
                         onActionCreated(newTask);
                     }
-                    // Onboarding step advance removed
                     toast.success(isFocus ? "Фокус-завдання створено" : "Завдання створено");
                     break;
 
@@ -734,12 +727,7 @@ export function QuickAddModal({
                                 key={ent.id}
                                 id={`quick-add-tab-${ent.id}`}
                                 onClick={() => {
-                                    // Onboarding step check removed
                                     setType(ent.id);
-                                    if (isActive) {
-                                        // Legacy/Obsolete checks removed.
-                                        // Step progression is now handled by specific element interactions.
-                                    }
                                 }}
                                 className={cn(
                                     "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold whitespace-nowrap transition-all outline-none focus:ring-2 focus:ring-slate-200 dark:focus:ring-primary/20",
@@ -784,20 +772,15 @@ export function QuickAddModal({
                                         <CurrentIcon className="h-5 w-5" />
                                     </div>
                                     <Input
-                                        id={type === 'content' ? 'note-title-input' : 'onboarding-task-title'}
+                                        id={type === 'content' ? 'note-title-input' : 'task-title'}
                                         value={title}
                                         onChange={(e) => {
                                             setTitle(e.target.value);
                                         }}
                                         onBlur={() => {
-                                            if (title.trim().length > 0) {
-                                                // Onboarding checks removed
-                                            }
                                         }}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter' && !e.shiftKey) {
-                                                // Prevent submission if in onboarding title step
-                                                // Onboarding checks removed
                                                 handleSubmit();
                                             }
                                         }}
@@ -1049,8 +1032,8 @@ export function QuickAddModal({
                             {!(type === 'content' && contentType === 'journal') && (
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Сфера <span className="text-red-500">*</span></label>
-                                    <Select value={areaId} onValueChange={(v) => { setAreaId(v); checkAndAdvance('create-task-area'); }} disabled={!!projectId}>
-                                        <SelectTrigger id="onboarding-task-area" className="h-8 w-full bg-white dark:bg-secondary/20 border-slate-200 dark:border-border shadow-sm text-xs disabled:opacity-50 disabled:cursor-not-allowed dark:text-foreground">
+                                    <Select value={areaId} onValueChange={(v) => { setAreaId(v); }} disabled={!!projectId}>
+                                        <SelectTrigger id="task-area" className="h-8 w-full bg-white dark:bg-secondary/20 border-slate-200 dark:border-border shadow-sm text-xs disabled:opacity-50 disabled:cursor-not-allowed dark:text-foreground">
                                             <SelectValue placeholder="Сфера" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -1159,7 +1142,6 @@ export function QuickAddModal({
                                             value={date}
                                             onChange={(e) => {
                                                 setDate(e.target.value);
-                                                checkAndAdvance('create-task-date');
                                             }}
                                             required
                                             className="h-8 w-full min-w-0 max-w-full text-xs bg-white dark:bg-secondary/20 border border-slate-200 dark:border-border rounded-md px-2 text-foreground appearance-none block box-border"
@@ -1395,8 +1377,8 @@ export function QuickAddModal({
                             {(type === 'task' || type === 'routine') && (
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Тривалість <span className="text-red-500">*</span></label>
-                                    <Select value={duration} onValueChange={(v) => { setDuration(v); checkAndAdvance('create-task-duration'); }}>
-                                        <SelectTrigger id="onboarding-task-duration" className="h-8 w-full bg-white dark:bg-secondary/20 border-slate-200 dark:border-border shadow-sm text-xs dark:text-foreground">
+                                    <Select value={duration} onValueChange={(v) => { setDuration(v); }}>
+                                        <SelectTrigger id="task-duration" className="h-8 w-full bg-white dark:bg-secondary/20 border-slate-200 dark:border-border shadow-sm text-xs dark:text-foreground">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="max-h-[200px]">
@@ -1496,7 +1478,7 @@ export function QuickAddModal({
                                 });
                             })()) && (
                                     <Button
-                                        id={type === 'content' ? 'note-submit-btn' : 'onboarding-task-create-btn'}
+                                        id={type === 'content' ? 'note-submit-btn' : 'task-create-btn'}
                                         size="sm"
                                         onClick={handleSubmit}
                                         className="bg-orange-600 text-white hover:bg-orange-700 rounded-md shadow-sm px-6 font-medium disabled:opacity-50 disabled:cursor-not-allowed"

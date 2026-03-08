@@ -24,6 +24,7 @@ interface User {
     email: string;
     role: string;
     subscriptionTier: string;
+    emailVerified: string | null;
     createdAt: string;
     lastActive: string | null; // Changed to string | null as it comes from SQL
     goalsCount: number;
@@ -89,6 +90,7 @@ export default function UsersPage() {
                                     <TableHead className="text-slate-400">Користувач</TableHead>
                                     <TableHead className="text-slate-400">Роль</TableHead>
                                     <TableHead className="text-slate-400">План</TableHead>
+                                    <TableHead className="text-slate-400">Верифікація</TableHead>
                                     <TableHead className="text-slate-400">Активність</TableHead>
                                     <TableHead className="text-slate-400">Остання активність</TableHead>
                                     <TableHead className="text-right text-slate-400">Дії</TableHead>
@@ -138,6 +140,15 @@ export default function UsersPage() {
                                                     : 'text-slate-400'
                                             }>
                                                 {user.subscriptionTier}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className={
+                                                user.emailVerified
+                                                    ? 'border-emerald-500 text-emerald-500'
+                                                    : 'border-rose-500 text-rose-500'
+                                            }>
+                                                {user.emailVerified ? 'Підтверджено' : 'Непідтверджено'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-slate-400 text-sm">

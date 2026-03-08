@@ -185,7 +185,7 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
                                 }}
                             >
                                 <div className="flex items-center gap-2 md:gap-3">
-                                    <div className="flex items-center gap-1.5 md:gap-2" id="onboarding-context-score">
+                                    <div className="flex items-center gap-1.5 md:gap-2" id="context-score">
                                         <span className={cn("text-3xl md:text-5xl font-extrabold tabular-nums transition-colors duration-300", getScoreColor(score))}>
                                             {score}
                                         </span>

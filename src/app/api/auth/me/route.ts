@@ -58,7 +58,6 @@ export async function GET() {
             email: user.email,
             avatar: user.avatar,
             subscriptionTier: user.subscriptionTier,
-            onboardingCompleted: user.onboardingCompleted,
             role: user.role,
             cardLast4: user.cardLast4,
             cardToken: user.cardToken,

@@ -38,11 +38,13 @@ export async function GET(
             name: users.name,
             email: users.email,
             role: users.role,
+            emailVerified: users.emailVerified,
             subscriptionTier: users.subscriptionTier,
+            subscriptionExpiresAt: users.subscriptionExpiresAt,
             createdAt: users.createdAt,
             updatedAt: users.updatedAt,
             avatar: users.avatar,
-            onboardingCompleted: users.onboardingCompleted,
+
             goalsCount: sql<number>`(SELECT COUNT(*) FROM goals WHERE goals.user_id = ${users.id})`,
             habitsCount: sql<number>`(SELECT COUNT(*) FROM habits WHERE habits.user_id = ${users.id})`,
             lastActive: sql<string>`(SELECT MAX(last_used_at) FROM sessions WHERE sessions.user_id = ${users.id})`
@@ -74,7 +76,7 @@ export async function PATCH(
 
     try {
         const body = await req.json();
-        const { role, subscriptionTier } = body;
+        const { role, subscriptionTier, subscriptionExpiresAt } = body;
 
         // Validation
         const validRoles = ['user', 'support', 'manager', 'admin'];
@@ -84,7 +86,11 @@ export async function PATCH(
         if (role && validRoles.includes(role)) updateData.role = role;
         if (subscriptionTier && validTiers.includes(subscriptionTier)) updateData.subscriptionTier = subscriptionTier;
         if (typeof body.name === 'string' && body.name.trim().length > 0) updateData.name = body.name.trim();
-        if (typeof body.onboardingCompleted === 'boolean') updateData.onboardingCompleted = body.onboardingCompleted;
+
+
+        if (subscriptionExpiresAt !== undefined) {
+            updateData.subscriptionExpiresAt = subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : null;
+        }
 
         if (Object.keys(updateData).length === 0) {
             return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
@@ -111,6 +117,78 @@ export async function PATCH(
         return NextResponse.json({ success: true, user: updateData });
     } catch (error) {
         console.error('Failed to update user:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+export async function DELETE(
+    req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const adminId = await checkAdmin();
+    if (!adminId) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const { id: userId } = await params;
+    const { searchParams } = new URL(req.url);
+    const mode = searchParams.get('mode') || 'data'; // 'data' or 'account'
+
+    try {
+        if (mode === 'data') {
+            // Delete all user data except the user record itself
+            await db.transaction(async (tx) => {
+                // List of tables to clear for the user
+                const tables = [
+                    'goals', 'projects', 'actions', 'metric_definitions', 'metric_entries',
+                    'calendar_events', 'notes', 'focuses', 'check_ins', 'insights',
+                    'periods', 'experiments', 'routines', 'journal_entries', 'file_assets',
+                    'library_items', 'habits', 'habit_logs', 'sessions', 'user_limits'
+                ];
+
+                for (const tableName of tables) {
+                    // Use execute with raw SQL for generic table deletion
+                    await tx.run(sql.raw(`DELETE FROM ${tableName} WHERE user_id = '${userId}'`));
+                }
+
+                // Also sessions table has userId column (not user_id) in some schemas, 
+                // but our schema.ts says userId for sessions.
+
+            });
+
+            // Audit
+            await db.insert(adminAuditLogs).values({
+                id: uuidv4(),
+                adminId: adminId,
+                action: 'DELETE_USER_DATA',
+                entityType: 'user',
+                entityId: userId,
+                details: { mode: 'data' },
+                createdAt: new Date()
+            });
+
+            return NextResponse.json({ success: true, message: 'User data cleared successfully' });
+        } else if (mode === 'account') {
+            // Full account deletion
+            // Drizzle should handle cascades if defined, but we'll be thorough
+            await db.delete(users).where(eq(users.id, userId));
+
+            // Audit (log remains even if user is gone)
+            await db.insert(adminAuditLogs).values({
+                id: uuidv4(),
+                adminId: adminId,
+                action: 'DELETE_USER_ACCOUNT',
+                entityType: 'user',
+                entityId: userId,
+                details: { mode: 'account' },
+                createdAt: new Date()
+            });
+
+            return NextResponse.json({ success: true, message: 'User account deleted successfully' });
+        }
+
+        return NextResponse.json({ error: 'Invalid deletion mode' }, { status: 400 });
+    } catch (error) {
+        console.error('Failed to delete user/data:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

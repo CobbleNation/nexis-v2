@@ -20,14 +20,13 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { bio, firstName, lastName, avatar, onboardingCompleted } = body;
+        const { bio, firstName, lastName, avatar } = body;
         const userId = payload.userId as string;
 
         // Construct update object dynamically
         const updateData: any = {};
         if (bio !== undefined) updateData.bio = bio;
         if (avatar !== undefined) updateData.avatar = avatar;
-        if (onboardingCompleted !== undefined) updateData.onboardingCompleted = onboardingCompleted;
 
         // Handle name reconstruction if needed, or just store fields if schema supports it
         // Schema has 'name', but UI uses firstName/lastName. 

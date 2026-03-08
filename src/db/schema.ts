@@ -16,7 +16,8 @@ export const users = sqliteTable('users', {
     emailVerified: checkTimestamp('email_verified'),
     avatar: text('avatar'),
     subscriptionTier: text('subscription_tier').default('free'), // free, pro
-    onboardingCompleted: boolean('onboarding_completed').default(false),
+    subscriptionExpiresAt: checkTimestamp('subscription_expires_at'),
+
     role: text('role', { enum: ['user', 'support', 'manager', 'admin'] }).default('user').notNull(),
     resetToken: text('reset_token'),
     resetTokenExpiry: checkTimestamp('reset_token_expiry'),

@@ -14,7 +14,6 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { useData } from '@/lib/store';
-import { useOnboarding } from '@/components/onboarding/OnboardingProvider';
 import { BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -23,7 +22,6 @@ export default function SettingsPage() {
     const { theme, setTheme } = useTheme();
     const { state, dispatch } = useData();
     const { notificationSettings } = state;
-    const { startOnboarding } = useOnboarding();
     const router = useRouter();
 
     // Local state for profile form
@@ -457,25 +455,7 @@ export default function SettingsPage() {
                                         <Button variant="destructive" size="sm" onClick={deleteAccount} className="rounded-full shadow-lg shadow-rose-500/20 px-6 font-bold">Видалити акаунт</Button>
                                     </div>
 
-                                    <div className="flex items-center justify-between p-5 border border-border rounded-xl bg-orange-50/30 dark:bg-orange-950/10">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <BookOpen className="w-4 h-4 text-orange-600 dark:text-orange-400" />
-                                                <h4 className="font-bold text-foreground text-sm">Перезапустити туторіал</h4>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground leading-relaxed max-w-sm">
-                                                Пройти навчання з початку, щоб згадати всі функції Zynorvia.
-                                            </p>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={startOnboarding}
-                                            className="hover:bg-orange-100 hover:text-orange-700 hover:border-orange-200 dark:hover:bg-orange-950/30 dark:hover:text-orange-400 border-border font-medium text-foreground"
-                                        >
-                                            Запустити
-                                        </Button>
-                                    </div>
+
                                 </CardContent>
                             </Card>
                         </TabsContent>

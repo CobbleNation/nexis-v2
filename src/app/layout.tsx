@@ -6,8 +6,6 @@ import { DataProvider } from "@/lib/store";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { NotificationManager } from "@/components/features/NotificationManager";
-import { OnboardingProvider } from "@/components/onboarding/OnboardingProvider";
-import { OnboardingOverlay } from "@/components/onboarding/OnboardingOverlay";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,6 +21,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Zynorvia | Your Life OS",
   description: "A comprehensive Zynorvia system for tracking and improving your life.",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export const viewport: Viewport = {
@@ -51,12 +52,9 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               <TooltipProvider>
-                <OnboardingProvider>
-                  <NotificationManager />
-                  {children}
-                  <OnboardingOverlay />
-                  <Toaster />
-                </OnboardingProvider>
+                <NotificationManager />
+                {children}
+                <Toaster />
               </TooltipProvider>
             </ThemeProvider>
           </DataProvider>

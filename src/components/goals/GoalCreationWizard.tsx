@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { differenceInDays, addMonths, addYears, parseISO, isValid, format } from 'date-fns';
 import { MetricSuggestionResponse } from '@/lib/ai/types';
 import { MetricCreationWizard } from '@/components/metrics/MetricCreationWizard';
-import { useOnboarding } from '@/components/onboarding/OnboardingProvider';
 import { useSubscription } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/common/UpgradeModal';
 
@@ -31,7 +30,6 @@ interface GoalCreationWizardProps {
 
 export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, onComplete, onCancel }: GoalCreationWizardProps) {
     const { state, dispatch } = useData();
-    const { nextStep, currentStep, isActive: isOnboardingActive } = useOnboarding();
 
     const [isLoading, setIsLoading] = useState(false);
     const [step, setStep] = useState(1);
@@ -43,13 +41,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
 
 
-    // Helper to advance onboarding if active and on correct step
-    const checkAndAdvance = (expectedStep: string) => {
-        if (isOnboardingActive && currentStep === expectedStep) {
-            // Small delay to allow UI update before moving spotlight
-            setTimeout(() => nextStep(), 150);
-        }
-    };
+
 
     // ... handlers ...
 
@@ -385,7 +377,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                 desc="Напрямок руху. Задає сенс, без дедлайнів."
                                 extra="Макс 2 на сферу."
                                 selected={goalType === 'vision'}
-                                onClick={() => { setGoalType('vision'); checkAndAdvance('create-goal-type'); setStep(2); }}
+                                onClick={() => { setGoalType('vision'); setStep(2); }}
                                 colorClass="text-emerald-600 dark:text-emerald-400"
                                 bgClass="bg-emerald-50 dark:bg-emerald-950/30"
                                 borderClass="border-emerald-200 dark:border-emerald-800"
@@ -398,7 +390,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                 subtitle="(3 міс. – 1 рік)"
                                 desc="Головна зміна. Конкретний, вимірюваний результат."
                                 selected={goalType === 'strategic'}
-                                onClick={() => { setGoalType('strategic'); checkAndAdvance('create-goal-type'); setStep(2); }}
+                                onClick={() => { setGoalType('strategic'); setStep(2); }}
                                 colorClass="text-amber-500 dark:text-amber-400"
                                 bgClass="bg-amber-50 dark:bg-amber-950/30"
                                 borderClass="border-amber-200 dark:border-amber-800"
@@ -411,7 +403,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                 subtitle="(1–3 місяці)"
                                 desc="Короткий спринт для фокусу на важливому зараз."
                                 selected={goalType === 'tactical'}
-                                onClick={() => { setGoalType('tactical'); checkAndAdvance('create-goal-type'); setStep(2); }}
+                                onClick={() => { setGoalType('tactical'); setStep(2); }}
                                 colorClass="text-orange-500 dark:text-orange-400"
                                 bgClass="bg-orange-50 dark:bg-orange-950/30"
                                 borderClass="border-orange-200 dark:border-orange-800"
@@ -437,7 +429,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 max-w-2xl mx-auto py-4">
                         <div className="space-y-3">
                             <Label className="text-base font-semibold text-slate-700 dark:text-foreground">1. Оберіть Сферу</Label>
-                            <Select value={areaId} onValueChange={(val) => { setAreaId(val); checkAndAdvance('create-goal-area'); }}>
+                            <Select value={areaId} onValueChange={(val) => { setAreaId(val); }}>
                                 <SelectTrigger id="goal-area-select" className="h-12 text-base bg-white dark:bg-secondary/20 shadow-sm border-slate-200 dark:border-border rounded-xl px-4 dark:text-foreground">
                                     <SelectValue placeholder="Сфера..." />
                                 </SelectTrigger>
@@ -466,7 +458,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                         <div className="space-y-3">
                             <Label className="text-base font-semibold text-slate-700 dark:text-foreground">2. Сформулюйте Ціль</Label>
                             <div className="grid grid-cols-[1fr_2fr] gap-3">
-                                <Select value={templateId} onValueChange={(val) => { setTemplateId(val); checkAndAdvance('create-goal-template'); }}>
+                                <Select value={templateId} onValueChange={(val) => { setTemplateId(val); }}>
                                     <SelectTrigger id="goal-template-select" className="h-12 bg-white dark:bg-secondary/20 shadow-sm border-slate-200 dark:border-border rounded-xl dark:text-foreground">
                                         <SelectValue placeholder="Шаблон..." />
                                     </SelectTrigger>
@@ -478,7 +470,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                     </SelectContent>
                                 </Select>
                                 <Input
-                                    id="onboarding-goal-title"
+                                    id="goal-title"
                                     value={customTitle}
                                     onChange={e => setCustomTitle(e.target.value)}
                                     placeholder={GOAL_TEMPLATES.find(t => t.id === templateId)?.placeholder || "Чого саме ви хочете досягти?"}
@@ -606,7 +598,6 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                             const currentVal = entries.length > 0 ? entries[0].value : (metric?.baseline ?? 0);
                                             setMetricStartValue(currentVal.toString());
                                         }
-                                        checkAndAdvance('create-goal-metric-select');
                                     }}>
                                         <SelectTrigger id="goal-metric-select" className="h-11 bg-white dark:bg-secondary/20 border-slate-200 dark:border-border dark:text-foreground"><SelectValue placeholder="Оберіть зі списку..." /></SelectTrigger>
                                         <SelectContent>
@@ -629,7 +620,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                         <div className="grid grid-cols-3 gap-2">
                                             <button
                                                 id="goal-metric-increase"
-                                                onClick={() => { setMetricDirection('increase'); checkAndAdvance('create-goal-metric-direction'); }}
+                                                onClick={() => { setMetricDirection('increase'); }}
                                                 className={cn("flex flex-col items-center justify-center p-2 rounded-lg border transition-all",
                                                     metricDirection === 'increase' ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900 text-green-700 dark:text-green-400" : "bg-slate-50 dark:bg-secondary/20 border-transparent text-slate-400 hover:bg-slate-100 dark:hover:bg-secondary/40")}
                                             >
@@ -638,7 +629,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                             </button>
                                             <button
                                                 id="goal-metric-decrease"
-                                                onClick={() => { setMetricDirection('decrease'); checkAndAdvance('create-goal-metric-direction'); }}
+                                                onClick={() => { setMetricDirection('decrease'); }}
                                                 className={cn("flex flex-col items-center justify-center p-2 rounded-lg border transition-all",
                                                     metricDirection === 'decrease' ? "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900 text-red-700 dark:text-red-400" : "bg-slate-50 dark:bg-secondary/20 border-transparent text-slate-400 hover:bg-slate-100 dark:hover:bg-secondary/40")}
                                             >
@@ -647,7 +638,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                             </button>
                                             <button
                                                 id="goal-metric-maintain"
-                                                onClick={() => { setMetricDirection('maintain'); checkAndAdvance('create-goal-metric-direction'); }}
+                                                onClick={() => { setMetricDirection('maintain'); }}
                                                 className={cn("flex flex-col items-center justify-center p-2 rounded-lg border transition-all",
                                                     metricDirection === 'maintain' ? "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-400" : "bg-slate-50 dark:bg-secondary/20 border-transparent text-slate-400 hover:bg-slate-100 dark:hover:bg-secondary/40")}
                                             >
@@ -720,7 +711,6 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                     className={cn("h-11 bg-white dark:bg-secondary/20 border-slate-200 dark:border-border text-base dark:text-foreground",
                                         dateError && "border-red-300 focus-visible:ring-red-200")}
                                     id="goal-deadline-input"
-                                    onFocus={() => checkAndAdvance('create-goal-deadline')}
                                 />
 
                                 {dateError ? (
@@ -762,7 +752,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                             <Textarea
                                 id="goal-description-input"
                                 value={description}
-                                onChange={e => { setDescription(e.target.value); checkAndAdvance('create-goal-description'); }}
+                                onChange={e => { setDescription(e.target.value); }}
                                 placeholder="Чому досягнення цієї цілі змінить ваше життя?"
                                 className="min-h-[120px] p-4 text-base bg-white dark:bg-card shadow-sm border-slate-200 dark:border-border rounded-2xl resize-none placeholder:text-slate-300 dark:placeholder:text-muted-foreground/50 dark:text-foreground"
                             />
@@ -787,7 +777,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                         onClick={handleNext}
                         className="bg-slate-900 text-white hover:bg-slate-800 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90 px-8 h-11 rounded-xl font-semibold shadow-lg shadow-slate-200 dark:shadow-none disabled:opacity-50"
                         disabled={step === 2 && goalType === 'vision' && visionGoalCount >= 2}
-                        id="onboarding-goal-next-btn"
+                        id="goal-next-btn"
                     >
                         Далі <ChevronRight className="w-5 h-5 ml-2" />
                     </Button>
@@ -795,7 +785,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                     <Button
                         onClick={handleSubmit}
                         disabled={isLoading || !!dateError}
-                        id="onboarding-goal-create-btn"
+                        id="goal-create-btn"
                         className="bg-orange-600 hover:bg-orange-700 text-white px-10 h-11 rounded-xl font-bold text-base shadow-xl shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}

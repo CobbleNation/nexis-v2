@@ -61,7 +61,7 @@ export function OverviewDay({ filteredActions, filteredGoals, activeArea, active
     };
 
     return (
-        <div className="space-y-12" id="onboarding-plan-day">
+        <div className="space-y-12" id="overview-content">
             {/* 2. Context Brief */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
                 <ContextBrief

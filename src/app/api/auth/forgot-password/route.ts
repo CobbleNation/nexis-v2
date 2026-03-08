@@ -36,17 +36,21 @@ export async function POST(req: Request) {
         // Send Reset Email
         try {
             await sendPasswordResetEmail(email, token);
-        } catch (emailError) {
+        } catch (emailError: any) {
             console.error('Failed to send reset email:', emailError);
-            return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+            return NextResponse.json({
+                error: 'Не вдалося відправити лист. Спробуйте пізніше або зверніться в підтримку.',
+                details: emailError.message
+            }, { status: 500 });
         }
 
         return NextResponse.json({ message: 'Reset link sent' });
     } catch (error: any) {
         console.error('Forgot password error:', error);
         return NextResponse.json({
-            error: 'Internal server error',
+            error: 'Внутрішня помилка сервера',
             details: error.message || 'Unknown error'
         }, { status: 500 });
     }
 }
+

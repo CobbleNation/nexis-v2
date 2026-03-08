@@ -40,6 +40,7 @@ export async function GET(req: Request) {
             name: users.name,
             email: users.email,
             role: users.role,
+            emailVerified: users.emailVerified,
             subscriptionTier: users.subscriptionTier,
             createdAt: users.createdAt,
             // Subqueries for basic stats to avoid massive joins/group by issues with simple Drizzle usage

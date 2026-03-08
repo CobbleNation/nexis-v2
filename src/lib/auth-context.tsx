@@ -12,7 +12,7 @@ interface User {
     lastName?: string;
     bio?: string;
     subscriptionTier?: 'free' | 'pro';
-    onboardingCompleted?: boolean;
+
     cardLast4?: string;
     cardToken?: string;
     role?: 'user' | 'admin' | 'manager' | 'support';
@@ -43,8 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (params.get('logged_out') === '1') {
             fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
             localStorage.removeItem('zynorvia-data');
-            localStorage.removeItem('onboarding_step');
-            localStorage.removeItem('onboarding_active');
+
             setUser(null);
             setIsLoading(false);
             window.history.replaceState({}, '', window.location.pathname);
@@ -60,9 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const res = await fetch('/api/auth/me', { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
-                if (data.user && typeof data.user.onboardingCompleted === 'undefined') {
-                    data.user.onboardingCompleted = false;
-                }
+
                 setUser(data.user);
                 return;
             }
@@ -88,9 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const retryRes = await fetch('/api/auth/me', { cache: 'no-store' });
             if (retryRes.ok) {
                 const data = await retryRes.json();
-                if (data.user && typeof data.user.onboardingCompleted === 'undefined') {
-                    data.user.onboardingCompleted = false;
-                }
+
                 setUser(data.user);
             } else {
                 setUser(null);
@@ -108,9 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     async function login(credentials: any) {
-        // Clear potential stale state
-        localStorage.removeItem('onboarding_step');
-        localStorage.removeItem('onboarding_active');
+
 
         const res = await fetch('/api/auth/login', {
             method: 'POST',
@@ -124,17 +117,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const data = await res.json();
-        if (data.user && typeof data.user.onboardingCompleted === 'undefined') {
-            data.user.onboardingCompleted = false;
-        }
+
         setUser(data.user);
         // Hard navigation to ensure clean state
         window.location.href = '/overview';
     }
 
     async function register(formData: any) {
-        localStorage.removeItem('onboarding_step');
-        localStorage.removeItem('onboarding_active');
+
 
         const res = await fetch('/api/auth/register', {
             method: 'POST',
@@ -155,8 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function logout() {
         // 1. Clear local state immediately
         localStorage.removeItem('zynorvia-data');
-        localStorage.removeItem('onboarding_step');
-        localStorage.removeItem('onboarding_active');
+
         setUser(null);
 
         // 2. Clear cookies via POST (server-side, awaited)

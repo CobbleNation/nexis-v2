@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, Settings, RotateCcw, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Settings, RotateCcw, ShieldCheck, Trash2, AlertTriangle } from 'lucide-react';
 import { LIMITS } from '@/lib/limits';
 
 interface UserDetails {
@@ -23,12 +23,14 @@ interface UserDetails {
     email: string;
     role: string;
     subscriptionTier: string;
+    subscriptionExpiresAt: string | null;
+    emailVerified: string | null;
     createdAt: string;
     lastActive: string | null;
     avatar: string | null;
     goalsCount: number;
     habitsCount: number;
-    onboardingCompleted: boolean;
+
 }
 
 // Numeric limit fields with labels and plan defaults
@@ -88,7 +90,8 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         role: '',
         subscriptionTier: '',
         name: '',
-        onboardingCompleted: false
+
+        subscriptionExpiresAt: ''
     });
     const [limitsForm, setLimitsForm] = useState<LimitsForm>(getDefaultLimitsForm());
     const [limitsLoading, setLimitsLoading] = useState(true);
@@ -104,7 +107,8 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     role: data.user.role,
                     subscriptionTier: data.user.subscriptionTier,
                     name: data.user.name,
-                    onboardingCompleted: data.user.onboardingCompleted
+
+                    subscriptionExpiresAt: data.user.subscriptionExpiresAt ? format(new Date(data.user.subscriptionExpiresAt), "yyyy-MM-dd'T'HH:mm") : ''
                 });
             } catch (error) {
                 toast.error('Failed to load user');
@@ -199,6 +203,35 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         toast.info('Limits reset to plan defaults (not saved yet)');
     };
 
+    const handleDeletion = async (mode: 'data' | 'account') => {
+        const confirmMessage = mode === 'data'
+            ? 'Ви впевнені, що хочете видалити ВСІ дані користувача? Акаунт залишиться.'
+            : 'УВАГА! Ви впевнені, що хочете ПОВНІСТЮ ТА НАЗАВЖДИ видалити цей акаунт? Цю дію неможливо скасувати.';
+
+        if (!confirm(confirmMessage)) return;
+
+        try {
+            const res = await fetch(`/api/admin/users/${id}?mode=${mode}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                toast.success(mode === 'data' ? 'Дані користувача очищено' : 'Акаунт успішно видалено');
+                if (mode === 'account') {
+                    router.push('/admin/users');
+                } else {
+                    // Refresh data
+                    window.location.reload();
+                }
+            } else {
+                const data = await res.json();
+                toast.error(data.error || 'Помилка при видаленні');
+            }
+        } catch (error) {
+            toast.error('Сталась критична помилка');
+        }
+    };
+
     const planDefaults = LIMITS[formData.subscriptionTier === 'pro' ? 'pro' : 'free'];
 
     // Tri-state for boolean: null = plan default, true = enabled, false = disabled
@@ -252,6 +285,9 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Badge variant={user.emailVerified ? 'outline' : 'destructive'} className={user.emailVerified ? "border-emerald-500 text-emerald-500" : ""}>
+                        {user.emailVerified ? 'ВЕРИФІКОВАНО' : 'НЕВЕРИФІКОВАНО'}
+                    </Badge>
                     <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'} className="capitalize px-3 py-1 text-sm">
                         {user.role}
                     </Badge>
@@ -313,20 +349,20 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                         </SelectContent>
                                     </Select>
                                 </div>
+
+                                <div className="space-y-2">
+                                    <Label>Термін дії підписки (тільки для Pro)</Label>
+                                    <Input
+                                        type="datetime-local"
+                                        value={formData.subscriptionExpiresAt}
+                                        onChange={(e) => setFormData({ ...formData, subscriptionExpiresAt: e.target.value })}
+                                        disabled={formData.subscriptionTier !== 'pro'}
+                                        className="bg-slate-950 border-slate-800 text-slate-100 focus:ring-slate-700"
+                                    />
+                                    <p className="text-[10px] text-slate-500">Залиште порожнім для необмеженого доступу</p>
+                                </div>
                             </div>
 
-                            <div className="flex items-center justify-between p-4 border border-slate-800 rounded-lg bg-slate-950/50">
-                                <div>
-                                    <Label className="text-base">Онбординг Завершено</Label>
-                                    <p className="text-sm text-slate-500">
-                                        Перевизначити статус онбордингу
-                                    </p>
-                                </div>
-                                <Switch
-                                    checked={formData.onboardingCompleted}
-                                    onCheckedChange={(checked) => setFormData({ ...formData, onboardingCompleted: checked })}
-                                />
-                            </div>
 
                             <Separator className="bg-slate-800" />
 
@@ -514,6 +550,49 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                     </div>
                                 </>
                             )}
+                        </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="bg-slate-950 border-rose-900/30 text-slate-100 overflow-hidden">
+                        <div className="bg-rose-500/10 px-6 py-3 border-b border-rose-900/30 flex items-center gap-2">
+                            <AlertTriangle className="h-5 w-5 text-rose-500" />
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-rose-500">Небезпечна Зона</h3>
+                        </div>
+                        <CardContent className="p-6 space-y-6">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border border-rose-900/20 rounded-xl bg-slate-900/50">
+                                <div className="space-y-1">
+                                    <h4 className="font-bold text-slate-200">Видалити всі дані користувача</h4>
+                                    <p className="text-xs text-slate-500 max-w-md">
+                                        Це очистить всі цілі, проекти, нотатки та іншу активність користувача.
+                                        Акаунт та налаштування підписки залишаться. <span className="text-rose-400 font-semibold">Ця дія незворотна.</span>
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    className="border-rose-900/50 hover:bg-rose-900/20 text-rose-400 hover:text-rose-300 shrink-0"
+                                    onClick={() => handleDeletion('data')}
+                                >
+                                    <RotateCcw className="h-4 w-4 mr-2" /> Очистити Дані
+                                </Button>
+                            </div>
+
+                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border border-rose-900/30 rounded-xl bg-rose-950/20">
+                                <div className="space-y-1">
+                                    <h4 className="font-bold text-rose-400">Видалити акаунт назавжди</h4>
+                                    <p className="text-xs text-rose-500/70 max-w-md">
+                                        Повне видалення профілю користувача та всіх пов'язаних даних.
+                                        Користувач втратить доступ до системи негайно. <span className="text-rose-500 font-bold italic underline">Відновити неможливо.</span>
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="destructive"
+                                    className="bg-rose-700 hover:bg-rose-600 text-white shadow-lg shadow-rose-950/50 shrink-0"
+                                    onClick={() => handleDeletion('account')}
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" /> Видалити Акаунт
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>

@@ -6,27 +6,36 @@ import { eq, and, gt } from 'drizzle-orm';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
+    const { searchParams } = new URL(req.url);
+    const token = searchParams.get('token');
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
+
+    // Safety: Redirect GET requests to the UI page to prevent bot pre-fetching from consuming tokens
+    return NextResponse.redirect(new URL(`/auth/verify?token=${token || ''}`, baseUrl));
+}
+
+export async function POST(req: Request) {
     try {
-        const { searchParams } = new URL(req.url);
-        const token = searchParams.get('token');
-        console.log('[Verify] Request received with token:', token?.substring(0, 8) + '...');
+        const { token } = await req.json();
+        console.log('[Verify] POST received with token:', token?.substring(0, 8) + '...');
 
         if (!token) {
-            return NextResponse.redirect(new URL('/login?error=missing_token', req.url));
+            return NextResponse.json({ error: 'Токен відсутній' }, { status: 400 });
         }
 
-        // Find user with this token and check expiry
+        // Find user with this token
         const [user] = await db.select()
             .from(users)
             .where(eq(users.verificationToken, token))
             .limit(1);
 
         if (!user) {
-            return NextResponse.redirect(new URL('/login?error=invalid_token', req.url));
+            return NextResponse.json({ error: 'Недійсний токен або акаунт уже підтверджено' }, { status: 400 });
         }
 
+        // Check expiry
         if (user.verificationTokenExpiry && user.verificationTokenExpiry < new Date()) {
-            return NextResponse.redirect(new URL('/login?error=expired_token', req.url));
+            return NextResponse.json({ error: 'Термін дії токена закінчився' }, { status: 400 });
         }
 
         // Mark as verified
@@ -38,11 +47,10 @@ export async function GET(req: Request) {
             })
             .where(eq(users.id, user.id));
 
-        const response = NextResponse.redirect(new URL('/auth/verified', req.url));
-        response.headers.set('X-Verification-Source', 'route-handler');
-        return response;
+        return NextResponse.json({ message: 'Success' });
     } catch (error) {
         console.error('Verification error:', error);
-        return NextResponse.redirect(new URL('/login?error=internal_error', req.url));
+        return NextResponse.json({ error: 'Внутрішня помилка сервера' }, { status: 500 });
     }
 }
+

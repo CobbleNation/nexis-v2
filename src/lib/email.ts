@@ -23,8 +23,18 @@ const BASE_URL = rawBaseUrl.includes('zynorvia.com') && !rawBaseUrl.startsWith('
 
 console.log('[Email] Using BASE_URL:', BASE_URL);
 
+// Verify transporter on initialization
+transporter.verify((error) => {
+    if (error) {
+        console.error('[Email] Transporter configuration error:', error);
+    } else {
+        console.log('[Email] Server is ready to take our messages');
+    }
+});
+
 export async function sendVerificationEmail(email: string, name: string, token: string) {
-    const verifyUrl = `${BASE_URL}/api/auth/verify?token=${token}`;
+    const verifyUrl = `${BASE_URL}/auth/verify?token=${token}`;
+
 
     await transporter.sendMail({
         from: `"Zynorvia" <${process.env.EMAIL_USER}>`,
@@ -33,8 +43,8 @@ export async function sendVerificationEmail(email: string, name: string, token: 
         html: `
             <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                 <div style="text-align: center; margin-bottom: 32px;">
-                    <div style="display: inline-block; padding: 12px; background-color: #ea580c; border-radius: 16px;">
-                        <span style="color: white; font-weight: 800; font-size: 24px;">Z</span>
+                    <div style="display: inline-block; padding: 12px; background-color: rgba(234, 88, 12, 0.1); border-radius: 16px;">
+                        <div style="width: 24px; height: 24px; background-color: #ea580c; border-radius: 4px; transform: rotate(45deg); margin: 6px;"></div>
                     </div>
                     <h1 style="color: #0f172a; font-size: 24px; font-weight: 800; margin-top: 16px;">Zynorvia</h1>
                 </div>
@@ -74,8 +84,8 @@ export async function sendPasswordResetEmail(email: string, token: string) {
         html: `
             <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                 <div style="text-align: center; margin-bottom: 32px;">
-                    <div style="display: inline-block; padding: 12px; background-color: #ea580c; border-radius: 16px;">
-                        <span style="color: white; font-weight: 800; font-size: 24px;">Z</span>
+                    <div style="display: inline-block; padding: 12px; background-color: rgba(234, 88, 12, 0.1); border-radius: 16px;">
+                        <div style="width: 24px; height: 24px; background-color: #ea580c; border-radius: 4px; transform: rotate(45deg); margin: 6px;"></div>
                     </div>
                     <h1 style="color: #0f172a; font-size: 24px; font-weight: 800; margin-top: 16px;">Zynorvia</h1>
                 </div>

@@ -261,8 +261,7 @@ export interface MetricDefinition {
     areaId: string;
     name: string;
 
-    // Onboarding
-    onboardingCompleted?: boolean;
+
     subscriptionTier?: 'free' | 'pro';
     unit?: string; // e.g. "kg", "hours", "points" - optional for boolean
     direction: 'increase' | 'decrease' | 'neutral';
