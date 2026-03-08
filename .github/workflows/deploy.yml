@@ -53,6 +53,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          debug: true
           script: |
             # Create project directory if it doesn't exist
             mkdir -p /opt/nexis
