@@ -57,6 +57,20 @@ jobs:
           port: 22
           debug: true
           script: |
+            # Check if docker is installed
+            if ! [ -x "$(command -v docker)" ]; then
+              echo "Docker is not installed. Installing..."
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sh get-docker.sh
+              rm get-docker.sh
+            fi
+
+            # Check if docker-compose is available (v2)
+            if ! docker compose version > /dev/null 2>&1; then
+              echo "Docker Compose v2 is missing. Installing plugin..."
+              apt-get update && apt-get install -y docker-compose-plugin
+            fi
+            
             # Create project directory if it doesn't exist
             mkdir -p /opt/nexis
             cd /opt/nexis
