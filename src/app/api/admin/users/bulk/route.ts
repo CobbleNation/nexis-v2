@@ -31,7 +31,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'No user IDs provided' }, { status: 400 });
         }
 
-        const adminId = payload.id as string;
+        const adminId = payload.userId as string;
 
         switch (action) {
             case 'verify':
