@@ -2,11 +2,12 @@ import { ZYNORVIA_SYSTEM_PROMPT } from '@/lib/ai/system-prompt';
 import { AssistantResponse } from '@/lib/ai/types';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
     try {
         const body = await req.json();
         const { messages } = body;
