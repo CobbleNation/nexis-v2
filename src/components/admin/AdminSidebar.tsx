@@ -21,8 +21,8 @@ import { useState } from 'react';
 const adminNavItems = [
     { href: '/admin', label: 'Головна', icon: LayoutDashboard },
     { href: '/admin/users', label: 'Користувачі', icon: Users },
+    { href: '/admin/payments', label: 'Платежі', icon: Activity },
     { href: '/admin/content', label: 'Контент', icon: Database },
-    { href: '/admin/analytics', label: 'Аналітика', icon: Activity },
     { href: '/admin/audit', label: 'Журнал Аудиту', icon: ShieldAlert },
 ];
 

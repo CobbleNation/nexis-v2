@@ -34,6 +34,8 @@ export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+    const [performingBulk, setPerformingBulk] = useState(false);
 
     async function fetchUsers(query = '') {
         try {
@@ -52,6 +54,50 @@ export default function UsersPage() {
         }
     }
 
+    const toggleUser = (id: string) => {
+        const next = new Set(selectedUsers);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        setSelectedUsers(next);
+    };
+
+    const toggleAll = () => {
+        if (selectedUsers.size === users.length) {
+            setSelectedUsers(new Set());
+        } else {
+            setSelectedUsers(new Set(users.map(u => u.id)));
+        }
+    };
+
+    const handleBulkAction = async (action: string) => {
+        if (selectedUsers.size === 0) return;
+        if (action === 'delete' && !confirm(`Are you sure you want to delete ${selectedUsers.size} users?`)) return;
+
+        setPerformingBulk(true);
+        try {
+            const res = await fetch('/api/admin/users/bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userIds: Array.from(selectedUsers),
+                    action
+                })
+            });
+
+            if (res.ok) {
+                toast.success('Групова дія виконана успішно');
+                setSelectedUsers(new Set());
+                fetchUsers(search);
+            } else {
+                toast.error('Помилка при виконанні групової дії');
+            }
+        } catch (err) {
+            toast.error('Critical error during bulk action');
+        } finally {
+            setPerformingBulk(false);
+        }
+    };
+
     useEffect(() => {
         // Debounce search
         const timer = setTimeout(() => {
@@ -61,7 +107,7 @@ export default function UsersPage() {
     }, [search]);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-20">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h1 className="text-2xl md:text-3xl font-bold">Управління Користувачами</h1>
                 <div className="flex items-center gap-4">
@@ -87,6 +133,14 @@ export default function UsersPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow className="border-slate-800 hover:bg-slate-800/50">
+                                    <TableHead className="w-[50px]">
+                                        <input
+                                            type="checkbox"
+                                            checked={users.length > 0 && selectedUsers.size === users.length}
+                                            onChange={toggleAll}
+                                            className="rounded border-slate-800 bg-slate-950 text-orange-600 focus:ring-orange-500"
+                                        />
+                                    </TableHead>
                                     <TableHead className="text-slate-400">Користувач</TableHead>
                                     <TableHead className="text-slate-400">Роль</TableHead>
                                     <TableHead className="text-slate-400">План</TableHead>
@@ -99,20 +153,28 @@ export default function UsersPage() {
                             <TableBody>
                                 {loading && (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                                        <TableCell colSpan={8} className="h-24 text-center text-slate-500">
                                             Завантаження...
                                         </TableCell>
                                     </TableRow>
                                 )}
                                 {!loading && users.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                                        <TableCell colSpan={8} className="h-24 text-center text-slate-500">
                                             Користувачів не знайдено.
                                         </TableCell>
                                     </TableRow>
                                 )}
                                 {users.map((user) => (
                                     <TableRow key={user.id} className="border-slate-800 hover:bg-slate-800/50">
+                                        <TableCell>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedUsers.has(user.id)}
+                                                onChange={() => toggleUser(user.id)}
+                                                className="rounded border-slate-800 bg-slate-950 text-orange-600 focus:ring-orange-500"
+                                            />
+                                        </TableCell>
                                         <TableCell className="font-medium">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="h-8 w-8">
@@ -173,6 +235,57 @@ export default function UsersPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Bulk Action Bar */}
+            {selectedUsers.size > 0 && (
+                <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-800 shadow-2xl shadow-black/50 rounded-2xl p-4 flex items-center gap-6 z-50 animate-in fade-in slide-in-from-bottom-4">
+                    <div className="text-sm font-medium">
+                        Обрано: <span className="text-orange-500">{selectedUsers.size}</span>
+                    </div>
+                    <div className="h-6 w-px bg-slate-800" />
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-slate-800 border-slate-700 hover:bg-slate-700"
+                            onClick={() => handleBulkAction('verify')}
+                            disabled={performingBulk}
+                        >
+                            Верифікувати
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-slate-800 border-slate-700 hover:bg-slate-700"
+                            onClick={() => handleBulkAction('set_pro')}
+                            disabled={performingBulk}
+                        >
+                            Надати Pro
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="bg-slate-800 border-slate-700 hover:bg-slate-700"
+                            onClick={() => handleBulkAction('set_free')}
+                            disabled={performingBulk}
+                        >
+                            Надати Free
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleBulkAction('delete')}
+                            disabled={performingBulk}
+                        >
+                            Видалити
+                        </Button>
+                    </div>
+                    <div className="h-6 w-px bg-slate-800" />
+                    <Button variant="ghost" size="sm" onClick={() => setSelectedUsers(new Set())}>
+                        Скасувати
+                    </Button>
+                </div>
+            )}
 
         </div>
     );
