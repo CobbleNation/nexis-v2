@@ -25,15 +25,34 @@ export async function sendVerificationEmail(email: string, name: string, token: 
         to: email,
         subject: 'Підтвердження вашого акаунту Zynorvia',
         html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 12px;">
-                <h2 style="color: #0f172a;">Вітаємо, ${name}!</h2>
-                <p style="color: #475569; line-height: 1.5;">Дякуємо за реєстрацію в Zynorvia. Щоб почати користуватися вашим акаунтом, будь ласка, підтвердіть вашу електронну пошту.</p>
-                <div style="margin: 30px 0;">
-                    <a href="${verifyUrl}" style="background-color: #f97316; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Підтвердити пошту</a>
+            <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <div style="display: inline-block; padding: 12px; background-color: #ea580c; border-radius: 16px;">
+                        <span style="color: white; font-weight: 800; font-size: 24px;">Z</span>
+                    </div>
+                    <h1 style="color: #0f172a; font-size: 24px; font-weight: 800; margin-top: 16px;">Zynorvia</h1>
                 </div>
-                <p style="color: #94a3b8; font-size: 12px;">Якщо ви не створювали акаунт у Zynorvia, просто ігноруйте цей лист.</p>
-                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-                <p style="text-align: center; color: #94a3b8; font-size: 12px;">© 2026 Zynorvia. Всі права захищені.</p>
+                
+                <h2 style="color: #0f172a; font-size: 20px; font-weight: 700; margin-bottom: 16px;">Вітаємо, ${name}!</h2>
+                
+                <p style="color: #475569; line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+                    Дякуємо за реєстрацію в Zynorvia. Ми раді, що ви з нами! Щоб почати користуватися вашою персональною екосистемою, просто підтвердіть свою пошту.
+                </p>
+                
+                <div style="text-align: center; margin: 40px 0;">
+                    <a href="${verifyUrl}" style="background-color: #ea580c; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 16px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(234, 88, 12, 0.2);">
+                        Підтвердити пошту
+                    </a>
+                </div>
+                
+                <p style="color: #94a3b8; font-size: 14px; margin-top: 32px; text-align: center;">
+                    Якщо ви не створювали акаунт у Zynorvia, просто ігноруйте цей лист.
+                </p>
+                
+                <div style="border-top: 1px solid #f1f5f9; margin-top: 40px; padding-top: 24px; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">© 2026 Zynorvia Inc. Всі права захищені.</p>
+                    <p style="color: #cbd5e1; font-size: 10px;">Це автоматичне повідомлення, на нього не потрібно відповідати.</p>
+                </div>
             </div>
         `,
     });
@@ -47,16 +66,33 @@ export async function sendPasswordResetEmail(email: string, token: string) {
         to: email,
         subject: 'Відновлення паролю Zynorvia',
         html: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; rounded: 12px;">
-                <h2 style="color: #0f172a;">Відновлення паролю</h2>
-                <p style="color: #475569; line-height: 1.5;">Ви отримали цей лист, тому що ми отримали запит на скидання паролю для вашого акаунту.</p>
-                <div style="margin: 30px 0;">
-                    <a href="${resetUrl}" style="background-color: #0f172a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold;">Змінити пароль</a>
+            <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                <div style="text-align: center; margin-bottom: 32px;">
+                    <div style="display: inline-block; padding: 12px; background-color: #ea580c; border-radius: 16px;">
+                        <span style="color: white; font-weight: 800; font-size: 24px;">Z</span>
+                    </div>
+                    <h1 style="color: #0f172a; font-size: 24px; font-weight: 800; margin-top: 16px;">Zynorvia</h1>
                 </div>
-                <p style="color: #475569; line-height: 1.5;">Посилання для скидання паролю припинить дію через 1 годину.</p>
-                <p style="color: #94a3b8; font-size: 12px;">Якщо ви не запитували зміну паролю, ніяких додаткових дій не потрібно.</p>
-                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-                <p style="text-align: center; color: #94a3b8; font-size: 12px;">© 2026 Zynorvia. Всі права захищені.</p>
+                
+                <h2 style="color: #0f172a; font-size: 20px; font-weight: 700; margin-bottom: 16px;">Відновлення паролю</h2>
+                
+                <p style="color: #475569; line-height: 1.6; font-size: 16px; margin-bottom: 24px;">
+                    Ми отримали запит на скидання паролю для вашого акаунту Zynorvia. Якщо ви не робили цього запиту, просто проігноруйте цей лист.
+                </p>
+                
+                <div style="text-align: center; margin: 40px 0;">
+                    <a href="${resetUrl}" style="background-color: #0f172a; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 16px; font-weight: 700; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.2);">
+                        Змінити пароль
+                    </a>
+                </div>
+                
+                <p style="color: #ea580c; font-size: 14px; font-weight: 600; text-align: center; margin-bottom: 32px;">
+                    Важливо: посилання дійсне протягом 1 години.
+                </p>
+                
+                <div style="border-top: 1px solid #f1f5f9; margin-top: 40px; padding-top: 24px; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">© 2026 Zynorvia Inc. Всі права захищені.</p>
+                </div>
             </div>
         `,
     });

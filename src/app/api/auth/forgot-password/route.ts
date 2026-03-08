@@ -13,7 +13,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Email is required' }, { status: 400 });
         }
 
-        const user = await db.select().from(users).where(eq(users.email, email)).get();
+        const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
         if (!user) {
             // Do not reveal if user exists
