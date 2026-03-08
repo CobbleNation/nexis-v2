@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -23,10 +23,10 @@ export default function VerifiedPage() {
             <div className={`max-w-md w-full relative z-10 transition-all duration-700 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}>
                 <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 rounded-[2.5rem] shadow-2xl p-10 text-center relative overflow-hidden">
                     {/* Top Progress Bar Decoration */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 via-green-500 to-orange-500 bg-[length:200%_auto] animate-gradient" />
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 via-green-500 to-orange-500 bg-[length:200%_auto] animate-[gradient_3s_ease_infinite]" />
 
                     <div className="mb-8 relative flex justify-center">
-                        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center relative animate-bounce-subtle">
+                        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center relative animate-[bounce-subtle_4s_ease-in-out_infinite]">
                             <span className="text-green-600 dark:text-green-400 text-5xl font-bold">Z</span>
 
                             {/* Sparkles around the circle */}
@@ -58,24 +58,6 @@ export default function VerifiedPage() {
                     </div>
                 </div>
             </div>
-
-            <style jsx>{`
-                @keyframes gradient {
-                    0% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                    100% { background-position: 0% 50%; }
-                }
-                .animate-gradient {
-                    animation: gradient 3s ease infinite;
-                }
-                @keyframes bounce-subtle {
-                    0%, 100% { transform: translateY(0); }
-                    50% { transform: translateY(-8px); }
-                }
-                .animate-bounce-subtle {
-                    animation: bounce-subtle 4s ease-in-out infinite;
-                }
-            `}</style>
         </div>
     );
 }
