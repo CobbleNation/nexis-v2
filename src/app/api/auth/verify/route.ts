@@ -9,6 +9,7 @@ export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const token = searchParams.get('token');
+        console.log('[Verify] Request received with token:', token?.substring(0, 8) + '...');
 
         if (!token) {
             return NextResponse.redirect(new URL('/login?error=missing_token', req.url));
