@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # Image name will be set to lowercase in a script step
+  IMAGE_NAME: cobblenation/nexis-v2
 
 jobs:
   build-and-push:
@@ -20,10 +20,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set lower case owner and repository name
-        run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
