@@ -97,7 +97,12 @@ jobs:
             
             # Full cleanup and restart to ensure new code is live
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            docker compose down --remove-orphans
+            
+            # If the file exists, bring it down. If not, ignore error.
+            if [ -f "docker-compose.yml" ]; then
+              docker compose down --remove-orphans
+            fi
+            
             docker compose up -d --force-recreate
             
             # Clean up old unused images to save disk space
