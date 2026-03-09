@@ -19,9 +19,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Invalid Token' }, { status: 401 });
         }
 
-        // Downgrade user to free
+        // Disable auto-renewal instead of immediate downgrade
         await db.update(users)
-            .set({ subscriptionTier: 'free' })
+            .set({ autoRenew: false })
             .where(eq(users.id, payload.userId as string));
 
         return NextResponse.json({ message: 'Subscription cancelled' });

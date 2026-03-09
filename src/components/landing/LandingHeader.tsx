@@ -20,7 +20,7 @@ export function LandingHeader() {
     const isPro = user?.subscriptionTier === 'pro';
 
     return (
-        <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-white/50 dark:bg-[#020817]/50 backdrop-blur-xl supports-[backdrop-filter]:bg-white/20">
+        <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-white/80 dark:bg-[#020817]/80 backdrop-blur-md md:backdrop-blur-xl supports-[backdrop-filter]:bg-white/20 transform-gpu">
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tighter hover:opacity-80 transition-opacity">
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">

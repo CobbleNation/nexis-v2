@@ -367,42 +367,62 @@ export default function SettingsPage() {
                                                 </div>
 
                                                 <div className="p-5 border border-border rounded-xl bg-slate-50/50 dark:bg-slate-900/50 space-y-2 flex flex-col justify-center">
-                                                    <div className="text-sm font-medium text-muted-foreground">Наступне списання</div>
-                                                    <div className="text-2xl font-bold text-foreground">₴199.00</div>
-                                                    <div className="text-xs text-muted-foreground">14 Лютого 2026</div>
+                                                    <div className="text-sm font-medium text-muted-foreground">
+                                                        {user.autoRenew ? 'Наступне списання' : 'Підписка діє до'}
+                                                    </div>
+                                                    <div className="text-2xl font-bold text-foreground">
+                                                        {user.autoRenew ? '₴199.00' : 'Активна'}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' }) : '---'}
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-center justify-between p-5 border border-rose-200 dark:border-rose-900/50 bg-rose-50/30 dark:bg-rose-950/10 rounded-xl">
-                                                <div className="space-y-1">
-                                                    <h4 className="font-bold text-rose-800 dark:text-rose-400 text-sm">Скасувати підписку</h4>
-                                                    <p className="text-xs text-rose-700/70 dark:text-rose-400/70 leading-relaxed max-w-sm">
-                                                        Ви втратите доступ до Pro функцій в кінці поточного періоду.
-                                                    </p>
-                                                </div>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    disabled={isSaving}
-                                                    onClick={async () => {
-                                                        if (confirm('Ви впевнені, що хочете скасувати підписку?')) {
-                                                            setIsSaving(true);
-                                                            try {
-                                                                const res = await fetch('/api/billing/cancel', { method: 'POST' });
-                                                                if (!res.ok) throw new Error('Failed');
-                                                                toast.success('Підписку скасовано. Ви переведені на Free план.');
-                                                                setTimeout(() => window.location.reload(), 1500);
-                                                            } catch (e) {
-                                                                toast.error('Не вдалося скасувати підписку');
-                                                                setIsSaving(false);
+                                            {user.autoRenew ? (
+                                                <div className="flex items-center justify-between p-5 border border-rose-200 dark:border-rose-900/50 bg-rose-50/30 dark:bg-rose-950/10 rounded-xl">
+                                                    <div className="space-y-1">
+                                                        <h4 className="font-bold text-rose-800 dark:text-rose-400 text-sm">Скасувати підписку</h4>
+                                                        <p className="text-xs text-rose-700/70 dark:text-rose-400/70 leading-relaxed max-w-sm">
+                                                            Ви втратите доступ до Pro функцій в кінці поточного періоду.
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        disabled={isSaving}
+                                                        onClick={async () => {
+                                                            if (confirm('Ви впевнені, що хочете скасувати підписку?')) {
+                                                                setIsSaving(true);
+                                                                try {
+                                                                    const res = await fetch('/api/billing/cancel', { method: 'POST' });
+                                                                    if (!res.ok) throw new Error('Failed');
+                                                                    toast.success('Автоподовження скасовано. Підписка діятиме до кінця терміну.');
+                                                                    setTimeout(() => window.location.reload(), 1500);
+                                                                } catch (e) {
+                                                                    toast.error('Не вдалося скасувати підписку');
+                                                                    setIsSaving(false);
+                                                                }
                                                             }
-                                                        }
-                                                    }}
-                                                    className="rounded-full shadow-lg shadow-rose-500/20 px-6 font-bold"
-                                                >
-                                                    {isSaving ? 'Обробка...' : 'Скасувати'}
-                                                </Button>
-                                            </div>
+                                                        }}
+                                                        className="rounded-full shadow-lg shadow-rose-500/20 px-6 font-bold"
+                                                    >
+                                                        {isSaving ? 'Обробка...' : 'Скасувати'}
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-between p-5 border border-orange-200 dark:border-orange-900/50 bg-orange-50/30 dark:bg-orange-950/10 rounded-xl">
+                                                    <div className="space-y-1">
+                                                        <h4 className="font-bold text-orange-800 dark:text-orange-400 text-sm">Скасування заплановано</h4>
+                                                        <p className="text-xs text-orange-700/70 dark:text-orange-400/70 leading-relaxed max-w-sm">
+                                                            Ви скасували автоподовження. Підписка активна до {user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt).toLocaleDateString('uk-UA') : 'кінця терміну'}.
+                                                        </p>
+                                                    </div>
+                                                    <Button variant="outline" size="sm" className="rounded-full" onClick={() => router.push('/pricing')}>
+                                                        Поновити підписку
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </>
                                     ) : (
                                         <div className="text-center py-12 space-y-6">

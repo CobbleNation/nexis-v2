@@ -43,7 +43,8 @@ export async function POST(req: Request) {
                 ]
             },
             redirectUrl: `${BASE_URL}/payment/success`, // Redirect user here after payment
-            webHookUrl: `${BASE_URL}/api/billing/webhook` // Monobank notifies here
+            webHookUrl: `${BASE_URL}/api/billing/webhook`, // Monobank notifies here
+            saveCard: true
         });
 
         // 2. Record Pending Payment in DB

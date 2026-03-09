@@ -12,10 +12,13 @@ interface User {
     lastName?: string;
     bio?: string;
     subscriptionTier?: 'free' | 'pro';
+    subscriptionStartedAt?: Date | string;
+    subscriptionExpiresAt?: Date | string;
+    autoRenew?: boolean;
 
     cardLast4?: string;
     cardToken?: string;
-    role?: 'user' | 'admin' | 'manager' | 'support';
+    role?: 'user' | 'support' | 'manager' | 'admin';
     customLimits?: Record<string, any> | null;
 }
 

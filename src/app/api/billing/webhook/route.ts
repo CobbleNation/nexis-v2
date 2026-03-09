@@ -36,9 +36,16 @@ export async function POST(req: Request) {
 
         // If success, Activate Pro Plan & Save Card
         if (newStatus === 'success' && payment.status !== 'success') {
+            const now = new Date();
+            const expiresAt = new Date(now);
+            expiresAt.setMonth(expiresAt.getMonth() + 1);
+
             const updateData: any = {
                 subscriptionTier: 'pro',
-                updatedAt: new Date()
+                subscriptionStartedAt: now,
+                subscriptionExpiresAt: expiresAt,
+                autoRenew: true,
+                updatedAt: now
             };
 
             // Save card info if present in webhook
@@ -49,14 +56,12 @@ export async function POST(req: Request) {
             if (body.walletId) {
                 updateData.cardToken = body.walletId;
             }
-            // Estimate expiry if not provided? Monobank might not send exp date directly in basic webhook.
-            // We can ask user to input it or just show "valid".
 
             await db.update(users)
                 .set(updateData)
                 .where(eq(users.id, payment.userId));
 
-            console.log(`Activated Pro Plan for user ${payment.userId}`);
+            console.log(`Activated Pro Plan for user ${payment.userId} until ${expiresAt.toISOString()}`);
         }
 
         return NextResponse.json({ message: 'OK' });

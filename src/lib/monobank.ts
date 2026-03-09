@@ -22,6 +22,15 @@ interface CreateInvoiceParams {
     webHookUrl: string;
     validity?: number; // seconds
     paymentType?: 'debit' | 'hold';
+    saveCard?: boolean;
+}
+
+interface CreateRecurringPaymentParams {
+    amount: number;
+    ccy?: number;
+    cardToken: string;
+    description: string;
+    reference: string;
 }
 
 interface MonobankInvoiceResponse {
@@ -38,7 +47,8 @@ export const monobank = {
             redirectUrl: params.redirectUrl,
             webHookUrl: params.webHookUrl,
             validity: params.validity || 3600,
-            paymentType: params.paymentType || 'debit'
+            paymentType: params.paymentType || 'debit',
+            saveCard: params.saveCard
         };
 
         const response = await fetch(`${MONOBANK_API_URL}/invoice/create`, {
@@ -54,6 +64,35 @@ export const monobank = {
             const errorText = await response.text();
             console.error('Monobank API Error:', errorText);
             throw new Error(`Monobank API Error: ${response.status} ${errorText}`);
+        }
+
+        return await response.json();
+    },
+
+    async createRecurringPayment(params: CreateRecurringPaymentParams): Promise<any> {
+        const payload = {
+            amount: params.amount,
+            ccy: params.ccy || 980,
+            cardToken: params.cardToken,
+            merchantPaymInfo: {
+                reference: params.reference,
+                destination: params.description
+            }
+        };
+
+        const response = await fetch(`${MONOBANK_API_URL}/payment/direct`, {
+            method: 'POST',
+            headers: {
+                'X-Token': MONOBANK_TOKEN,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Monobank Recurring API Error:', errorText);
+            throw new Error(`Monobank Recurring API Error: ${response.status} ${errorText}`);
         }
 
         return await response.json();

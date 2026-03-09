@@ -62,35 +62,51 @@ export default function PaymentPage() {
                                     </div>
                                 </CardHeader>
 
-                                <CardContent className="p-8 space-y-6">
-                                    <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 flex items-start gap-3">
-                                        <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-                                        <div className="text-sm">
-                                            <p className="font-semibold text-blue-900 dark:text-blue-200">Безпечний платіж через Monobank</p>
-                                            <p className="text-blue-700/80 dark:text-blue-400/80 mt-1">
-                                                Ми перенаправимо вас на захищену сторінку оплати Monobank. Ваші платіжні дані не зберігаються на наших серверах.
-                                            </p>
+                                <CardContent className="p-8">
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex gap-4 border-b border-border w-full">
+                                                <button className="pb-2 border-b-2 border-primary font-semibold text-sm">Рекомендуємо</button>
+                                                <button className="pb-2 text-muted-foreground font-medium text-sm">Так теж можна</button>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="flex flex-col gap-4">
-                                        <Button
-                                            size="lg"
-                                            className="w-full h-14 text-lg font-bold bg-black hover:bg-zinc-900 text-white shadow-lg shadow-black/10 flex items-center justify-center gap-3 rounded-2xl"
-                                            onClick={handlePayment}
-                                            disabled={isLoading}
-                                        >
-                                            {isLoading ? (
-                                                'Обробка...'
-                                            ) : (
-                                                <>
-                                                    <img src="https://monobank.ua/resources/logo-white.svg" alt="Monobank" className="h-6 w-auto mr-2" />
-                                                    Оплатити через Monobank
-                                                </>
-                                            )}
-                                        </Button>
-                                        <div className="text-center text-xs text-muted-foreground">
-                                            Apple Pay / Google Pay / Картка
+                                        <div className="space-y-3">
+                                            <div
+                                                className="group relative flex items-center justify-between p-4 rounded-2xl border-2 border-primary/20 bg-primary/5 cursor-pointer transition-all hover:border-primary/40"
+                                                onClick={handlePayment}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
+                                                        <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-bold text-lg">Онлайн-оплата карткою</p>
+                                                        <p className="text-xs text-muted-foreground">GooglePay, ApplePay</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="h-5 w-auto" />
+                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" className="h-5 w-auto" />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-4 mt-8">
+                                                <Button
+                                                    size="lg"
+                                                    className="w-full h-14 text-lg font-bold bg-black hover:bg-zinc-900 text-white shadow-lg shadow-black/10 flex items-center justify-center gap-3 rounded-2xl"
+                                                    onClick={handlePayment}
+                                                    disabled={isLoading}
+                                                >
+                                                    {isLoading ? (
+                                                        'Обробка...'
+                                                    ) : (
+                                                        <>
+                                                            Перейти до оплати
+                                                        </>
+                                                    )}
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
                                 </CardContent>

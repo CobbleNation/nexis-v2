@@ -69,6 +69,9 @@ export async function POST(req: Request) {
                 avatar: user.avatar,
                 role: user.role,
                 subscriptionTier: user.subscriptionTier,
+                subscriptionStartedAt: user.subscriptionStartedAt,
+                subscriptionExpiresAt: user.subscriptionExpiresAt,
+                autoRenew: user.autoRenew,
                 cardLast4: user.cardLast4,
                 cardToken: user.cardToken,
                 customLimits: limits ?? null

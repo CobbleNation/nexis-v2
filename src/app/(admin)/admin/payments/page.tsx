@@ -64,7 +64,7 @@ export default function PaymentsPage() {
             const res = await fetch('/api/admin/payments');
             if (res.ok) {
                 const data = await res.json();
-                setPayments(data.payments || []);
+                setPayments(data);
             } else {
                 toast.error('Failed to fetch payments');
             }
