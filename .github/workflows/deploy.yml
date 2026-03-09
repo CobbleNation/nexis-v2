@@ -83,7 +83,6 @@ jobs:
             
             # Create/Update docker-compose.yml on the server
             cat > docker-compose.yml << EOF
-            version: '3.8'
             services:
               web:
                 image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
