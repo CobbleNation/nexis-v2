@@ -100,7 +100,7 @@ export async function PATCH(
             updateData.subscriptionExpiresAt = subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : null;
         }
 
-        if (body.subscriptionPeriod && ['month', 'year'].includes(body.subscriptionPeriod)) {
+        if (body.subscriptionPeriod !== undefined) {
             updateData.subscriptionPeriod = body.subscriptionPeriod;
         }
 
