@@ -32,6 +32,11 @@ export const users = sqliteTable('users', {
     cardLast4: text('card_last4'),
     cardExp: text('card_exp'), // MM/YY
     cardToken: text('card_token'), // Wallet ID or Token
+
+    // Pricing Overrides & Periods
+    currentPriceOverride: integer('current_price_override'), // in cents, one-time
+    recurringPriceOverride: integer('recurring_price_override'), // in cents, for future
+    subscriptionPeriod: text('subscription_period').default('month'), // 'month' or 'year'
 });
 
 export const sessions = sqliteTable('sessions', {

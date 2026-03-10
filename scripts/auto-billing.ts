@@ -1,14 +1,23 @@
+import * as dotenv from 'dotenv';
+import path from 'path';
 
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+// Load .env from project root
+dotenv.config({ path: path.join(__dirname, '../.env.local') });
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
 import { users, payments } from '../src/db/schema';
 import { eq, and, lt, isNotNull } from 'drizzle-orm';
 import { monobank } from '../src/lib/monobank';
 import { v4 as uuidv4 } from 'uuid';
 
-const dbPath = 'sqlite.db';
-const sqlite = new Database(dbPath);
-const db = drizzle(sqlite);
+const client = createClient({
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN!,
+});
+const db = drizzle(client);
+
 
 async function runAutoBilling() {
     console.log('💳 Auto-billing process started...');
@@ -34,23 +43,31 @@ async function runAutoBilling() {
         try {
             console.log(`Processing user: ${user.email} (${user.id})`);
 
-            const AMOUNT = 19900; // 199.00 UAH
+            // Use recurringPriceOverride if set, otherwise use plan default based on period
+            const period = user.subscriptionPeriod || 'month';
+            const defaultAmount = period === 'year' ? 199000 : 19900;
+            const amount = user.recurringPriceOverride ?? defaultAmount;
+
             const REFERENCE = uuidv4();
 
             // 1. Attempt charge via Monobank
             const chargeResult = await monobank.createRecurringPayment({
-                amount: AMOUNT,
+                amount: amount,
                 cardToken: user.cardToken!,
-                description: 'Zynorvia Pro Subscription Renewal',
+                description: `Zynorvia Pro Subscription Renewal (${period === 'year' ? 'Yearly' : 'Monthly'})`,
                 reference: REFERENCE
             });
 
             console.log(`Charge result for ${user.email}:`, chargeResult);
 
-            if (chargeResult.status === 'success') {
+            if (chargeResult.status === 'success' || chargeResult.status === 'processing') {
                 // 2. Update subscription dates
                 const newExpiry = new Date(user.subscriptionExpiresAt!);
-                newExpiry.setMonth(newExpiry.getMonth() + 1);
+                if (period === 'year') {
+                    newExpiry.setFullYear(newExpiry.getFullYear() + 1);
+                } else {
+                    newExpiry.setMonth(newExpiry.getMonth() + 1);
+                }
 
                 await db.update(users)
                     .set({
@@ -63,8 +80,8 @@ async function runAutoBilling() {
                 await db.insert(payments).values({
                     id: REFERENCE,
                     userId: user.id,
-                    amount: AMOUNT,
-                    status: 'success',
+                    amount: amount,
+                    status: 'success', // We consider success/processing as successful renewal attempt
                     metadata: chargeResult,
                     createdAt: new Date(),
                     updatedAt: new Date()

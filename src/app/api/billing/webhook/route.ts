@@ -36,20 +36,37 @@ export async function POST(req: Request) {
 
         // If success, Activate Pro Plan & Save Card
         if (newStatus === 'success' && payment.status !== 'success') {
+            const [user] = await db.select().from(users).where(eq(users.id, payment.userId)).limit(1);
+            if (!user) {
+                console.error('User not found:', payment.userId);
+                return NextResponse.json({ message: 'User not found' }, { status: 200 });
+            }
+
+            const period = payment.metadata?.period || 'month';
             const now = new Date();
-            const expiresAt = new Date(now);
-            expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+            // Extension logic: if still active, add to expiry. If expired, add to now.
+            const currentExpiry = user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt) : new Date();
+            const baseDate = currentExpiry > now ? currentExpiry : now;
+            const newExpiresAt = new Date(baseDate);
+
+            if (period === 'year') {
+                newExpiresAt.setFullYear(newExpiresAt.getFullYear() + 1);
+            } else {
+                newExpiresAt.setMonth(newExpiresAt.getMonth() + 1);
+            }
 
             const updateData: any = {
                 subscriptionTier: 'pro',
-                subscriptionStartedAt: now,
-                subscriptionExpiresAt: expiresAt,
+                subscriptionStartedAt: user.subscriptionStartedAt || now,
+                subscriptionExpiresAt: newExpiresAt,
+                subscriptionPeriod: period,
+                currentPriceOverride: null, // Clear one-time override
                 autoRenew: true,
                 updatedAt: now
             };
 
             // Save card info if present in webhook
-            // Monobank often sends 'maskedPan' and 'walletId' in success callbacks
             if (body.maskedPan && body.maskedPan.length > 4) {
                 updateData.cardLast4 = body.maskedPan.slice(-4);
             }
@@ -59,10 +76,11 @@ export async function POST(req: Request) {
 
             await db.update(users)
                 .set(updateData)
-                .where(eq(users.id, payment.userId));
+                .where(eq(users.id, user.id));
 
-            console.log(`Activated Pro Plan for user ${payment.userId} until ${expiresAt.toISOString()}`);
+            console.log(`Activated Pro (${period}) for user ${user.id} until ${newExpiresAt.toISOString()}`);
         }
+
 
         return NextResponse.json({ message: 'OK' });
 

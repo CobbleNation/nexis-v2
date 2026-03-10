@@ -14,10 +14,14 @@ interface User {
     subscriptionTier?: 'free' | 'pro';
     subscriptionStartedAt?: Date | string;
     subscriptionExpiresAt?: Date | string;
+    subscriptionPeriod?: 'month' | 'year';
+    currentPriceOverride?: number | null;
+    recurringPriceOverride?: number | null;
     autoRenew?: boolean;
 
     cardLast4?: string;
     cardToken?: string;
+
     role?: 'user' | 'support' | 'manager' | 'admin';
     customLimits?: Record<string, any> | null;
 }

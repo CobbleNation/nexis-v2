@@ -22,23 +22,37 @@ export async function POST(req: Request) {
 
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-        // Configuration
-        const AMOUNT = 19900; // 199.00 UAH
+        // 0. Parse Request Body
+        const body = await req.json().catch(() => ({}));
+        const requestedPeriod = body.period === 'year' ? 'year' : 'month';
+
+        // 1. Calculate Amount (Priority: Override > Default)
+        // Default prices: monthly = 199.00 UAH, yearly = 1990.00 UAH
+        let amount = requestedPeriod === 'year' ? 199000 : 19900;
+
+        if (user.currentPriceOverride !== null && user.currentPriceOverride !== undefined) {
+            amount = user.currentPriceOverride;
+            console.log(`[Checkout] Applying price override: ${amount} units for user ${userId}`);
+        }
+
         const REFERENCE = uuidv4();
         const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-        // 1. Create Invoice in Monobank
+        const description = requestedPeriod === 'year' ? 'Zynorvia Pro Subscription (1 Year)' : 'Zynorvia Pro Subscription (1 Month)';
+        const basketName = requestedPeriod === 'year' ? 'Zynorvia Pro - Yearly' : 'Zynorvia Pro - Monthly';
+
+        // 2. Create Invoice in Monobank
         const invoice = await monobank.createInvoice({
-            amount: AMOUNT,
+            amount: amount,
             merchantPaymInfo: {
                 reference: REFERENCE,
-                destination: 'Zynorvia Pro Subscription (1 Month)',
+                destination: description,
                 basketOrder: [
                     {
-                        name: 'Zynorvia Pro - Monthly',
+                        name: basketName,
                         qty: 1,
-                        sum: AMOUNT,
-                        unit: 'month'
+                        sum: amount,
+                        unit: requestedPeriod
                     }
                 ]
             },
@@ -47,17 +61,21 @@ export async function POST(req: Request) {
             saveCard: true
         });
 
-        // 2. Record Pending Payment in DB
+        // 3. Record Pending Payment in DB
         await db.insert(payments).values({
             id: REFERENCE,
             userId: userId,
-            amount: AMOUNT,
+            amount: amount,
             status: 'pending',
             invoiceId: invoice.invoiceId,
-            metadata: { pageUrl: invoice.pageUrl }
+            metadata: {
+                pageUrl: invoice.pageUrl,
+                period: requestedPeriod // Crucial for webhook to know how much to extend
+            }
         });
 
         return NextResponse.json({ url: invoice.pageUrl });
+
 
     } catch (error) {
         console.error('Checkout Error:', error);

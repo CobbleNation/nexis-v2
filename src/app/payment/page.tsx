@@ -10,16 +10,29 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 
 export default function PaymentPage() {
     const router = useRouter();
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const [period, setPeriod] = useState<'month' | 'year'>('month');
+
+    // Use price override if set by admin, otherwise use plan default
+    const hasOverride = user?.currentPriceOverride !== null && user?.currentPriceOverride !== undefined;
+    const currentAmount = hasOverride
+        ? user!.currentPriceOverride! / 100
+        : (period === 'year' ? 1990 : 199);
 
     const handlePayment = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch('/api/billing/checkout', { method: 'POST' });
+            const res = await fetch('/api/billing/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ period })
+            });
             if (!res.ok) throw new Error('Checkout failed');
 
             const data = await res.json();
@@ -63,49 +76,83 @@ export default function PaymentPage() {
                                 </CardHeader>
 
                                 <CardContent className="p-8">
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex gap-4 border-b border-border w-full">
-                                                <button className="pb-2 border-b-2 border-primary font-semibold text-sm">Рекомендуємо</button>
-                                                <button className="pb-2 text-muted-foreground font-medium text-sm">Так теж можна</button>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <div
-                                                className="group relative flex items-center justify-between p-4 rounded-2xl border-2 border-primary/20 bg-primary/5 cursor-pointer transition-all hover:border-primary/40"
-                                                onClick={handlePayment}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-bold text-lg">Онлайн-оплата карткою</p>
-                                                        <p className="text-xs text-muted-foreground">GooglePay, ApplePay</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="h-5 w-auto" />
-                                                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" className="h-5 w-auto" />
+                                    <div className="space-y-6">
+                                        {!hasOverride && (
+                                            <div className="flex flex-col gap-3">
+                                                <Label className="text-sm font-semibold">Термін підписки</Label>
+                                                <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
+                                                    <button
+                                                        onClick={() => setPeriod('month')}
+                                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${period === 'month' ? 'bg-white dark:bg-slate-800 shadow-sm' : 'text-muted-foreground'}`}
+                                                    >
+                                                        Щомісячно
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setPeriod('year')}
+                                                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${period === 'year' ? 'bg-white dark:bg-slate-800 shadow-sm' : 'text-muted-foreground'}`}
+                                                    >
+                                                        Щорічно
+                                                        <span className="text-[10px] bg-green-100 dark:bg-green-900/50 text-green-600 px-1.5 py-0.5 rounded-full font-bold">-15%</span>
+                                                    </button>
                                                 </div>
                                             </div>
+                                        )}
 
-                                            <div className="flex flex-col gap-4 mt-8">
-                                                <Button
-                                                    size="lg"
-                                                    className="w-full h-14 text-lg font-bold bg-black hover:bg-zinc-900 text-white shadow-lg shadow-black/10 flex items-center justify-center gap-3 rounded-2xl"
+                                        {hasOverride && (
+                                            <div className="p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-2xl flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/50 rounded-full flex items-center justify-center">
+                                                    <ShieldCheck className="w-5 h-5 text-orange-600" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-orange-800 dark:text-orange-400">Персональна пропозиція</p>
+                                                    <p className="text-xs text-orange-700/70 dark:text-orange-300/60">Для вас встановлено спеціальну ціну на наступний платіж</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex gap-4 border-b border-border w-full">
+                                                    <button className="pb-2 border-b-2 border-primary font-semibold text-sm">Рекомендуємо</button>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                <div
+                                                    className="group relative flex items-center justify-between p-4 rounded-2xl border-2 border-primary/20 bg-primary/5 cursor-pointer transition-all hover:border-primary/40"
                                                     onClick={handlePayment}
-                                                    disabled={isLoading}
                                                 >
-                                                    {isLoading ? (
-                                                        'Обробка...'
-                                                    ) : (
-                                                        <>
-                                                            Перейти до оплати
-                                                        </>
-                                                    )}
-                                                </Button>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
+                                                            <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-lg">Онлайн-оплата карткою</p>
+                                                            <p className="text-xs text-muted-foreground">GooglePay, ApplePay</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/Google_Pay_%28GPay%29_Logo.svg" alt="GPay" className="h-5 w-auto" />
+                                                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" className="h-5 w-auto" />
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col gap-4 mt-8">
+                                                    <Button
+                                                        size="lg"
+                                                        className="w-full h-14 text-lg font-bold bg-black hover:bg-zinc-900 text-white shadow-lg shadow-black/10 flex items-center justify-center gap-3 rounded-2xl"
+                                                        onClick={handlePayment}
+                                                        disabled={isLoading}
+                                                    >
+                                                        {isLoading ? (
+                                                            'Обробка...'
+                                                        ) : (
+                                                            <>
+                                                                Перейти до оплати {currentAmount} ₴
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -136,11 +183,15 @@ export default function PaymentPage() {
                                     <div className="flex justify-between items-start pb-6 border-b border-border/40">
                                         <div>
                                             <h4 className="font-bold text-lg">Zynorvia Pro</h4>
-                                            <p className="text-sm text-muted-foreground">Щомісячна підписка</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {hasOverride ? 'Спеціальна пропозиція' : period === 'year' ? 'Річна підписка' : 'Щомісячна підписка'}
+                                            </p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="font-bold text-lg">199 ₴</span>
-                                            <p className="text-xs text-muted-foreground">/ місяць</p>
+                                            <span className="font-bold text-lg">{currentAmount} ₴</span>
+                                            <p className="text-xs text-muted-foreground">
+                                                / {hasOverride ? 'платіж' : period === 'year' ? 'рік' : 'місяць'}
+                                            </p>
                                         </div>
                                     </div>
 
@@ -162,7 +213,7 @@ export default function PaymentPage() {
                                     <div className="pt-4 border-t border-border/40">
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-muted-foreground">Підсумок</span>
-                                            <span>199 ₴</span>
+                                            <span>{currentAmount} ₴</span>
                                         </div>
                                         <div className="flex justify-between items-center mb-4">
                                             <span className="text-muted-foreground">Податки</span>
@@ -171,11 +222,12 @@ export default function PaymentPage() {
                                         <Separator className="my-4" />
                                         <div className="flex justify-between items-center text-lg font-bold">
                                             <span>Всього до сплати</span>
-                                            <span className="text-orange-600">199 ₴</span>
+                                            <span className="text-orange-600">{currentAmount} ₴</span>
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
+
 
                             <div className="mt-6 p-4 rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/30 text-center">
                                 <p className="text-xs text-orange-800 dark:text-orange-300 font-medium">

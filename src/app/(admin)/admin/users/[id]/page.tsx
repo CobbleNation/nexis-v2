@@ -40,7 +40,9 @@ interface UserDetails {
     avatar: string | null;
     goalsCount: number;
     habitsCount: number;
-
+    subscriptionPeriod: 'month' | 'year';
+    currentPriceOverride: number | null;
+    recurringPriceOverride: number | null;
 }
 
 // Numeric limit fields with labels and plan defaults
@@ -103,7 +105,10 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         role: '',
         subscriptionTier: '',
         name: '',
-        subscriptionExpiresAt: ''
+        subscriptionExpiresAt: '',
+        subscriptionPeriod: 'month' as 'month' | 'year',
+        currentPriceOverride: '' as string | number,
+        recurringPriceOverride: '' as string | number
     });
     const [limitsForm, setLimitsForm] = useState<LimitsForm>(getDefaultLimitsForm());
     const [limitsLoading, setLimitsLoading] = useState(true);
@@ -133,7 +138,10 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     role: data.user.role,
                     subscriptionTier: data.user.subscriptionTier,
                     name: data.user.name,
-                    subscriptionExpiresAt: data.user.subscriptionExpiresAt ? data.user.subscriptionExpiresAt.split('T')[0] : ''
+                    subscriptionExpiresAt: data.user.subscriptionExpiresAt ? data.user.subscriptionExpiresAt.split('T')[0] : '',
+                    subscriptionPeriod: data.user.subscriptionPeriod || 'month',
+                    currentPriceOverride: data.user.currentPriceOverride !== null ? data.user.currentPriceOverride / 100 : '',
+                    recurringPriceOverride: data.user.recurringPriceOverride !== null ? data.user.recurringPriceOverride / 100 : ''
                 });
             } catch (err) {
                 toast.error('Failed to load user info');
@@ -174,15 +182,22 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
     const handleSave = async () => {
         setSaving(true);
         try {
+            // Convert prices back to cents
+            const payload = {
+                ...formData,
+                currentPriceOverride: formData.currentPriceOverride === '' ? null : Math.round(Number(formData.currentPriceOverride) * 100),
+                recurringPriceOverride: formData.recurringPriceOverride === '' ? null : Math.round(Number(formData.recurringPriceOverride) * 100)
+            };
+
             const res = await fetch(`/api/admin/users/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
             if (res.ok) {
                 toast.success('User updated successfully');
                 const data = await res.json();
-                setUser(prev => prev ? ({ ...prev, ...data.user }) : null);
+                setUser((prev: UserDetails | null) => prev ? ({ ...prev, ...data.user }) : null);
             } else {
                 toast.error('Failed to update user');
             }
@@ -681,7 +696,67 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     </div>
                 </TabsContent>
 
-                <TabsContent value="finance">
+                <TabsContent value="finance" className="space-y-6">
+                    <Card className="bg-slate-900 border-slate-800 text-slate-100">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-orange-500">
+                                <ShieldCheck className="h-5 w-5" />
+                                Персональне Ціноутворення
+                            </CardTitle>
+                            <CardDescription>Встановіть спеціальну ціну для цього користувача (в ₴)</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                    <Label>Період підписки за замовчуванням</Label>
+                                    <Select
+                                        value={formData.subscriptionPeriod}
+                                        onValueChange={(val: any) => setFormData({ ...formData, subscriptionPeriod: val })}
+                                    >
+                                        <SelectTrigger className="bg-slate-950 border-slate-800">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                                            <SelectItem value="month">Місяць</SelectItem>
+                                            <SelectItem value="year">Рік</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-orange-400">Ціна наступного платежу (₴)</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="199"
+                                        value={formData.currentPriceOverride}
+                                        onChange={(e) => setFormData({ ...formData, currentPriceOverride: e.target.value })}
+                                        className="bg-slate-950 border-slate-800 focus:ring-orange-500/50"
+                                    />
+                                    <p className="text-[10px] text-slate-500">Разова зміна. Очиститься після успішної оплати.</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-emerald-400">Ціна регулярних платежів (₴)</Label>
+                                    <Input
+                                        type="number"
+                                        placeholder="199"
+                                        value={formData.recurringPriceOverride}
+                                        onChange={(e) => setFormData({ ...formData, recurringPriceOverride: e.target.value })}
+                                        className="bg-slate-950 border-slate-800 focus:ring-emerald-500/50"
+                                    />
+                                    <p className="text-[10px] text-slate-500">Діятиме постійно для автоматичних списань.</p>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end border-t border-slate-800 pt-6">
+                                <Button onClick={handleSave} disabled={saving} className="bg-emerald-600 hover:bg-emerald-700">
+                                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                                    Зберегти Оверрайди
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">

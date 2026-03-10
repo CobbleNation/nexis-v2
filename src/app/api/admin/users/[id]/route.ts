@@ -46,6 +46,9 @@ export async function GET(
             emailVerified: users.emailVerified,
             subscriptionTier: users.subscriptionTier,
             subscriptionExpiresAt: users.subscriptionExpiresAt,
+            subscriptionPeriod: users.subscriptionPeriod,
+            currentPriceOverride: users.currentPriceOverride,
+            recurringPriceOverride: users.recurringPriceOverride,
             createdAt: users.createdAt,
             updatedAt: users.updatedAt,
             avatar: users.avatar,
@@ -95,6 +98,18 @@ export async function PATCH(
 
         if (subscriptionExpiresAt !== undefined) {
             updateData.subscriptionExpiresAt = subscriptionExpiresAt ? new Date(subscriptionExpiresAt) : null;
+        }
+
+        if (body.subscriptionPeriod && ['month', 'year'].includes(body.subscriptionPeriod)) {
+            updateData.subscriptionPeriod = body.subscriptionPeriod;
+        }
+
+        if (body.currentPriceOverride !== undefined) {
+            updateData.currentPriceOverride = body.currentPriceOverride === '' ? null : body.currentPriceOverride;
+        }
+
+        if (body.recurringPriceOverride !== undefined) {
+            updateData.recurringPriceOverride = body.recurringPriceOverride === '' ? null : body.recurringPriceOverride;
         }
 
         if (Object.keys(updateData).length === 0) {

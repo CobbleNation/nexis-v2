@@ -60,6 +60,9 @@ export async function GET() {
             subscriptionTier: user.subscriptionTier,
             subscriptionStartedAt: user.subscriptionStartedAt,
             subscriptionExpiresAt: user.subscriptionExpiresAt,
+            subscriptionPeriod: user.subscriptionPeriod,
+            currentPriceOverride: user.currentPriceOverride,
+            recurringPriceOverride: user.recurringPriceOverride,
             autoRenew: user.autoRenew,
             role: user.role,
             cardLast4: user.cardLast4,
@@ -68,3 +71,4 @@ export async function GET() {
         }
     }, { headers: noCacheHeaders });
 }
+
