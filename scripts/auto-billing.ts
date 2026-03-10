@@ -140,7 +140,4 @@ async function runAutoBilling() {
     console.log('🏁 Auto-billing process finished.');
 }
 
-console.log('🏁 Auto-billing process finished.');
-}
-
 runAutoBilling().catch(console.error);
