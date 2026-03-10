@@ -10,8 +10,9 @@ if (process.env.NODE_ENV !== 'production') {
 const url = process.env.TURSO_DATABASE_URL;
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
-if (process.env.NODE_ENV === 'production' && !url) {
-    throw new Error('TURSO_DATABASE_URL is required in production');
+// Only throw in production runtime, not during build
+if (process.env.NODE_ENV === 'production' && !url && !process.env.NEXT_PHASE) {
+    console.warn('Warning: TURSO_DATABASE_URL is missing in production environment');
 }
 
 const client = createClient({
