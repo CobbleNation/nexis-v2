@@ -47,6 +47,8 @@ export async function GET(
             subscriptionTier: users.subscriptionTier,
             subscriptionExpiresAt: users.subscriptionExpiresAt,
             subscriptionPeriod: users.subscriptionPeriod,
+            autoRenew: users.autoRenew,
+            hasCard: sql<boolean>`CASE WHEN ${users.cardToken} IS NOT NULL THEN true ELSE false END`,
             currentPriceOverride: users.currentPriceOverride,
             recurringPriceOverride: users.recurringPriceOverride,
             createdAt: users.createdAt,
@@ -110,6 +112,10 @@ export async function PATCH(
 
         if (body.recurringPriceOverride !== undefined) {
             updateData.recurringPriceOverride = body.recurringPriceOverride === '' ? null : body.recurringPriceOverride;
+        }
+
+        if (body.autoRenew !== undefined) {
+            updateData.autoRenew = body.autoRenew;
         }
 
         if (Object.keys(updateData).length === 0) {

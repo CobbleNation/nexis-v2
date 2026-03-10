@@ -41,6 +41,8 @@ interface UserDetails {
     goalsCount: number;
     habitsCount: number;
     subscriptionPeriod: string; // 'month', 'year', or '1m', '5h', etc.
+    autoRenew: boolean;
+    hasCard: boolean;
     currentPriceOverride: number | null;
     recurringPriceOverride: number | null;
 }
@@ -107,6 +109,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         name: '',
         subscriptionExpiresAt: '',
         subscriptionPeriod: 'month' as string,
+        autoRenew: false,
         currentPriceOverride: '' as string | number,
         recurringPriceOverride: '' as string | number
     });
@@ -168,8 +171,9 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     role: data.user.role,
                     subscriptionTier: data.user.subscriptionTier,
                     name: data.user.name,
-                    subscriptionExpiresAt: data.user.subscriptionExpiresAt ? data.user.subscriptionExpiresAt.split('T')[0] : '',
+                    subscriptionExpiresAt: data.user.subscriptionExpiresAt ? data.user.subscriptionExpiresAt.slice(0, 16) : '',
                     subscriptionPeriod: data.user.subscriptionPeriod || 'month',
+                    autoRenew: data.user.autoRenew || false,
                     currentPriceOverride: data.user.currentPriceOverride !== null ? data.user.currentPriceOverride / 100 : '',
                     recurringPriceOverride: data.user.recurringPriceOverride !== null ? data.user.recurringPriceOverride / 100 : ''
                 });
@@ -436,13 +440,13 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                         <div className="space-y-2">
                                             <Label>Термін дії підписки (тільки для Pro)</Label>
                                             <Input
-                                                type="date"
+                                                type="datetime-local"
                                                 value={formData.subscriptionExpiresAt}
                                                 onChange={(e) => setFormData({ ...formData, subscriptionExpiresAt: e.target.value })}
                                                 disabled={formData.subscriptionTier !== 'pro'}
                                                 className="bg-slate-950 border-slate-800 text-slate-100 focus:ring-slate-700"
                                             />
-                                            <p className="text-[10px] text-slate-500">Залиште порожнім для необмеженого доступу</p>
+                                            <p className="text-[10px] text-slate-500">Точний час закінчення (напр. для тесту 1 хв)</p>
                                         </div>
                                     </div>
 
@@ -737,6 +741,31 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2 col-span-1">
+                                    <Label className="flex items-center justify-between">
+                                        Статус Автопродовження
+                                        <Badge variant={formData.autoRenew ? 'outline' : 'secondary'} className={formData.autoRenew ? "border-emerald-500 text-emerald-500" : ""}>
+                                            {formData.autoRenew ? 'УВІМКНЕНО' : 'ВИМКНЕНО'}
+                                        </Badge>
+                                    </Label>
+                                    <div className="flex items-center space-x-2 bg-slate-950 p-2 rounded-lg border border-slate-800">
+                                        <Switch
+                                            checked={formData.autoRenew}
+                                            onCheckedChange={(checked) => setFormData({ ...formData, autoRenew: checked })}
+                                        />
+                                        <span className="text-sm text-slate-400">Списувати автоматично?</span>
+                                    </div>
+                                    {user.hasCard ? (
+                                        <div className="flex items-center gap-2 text-[10px] text-emerald-500 mt-1">
+                                            <ShieldCheck className="w-3 h-3" /> Картка прив'язана (Token OK)
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-[10px] text-rose-500 mt-1">
+                                            <AlertTriangle className="w-3 h-3" /> Картка НЕ прив'язана
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="space-y-2 col-span-1">
                                     <Label>Період підписки (за замовчуванням)</Label>
                                     <div className="flex gap-2">
