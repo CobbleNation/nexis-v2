@@ -18,7 +18,6 @@ const client = createClient({
 });
 const db = drizzle(client);
 
-
 function extendExpiry(currentExpiry: Date, period: string): Date {
     const date = new Date(currentExpiry);
     const match = period.match(/^(\d+)([myhd])$/);
@@ -44,14 +43,20 @@ function extendExpiry(currentExpiry: Date, period: string): Date {
 }
 
 async function runAutoBilling() {
-    console.log('💳 Auto-billing process started...');
+    console.log(`[${new Date().toISOString()}] 💳 Auto-billing check started...`);
 
     const now = new Date();
-    // Find users whose subscription expires in less than 5 minutes (for precise test billing)
-    // or standard 24 hour buffer for normal cycles
+    // Buffer for charging slightly ahead or catching minute-level expirations
     const bufferTime = new Date(now.getTime() + 5 * 60 * 1000);
 
-    const usersToCharge = await db.select()
+    const usersToCharge = await db.select({
+        id: users.id,
+        email: users.email,
+        cardToken: users.cardToken,
+        subscriptionPeriod: users.subscriptionPeriod,
+        subscriptionExpiresAt: users.subscriptionExpiresAt,
+        recurringPriceOverride: users.recurringPriceOverride,
+    })
         .from(users)
         .where(
             and(
@@ -62,7 +67,9 @@ async function runAutoBilling() {
             )
         );
 
-    console.log(`Found ${usersToCharge.length} users to potentially charge.`);
+    if (usersToCharge.length > 0) {
+        console.log(`Found ${usersToCharge.length} users to potentially charge.`);
+    }
 
     for (const user of usersToCharge) {
         try {
@@ -110,14 +117,16 @@ async function runAutoBilling() {
             } else {
                 console.error(`❌ Charge failed for ${user.email}: status is ${chargeResult.status}`);
             }
-
         } catch (error) {
             console.error(`💥 Error processing auto-billing for ${user.email}:`, error);
         }
     }
 
     // Downgrade users whose subscription has expired and autoRenew is false
-    const expiredUsers = await db.select()
+    const expiredUsers = await db.select({
+        id: users.id,
+        email: users.email
+    })
         .from(users)
         .where(
             and(
@@ -136,8 +145,39 @@ async function runAutoBilling() {
             })
             .where(eq(users.id, user.id));
     }
-
-    console.log('🏁 Auto-billing process finished.');
 }
 
-runAutoBilling().catch(console.error);
+async function startDaemon() {
+    console.log('🚀 Zynorvia Auto-billing Daemon started');
+
+    // Graceful shutdown
+    let isRunning = true;
+    const shutdown = () => {
+        isRunning = false;
+        console.log('\nStopping daemon gracefully...');
+    };
+
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
+
+    while (isRunning) {
+        try {
+            await runAutoBilling();
+        } catch (error) {
+            console.error('💥 Critical error in billing loop:', error);
+        }
+
+        if (!isRunning) break;
+
+        // Sleep for 60 seconds
+        await new Promise(resolve => setTimeout(resolve, 60000));
+    }
+
+    console.log('👋 Daemon stopped safely.');
+    process.exit(0);
+}
+
+startDaemon().catch(err => {
+    console.error('💀 Daemon failed to start:', err);
+    process.exit(1);
+});
