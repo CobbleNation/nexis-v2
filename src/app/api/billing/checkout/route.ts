@@ -24,7 +24,8 @@ export async function POST(req: Request) {
 
         // 0. Parse Request Body
         const body = await req.json().catch(() => ({}));
-        const requestedPeriod = body.period === 'year' ? 'year' : 'month';
+        // Allow any period string for testing (e.g., '1m'), default to 'month'
+        const requestedPeriod = body.period || 'month';
 
         // 1. Calculate Amount (Priority: Override > Default)
         // Default prices: monthly = 199.00 UAH, yearly = 1990.00 UAH
