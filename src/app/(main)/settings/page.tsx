@@ -379,7 +379,13 @@ export default function SettingsPage() {
                                                         {user.autoRenew ? '₴199.00' : 'Активна'}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        {user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '---'}
+                                                        {user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt).toLocaleString('uk-UA', {
+                                                            day: 'numeric',
+                                                            month: 'long',
+                                                            year: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit'
+                                                        }) : '---'}
                                                     </div>
                                                 </div>
                                             </div>
