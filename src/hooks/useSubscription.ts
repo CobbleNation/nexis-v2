@@ -8,8 +8,11 @@ export function useSubscription() {
 
     // Default to FREE if no tier specified
     const tier: SubscriptionTier = user?.subscriptionTier || SUBSCRIPTION_PLAN.FREE;
-    // Check if user is on PRO plan
-    const isPro = tier === SUBSCRIPTION_PLAN.PRO;
+
+    // Check if user is on PRO plan AND it hasn't expired yet
+    const now = new Date();
+    const isPro = tier === SUBSCRIPTION_PLAN.PRO &&
+        (!user?.subscriptionExpiresAt || new Date(user.subscriptionExpiresAt) > now);
 
     // Create a merged limits object for backwards compatibility where `limits.MAX_GOALS` was used directly
     const customLimits = user?.customLimits;

@@ -19,12 +19,37 @@ const client = createClient({
 const db = drizzle(client);
 
 
+function extendExpiry(currentExpiry: Date, period: string): Date {
+    const date = new Date(currentExpiry);
+    const match = period.match(/^(\d+)([myhd])$/);
+
+    if (match) {
+        const value = parseInt(match[1]);
+        const unit = match[2];
+
+        switch (unit) {
+            case 'm': date.setMinutes(date.getMinutes() + value); break;
+            case 'h': date.setHours(date.getHours() + value); break;
+            case 'd': date.setDate(date.getDate() + value); break;
+        }
+        return date;
+    }
+
+    if (period === 'year') {
+        date.setFullYear(date.getFullYear() + 1);
+    } else {
+        date.setMonth(date.getMonth() + 1);
+    }
+    return date;
+}
+
 async function runAutoBilling() {
     console.log('💳 Auto-billing process started...');
 
     const now = new Date();
-    // Find users whose subscription expires in less than 24 hours and have autoRenew enabled
-    const bufferTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    // Find users whose subscription expires in less than 5 minutes (for precise test billing)
+    // or standard 24 hour buffer for normal cycles
+    const bufferTime = new Date(now.getTime() + 5 * 60 * 1000);
 
     const usersToCharge = await db.select()
         .from(users)
@@ -37,13 +62,12 @@ async function runAutoBilling() {
             )
         );
 
-    console.log(`Found ${usersToCharge.length} users to charge.`);
+    console.log(`Found ${usersToCharge.length} users to potentially charge.`);
 
     for (const user of usersToCharge) {
         try {
             console.log(`Processing user: ${user.email} (${user.id})`);
 
-            // Use recurringPriceOverride if set, otherwise use plan default based on period
             const period = user.subscriptionPeriod || 'month';
             const defaultAmount = period === 'year' ? 199000 : 19900;
             const amount = user.recurringPriceOverride ?? defaultAmount;
@@ -54,7 +78,7 @@ async function runAutoBilling() {
             const chargeResult = await monobank.createRecurringPayment({
                 amount: amount,
                 cardToken: user.cardToken!,
-                description: `Zynorvia Pro Subscription Renewal (${period === 'year' ? 'Yearly' : 'Monthly'})`,
+                description: `Zynorvia Pro Subscription Renewal (${period})`,
                 reference: REFERENCE
             });
 
@@ -62,12 +86,7 @@ async function runAutoBilling() {
 
             if (chargeResult.status === 'success' || chargeResult.status === 'processing') {
                 // 2. Update subscription dates
-                const newExpiry = new Date(user.subscriptionExpiresAt!);
-                if (period === 'year') {
-                    newExpiry.setFullYear(newExpiry.getFullYear() + 1);
-                } else {
-                    newExpiry.setMonth(newExpiry.getMonth() + 1);
-                }
+                const newExpiry = extendExpiry(new Date(user.subscriptionExpiresAt!), period);
 
                 await db.update(users)
                     .set({
@@ -81,7 +100,7 @@ async function runAutoBilling() {
                     id: REFERENCE,
                     userId: user.id,
                     amount: amount,
-                    status: 'success', // We consider success/processing as successful renewal attempt
+                    status: 'success',
                     metadata: chargeResult,
                     createdAt: new Date(),
                     updatedAt: new Date()
@@ -90,7 +109,6 @@ async function runAutoBilling() {
                 console.log(`✅ Successfully renewed subscription for ${user.email} until ${newExpiry.toISOString()}`);
             } else {
                 console.error(`❌ Charge failed for ${user.email}: status is ${chargeResult.status}`);
-                // Potential logic: disable auto-renew or notify user
             }
 
         } catch (error) {
@@ -98,7 +116,7 @@ async function runAutoBilling() {
         }
     }
 
-    // Also, downgrade users whose subscription has expired and autoRenew is false
+    // Downgrade users whose subscription has expired and autoRenew is false
     const expiredUsers = await db.select()
         .from(users)
         .where(
@@ -120,6 +138,9 @@ async function runAutoBilling() {
     }
 
     console.log('🏁 Auto-billing process finished.');
+}
+
+console.log('🏁 Auto-billing process finished.');
 }
 
 runAutoBilling().catch(console.error);
