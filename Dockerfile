@@ -36,7 +36,7 @@ RUN useradd --system --uid 1001 nextjs
 # Install openssl in runner as well (needed for many DB clients)
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
