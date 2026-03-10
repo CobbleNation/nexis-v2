@@ -11,13 +11,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect } from 'react';
 
-export default function PaymentPage() {
+function PaymentContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
-    const [period, setPeriod] = useState<'month' | 'year'>('month');
+
+    // Initialize period from URL if present
+    const initialPeriod = searchParams.get('period') === 'year' ? 'year' : 'month';
+    const [period, setPeriod] = useState<'month' | 'year'>(initialPeriod);
+
+    // Update period if URL changes (optional but good for consistency)
+    useEffect(() => {
+        const p = searchParams.get('period');
+        if (p === 'year' || p === 'month') {
+            setPeriod(p as 'month' | 'year');
+        }
+    }, [searchParams]);
 
     // Use price override if set by admin, otherwise use plan default
     const hasOverride = user?.currentPriceOverride !== null && user?.currentPriceOverride !== undefined;
@@ -239,5 +252,17 @@ export default function PaymentPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function PaymentPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+            </div>
+        }>
+            <PaymentContent />
+        </Suspense>
     );
 }

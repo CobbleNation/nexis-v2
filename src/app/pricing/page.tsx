@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button"
 import { LandingHeader } from "@/components/landing/LandingHeader"
 import { LandingFooter } from "@/components/landing/LandingFooter"
 
+import { useState } from "react"
+
 export default function PricingPage() {
+    const [billingPeriod, setBillingPeriod] = useState<'month' | 'year'>('month');
+
     return (
         <div className="flex flex-col min-h-screen bg-white dark:bg-[#020817] text-slate-900 dark:text-slate-50 transition-colors duration-500">
             <LandingHeader />
@@ -23,9 +27,23 @@ export default function PricingPage() {
                         Обери свій шлях <span className="text-slate-400">до продуктивності.</span>
                     </h1>
 
-                    <p className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400 mb-16">
+                    <p className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400 mb-8">
                         Почни безкоштовно та переходь на Pro, коли будеш готовий масштабувати свої досягнення.
                     </p>
+
+                    <div className="flex items-center justify-center gap-4 mb-16">
+                        <span className={`text-sm font-medium ${billingPeriod === 'month' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>Щомісячно</span>
+                        <button
+                            onClick={() => setBillingPeriod(billingPeriod === 'month' ? 'year' : 'month')}
+                            className="relative w-14 h-7 bg-slate-200 dark:bg-slate-800 rounded-full p-1 transition-colors duration-300 focus:outline-none"
+                        >
+                            <div className={`w-5 h-5 bg-orange-500 rounded-full transition-transform duration-300 transform ${billingPeriod === 'year' ? 'translate-x-7' : 'translate-x-0'}`} />
+                        </button>
+                        <div className="flex items-center gap-2">
+                            <span className={`text-sm font-medium ${billingPeriod === 'year' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>Щорічно</span>
+                            <span className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Економія 15%</span>
+                        </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                         {/* Free Plan */}
@@ -49,8 +67,8 @@ export default function PricingPage() {
                         {/* Pro Plan */}
                         <PricingCard
                             title="Pro"
-                            price="199 ₴"
-                            period="/ місяць"
+                            price={billingPeriod === 'year' ? "1990 ₴" : "199 ₴"}
+                            period={billingPeriod === 'year' ? "/ рік" : "/ місяць"}
                             desc="Для тих, хто серйозно ставиться до своїх амбіцій."
                             features={[
                                 "Все що в Free, плюс:",
@@ -63,6 +81,7 @@ export default function PricingPage() {
                             buttonText="Спробувати Pro"
                             buttonVariant="default"
                             isPopular={true}
+                            href={`/payment?period=${billingPeriod}`}
                         />
                     </div>
 
@@ -74,7 +93,7 @@ export default function PricingPage() {
     )
 }
 
-function PricingCard({ title, price, period, desc, features, buttonText, buttonVariant, isPopular }: any) {
+function PricingCard({ title, price, period, desc, features, buttonText, buttonVariant, isPopular, href }: any) {
     return (
         <div className={`relative p-8 rounded-3xl border flex flex-col items-start text-left ${isPopular ? 'border-orange-500 shadow-2xl shadow-orange-500/10 bg-slate-50 dark:bg-[#0B1121]' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-[#020817]'}`}>
             {isPopular && (
@@ -101,7 +120,7 @@ function PricingCard({ title, price, period, desc, features, buttonText, buttonV
                 ))}
             </div>
 
-            <Link href={isPopular ? "/payment" : "/overview"} className="w-full">
+            <Link href={href || (isPopular ? "/payment" : "/overview")} className="w-full">
                 <Button
                     className={`w-full h-12 rounded-xl text-base font-semibold ${isPopular ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white border-none hover:opacity-90' : ''}`}
                     variant={buttonVariant}
