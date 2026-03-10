@@ -21,14 +21,14 @@ function PaymentContent() {
     const [isLoading, setIsLoading] = useState(false);
 
     // Initialize period from URL if present
-    const initialPeriod = searchParams.get('period') === 'year' ? 'year' : 'month';
-    const [period, setPeriod] = useState<'month' | 'year'>(initialPeriod);
+    const initialPeriod = searchParams.get('period') || 'month';
+    const [period, setPeriod] = useState<string>(initialPeriod);
 
     // Update period if URL changes (optional but good for consistency)
     useEffect(() => {
         const p = searchParams.get('period');
-        if (p === 'year' || p === 'month') {
-            setPeriod(p as 'month' | 'year');
+        if (p) {
+            setPeriod(p);
         }
     }, [searchParams]);
 
@@ -36,7 +36,7 @@ function PaymentContent() {
     const hasOverride = user?.currentPriceOverride !== null && user?.currentPriceOverride !== undefined;
     const currentAmount = hasOverride
         ? user!.currentPriceOverride! / 100
-        : (period === 'year' ? 1990 : 199);
+        : (period === 'year' ? 1990 : (period === 'month' ? 199 : 1)); // 1 UAH for other periods (testing)
 
     const handlePayment = async () => {
         setIsLoading(true);
