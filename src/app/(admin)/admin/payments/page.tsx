@@ -64,7 +64,8 @@ export default function PaymentsPage() {
             const res = await fetch('/api/admin/payments');
             if (res.ok) {
                 const data = await res.json();
-                setPayments(data);
+                // Fix: data is { payments: [...] }
+                setPayments(Array.isArray(data.payments) ? data.payments : []);
             } else {
                 toast.error('Failed to fetch payments');
             }
@@ -72,6 +73,17 @@ export default function PaymentsPage() {
             toast.error('Error loading payments');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const formatDateSafe = (dateStr: string | null | undefined) => {
+        if (!dateStr) return '---';
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '---';
+            return format(date, 'dd.MM.yyyy HH:mm');
+        } catch (e) {
+            return '---';
         }
     };
 
@@ -231,7 +243,7 @@ export default function PaymentsPage() {
                                                 </Badge>
                                             </td>
                                             <td className="px-6 py-4 text-slate-400">
-                                                {format(new Date(payment.createdAt), 'dd.MM.yyyy HH:mm')}
+                                                {formatDateSafe(payment.createdAt)}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <Badge variant="secondary" className="bg-slate-800 text-slate-400 border-none font-normal">

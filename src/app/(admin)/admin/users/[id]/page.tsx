@@ -40,7 +40,7 @@ interface UserDetails {
     avatar: string | null;
     goalsCount: number;
     habitsCount: number;
-    subscriptionPeriod: 'month' | 'year';
+    subscriptionPeriod: string; // 'month', 'year', or '1m', '5h', etc.
     currentPriceOverride: number | null;
     recurringPriceOverride: number | null;
 }
@@ -106,10 +106,40 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         subscriptionTier: '',
         name: '',
         subscriptionExpiresAt: '',
-        subscriptionPeriod: 'month' as 'month' | 'year',
+        subscriptionPeriod: 'month' as string,
         currentPriceOverride: '' as string | number,
         recurringPriceOverride: '' as string | number
     });
+    // For granular control
+    const [subPeriodValue, setSubPeriodValue] = useState('1');
+    const [subPeriodUnit, setSubPeriodUnit] = useState('month');
+
+    // Helper to split period like '1m' into 1 and 'm'
+    const parsePeriod = (p: string) => {
+        if (p === 'month') return { val: '1', unit: 'month' };
+        if (p === 'year') return { val: '1', unit: 'year' };
+        const match = p.match(/^(\d+)([mhd])$/);
+        if (match) return { val: match[1], unit: match[2] };
+        return { val: '1', unit: 'month' };
+    };
+
+    useEffect(() => {
+        if (formData.subscriptionPeriod) {
+            const { val, unit } = parsePeriod(formData.subscriptionPeriod);
+            setSubPeriodValue(val);
+            setSubPeriodUnit(unit);
+        }
+    }, [formData.subscriptionPeriod]);
+
+    const handlePeriodChange = (val: string, unit: string) => {
+        let period = 'month';
+        if (unit === 'month' || unit === 'year') {
+            period = unit;
+        } else {
+            period = `${val}${unit}`;
+        }
+        setFormData(prev => ({ ...prev, subscriptionPeriod: period }));
+    };
     const [limitsForm, setLimitsForm] = useState<LimitsForm>(getDefaultLimitsForm());
     const [limitsLoading, setLimitsLoading] = useState(true);
 
@@ -707,20 +737,41 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="space-y-2">
-                                    <Label>Період підписки за замовчуванням</Label>
-                                    <Select
-                                        value={formData.subscriptionPeriod}
-                                        onValueChange={(val: any) => setFormData({ ...formData, subscriptionPeriod: val })}
-                                    >
-                                        <SelectTrigger className="bg-slate-950 border-slate-800">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
-                                            <SelectItem value="month">Місяць</SelectItem>
-                                            <SelectItem value="year">Рік</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                <div className="space-y-2 col-span-1">
+                                    <Label>Період підписки (за замовчуванням)</Label>
+                                    <div className="flex gap-2">
+                                        {(subPeriodUnit !== 'month' && subPeriodUnit !== 'year') && (
+                                            <Input
+                                                type="number"
+                                                min="1"
+                                                className="w-20 bg-slate-950 border-slate-800"
+                                                value={subPeriodValue}
+                                                onChange={(e) => {
+                                                    setSubPeriodValue(e.target.value);
+                                                    handlePeriodChange(e.target.value, subPeriodUnit);
+                                                }}
+                                            />
+                                        )}
+                                        <Select
+                                            value={subPeriodUnit}
+                                            onValueChange={(unit) => {
+                                                setSubPeriodUnit(unit);
+                                                handlePeriodChange(subPeriodValue, unit);
+                                            }}
+                                        >
+                                            <SelectTrigger className="bg-slate-950 border-slate-800">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                                                <SelectItem value="month">Місяць</SelectItem>
+                                                <SelectItem value="year">Рік</SelectItem>
+                                                <SelectItem value="d">Дні</SelectItem>
+                                                <SelectItem value="h">Години</SelectItem>
+                                                <SelectItem value="m">Хвилини (тест)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <p className="text-[10px] text-slate-500">Обрано: {formData.subscriptionPeriod}</p>
                                 </div>
 
                                 <div className="space-y-2">

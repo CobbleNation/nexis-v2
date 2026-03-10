@@ -354,15 +354,20 @@ export default function SettingsPage() {
                                                         </div>
                                                         <div>
                                                             <div className="font-bold text-sm">
-                                                                {user.cardLast4 ? `Monobank ending in ${user.cardLast4}` : 'Card linked'}
+                                                                {user.cardLast4 ? `•••• ${user.cardLast4}` : 'Метод оплати не додано'}
                                                             </div>
-                                                            <div className="text-xs text-muted-foreground">
-                                                                {user.cardToken ? 'Active for billing' : 'No active card'}
+                                                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                                {user.cardToken ? (
+                                                                    <>
+                                                                        <Shield className="w-3 h-3 text-emerald-500" />
+                                                                        Карта збережена для автоподовження
+                                                                    </>
+                                                                ) : 'Оплатіть підписку, щоб зберегти карту'}
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => router.push('/payment')}>
-                                                        Оновити метод оплати
+                                                    <Button variant="outline" size="sm" className="w-full text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 border-indigo-100 dark:border-indigo-900/50" onClick={() => router.push('/payment')}>
+                                                        {user.cardLast4 ? 'Змінити карту' : 'Додати карту'}
                                                     </Button>
                                                 </div>
 

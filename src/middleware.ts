@@ -28,24 +28,27 @@ const PUBLIC_PATHS = [
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const hostname = request.headers.get('host') || '';
+    const proto = request.headers.get('x-forwarded-proto');
 
-    // 0. IMMEDIATE EXEMPTIONS FOR CRITICAL AUTH FLOWS
+    // 0. ENFORCE HTTPS
+    if (proto === 'http') {
+        return NextResponse.redirect(new URL(`https://${hostname}${pathname}`, request.url));
+    }
+
+    // 0.1 IMMEDIATE EXEMPTIONS FOR CRITICAL AUTH FLOWS
     if (pathname === '/api/auth/verify' || pathname === '/api/auth/forgot-password' || pathname === '/api/auth/reset-password') {
         return NextResponse.next();
     }
 
-    // 1. PUBLIC PATHS CHECK (MUST BE FIRST)
-    // Be very permissive about public paths to avoid 401s on critical auth flows
+    // 1. PUBLIC PATHS CHECK (Marketing & Public API)
+    const MARKETING_PATHS = ['/', '/pricing', '/privacy', '/terms'];
     const isPublic =
-        pathname === '/' ||
+        MARKETING_PATHS.some(path => pathname === path) ||
         pathname.startsWith('/api/auth') ||
         pathname.startsWith('/auth/') ||
         PUBLIC_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'));
 
-    if (isPublic) {
-        return NextResponse.next();
-    }
-    // 2. DOMAIN REDIRECTS (ONLY FOR NON-PUBLIC PATHS)
+    // 2. DOMAIN REDIRECTS
     if (hostname === 'admin.zynorvia.com') {
         if (pathname === '/') {
             return NextResponse.rewrite(new URL('/admin', request.url));
@@ -53,17 +56,15 @@ export async function middleware(request: NextRequest) {
         if (!pathname.startsWith('/admin') && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
             return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url));
         }
-    }
-
-    if (hostname === 'app.zynorvia.com') {
+    } else if (hostname === 'app.zynorvia.com') {
+        // App subdomain should not host the landing page
         if (pathname === '/') {
-            return NextResponse.rewrite(new URL('/overview', request.url));
+            return NextResponse.redirect(new URL('https://zynorvia.com/', request.url));
         }
-    }
-
-    if (hostname === 'zynorvia.com') {
-        // Redirect non-public app routes to the app subdomain
-        if (!pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
+    } else if (hostname === 'zynorvia.com') {
+        // Redirect non-marketing app routes to the app subdomain
+        const isMarketing = MARKETING_PATHS.includes(pathname);
+        if (!isMarketing && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
             return NextResponse.redirect(new URL(`https://app.zynorvia.com${pathname}`, request.url));
         }
     }

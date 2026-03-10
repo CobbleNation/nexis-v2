@@ -48,13 +48,29 @@ export async function POST(req: Request) {
             // Extension logic: if still active, add to expiry. If expired, add to now.
             const currentExpiry = user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt) : new Date();
             const baseDate = currentExpiry > now ? currentExpiry : now;
-            const newExpiresAt = new Date(baseDate);
 
-            if (period === 'year') {
-                newExpiresAt.setFullYear(newExpiresAt.getFullYear() + 1);
-            } else {
-                newExpiresAt.setMonth(newExpiresAt.getMonth() + 1);
-            }
+            const extendExpiry = (base: Date, p: string): Date => {
+                const next = new Date(base);
+                if (p === 'year') {
+                    next.setFullYear(next.getFullYear() + 1);
+                } else if (p === 'month') {
+                    next.setMonth(next.getMonth() + 1);
+                } else if (p.endsWith('m')) {
+                    const mins = parseInt(p.replace('m', ''));
+                    if (!isNaN(mins)) next.setMinutes(next.getMinutes() + mins);
+                } else if (p.endsWith('h')) {
+                    const hours = parseInt(p.replace('h', ''));
+                    if (!isNaN(hours)) next.setHours(next.getHours() + hours);
+                } else if (p.endsWith('d')) {
+                    const days = parseInt(p.replace('d', ''));
+                    if (!isNaN(days)) next.setDate(next.getDate() + days);
+                } else {
+                    next.setMonth(next.getMonth() + 1);
+                }
+                return next;
+            };
+
+            const newExpiresAt = extendExpiry(baseDate, period);
 
             const updateData: any = {
                 subscriptionTier: 'pro',
