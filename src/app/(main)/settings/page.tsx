@@ -376,7 +376,7 @@ export default function SettingsPage() {
                                                         {user.autoRenew ? 'Наступне списання' : 'Підписка діє до'}
                                                     </div>
                                                     <div className="text-2xl font-bold text-foreground">
-                                                        {user.autoRenew ? '₴199.00' : 'Активна'}
+                                                        {user.autoRenew ? `₴${((user.recurringPriceOverride ?? (user.subscriptionPeriod === 'year' ? 199000 : 19900)) / 100).toFixed(2)}` : 'Активна'}
                                                     </div>
                                                     <div className="text-xs text-muted-foreground">
                                                         {user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt).toLocaleString('uk-UA', {
@@ -449,6 +449,31 @@ export default function SettingsPage() {
                                             <Button className="rounded-full px-8 bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold shadow-lg shadow-orange-500/20" asChild>
                                                 <a href="/pricing">Перейти на Pro</a>
                                             </Button>
+
+                                            {/* Card management for Free users */}
+                                            <div className="mt-8 max-w-sm mx-auto p-5 border border-border rounded-xl bg-slate-50/50 dark:bg-slate-900/50 space-y-4 text-left">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                                        <CreditCard className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-sm">
+                                                            {user.cardLast4 ? `•••• ${user.cardLast4}` : 'Спосіб оплати'}
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                            {user.cardToken ? (
+                                                                <>
+                                                                    <Shield className="w-3 h-3 text-emerald-500" />
+                                                                    Карта збережена
+                                                                </>
+                                                            ) : 'Додайте карту для швидкого оформлення підписки'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <Button variant="outline" size="sm" className="w-full text-xs font-bold" onClick={() => router.push('/payment?action=attach_card')}>
+                                                    {user.cardLast4 ? 'Змінити карту' : 'Додати карту'}
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
                                 </CardContent>

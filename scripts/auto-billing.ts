@@ -119,6 +119,31 @@ async function runAutoBilling() {
             }
         } catch (error) {
             console.error(`💥 Error processing auto-billing for ${user.email}:`, error);
+
+            // Downgrade user on payment failure
+            console.log(`📉 Downgrading user ${user.email} due to payment failure`);
+            await db.update(users)
+                .set({
+                    subscriptionTier: 'free',
+                    autoRenew: false,
+                    updatedAt: new Date()
+                })
+                .where(eq(users.id, user.id));
+
+            // Record failed payment
+            try {
+                await db.insert(payments).values({
+                    id: uuidv4(),
+                    userId: user.id,
+                    amount: user.recurringPriceOverride ?? (user.subscriptionPeriod === 'year' ? 199000 : 19900),
+                    status: 'failure',
+                    metadata: { error: (error as Error).message, cron: true },
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+            } catch (e) {
+                console.error('Failed to record payment failure:', e);
+            }
         }
     }
 
