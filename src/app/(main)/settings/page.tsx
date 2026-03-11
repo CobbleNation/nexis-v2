@@ -366,7 +366,7 @@ export default function SettingsPage() {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <Button variant="outline" size="sm" className="w-full text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 border-indigo-100 dark:border-indigo-900/50" onClick={() => router.push('/payment')}>
+                                                    <Button variant="outline" size="sm" className="w-full text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:text-indigo-600 dark:hover:text-indigo-400 border-indigo-100 dark:border-indigo-900/50" onClick={() => router.push('/payment?action=attach_card')}>
                                                         {user.cardLast4 ? 'Змінити карту' : 'Додати карту'}
                                                     </Button>
                                                 </div>

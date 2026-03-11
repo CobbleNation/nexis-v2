@@ -26,21 +26,25 @@ export async function POST(req: Request) {
         const body = await req.json().catch(() => ({}));
         // Allow any period string for testing (e.g., '1m'), default to 'month'
         const requestedPeriod = body.period || 'month';
+        const action = body.action || 'subscription'; // 'subscription' | 'attach_card'
 
         // 1. Calculate Amount (Priority: Override > Default)
         // Default prices: monthly = 199.00 UAH, yearly = 1990.00 UAH
         let amount = requestedPeriod === 'year' ? 199000 : 19900;
+        let description = requestedPeriod === 'year' ? 'Zynorvia Pro Subscription (1 Year)' : 'Zynorvia Pro Subscription (1 Month)';
+        let basketName = requestedPeriod === 'year' ? 'Zynorvia Pro - Yearly' : 'Zynorvia Pro - Monthly';
 
-        if (user.currentPriceOverride !== null && user.currentPriceOverride !== undefined) {
+        if (action === 'attach_card') {
+            amount = 100; // 1.00 UAH for saving card
+            description = 'Прив\'язка картки (1 UAH буде повернуто/зараховано)';
+            basketName = 'Прив\'язка картки';
+        } else if (user.currentPriceOverride !== null && user.currentPriceOverride !== undefined) {
             amount = user.currentPriceOverride;
             console.log(`[Checkout] Applying price override: ${amount} units for user ${userId}`);
         }
 
         const REFERENCE = uuidv4();
         const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-
-        const description = requestedPeriod === 'year' ? 'Zynorvia Pro Subscription (1 Year)' : 'Zynorvia Pro Subscription (1 Month)';
-        const basketName = requestedPeriod === 'year' ? 'Zynorvia Pro - Yearly' : 'Zynorvia Pro - Monthly';
 
         // 2. Create Invoice in Monobank
         const invoice = await monobank.createInvoice({
@@ -53,7 +57,7 @@ export async function POST(req: Request) {
                         name: basketName,
                         qty: 1,
                         sum: amount,
-                        unit: requestedPeriod
+                        unit: action === 'attach_card' ? 'шт' : requestedPeriod
                     }
                 ]
             },
@@ -71,7 +75,8 @@ export async function POST(req: Request) {
             invoiceId: invoice.invoiceId,
             metadata: {
                 pageUrl: invoice.pageUrl,
-                period: requestedPeriod // Crucial for webhook to know how much to extend
+                period: requestedPeriod, // Crucial for webhook to know how much to extend
+                action: action // 'attach_card' or 'subscription'
             }
         });
 

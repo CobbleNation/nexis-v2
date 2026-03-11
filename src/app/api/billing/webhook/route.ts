@@ -42,59 +42,75 @@ export async function POST(req: Request) {
                 return NextResponse.json({ message: 'User not found' }, { status: 200 });
             }
 
+            const action = payment.metadata?.action || 'subscription';
             const period = payment.metadata?.period || 'month';
             const now = new Date();
 
-            // Extension logic: if still active, add to expiry. If expired, add to now.
-            const currentExpiry = user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt) : new Date();
-            const baseDate = currentExpiry > now ? currentExpiry : now;
-
-            const extendExpiry = (base: Date, p: string): Date => {
-                const next = new Date(base);
-                if (p === 'year') {
-                    next.setFullYear(next.getFullYear() + 1);
-                } else if (p === 'month') {
-                    next.setMonth(next.getMonth() + 1);
-                } else if (p.endsWith('m')) {
-                    const mins = parseInt(p.replace('m', ''));
-                    if (!isNaN(mins)) next.setMinutes(next.getMinutes() + mins);
-                } else if (p.endsWith('h')) {
-                    const hours = parseInt(p.replace('h', ''));
-                    if (!isNaN(hours)) next.setHours(next.getHours() + hours);
-                } else if (p.endsWith('d')) {
-                    const days = parseInt(p.replace('d', ''));
-                    if (!isNaN(days)) next.setDate(next.getDate() + days);
-                } else {
-                    next.setMonth(next.getMonth() + 1);
-                }
-                return next;
-            };
-
-            const newExpiresAt = extendExpiry(baseDate, period);
-
-            const updateData: any = {
-                subscriptionTier: 'pro',
-                subscriptionStartedAt: user.subscriptionStartedAt || now,
-                subscriptionExpiresAt: newExpiresAt,
-                subscriptionPeriod: period,
-                currentPriceOverride: null, // Clear one-time override
-                autoRenew: true,
+            let updateData: any = {
                 updatedAt: now
             };
 
-            // Save card info if present in webhook
-            if (body.maskedPan && body.maskedPan.length > 4) {
-                updateData.cardLast4 = body.maskedPan.slice(-4);
-            }
-            if (body.walletId) {
-                updateData.cardToken = body.walletId;
-            }
+            if (action === 'attach_card') {
+                updateData.autoRenew = true;
+                // Save card info if present in webhook
+                if (body.maskedPan && body.maskedPan.length > 4) {
+                    updateData.cardLast4 = body.maskedPan.slice(-4);
+                }
+                if (body.walletId) {
+                    updateData.cardToken = body.walletId;
+                }
 
-            await db.update(users)
-                .set(updateData)
-                .where(eq(users.id, user.id));
+                await db.update(users).set(updateData).where(eq(users.id, user.id));
+                console.log(`Attached card for user ${user.id}`);
+            } else {
+                // Subscription extension logic
+                const currentExpiry = user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt) : new Date();
+                const baseDate = currentExpiry > now ? currentExpiry : now;
 
-            console.log(`Activated Pro (${period}) for user ${user.id} until ${newExpiresAt.toISOString()}`);
+                const extendExpiry = (base: Date, p: string): Date => {
+                    const next = new Date(base);
+                    if (p === 'year') {
+                        next.setFullYear(next.getFullYear() + 1);
+                    } else if (p === 'month') {
+                        next.setMonth(next.getMonth() + 1);
+                    } else if (p.endsWith('m')) {
+                        const mins = parseInt(p.replace('m', ''));
+                        if (!isNaN(mins)) next.setMinutes(next.getMinutes() + mins);
+                    } else if (p.endsWith('h')) {
+                        const hours = parseInt(p.replace('h', ''));
+                        if (!isNaN(hours)) next.setHours(next.getHours() + hours);
+                    } else if (p.endsWith('d')) {
+                        const days = parseInt(p.replace('d', ''));
+                        if (!isNaN(days)) next.setDate(next.getDate() + days);
+                    } else {
+                        next.setMonth(next.getMonth() + 1);
+                    }
+                    return next;
+                };
+
+                const newExpiresAt = extendExpiry(baseDate, period);
+
+                updateData = {
+                    ...updateData,
+                    subscriptionTier: 'pro',
+                    subscriptionStartedAt: user.subscriptionStartedAt || now,
+                    subscriptionExpiresAt: newExpiresAt,
+                    subscriptionPeriod: period,
+                    currentPriceOverride: null, // Clear one-time override
+                    autoRenew: true
+                };
+
+                // Save card info if present in webhook
+                if (body.maskedPan && body.maskedPan.length > 4) {
+                    updateData.cardLast4 = body.maskedPan.slice(-4);
+                }
+                if (body.walletId) {
+                    updateData.cardToken = body.walletId;
+                }
+
+                await db.update(users).set(updateData).where(eq(users.id, user.id));
+                console.log(`Activated Pro (${period}) for user ${user.id} until ${newExpiresAt.toISOString()}`);
+            }
         }
 
 

@@ -24,6 +24,10 @@ function PaymentContent() {
     const initialPeriod = searchParams.get('period') || 'month';
     const [period, setPeriod] = useState<string>(initialPeriod);
 
+    // Handle action parameter
+    const actionParam = searchParams.get('action');
+    const action = actionParam === 'attach_card' ? 'attach_card' : 'subscription';
+
     // Update period if URL changes (optional but good for consistency)
     useEffect(() => {
         const p = searchParams.get('period');
@@ -34,9 +38,15 @@ function PaymentContent() {
 
     // Use price override if set by admin, otherwise use plan default
     const hasOverride = user?.currentPriceOverride !== null && user?.currentPriceOverride !== undefined;
-    const currentAmount = hasOverride
-        ? user!.currentPriceOverride! / 100
-        : (period === 'year' ? 1990 : (period === 'month' ? 199 : 1)); // 1 UAH for other periods (testing)
+
+    let currentAmount = 0;
+    if (action === 'attach_card') {
+        currentAmount = 1; // 1 UAH for attaching card
+    } else if (hasOverride) {
+        currentAmount = user!.currentPriceOverride! / 100;
+    } else {
+        currentAmount = period === 'year' ? 1990 : (period === 'month' ? 199 : 1); // 1 UAH for other periods (testing)
+    }
 
     const handlePayment = async () => {
         setIsLoading(true);
@@ -44,7 +54,7 @@ function PaymentContent() {
             const res = await fetch('/api/billing/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ period })
+                body: JSON.stringify({ period, action })
             });
             if (!res.ok) throw new Error('Checkout failed');
 
@@ -82,15 +92,19 @@ function PaymentContent() {
                                 <CardHeader className="bg-slate-100/50 dark:bg-slate-900/50 border-b border-border/40 pb-6">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <CardTitle className="text-2xl font-bold">Оформлення Підписки</CardTitle>
-                                            <CardDescription className="mt-1">Оберіть спосіб оплати</CardDescription>
+                                            <CardTitle className="text-2xl font-bold">
+                                                {action === 'attach_card' ? 'Прив\'язка Картки' : 'Оформлення Підписки'}
+                                            </CardTitle>
+                                            <CardDescription className="mt-1">
+                                                {action === 'attach_card' ? 'Сума в 1₴ буде зарахована або повернута' : 'Оберіть спосіб оплати'}
+                                            </CardDescription>
                                         </div>
                                     </div>
                                 </CardHeader>
 
                                 <CardContent className="p-8">
                                     <div className="space-y-6">
-                                        {!hasOverride && (
+                                        {action === 'subscription' && !hasOverride && (
                                             <div className="flex flex-col gap-3">
                                                 <Label className="text-sm font-semibold">Термін підписки</Label>
                                                 <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl w-fit">
@@ -111,7 +125,7 @@ function PaymentContent() {
                                             </div>
                                         )}
 
-                                        {hasOverride && (
+                                        {action === 'subscription' && hasOverride && (
                                             <div className="p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900/30 rounded-2xl flex items-center gap-3">
                                                 <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900/50 rounded-full flex items-center justify-center">
                                                     <ShieldCheck className="w-5 h-5 text-orange-600" />
@@ -195,15 +209,24 @@ function PaymentContent() {
                                 <CardContent className="space-y-6">
                                     <div className="flex justify-between items-start pb-6 border-b border-border/40">
                                         <div>
-                                            <h4 className="font-bold text-lg">Zynorvia Pro</h4>
+                                            <h4 className="font-bold text-lg">
+                                                {action === 'attach_card' ? 'Прив\'язка нової картки' : 'Zynorvia Pro'}
+                                            </h4>
                                             <p className="text-sm text-muted-foreground">
-                                                {hasOverride ? 'Спеціальна пропозиція' : period === 'year' ? 'Річна підписка' : 'Щомісячна підписка'}
+                                                {action === 'attach_card'
+                                                    ? 'Для перевірки карти'
+                                                    : hasOverride
+                                                        ? 'Спеціальна пропозиція'
+                                                        : period === 'year'
+                                                            ? 'Річна підписка'
+                                                            : 'Щомісячна підписка'
+                                                }
                                             </p>
                                         </div>
                                         <div className="text-right">
                                             <span className="font-bold text-lg">{currentAmount} ₴</span>
                                             <p className="text-xs text-muted-foreground">
-                                                / {hasOverride ? 'платіж' : period === 'year' ? 'рік' : 'місяць'}
+                                                / {action === 'attach_card' || hasOverride ? 'платіж' : period === 'year' ? 'рік' : 'місяць'}
                                             </p>
                                         </div>
                                     </div>
@@ -211,15 +234,15 @@ function PaymentContent() {
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-2 text-sm">
                                             <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                            <span>Необмежені цілі</span>
+                                            <span>{action === 'attach_card' ? 'Швидка перевірка' : 'Необмежені цілі'}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
                                             <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                            <span>AI Інсайти</span>
+                                            <span>{action === 'attach_card' ? 'Автоматичне збереження' : 'AI Інсайти'}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
                                             <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                            <span>Розширена аналітика</span>
+                                            <span>{action === 'attach_card' ? 'Безпечно та надійно' : 'Розширена аналітика'}</span>
                                         </div>
                                     </div>
 
