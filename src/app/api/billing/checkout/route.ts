@@ -25,8 +25,14 @@ export async function POST(req: Request) {
         // 0. Parse Request Body
         const body = await req.json().catch(() => ({}));
         // Allow any period string for testing (e.g., '1m'), default to 'month'
-        const requestedPeriod = body.period || 'month';
+        let requestedPeriod = body.period || 'month';
         const action = body.action || 'subscription'; // 'subscription' | 'attach_card'
+
+        // Override requestedPeriod if the admin set a custom testing period (not month/year)
+        if (user.subscriptionPeriod && !['month', 'year'].includes(user.subscriptionPeriod)) {
+            requestedPeriod = user.subscriptionPeriod;
+            console.log(`[Checkout] Overriding requested period to admin testing period: ${requestedPeriod}`);
+        }
 
         // 1. Calculate Amount (Priority: Override > Default)
         // Default prices: monthly = 199.00 UAH, yearly = 1990.00 UAH
