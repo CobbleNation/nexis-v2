@@ -90,6 +90,8 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!isAuthorized) {
+        if (isPublic) return NextResponse.next();
+
         if (pathname.startsWith('/api/')) {
             return NextResponse.json(
                 { error: 'Unauthorized_v4', path: pathname, isPublic: isPublic },
