@@ -23,7 +23,10 @@ export async function POST(req: Request) {
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
         // 0. Parse Request Body
+        const rawBodyText = await req.clone().text().catch(() => "failed");
+        console.log(`[Checkout API] Raw body: ${rawBodyText}`);
         const body = await req.json().catch(() => ({}));
+        console.log(`[Checkout API] Parsed body:`, body);
         // Allow any period string for testing (e.g., '1m'), default to 'month'
         let requestedPeriod = body.period || 'month';
         const action = body.action || 'subscription'; // 'subscription' | 'attach_card'
