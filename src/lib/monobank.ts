@@ -40,16 +40,21 @@ interface MonobankInvoiceResponse {
 
 export const monobank = {
     async createInvoice(params: CreateInvoiceParams): Promise<MonobankInvoiceResponse> {
-        const payload = {
+        const payload: any = {
             amount: params.amount,
             ccy: params.ccy || 980,
             merchantPaymInfo: params.merchantPaymInfo,
             redirectUrl: params.redirectUrl,
             webHookUrl: params.webHookUrl,
             validity: params.validity || 3600,
-            paymentType: params.paymentType || 'debit',
-            saveCard: params.saveCard
+            paymentType: params.paymentType || 'debit'
         };
+
+        if (params.saveCard) {
+            payload.saveCardData = {
+                saveCard: true
+            };
+        }
 
         const response = await fetch(`${MONOBANK_API_URL}/invoice/create`, {
             method: 'POST',

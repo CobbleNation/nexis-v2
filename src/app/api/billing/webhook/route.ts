@@ -86,8 +86,8 @@ export async function POST(req: Request) {
             if (body.maskedPan && body.maskedPan.length > 4) {
                 updateData.cardLast4 = body.maskedPan.slice(-4);
             }
-            if (body.cardToken) {
-                updateData.cardToken = body.cardToken;
+            if (body.walletId) {
+                updateData.cardToken = body.walletId;
             }
 
             await db.update(users)
