@@ -31,6 +31,8 @@ interface CreateRecurringPaymentParams {
     cardToken: string;
     description: string;
     reference: string;
+    webHookUrl?: string;
+    redirectUrl?: string;
 }
 
 interface MonobankInvoiceResponse {
@@ -74,18 +76,33 @@ export const monobank = {
         return await response.json();
     },
 
+    /**
+     * Create a recurring payment using a saved card token.
+     * Uses POST /api/merchant/wallet/payment with initiationKind: "merchant"
+     * Docs: https://api.monobank.ua/docs/acquiring.html#/paths/~1api~1merchant~1wallet~1payment/post
+     */
     async createRecurringPayment(params: CreateRecurringPaymentParams): Promise<any> {
-        const payload = {
+        const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
+        const payload: any = {
+            cardToken: params.cardToken,
             amount: params.amount,
             ccy: params.ccy || 980,
-            cardToken: params.cardToken,
+            initiationKind: 'merchant', // server-initiated recurring charge
+            webHookUrl: params.webHookUrl || `${BASE_URL}/api/billing/webhook`,
             merchantPaymInfo: {
                 reference: params.reference,
                 destination: params.description
             }
         };
 
-        const response = await fetch(`${MONOBANK_API_URL}/payment/direct`, {
+        // Add redirectUrl for potential 3DS challenges
+        if (params.redirectUrl) {
+            payload.redirectUrl = params.redirectUrl;
+        }
+
+        console.log(`[Monobank] Wallet payment request:`, JSON.stringify(payload, null, 2));
+
+        const response = await fetch(`${MONOBANK_API_URL}/wallet/payment`, {
             method: 'POST',
             headers: {
                 'X-Token': MONOBANK_TOKEN,
@@ -96,8 +113,8 @@ export const monobank = {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Monobank Recurring API Error:', errorText);
-            throw new Error(`Monobank Recurring API Error: ${response.status} ${errorText}`);
+            console.error('Monobank Wallet Payment API Error:', errorText);
+            throw new Error(`Monobank Wallet Payment API Error: ${response.status} ${errorText}`);
         }
 
         return await response.json();

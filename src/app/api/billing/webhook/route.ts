@@ -51,19 +51,24 @@ export async function POST(req: Request) {
             };
 
             if (action === 'attach_card') {
-                // Save card info ONLY if present in webhook (Apple/Google pay FOP issue)
-                if (body.walletId) {
+                // Card data is in walletData object per Monobank API docs
+                const cardToken = body.walletData?.cardToken;
+                const maskedPan = body.paymentInfo?.maskedPan;
+
+                if (cardToken) {
                     updateData.autoRenew = true;
-                    updateData.cardToken = body.walletId;
-                    if (body.maskedPan && body.maskedPan.length > 4) {
-                        updateData.cardLast4 = body.maskedPan.slice(-4);
+                    updateData.cardToken = cardToken;
+                    if (maskedPan && maskedPan.length > 4) {
+                        updateData.cardLast4 = maskedPan.replace(/\*/g, '').slice(-4);
                     }
-                    console.log(`Attached card for user ${user.id}`);
+                    console.log(`Attached card for user ${user.id}, token: ${cardToken}, last4: ${updateData.cardLast4}`);
                 } else {
-                    console.warn(`Attach card for user ${user.id} succeeded but NO walletId was returned (probably Google/Apple Pay used).`);
+                    console.warn(`Attach card for user ${user.id} succeeded but NO walletData.cardToken was returned. Webhook body keys: ${Object.keys(body).join(', ')}`);
+                    // Log walletData if it exists but has different structure
+                    if (body.walletData) console.warn('walletData:', JSON.stringify(body.walletData));
                 }
 
-                if (Object.keys(updateData).length > 1) { // more than just updatedAt
+                if (Object.keys(updateData).length > 1) {
                     await db.update(users).set(updateData).where(eq(users.id, user.id));
                 }
             } else {
@@ -108,15 +113,18 @@ export async function POST(req: Request) {
                     currentPriceOverride: null, // Clear one-time override
                 };
 
-                // Save card info if present in webhook
-                if (body.walletId) {
+                // Save card info from walletData per Monobank API docs
+                const cardToken = body.walletData?.cardToken;
+                const maskedPan = body.paymentInfo?.maskedPan;
+
+                if (cardToken) {
                     updateData.autoRenew = true;
-                    updateData.cardToken = body.walletId;
-                    if (body.maskedPan && body.maskedPan.length > 4) {
-                        updateData.cardLast4 = body.maskedPan.slice(-4);
+                    updateData.cardToken = cardToken;
+                    if (maskedPan && maskedPan.length > 4) {
+                        updateData.cardLast4 = maskedPan.replace(/\*/g, '').slice(-4);
                     }
+                    console.log(`Card saved during subscription for user ${user.id}, token: ${cardToken}`);
                 } else if (!user.cardToken && user.autoRenew) {
-                    // Turn off autoRenew if they previously didn't have a token and we still didn't get one
                     updateData.autoRenew = false;
                 }
 
