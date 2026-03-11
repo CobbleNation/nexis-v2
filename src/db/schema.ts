@@ -37,6 +37,9 @@ export const users = sqliteTable('users', {
     currentPriceOverride: integer('current_price_override'), // in cents, one-time
     recurringPriceOverride: integer('recurring_price_override'), // in cents, for future
     subscriptionPeriod: text('subscription_period').default('month'), // 'month' or 'year'
+
+    // Email Preferences
+    emailDigest: boolean('email_digest').default(false),
 });
 
 export const sessions = sqliteTable('sessions', {

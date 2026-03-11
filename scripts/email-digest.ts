@@ -102,11 +102,14 @@ async function runDigest() {
         name: users.name,
         subscriptionExpiresAt: users.subscriptionExpiresAt,
         subscriptionTier: users.subscriptionTier,
+        emailDigest: users.emailDigest,
     }).from(users);
 
     for (const user of allUsers) {
         try {
             if (!user.email || user.email.includes('@zynorvia.system')) continue;
+            // Skip users who have daily digest disabled
+            if (!user.emailDigest) continue;
 
             const digestItems: DigestItem[] = [];
 

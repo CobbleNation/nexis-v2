@@ -197,7 +197,8 @@ export async function GET() {
                 ...n,
                 date: n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
                 createdAt: n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
-            }))
+            })),
+            emailDigest: existingUser?.emailDigest ?? false
         }, {
             headers: {
                 'Cache-Control': 'no-store, max-age=0, must-revalidate',
@@ -447,6 +448,11 @@ export async function POST(req: Request) {
             } else {
                 // Mark all as read
                 await db.update(notifications).set({ read: true }).where(eq(notifications.userId, userId));
+            }
+        } else if (type === 'UPDATE_SETTINGS') {
+            // Persist email digest preference to users table
+            if (data.email !== undefined) {
+                await db.update(users).set({ emailDigest: data.email, updatedAt: new Date() }).where(eq(users.id, userId));
             }
         }
         // Add others as needed, but for now Focus Level relies on Actions, Goals checkins mainly.

@@ -204,6 +204,10 @@ function appReducer(state: AppState, action: AppAction): AppState {
                 journal: sanitizedJournal,
                 notifications: validNotifications,
                 goals: validGoals,
+                notificationSettings: {
+                    ...state.notificationSettings,
+                    email: (action.payload as any).emailDigest ?? state.notificationSettings.email,
+                },
                 isLoading: false
             };
         }
