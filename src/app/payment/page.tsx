@@ -155,7 +155,7 @@ function PaymentContent() {
                                                         </div>
                                                         <div>
                                                             <p className="font-bold text-lg">Онлайн-оплата карткою</p>
-                                                            <p className="text-xs text-muted-foreground">GooglePay, ApplePay</p>
+                                                            <p className="text-xs text-muted-foreground">GooglePay, ApplePay або за реквізитами</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
@@ -163,6 +163,19 @@ function PaymentContent() {
                                                         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Apple_Pay_logo.svg" alt="Apple Pay" className="h-5 w-auto" />
                                                     </div>
                                                 </div>
+
+                                                {action === 'attach_card' && (
+                                                    <div className="p-4 mt-2 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-2xl flex items-start gap-3">
+                                                        <ShieldCheck className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                                                        <div>
+                                                            <p className="text-sm font-bold text-blue-800 dark:text-blue-400">Важлива інформація</p>
+                                                            <p className="text-xs text-blue-700/80 dark:text-blue-300/80 mt-1">
+                                                                Оплата через Apple Pay або Google Pay може <b>не зберегти</b> вашу карту для майбутніх автосписань через обмеження банку.
+                                                                Для надійного збереження карти рекомендуємо ввести її <b>реквізити вручну</b> на сторінці оплати.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
 
                                                 <div className="flex flex-col gap-4 mt-8">
                                                     <Button

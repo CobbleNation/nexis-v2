@@ -51,21 +51,30 @@ export async function POST(req: Request) {
             };
 
             if (action === 'attach_card') {
-                updateData.autoRenew = true;
-                // Save card info if present in webhook
-                if (body.maskedPan && body.maskedPan.length > 4) {
-                    updateData.cardLast4 = body.maskedPan.slice(-4);
-                }
+                // Save card info ONLY if present in webhook (Apple/Google pay FOP issue)
                 if (body.walletId) {
+                    updateData.autoRenew = true;
                     updateData.cardToken = body.walletId;
+                    if (body.maskedPan && body.maskedPan.length > 4) {
+                        updateData.cardLast4 = body.maskedPan.slice(-4);
+                    }
+                    console.log(`Attached card for user ${user.id}`);
+                } else {
+                    console.warn(`Attach card for user ${user.id} succeeded but NO walletId was returned (probably Google/Apple Pay used).`);
                 }
 
-                await db.update(users).set(updateData).where(eq(users.id, user.id));
-                console.log(`Attached card for user ${user.id}`);
+                if (Object.keys(updateData).length > 1) { // more than just updatedAt
+                    await db.update(users).set(updateData).where(eq(users.id, user.id));
+                }
             } else {
                 // Subscription extension logic
                 const currentExpiry = user.subscriptionExpiresAt ? new Date(user.subscriptionExpiresAt) : new Date();
-                const baseDate = currentExpiry > now ? currentExpiry : now;
+                let baseDate = currentExpiry > now ? currentExpiry : now;
+
+                // For test periods (like 1m, 1h), force baseDate to now so testing is immediate
+                if (period !== 'month' && period !== 'year') {
+                    baseDate = now;
+                }
 
                 const extendExpiry = (base: Date, p: string): Date => {
                     const next = new Date(base);
@@ -97,15 +106,18 @@ export async function POST(req: Request) {
                     subscriptionExpiresAt: newExpiresAt,
                     subscriptionPeriod: period,
                     currentPriceOverride: null, // Clear one-time override
-                    autoRenew: true
                 };
 
                 // Save card info if present in webhook
-                if (body.maskedPan && body.maskedPan.length > 4) {
-                    updateData.cardLast4 = body.maskedPan.slice(-4);
-                }
                 if (body.walletId) {
+                    updateData.autoRenew = true;
                     updateData.cardToken = body.walletId;
+                    if (body.maskedPan && body.maskedPan.length > 4) {
+                        updateData.cardLast4 = body.maskedPan.slice(-4);
+                    }
+                } else if (!user.cardToken && user.autoRenew) {
+                    // Turn off autoRenew if they previously didn't have a token and we still didn't get one
+                    updateData.autoRenew = false;
                 }
 
                 await db.update(users).set(updateData).where(eq(users.id, user.id));
