@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 export const dynamic = "force-dynamic";
 import { db } from '@/db';
-import { actions, goals, notes, projects, lifeAreas, metricDefinitions, metricEntries, calendarEvents, focuses, checkIns, insights, periods, experiments, users, routines, journalEntries, fileAssets, libraryItems, habits, habitLogs } from '@/db/schema';
+import { actions, goals, notes, projects, lifeAreas, metricDefinitions, metricEntries, calendarEvents, focuses, checkIns, insights, periods, experiments, users, routines, journalEntries, fileAssets, libraryItems, habits, habitLogs, notifications } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gte } from 'drizzle-orm';
 import { seedLifeAreas, DEFAULT_AREAS } from '@/lib/seed-areas';
 import { DEFAULT_METRICS } from '@/lib/seed-metrics';
 import { v4 as uuidv4 } from 'uuid';
@@ -67,7 +67,8 @@ export async function GET() {
             userFiles,
             userLibrary,
             userHabits,
-            userHabitLogs
+            userHabitLogs,
+            userNotifications
         ] = await Promise.all([
             db.select().from(actions).where(eq(actions.userId, userId)),
             db.select().from(goals).where(eq(goals.userId, userId)),
@@ -88,6 +89,12 @@ export async function GET() {
             db.select().from(libraryItems).where(eq(libraryItems.userId, userId)),
             db.select().from(habits).where(eq(habits.userId, userId)),
             db.select().from(habitLogs).where(eq(habitLogs.userId, userId)),
+            db.select().from(notifications).where(
+                and(
+                    eq(notifications.userId, userId),
+                    gte(notifications.createdAt, new Date(Date.now() - 60 * 24 * 60 * 60 * 1000))
+                )
+            ),
         ]);
 
         // Auto-seed/Restore Life Areas (Robust Persistence)
@@ -185,7 +192,12 @@ export async function GET() {
             files: userFiles,
             library: userLibrary,
             habits: userHabits,
-            habitLogs: userHabitLogs
+            habitLogs: userHabitLogs,
+            notifications: userNotifications.map(n => ({
+                ...n,
+                date: n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
+                createdAt: n.createdAt instanceof Date ? n.createdAt.toISOString() : String(n.createdAt),
+            }))
         }, {
             headers: {
                 'Cache-Control': 'no-store, max-age=0, must-revalidate',
@@ -414,6 +426,28 @@ export async function POST(req: Request) {
             await db.insert(habitLogs).values({ ...logData, userId }).onConflictDoUpdate({ target: habitLogs.id, set: { ...logData, userId } });
         } else if (type === 'DELETE_HABIT_LOG') {
             await db.delete(habitLogs).where(eq(habitLogs.id, data.id));
+        } else if (type === 'ADD_NOTIFICATION') {
+            const notifData = { ...data };
+            if (typeof notifData.createdAt === 'string') notifData.createdAt = new Date(notifData.createdAt);
+            await db.insert(notifications).values({
+                id: notifData.id,
+                userId,
+                title: notifData.title,
+                message: notifData.message,
+                type: notifData.type || 'info',
+                read: notifData.read || false,
+                link: notifData.link || null,
+                createdAt: notifData.createdAt || new Date(),
+            }).onConflictDoNothing();
+        } else if (type === 'MARK_NOTIFICATIONS_READ') {
+            if (data.ids && data.ids.length > 0) {
+                for (const id of data.ids) {
+                    await db.update(notifications).set({ read: true }).where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+                }
+            } else {
+                // Mark all as read
+                await db.update(notifications).set({ read: true }).where(eq(notifications.userId, userId));
+            }
         }
         // Add others as needed, but for now Focus Level relies on Actions, Goals checkins mainly.
         // Wait, 'metrics' table exists. 'focuses' table DOES NOT EXIST in schema.ts yet?

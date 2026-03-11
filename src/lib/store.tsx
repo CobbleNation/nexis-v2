@@ -154,12 +154,12 @@ function appReducer(state: AppState, action: AppAction): AppState {
                     : (typeof j.date === 'string' ? j.date.split('T')[0] : j.date)
             })) || [];
 
-            // Notifications retention (30 days)
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            // Notifications retention (60 days)
+            const sixtyDaysAgo = new Date();
+            sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
             const validNotifications = action.payload.notifications?.filter(n => {
                 const date = new Date(n.date);
-                return date >= thirtyDaysAgo;
+                return date >= sixtyDaysAgo;
             }) || [];
 
             // 1. Calculate the latest metric values on load
@@ -426,31 +426,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const [state, dispatch] = useReducer(appReducer, INITIAL_STATE);
     const { user } = useAuth();
 
-    // Notification persistence helpers (localStorage, keyed per user, 3-month TTL)
-    const NOTIF_STORAGE_KEY = (uid: string) => `nexis-notifications-${uid}`;
-    const THREE_MONTHS_MS = 90 * 24 * 60 * 60 * 1000;
-
-    const loadNotificationsFromStorage = (uid: string): import('@/types').Notification[] => {
-        try {
-            const raw = localStorage.getItem(NOTIF_STORAGE_KEY(uid));
-            if (!raw) return [];
-            const parsed: import('@/types').Notification[] = JSON.parse(raw);
-            const cutoff = Date.now() - THREE_MONTHS_MS;
-            return parsed.filter(n => new Date(n.date).getTime() > cutoff);
-        } catch {
-            return [];
-        }
-    };
-
-    const saveNotificationsToStorage = (uid: string, notifications: import('@/types').Notification[]) => {
-        try {
-            const cutoff = Date.now() - THREE_MONTHS_MS;
-            const toSave = notifications.filter(n => new Date(n.date).getTime() > cutoff);
-            localStorage.setItem(NOTIF_STORAGE_KEY(uid), JSON.stringify(toSave));
-        } catch {
-            // ignore storage errors
-        }
-    };
+    // Notification persistence is now DB-backed via sync API (no localStorage needed)
 
     // Reset state when user logs out
     useEffect(() => {
@@ -464,27 +440,16 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (!user) return; // Don't load if no user
 
         const loadData = async () => {
-            // Load saved notifications from localStorage BEFORE server sync
-            const storedNotifications = loadNotificationsFromStorage(user.id);
-
             // 2. Always Sync with Server (Source of Truth)
             try {
                 const res = await fetch('/api/sync');
                 if (res.ok) {
                     const apiData = await res.json();
-                    // Merge stored notifications (not in DB) into the API data
-                    const merged = [
-                        ...storedNotifications,
-                        // Avoid duplicates
-                    ].filter((n, i, arr) => arr.findIndex(x => x.id === n.id) === i);
-                    dispatch({ type: 'INIT_DATA', payload: { ...apiData, notifications: merged } });
-                } else {
-                    // Server failed, still restore notifications from storage
-                    dispatch({ type: 'ADD_NOTIFICATION', payload: storedNotifications[0] });
+                    // Notifications now come from DB via sync API
+                    dispatch({ type: 'INIT_DATA', payload: apiData });
                 }
             } catch (e) {
                 console.error("Sync failed", e);
-                // Fallback to empty/default state on error, or could show toast
             }
 
             dispatch({ type: 'SET_LOADING', payload: false });
@@ -508,11 +473,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         }
     }, [user, state.user.name, state.user.avatar]);
 
-    // Persist notifications to localStorage whenever they change
-    useEffect(() => {
-        if (!user?.id || state.isLoading) return;
-        saveNotificationsToStorage(user.id, state.notifications);
-    }, [state.notifications, user?.id, state.isLoading]);
+    // Notifications are synced to DB via performSync, no localStorage needed
 
     // Sync changes to Local Storage - REMOVED for DB Only approach
     // useEffect(() => {

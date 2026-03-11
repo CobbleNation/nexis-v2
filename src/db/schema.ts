@@ -441,3 +441,15 @@ export const userLimits = sqliteTable('user_limits', {
     updatedAt: checkTimestamp('updated_at').notNull().$defaultFn(() => new Date()),
     updatedBy: text('updated_by').references(() => users.id, { onDelete: 'set null' }),
 });
+
+// --- Notifications (persistent, DB-backed) ---
+export const notifications = sqliteTable('notifications', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    title: text('title').notNull(),
+    message: text('message').notNull(),
+    type: text('type').notNull(), // 'info' | 'success' | 'warning' | 'error'
+    read: boolean('read').notNull().default(false),
+    link: text('link'),
+    createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
+});
