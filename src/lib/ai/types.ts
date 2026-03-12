@@ -112,3 +112,20 @@ export interface ProjectSuggestionResponse {
         rationale: string;
     }[];
 }
+
+export interface GoalCreatorVariant {
+    title: string;
+    description: string;
+    type: 'vision' | 'strategic' | 'tactical';
+    suggestedArea?: string;
+    reasoning: string;
+    metrics?: {
+        name: string;
+        unit: string;
+    }[];
+    steps?: string[];
+}
+
+export interface GoalCreatorResponse {
+    variants: GoalCreatorVariant[];
+}

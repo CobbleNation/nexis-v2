@@ -15,10 +15,11 @@ import { GOAL_TEMPLATES, getSuggestedMetrics } from '@/lib/goal-templates';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { differenceInDays, addMonths, addYears, parseISO, isValid, format } from 'date-fns';
-import { MetricSuggestionResponse } from '@/lib/ai/types';
+import { MetricSuggestionResponse, GoalCreatorVariant } from '@/lib/ai/types';
 import { MetricCreationWizard } from '@/components/metrics/MetricCreationWizard';
 import { useSubscription } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/common/UpgradeModal';
+import { AIGoalCreatorModal } from '@/components/goals/AIGoalCreatorModal';
 
 interface GoalCreationWizardProps {
     initialTitle?: string;
@@ -38,6 +39,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
     const HAS_FULL_AI = checkLimit('HAS_FULL_AI');
     const [showUpgrade, setShowUpgrade] = useState(false);
     const [upgradeContext, setUpgradeContext] = useState({ title: '', description: '' });
+    const [showAICreator, setShowAICreator] = useState(false);
 
 
 
@@ -178,12 +180,16 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     goalTitle: finalTitle,
-                    description: description, // Pass description if available
+                    description: description,
                     area: currentArea?.title
                 })
             });
 
-            if (!response.ok) throw new Error("Failed to suggest metrics");
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                const errorMsg = errorData?.error || `Помилка сервера (${response.status})`;
+                throw new Error(errorMsg);
+            }
 
             const data: MetricSuggestionResponse = await response.json();
             setAiSuggestedMetrics(data.metrics || []);
@@ -193,9 +199,9 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                 toast.info("AI не знайшов специфічних метрик для цієї цілі.");
             }
 
-        } catch (error) {
-            console.error(error);
-            toast.error("Не вдалося отримати підказки AI");
+        } catch (error: any) {
+            console.error('AI Suggest Metrics Error:', error);
+            toast.error(error?.message || "Не вдалося отримати підказки AI");
         } finally {
             setIsSuggestingMetrics(false);
         }
@@ -366,6 +372,32 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                             <h3 className="text-xl font-bold text-slate-900 dark:text-foreground">Оберіть тип цілі</h3>
                             <p className="text-slate-500 dark:text-muted-foreground text-sm">Визначте масштаб ваших амбіцій</p>
                         </div>
+
+                        {/* AI Goal Creator Button */}
+                        <button
+                            onClick={() => {
+                                if (!HAS_FULL_AI) {
+                                    setUpgradeContext({
+                                        title: 'AI Помічник Цілей',
+                                        description: 'Не знаєте, як правильно сформувати ціль? Опишіть бажаний результат, і AI створить структуровані варіанти з типом, метриками та кроками. Доступно у Pro.'
+                                    });
+                                    setShowUpgrade(true);
+                                } else {
+                                    setShowAICreator(true);
+                                }
+                            }}
+                            className="w-full p-4 rounded-2xl border-2 border-dashed border-violet-200 dark:border-violet-800/50 bg-violet-50/50 dark:bg-violet-950/20 hover:bg-violet-50 dark:hover:bg-violet-950/30 hover:border-violet-300 dark:hover:border-violet-700 transition-all group cursor-pointer"
+                        >
+                            <div className="flex items-center justify-center gap-3">
+                                <div className="p-2 bg-violet-100 dark:bg-violet-900/50 rounded-xl group-hover:bg-violet-200 dark:group-hover:bg-violet-900/70 transition-colors">
+                                    <Sparkles className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                                </div>
+                                <div className="text-left">
+                                    <h4 className="text-sm font-bold text-violet-700 dark:text-violet-300">Не знаєте, як сформувати ціль?</h4>
+                                    <p className="text-xs text-violet-500 dark:text-violet-400/70">AI Помічник створить варіанти за вашим описом (Pro)</p>
+                                </div>
+                            </div>
+                        </button>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:items-stretch">
                             <GoalTypeCard
@@ -798,6 +830,21 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                 onOpenChange={setShowUpgrade}
                 title={upgradeContext.title}
                 description={upgradeContext.description}
+            />
+            <AIGoalCreatorModal
+                open={showAICreator}
+                onOpenChange={setShowAICreator}
+                areas={state.areas.map(a => ({ id: a.id, title: a.title }))}
+                onSelectVariant={(variant: GoalCreatorVariant, matchedAreaId?: string) => {
+                    setGoalType(variant.type);
+                    setCustomTitle(variant.title);
+                    setDescription(variant.description);
+                    setTemplateId('custom');
+                    if (matchedAreaId) {
+                        setAreaId(matchedAreaId);
+                    }
+                    setStep(2);
+                }}
             />
         </div >
     );
