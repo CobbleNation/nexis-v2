@@ -370,7 +370,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
 
             <div className="p-6 flex-1 overflow-y-auto min-h-0">
                 {step === 1 && (
-                    <div className="space-y-6 animate-in fade-in slide-in-from-left-4 max-w-4xl mx-auto h-full flex flex-col justify-center">
+                    <div className="space-y-6 animate-in fade-in slide-in-from-left-4 max-w-4xl mx-auto py-4">
                         <div className="text-center space-y-1 mb-2">
                             <h3 className="text-xl font-bold text-slate-900 dark:text-foreground">Оберіть тип цілі</h3>
                             <p className="text-slate-500 dark:text-muted-foreground text-sm">Визначте масштаб ваших амбіцій</p>
