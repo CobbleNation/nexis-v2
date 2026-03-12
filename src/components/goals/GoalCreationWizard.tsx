@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useData } from '@/lib/store';
 import { Loader2, Target, Compass, Flag, ChevronRight, ChevronLeft, ArrowUpRight, Plus, X, Info, TrendingUp, TrendingDown, Minus, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { Goal } from '@/types';
+import { Goal, MetricDefinition } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
 import { GOAL_TEMPLATES, getSuggestedMetrics } from '@/lib/goal-templates';
 import { cn } from '@/lib/utils';
@@ -95,6 +95,9 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
     }>({});
 
     const [metricDirection, setMetricDirection] = useState<'increase' | 'decrease' | 'maintain'>(initialData?.metricDirection || 'increase');
+
+    // AI-generated subGoals (from AI Goal Creator)
+    const [aiSubGoals, setAiSubGoals] = useState<{ id: string; title: string; completed: boolean }[]>([]);
 
     const [deadline, setDeadline] = useState(initialData?.deadline ? new Date(initialData.deadline).toISOString().split('T')[0] : '');
     const [dateError, setDateError] = useState<string | null>(null);
@@ -289,7 +292,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                 progress: initialData?.progress || 0,
                 priority,
                 deadline: (goalType === 'vision') ? undefined : (deadline || undefined),
-                subGoals: initialData?.subGoals || [],
+                subGoals: [...(initialData?.subGoals || []), ...aiSubGoals],
                 createdAt: initialData?.createdAt || new Date(), // Keep original date if editing
 
                 // Metric Data
@@ -836,14 +839,67 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                 onOpenChange={setShowAICreator}
                 areas={state.areas.map(a => ({ id: a.id, title: a.title }))}
                 onSelectVariant={(variant: GoalCreatorVariant, matchedAreaId?: string) => {
+                    // 1. Set basic goal fields
                     setGoalType(variant.type);
                     setCustomTitle(variant.title);
                     setDescription(variant.description);
                     setTemplateId('custom');
+
+                    const resolvedAreaId = matchedAreaId || areaId;
                     if (matchedAreaId) {
                         setAreaId(matchedAreaId);
                     }
+
+                    // 2. Auto-create metrics from AI suggestions
+                    if (variant.metrics && variant.metrics.length > 0 && resolvedAreaId) {
+                        const createdMetricIds: string[] = [];
+
+                        variant.metrics.forEach((m, idx) => {
+                            const newMetricId = uuidv4();
+                            const metricDef: MetricDefinition = {
+                                id: newMetricId,
+                                userId: 'user',
+                                areaId: resolvedAreaId,
+                                name: m.name,
+                                unit: m.unit || '',
+                                direction: 'increase',
+                                frequency: 'weekly',
+                                valueType: 'number',
+                                type: 'number',
+                                baseline: 0,
+                                target: 100,
+                                createdAt: new Date(),
+                            };
+                            dispatch({ type: 'ADD_METRIC_DEF', payload: metricDef });
+                            createdMetricIds.push(newMetricId);
+                        });
+
+                        // Set first metric as primary target
+                        if (createdMetricIds.length > 0) {
+                            setTargetMetricId(createdMetricIds[0]);
+                            setMetricStartValue('0');
+                            setMetricTargetValue('100');
+                            setMetricDirection('increase');
+                        }
+
+                        // Set additional metrics (if more than 1)
+                        if (createdMetricIds.length > 1) {
+                            setAdditionalMetricIds(createdMetricIds.slice(1));
+                        }
+                    }
+
+                    // 3. Auto-create subGoals from AI steps
+                    if (variant.steps && variant.steps.length > 0) {
+                        const newSubGoals = variant.steps.map(stepTitle => ({
+                            id: uuidv4(),
+                            title: stepTitle,
+                            completed: false,
+                        }));
+                        setAiSubGoals(newSubGoals);
+                    }
+
                     setStep(2);
+                    toast.success('AI заповнив ціль! Переглядайте та правте на кожному кроці.');
                 }}
             />
         </div >
