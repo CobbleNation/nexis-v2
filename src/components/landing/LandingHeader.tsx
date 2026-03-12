@@ -8,19 +8,42 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useData } from "@/lib/store"
 import { useAuth } from "@/lib/auth-context"
 import { useTheme } from "next-themes"
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export function LandingHeader() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    // Lock body scroll when mobile menu is open (fixes iOS Safari scroll break)
+    useEffect(() => {
+        if (mobileMenuOpen) {
+            // Save current scroll position
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.overflow = 'hidden';
+            return () => {
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.left = '';
+                document.body.style.right = '';
+                document.body.style.overflow = '';
+                window.scrollTo(0, scrollY);
+            };
+        }
+    }, [mobileMenuOpen]);
+
+    const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
     const { state } = useData();
     const { user, logout } = useAuth();
     const { theme, setTheme } = useTheme();
     const isPro = user?.subscriptionTier === 'pro';
 
     return (
-        <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-white/80 dark:bg-[#020817]/80 backdrop-blur-md md:backdrop-blur-xl supports-[backdrop-filter]:bg-white/20 transform-gpu">
+        <header className="fixed top-0 w-full z-50 border-b border-white/10 bg-white/90 dark:bg-[#020817]/90 backdrop-blur-sm md:backdrop-blur-xl transform-gpu">
             <div className="container mx-auto px-6 h-16 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2 font-bold text-xl tracking-tighter hover:opacity-80 transition-opacity">
                     <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
@@ -141,36 +164,45 @@ export function LandingHeader() {
                 </div>
             </div>
 
-            {/* Mobile dropdown menu */}
+            {/* Mobile menu overlay + panel */}
+            {mobileMenuOpen && (
+                <div
+                    className="sm:hidden fixed inset-0 top-16 z-40 bg-black/20 dark:bg-black/40"
+                    onClick={closeMobileMenu}
+                    aria-hidden="true"
+                />
+            )}
             <div className={cn(
-                "sm:hidden overflow-hidden transition-all duration-300 bg-white/95 dark:bg-[#020817]/95 backdrop-blur-xl border-t border-white/10",
-                mobileMenuOpen ? "max-h-72 opacity-100" : "max-h-0 opacity-0"
+                "sm:hidden fixed top-16 left-0 right-0 z-50 transition-all duration-300 ease-out bg-white dark:bg-[#020817] border-b border-slate-200 dark:border-slate-800 shadow-xl",
+                mobileMenuOpen
+                    ? "translate-y-0 opacity-100 pointer-events-auto"
+                    : "-translate-y-2 opacity-0 pointer-events-none"
             )}>
                 <div className="container mx-auto px-6 py-4 space-y-3">
-                    <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <Link href="/#features" onClick={closeMobileMenu} className="block py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                         Можливості
                     </Link>
-                    <Link href="/#workflow" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <Link href="/#workflow" onClick={closeMobileMenu} className="block py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                         Методологія
                     </Link>
-                    <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <Link href="/pricing" onClick={closeMobileMenu} className="block py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                         Тарифи
                     </Link>
                     <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                         {user ? (
-                            <Link href="/overview" onClick={() => setMobileMenuOpen(false)}>
+                            <Link href="/overview" onClick={closeMobileMenu}>
                                 <Button className="w-full rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold flex items-center justify-center gap-2">
                                     Перейти в продукт <ArrowRight className="w-4 h-4" />
                                 </Button>
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                                <Link href="/login" onClick={closeMobileMenu}>
                                     <Button variant="ghost" className="w-full justify-center text-slate-600 dark:text-slate-300">
                                         Увійти
                                     </Button>
                                 </Link>
-                                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                                <Link href="/register" onClick={closeMobileMenu}>
                                     <Button className="w-full rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-200 font-semibold">
                                         Спробувати безкоштовно
                                     </Button>

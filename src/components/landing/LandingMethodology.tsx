@@ -44,7 +44,7 @@ export function LandingMethodology({ user }: LandingMethodologyProps) {
                     </div>
 
                     <div className="flex-1 relative w-full">
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-[100px] opacity-20" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-[50px] md:blur-[100px] opacity-20" />
                         <div className="relative bg-white dark:bg-[#020817] border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-2xl">
                             <div className="space-y-6">
                                 <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">

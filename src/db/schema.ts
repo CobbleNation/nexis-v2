@@ -456,3 +456,41 @@ export const notifications = sqliteTable('notifications', {
     link: text('link'),
     createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
 });
+
+// --- Admin Email System ---
+export const adminEmailAccounts = sqliteTable('admin_email_accounts', {
+    id: text('id').primaryKey(),
+    address: text('address').notNull().unique(), // e.g. support@zynorvia.com
+    displayName: text('display_name').notNull(), // e.g. "Zynorvia Support"
+    smtpHost: text('smtp_host').notNull(),
+    smtpPort: integer('smtp_port').notNull().default(465),
+    smtpSecure: boolean('smtp_secure').default(true),
+    imapHost: text('imap_host'),
+    imapPort: integer('imap_port').default(993),
+    imapSecure: boolean('imap_secure').default(true),
+    username: text('username').notNull(),
+    password: text('password').notNull(),
+    isActive: boolean('is_active').default(true),
+    createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
+    updatedAt: checkTimestamp('updated_at').notNull().$defaultFn(() => new Date()),
+});
+
+export const adminEmails = sqliteTable('admin_emails', {
+    id: text('id').primaryKey(),
+    accountId: text('account_id').references(() => adminEmailAccounts.id, { onDelete: 'cascade' }).notNull(),
+    folder: text('folder').notNull().default('inbox'), // inbox, sent, archive, trash
+    fromAddress: text('from_address').notNull(),
+    fromName: text('from_name'),
+    toAddress: text('to_address').notNull(),
+    toName: text('to_name'),
+    subject: text('subject').notNull(),
+    bodyHtml: text('body_html'),
+    bodyText: text('body_text'),
+    isRead: boolean('is_read').default(false),
+    isStarred: boolean('is_starred').default(false),
+    inReplyTo: text('in_reply_to'), // email ID for threading
+    messageId: text('message_id'), // SMTP Message-ID header
+    receivedAt: checkTimestamp('received_at'),
+    sentAt: checkTimestamp('sent_at'),
+    createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
+});

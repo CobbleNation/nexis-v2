@@ -3,7 +3,7 @@ import { BarChart3, Globe, Layout, Lock, Target, Zap } from "lucide-react"
 export function LandingFeatures() {
     return (
         <section id="features" className="container mx-auto px-6 py-32 relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-orange-500/5 rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-orange-500/5 rounded-full blur-[60px] md:blur-[120px] pointer-events-none" />
 
             <div className="text-center mb-20 space-y-4 relative z-10">
                 <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Все що потрібно. <span className="text-slate-400">І нічого зайвого.</span></h2>

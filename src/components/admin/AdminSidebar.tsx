@@ -11,7 +11,8 @@ import {
     LogOut,
     ArrowLeft,
     Activity,
-    Menu
+    Menu,
+    Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -22,6 +23,7 @@ const adminNavItems = [
     { href: '/admin', label: 'Головна', icon: LayoutDashboard },
     { href: '/admin/users', label: 'Користувачі', icon: Users },
     { href: '/admin/payments', label: 'Платежі', icon: Activity },
+    { href: '/admin/mail', label: 'Пошта', icon: Mail },
     { href: '/admin/content', label: 'Контент', icon: Database },
     { href: '/admin/audit', label: 'Журнал Аудиту', icon: ShieldAlert },
 ];

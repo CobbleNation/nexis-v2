@@ -22,11 +22,11 @@ export default async function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#020817] text-slate-900 dark:text-slate-50 transition-colors duration-500 overflow-x-hidden">
 
-      {/* Decorative Background Gradients */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 rounded-full blur-[120px]" />
-        <div className="absolute top-[20%] left-[20%] w-[60%] h-[60%] bg-orange-500/5 rounded-full blur-[150px] animate-pulse duration-[10s]" />
+      {/* Decorative Background Gradients — reduced blur for mobile perf */}
+      <div className="fixed inset-0 z-0 pointer-events-none transform-gpu">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[60px] md:blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 rounded-full blur-[60px] md:blur-[120px]" />
+        <div className="absolute top-[20%] left-[20%] w-[60%] h-[60%] bg-orange-500/5 rounded-full blur-[80px] md:blur-[150px]" />
       </div>
 
       {/* Header */}
