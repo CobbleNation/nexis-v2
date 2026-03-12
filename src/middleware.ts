@@ -46,6 +46,7 @@ export async function middleware(request: NextRequest) {
         MARKETING_PATHS.some(path => pathname === path) ||
         pathname.startsWith('/api/auth') ||
         pathname.startsWith('/auth/') ||
+        pathname.startsWith('/api/ai') ||
         PUBLIC_PATHS.some(path => pathname === path || pathname.startsWith(path + '/'));
 
     // 2. DOMAIN REDIRECTS
