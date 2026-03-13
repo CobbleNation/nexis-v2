@@ -256,6 +256,15 @@ export default function UsersPage() {
                         <Button
                             variant="outline"
                             size="sm"
+                            className="bg-slate-800 border-slate-700 hover:bg-slate-700 text-orange-500 border-orange-500/30"
+                            onClick={() => handleBulkAction('resend_verification')}
+                            disabled={performingBulk}
+                        >
+                            Надіслати підтвердження
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
                             className="bg-slate-800 border-slate-700 hover:bg-slate-700"
                             onClick={() => handleBulkAction('set_pro')}
                             disabled={performingBulk}

@@ -11,6 +11,8 @@ import { eq, inArray } from 'drizzle-orm';
 import { verifyJWT } from '@/lib/jwt-utils';
 import { cookies } from 'next/headers';
 import { v4 as uuidv4 } from 'uuid';
+import { randomBytes } from 'crypto';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
     try {
@@ -38,6 +40,38 @@ export async function POST(req: Request) {
                 await db.update(users)
                     .set({ emailVerified: new Date() })
                     .where(inArray(users.id, userIds));
+                break;
+
+            case 'resend_verification':
+                // Fetch user details to get email and name
+                const usersToResend = await db.select({
+                    id: users.id,
+                    email: users.email,
+                    name: users.name
+                })
+                    .from(users)
+                    .where(inArray(users.id, userIds));
+
+                for (const user of usersToResend) {
+                    const verificationToken = randomBytes(32).toString('hex');
+                    const tokenExpiry = new Date(Date.now() + 24 * 3600000); // 24 hours
+
+                    // Update user with new token
+                    await db.update(users)
+                        .set({
+                            verificationToken,
+                            verificationTokenExpiry: tokenExpiry
+                        })
+                        .where(eq(users.id, user.id));
+
+                    // Send email
+                    try {
+                        await sendVerificationEmail(user.email, user.name, verificationToken);
+                    } catch (emailError) {
+                        console.error(`Failed to resend verification email to ${user.email}:`, emailError);
+                        // Continue to next user
+                    }
+                }
                 break;
 
             case 'set_pro':
