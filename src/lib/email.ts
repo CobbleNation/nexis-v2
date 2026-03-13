@@ -5,7 +5,7 @@ const isLocal = process.env.EMAIL_HOST === '127.0.0.1' ||
                 !process.env.EMAIL_HOST;
 
 const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || '127.0.0.1',
+    host: process.env.EMAIL_HOST || 'host.docker.internal',
     port: Number(process.env.EMAIL_PORT) || (isLocal ? 25 : 465),
     secure: process.env.EMAIL_SECURE === 'true' || (!isLocal && (Number(process.env.EMAIL_PORT) === 465)),
     auth: process.env.EMAIL_USER && process.env.EMAIL_PASS ? {
