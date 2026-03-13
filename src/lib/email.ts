@@ -1,9 +1,11 @@
 import nodemailer from 'nodemailer';
 
-const isLocal = process.env.EMAIL_HOST === '127.0.0.1' || process.env.EMAIL_HOST === 'localhost';
+const isLocal = process.env.EMAIL_HOST === '127.0.0.1' || 
+                process.env.EMAIL_HOST === 'localhost' || 
+                !process.env.EMAIL_HOST;
 
 const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
+    host: process.env.EMAIL_HOST || '127.0.0.1',
     port: Number(process.env.EMAIL_PORT) || (isLocal ? 25 : 465),
     secure: process.env.EMAIL_SECURE === 'true' || (!isLocal && (Number(process.env.EMAIL_PORT) === 465)),
     auth: process.env.EMAIL_USER && process.env.EMAIL_PASS ? {
@@ -16,7 +18,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
-const rawBaseUrl = APP_URL.replace(/\/$/, ''); // remove trailing slash
+const rawBaseUrl = APP_URL.replace(/\/$/, '');
 const BASE_URL = rawBaseUrl.includes('zynorvia.com') && !rawBaseUrl.startsWith('https://')
     ? `https://${rawBaseUrl.replace('http://', '')}`
     : (rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`);
@@ -34,13 +36,14 @@ transporter.verify((error) => {
 
 export async function sendVerificationEmail(email: string, name: string, token: string) {
     const verifyUrl = `${BASE_URL}/auth/verify?token=${token}`;
-
-
-    await transporter.sendMail({
-        from: `"Zynorvia" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Підтвердження вашого акаунту Zynorvia',
-        html: `
+    const fromEmail = process.env.EMAIL_USER || 'no-reply@zynorvia.com';
+    
+    try {
+        await transporter.sendMail({
+            from: `"Zynorvia" <${fromEmail}>`,
+            to: email,
+            subject: 'Підтвердження вашого акаунту Zynorvia',
+            html: `
             <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                 <div style="text-align: center; margin-bottom: 32px;">
                     <div style="display: inline-block; padding: 12px; background-color: rgba(234, 88, 12, 0.1); border-radius: 16px;">
@@ -71,17 +74,24 @@ export async function sendVerificationEmail(email: string, name: string, token: 
                 </div>
             </div>
         `,
-    });
+        });
+        console.log(`[Email] Verification sent to ${email}`);
+    } catch (error) {
+        console.error(`[Email] Failed to send verification to ${email}:`, error);
+        throw error;
+    }
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
     const resetUrl = `${BASE_URL}/reset-password?token=${token}`;
+    const fromEmail = process.env.EMAIL_USER || 'no-reply@zynorvia.com';
 
-    await transporter.sendMail({
-        from: `"Zynorvia" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Відновлення паролю Zynorvia',
-        html: `
+    try {
+        await transporter.sendMail({
+            from: `"Zynorvia" <${fromEmail}>`,
+            to: email,
+            subject: 'Відновлення паролю Zynorvia',
+            html: `
             <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; border: 1px solid #f1f5f9; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                 <div style="text-align: center; margin-bottom: 32px;">
                     <div style="display: inline-block; padding: 12px; background-color: rgba(234, 88, 12, 0.1); border-radius: 16px;">
@@ -111,5 +121,10 @@ export async function sendPasswordResetEmail(email: string, token: string) {
                 </div>
             </div>
         `,
-    });
+        });
+        console.log(`[Email] Password reset sent to ${email}`);
+    } catch (error) {
+        console.error(`[Email] Failed to send password reset to ${email}:`, error);
+        throw error;
+    }
 }
