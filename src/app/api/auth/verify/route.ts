@@ -18,19 +18,19 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const { token } = await req.json();
-        console.log('[Verify] POST received with token:', token?.substring(0, 8) + '...');
-
-        if (!token) {
-            return NextResponse.json({ error: 'Токен відсутній' }, { status: 400 });
-        }
+        const cleanToken = token.trim();
+        console.log(`[Verify] Attempting verification for token (clean): ${cleanToken.substring(0, 8)}...`);
 
         // Find user with this token
+        // Use ILIKE or a more robust check if applicable, but hex is usually exact.
+        // We'll search for exact match first, but provide logging if failed.
         const [user] = await db.select()
             .from(users)
-            .where(eq(users.verificationToken, token))
+            .where(eq(users.verificationToken, cleanToken))
             .limit(1);
 
         if (!user) {
+            console.warn(`[Verify] No user found with token: ${cleanToken.substring(0, 8)}...`);
             return NextResponse.json({ error: 'Недійсний токен або акаунт уже підтверджено' }, { status: 400 });
         }
 
