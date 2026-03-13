@@ -17,11 +17,11 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zynorvia.com';
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.zynorvia.com';
 const rawBaseUrl = APP_URL.replace(/\/$/, '');
 const BASE_URL = rawBaseUrl.includes('zynorvia.com') && !rawBaseUrl.startsWith('https://')
-    ? `https://${rawBaseUrl.replace('http://', '')}`
-    : (rawBaseUrl.startsWith('http') ? rawBaseUrl : `https://${rawBaseUrl}`);
+    ? `https://${rawBaseUrl.replace('http://', '').replace(/^app\.|^www\./, 'app.')}`
+    : (rawBaseUrl.includes('zynorvia.com') ? rawBaseUrl.replace(/(https?:\/\/)(www\.)?/, '$1app.') : rawBaseUrl);
 
 console.log('[Email] Using BASE_URL:', BASE_URL);
 

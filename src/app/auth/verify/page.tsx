@@ -10,23 +10,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 function VerifyContent() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
+    const [debugInfo, setDebugInfo] = useState<string | null>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
     const token = searchParams.get('token');
 
-    const handleVerify = async () => {
-        if (!token) {
+    const handleVerify = async (manualToken?: string) => {
+        const activeToken = manualToken || token;
+
+        if (!activeToken) {
             setStatus('error');
-            setErrorMessage('Токен відсутній або недійсний.');
+            setErrorMessage('Токен відсутній у посиланні.');
+            setDebugInfo(`URL: ${window.location.href.split('?')[0]}... [No Query]`);
             return;
         }
 
         setStatus('loading');
         try {
+            console.log('[Verify] Sending POST to /api/auth/verify');
             const res = await fetch('/api/auth/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token }),
+                body: JSON.stringify({ token: activeToken }),
             });
 
             const data = await res.json();
@@ -45,14 +50,26 @@ function VerifyContent() {
         } catch (error: any) {
             setStatus('error');
             setErrorMessage(error.message || 'Сталась помилка під час підтвердження.');
+            setDebugInfo(`Token Length: ${activeToken.length}`);
             toast.error(error.message);
         }
     };
 
+    // Auto-verify on mount
+    useEffect(() => {
+        if (token && status === 'idle') {
+            handleVerify();
+        } else if (!token && status === 'idle') {
+            setStatus('error');
+            setErrorMessage('Токен відсутній у посиланні.');
+            setDebugInfo(`Full URL: ${window.location.href}`);
+        }
+    }, [token, status]);
+
     return (
         <div className="max-w-md w-full mx-auto">
             <AnimatePresence mode="wait">
-                {status === 'idle' && (
+                {(status === 'idle') && (
                     <motion.div
                         key="idle"
                         initial={{ opacity: 0, y: 20 }}
@@ -74,7 +91,7 @@ function VerifyContent() {
                         </div>
 
                         <Button
-                            onClick={handleVerify}
+                            onClick={() => handleVerify()}
                             className="w-full h-14 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg shadow-xl shadow-orange-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                         >
                             Підтвердити Пошту
@@ -128,6 +145,11 @@ function VerifyContent() {
                             <p className="text-slate-500 dark:text-slate-400">
                                 {errorMessage}
                             </p>
+                            {debugInfo && (
+                                <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-[10px] font-mono text-slate-400 break-all text-center">
+                                    {debugInfo}
+                                </div>
+                            )}
                         </div>
                         <Button
                             variant="outline"

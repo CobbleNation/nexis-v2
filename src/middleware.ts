@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
 
     // 0. ENFORCE HTTPS
     if (proto === 'http') {
-        return NextResponse.redirect(new URL(`https://${hostname}${pathname}`, request.url));
+        return NextResponse.redirect(new URL(`https://${hostname}${pathname}${request.nextUrl.search}`, request.url));
     }
 
     // 0.1 IMMEDIATE EXEMPTIONS FOR CRITICAL AUTH FLOWS
@@ -52,21 +52,21 @@ export async function middleware(request: NextRequest) {
     // 2. DOMAIN REDIRECTS
     if (hostname === 'admin.zynorvia.com') {
         if (pathname === '/') {
-            return NextResponse.rewrite(new URL('/admin', request.url));
+            return NextResponse.rewrite(new URL(`/admin${request.nextUrl.search}`, request.url));
         }
         if (!pathname.startsWith('/admin') && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
-            return NextResponse.rewrite(new URL(`/admin${pathname}`, request.url));
+            return NextResponse.rewrite(new URL(`/admin${pathname}${request.nextUrl.search}`, request.url));
         }
     } else if (hostname === 'app.zynorvia.com') {
         // App subdomain should not host the landing page
         if (pathname === '/') {
-            return NextResponse.redirect(new URL('https://zynorvia.com/', request.url));
+            return NextResponse.redirect(new URL(`https://zynorvia.com/${request.nextUrl.search}`, request.url));
         }
     } else if (hostname === 'zynorvia.com') {
         // Redirect non-marketing app routes to the app subdomain
         const isMarketing = MARKETING_PATHS.includes(pathname);
         if (!isMarketing && !pathname.startsWith('/api') && !pathname.startsWith('/_next')) {
-            return NextResponse.redirect(new URL(`https://app.zynorvia.com${pathname}`, request.url));
+            return NextResponse.redirect(new URL(`https://app.zynorvia.com${pathname}${request.nextUrl.search}`, request.url));
         }
     }
 
@@ -98,7 +98,7 @@ export async function middleware(request: NextRequest) {
             );
         }
         return NextResponse.redirect(
-            new URL(`/login?returnUrl=${encodeURIComponent(pathname)}`, request.url)
+            new URL(`/login?returnUrl=${encodeURIComponent(pathname + request.nextUrl.search)}`, request.url)
         );
     }
 
@@ -109,7 +109,7 @@ export async function middleware(request: NextRequest) {
             if (pathname.startsWith('/api/')) {
                 return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
             }
-            return NextResponse.redirect(new URL('/overview', request.url));
+            return NextResponse.redirect(new URL(`/overview${request.nextUrl.search}`, request.url));
         }
     }
 
