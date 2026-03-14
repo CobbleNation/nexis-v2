@@ -72,6 +72,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             title: 'Головна',
             items: [
                 { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
+                ...(user?.onboardingCompleted === false ? [{ name: 'Налаштування AI', href: '/overview?resume_onboarding=deep_plan', icon: Sparkles }] : [])
             ]
         },
         {

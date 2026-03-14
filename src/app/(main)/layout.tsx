@@ -6,7 +6,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, X } from "lucide-react";
 import { AiOnboardingModal } from "@/components/onboarding/AiOnboardingModal";
 
 function OnboardingResumer({ setShowOnboarding }: { setShowOnboarding: (val: boolean) => void }) {
@@ -30,6 +30,18 @@ export default function MainLayout({
     const router = useRouter();
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [isOnboardingMinimized, setIsOnboardingMinimized] = useState(false);
+    const [isResumerDismissed, setIsResumerDismissed] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setIsResumerDismissed(localStorage.getItem('onboarding_resumer_dismissed') === 'true');
+        }
+    }, []);
+
+    const handleDismissResumer = () => {
+        setIsResumerDismissed(true);
+        localStorage.setItem('onboarding_resumer_dismissed', 'true');
+    };
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -92,15 +104,23 @@ export default function MainLayout({
             )}
             
             {/* Onboarding Resume Trigger */}
-            {isOnboardingMinimized && !showOnboarding && (
-                <div className="fixed bottom-6 left-6 z-[8000] animate-in slide-in-from-left-4 duration-300">
-                    <button 
-                        onClick={() => setShowOnboarding(true)}
-                        className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 group"
-                    >
-                        <Sparkles className="w-5 h-5 animate-pulse" />
-                        <span className="font-semibold text-sm">Продовжити налаштування</span>
-                    </button>
+            {isOnboardingMinimized && !showOnboarding && !isResumerDismissed && (
+                <div className="fixed bottom-[100px] md:bottom-6 left-6 z-[8000] animate-in slide-in-from-left-4 duration-300">
+                    <div className="relative group">
+                        <button 
+                            onClick={() => setShowOnboarding(true)}
+                            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 pr-10"
+                        >
+                            <Sparkles className="w-5 h-5 animate-pulse" />
+                            <span className="font-semibold text-sm">Налаштування AI</span>
+                        </button>
+                        <button
+                            onClick={handleDismissResumer}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-orange-100 hover:text-white hover:bg-orange-600 rounded-full transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             )}
 
