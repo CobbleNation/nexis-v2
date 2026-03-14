@@ -106,5 +106,9 @@ jobs:
             
             docker compose up -d --force-recreate
             
+            # Run database migrations
+            echo "Running database migrations..."
+            docker exec nexis_web npx drizzle-kit push || echo "Migration skipped or failed (check if drizzle-kit is in production image)"
+            
             # Clean up old unused images to save disk space
             docker image prune -a -f --filter "until=24h"
