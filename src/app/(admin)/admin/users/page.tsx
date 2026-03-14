@@ -48,7 +48,7 @@ export default function UsersPage() {
                 setUsers(data.users);
             }
         } catch (err) {
-            toast.error('Failed to load users');
+            toast.error('Не вдалося завантажити користувачів');
         } finally {
             setLoading(false);
         }
@@ -71,7 +71,7 @@ export default function UsersPage() {
 
     const handleBulkAction = async (action: string) => {
         if (selectedUsers.size === 0) return;
-        if (action === 'delete' && !confirm(`Are you sure you want to delete ${selectedUsers.size} users?`)) return;
+        if (action === 'delete' && !confirm(`Ви впевнені, що хочете видалити ${selectedUsers.size} користувачів?`)) return;
 
         setPerformingBulk(true);
         try {
@@ -92,7 +92,7 @@ export default function UsersPage() {
                 toast.error('Помилка при виконанні групової дії');
             }
         } catch (err) {
-            toast.error('Critical error during bulk action');
+            toast.error('Критична помилка при виконанні дії');
         } finally {
             setPerformingBulk(false);
         }
@@ -224,7 +224,7 @@ export default function UsersPage() {
                                                 href={`/admin/users/${user.id}`}
                                                 className="text-blue-400 hover:text-blue-300 text-sm font-medium hover:underline flex items-center justify-end gap-1"
                                             >
-                                                View Details
+                                                Деталі
                                                 <ExternalLink className="h-3 w-3" />
                                             </Link>
                                         </TableCell>

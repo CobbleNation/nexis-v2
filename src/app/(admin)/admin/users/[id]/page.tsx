@@ -195,7 +195,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     recurringPriceOverride: data.user.recurringPriceOverride !== null ? data.user.recurringPriceOverride / 100 : ''
                 });
             } catch (err) {
-                toast.error('Failed to load user info');
+                toast.error('Не вдалося завантажити дані користувача');
                 router.push('/admin/users');
             } finally {
                 setLoading(false);
@@ -247,14 +247,14 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                toast.success('User updated successfully');
+                toast.success('Дані користувача оновлено');
                 const data = await res.json();
-                setUser((prev: UserDetails | null) => prev ? ({ ...prev, ...data.user }) : null);
+                setUser((prev) => prev ? ({ ...prev, ...data.user }) : null);
             } else {
-                toast.error('Failed to update user');
+                toast.error('Не вдалося оновити користувача');
             }
         } catch (error) {
-            toast.error('Error saving changes');
+            toast.error('Помилка при збереженні змін');
         } finally {
             setSaving(false);
         }
@@ -279,12 +279,12 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                toast.success('Custom limits saved');
+                toast.success('Налаштування лімітів збережено');
             } else {
-                toast.error('Failed to save limits');
+                toast.error('Не вдалося зберегти ліміти');
             }
         } catch {
-            toast.error('Error saving limits');
+            toast.error('Помилка при збереженні лімітів');
         } finally {
             setSavingLimits(false);
         }
@@ -292,7 +292,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
 
     const resetLimits = () => {
         setLimitsForm(getDefaultLimitsForm());
-        toast.info('Limits reset to plan defaults (not saved yet)');
+        toast.info('Ліміти скинуто до стандартних (ще не збережено)');
     };
 
     const handleDeletion = async (mode: 'data' | 'account') => {

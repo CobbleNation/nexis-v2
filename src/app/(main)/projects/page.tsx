@@ -121,87 +121,95 @@ function ProjectsContent() {
                     return (
                         <div 
                             key={project.id} 
-                            onClick={() => router.push(`/projects/${project.id}`)}
-                            className="group cursor-pointer"
+                            className="group relative"
                         >
-                            <div className="bg-white dark:bg-card p-6 rounded-[2rem] border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 h-full flex flex-col relative overflow-hidden">
-                                {/* Header */}
-                                <div className="flex justify-between items-start mb-4 relative z-10">
-                                    <div className={cn(
-                                        "w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner",
-                                        "bg-primary/5 text-primary"
-                                    )}>
-                                        {project.icon || <Folder className="w-6 h-6" />}
-                                    </div>
-                                    <div className="z-20" onClick={(e) => e.stopPropagation()}>
-                                        <ProjectActionsMenu project={project} />
-                                    </div>
-                                </div>
-
-                                {/* Content */}
-                                <div className="flex-1 relative z-10">
-                                    <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
-                                        {project.title || "Untitled Project"}
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4 h-10">
-                                        {project.description || "No description provided."}
-                                    </p>
-
-                                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md w-fit mb-3">
-                                        <Layers className="w-3.5 h-3.5" />
-                                        {tasksCount} завдань
-                                    </div>
-
-                                    {/* Deadline badge */}
-                                    {project.deadline && (
-                                        <div className="flex items-center gap-1.5 text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-md w-fit mb-3">
-                                            <Clock className="w-3.5 h-3.5" />
-                                            {new Date(project.deadline).toLocaleDateString('uk-UA')}
+                            <Link 
+                                href={`/projects/${project.id}`}
+                                className="block h-full cursor-pointer"
+                            >
+                                <div className="bg-white dark:bg-card p-6 rounded-[2rem] border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 h-full flex flex-col relative overflow-hidden">
+                                    {/* Header */}
+                                    <div className="flex justify-between items-start mb-4 relative z-10">
+                                        <div className={cn(
+                                            "w-12 h-12 rounded-2xl flex items-center justify-center text-xl shadow-inner",
+                                            "bg-primary/5 text-primary"
+                                        )}>
+                                            {project.icon || <Folder className="w-6 h-6" />}
                                         </div>
-                                    )}
+                                        {/* Placeholder for spacing */}
+                                        <div className="w-8 h-8" />
+                                    </div>
 
-                                    {/* Progress Section or Empty State */}
-                                    {(() => {
-                                        const totalTasks = state.actions.filter(a => a.projectId === project.id).length;
-                                        const totalMetrics = (project.metricIds || []).length;
-                                        const hasItems = totalTasks > 0 || totalMetrics > 0;
+                                    {/* Content */}
+                                    <div className="flex-1 relative z-10">
+                                        <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                                            {project.title || "Untitled Project"}
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground line-clamp-2 mb-4 h-10">
+                                            {project.description || "No description provided."}
+                                        </p>
 
-                                        if (!hasItems) {
+                                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground bg-muted/50 px-2 py-1 rounded-md w-fit mb-3">
+                                            <Layers className="w-3.5 h-3.5" />
+                                            {tasksCount} завдань
+                                        </div>
+
+                                        {/* Deadline badge */}
+                                        {project.deadline && (
+                                            <div className="flex items-center gap-1.5 text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-md w-fit mb-3">
+                                                <Clock className="w-3.5 h-3.5" />
+                                                {new Date(project.deadline).toLocaleDateString('uk-UA')}
+                                            </div>
+                                        )}
+
+                                        {/* Progress Section or Empty State */}
+                                        {(() => {
+                                            const totalTasks = state.actions.filter(a => a.projectId === project.id).length;
+                                            const totalMetrics = (project.metricIds || []).length;
+                                            const hasItems = totalTasks > 0 || totalMetrics > 0;
+
+                                            if (!hasItems) {
+                                                return (
+                                                    <div className="mb-4 py-2 px-3 bg-slate-100 dark:bg-secondary/30 rounded-lg border border-dashed border-slate-300 dark:border-border text-center">
+                                                        <p className="text-xs text-muted-foreground font-medium">
+                                                            Порожньо. Додайте задачі або метрики.
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }
+
                                             return (
-                                                <div className="mb-4 py-2 px-3 bg-slate-100 dark:bg-secondary/30 rounded-lg border border-dashed border-slate-300 dark:border-border text-center">
-                                                    <p className="text-xs text-muted-foreground font-medium">
-                                                        Порожньо. Додайте задачі або метрики.
-                                                    </p>
+                                                <div className="space-y-1.5 mb-4">
+                                                    <div className="flex justify-between text-xs font-medium">
+                                                        <span className="text-muted-foreground">Прогрес</span>
+                                                        <span className="text-primary">{(project.progress || 0)}%</span>
+                                                    </div>
+                                                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-primary rounded-full transition-all duration-500"
+                                                            style={{ width: `${project.progress || 0}%` }}
+                                                        />
+                                                    </div>
                                                 </div>
                                             );
-                                        }
+                                        })()}
+                                    </div>
 
-                                        return (
-                                            <div className="space-y-1.5 mb-4">
-                                                <div className="flex justify-between text-xs font-medium">
-                                                    <span className="text-muted-foreground">Прогрес</span>
-                                                    <span className="text-primary">{(project.progress || 0)}%</span>
-                                                </div>
-                                                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-primary rounded-full transition-all duration-500"
-                                                        style={{ width: `${project.progress || 0}%` }}
-                                                    />
-                                                </div>
-                                            </div>
-                                        );
-                                    })()}
-                                </div>
-
-                                {/* Footer */}
-                                <div className="flex items-center justify-between pt-4 border-t border-border/40 relative z-10 mt-auto">
-                                    <div className="flex items-center text-xs text-muted-foreground gap-1.5">
-                                        <Calendar className="w-3.5 h-3.5" />
-                                        <span>
-                                            {project.createdAt ? new Date(project.createdAt).toLocaleDateString('uk-UA') : 'N/A'}
-                                        </span>
+                                    {/* Footer */}
+                                    <div className="flex items-center justify-between pt-4 border-t border-border/40 relative z-10 mt-auto">
+                                        <div className="flex items-center text-xs text-muted-foreground gap-1.5">
+                                            <Calendar className="w-3.5 h-3.5" />
+                                            <span>
+                                                {project.createdAt ? new Date(project.createdAt).toLocaleDateString('uk-UA') : 'N/A'}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
+                            </Link>
+
+                            {/* Actions Menu overlay */}
+                            <div className="absolute top-6 right-6 z-20" onClick={(e) => e.stopPropagation()}>
+                                <ProjectActionsMenu project={project} />
                             </div>
                         </div>
                     );

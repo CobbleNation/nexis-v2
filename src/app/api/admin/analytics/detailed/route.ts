@@ -30,20 +30,22 @@ export async function GET(req: Request) {
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
         // 1. Activation Rate
-        // activation rate = activated users / registered users
+        // Any user who has performed at least one meaningful action
         const [registeredUsersRes] = await db.select({ count: count() }).from(users);
         const registeredUsers = registeredUsersRes.count;
 
         const [activatedUsersRes] = await db.select({ count: countDistinct(analyticsEvents.userId) })
             .from(analyticsEvents)
-            .where(eq(analyticsEvents.eventName, 'created_first_entry'));
+            .where(and(
+                sql`${analyticsEvents.userId} IS NOT NULL`,
+                sql`${analyticsEvents.eventName} IN ('created_first_entry', 'task_created', 'goal_created', 'habit_created', 'project_created')`
+            ));
         const activatedUsers = activatedUsersRes.count;
 
         const activationRate = registeredUsers > 0 ? (activatedUsers / registeredUsers) * 100 : 0;
 
         // 2. Funnel
-        // Landing (implied) -> Register -> Verify email -> First login -> First action
-        // For Landing page, we might use 'app_visited' or just start from Register
+        // Registration -> Email Verified -> First Login -> Activation (Any action)
         
         const [funnelRegister] = await db.select({ count: countDistinct(analyticsEvents.userId) })
             .from(analyticsEvents).where(eq(analyticsEvents.eventName, 'user_registered'));
@@ -52,44 +54,43 @@ export async function GET(req: Request) {
             .from(analyticsEvents).where(eq(analyticsEvents.eventName, 'email_verified'));
             
         const [funnelLogin] = await db.select({ count: countDistinct(analyticsEvents.userId) })
-            .from(analyticsEvents).where(eq(analyticsEvents.eventName, 'first_login'));
+            .from(analyticsEvents).where(eq(analyticsEvents.eventName, 'user_login')); // Note: switched from first_login to user_login proxy if needed
             
         const [funnelAction] = await db.select({ count: countDistinct(analyticsEvents.userId) })
-            .from(analyticsEvents).where(eq(analyticsEvents.eventName, 'created_first_entry'));
+            .from(analyticsEvents)
+            .where(sql`${analyticsEvents.eventName} IN ('created_first_entry', 'task_created', 'goal_created', 'habit_created', 'project_created')`);
 
         const funnel = [
-            { stage: 'Registration', count: funnelRegister.count },
-            { stage: 'Email Verified', count: funnelVerify.count },
-            { stage: 'First Login', count: funnelLogin.count },
-            { stage: 'First Action', count: funnelAction.count },
+            { stage: 'Реєстрація', count: funnelRegister.count },
+            { stage: 'Email Підтверджено', count: funnelVerify.count },
+            { stage: 'Вхід у систему', count: funnelLogin.count },
+            { stage: 'Перша Дія', count: funnelAction.count },
         ];
 
-        // 3. Retention (Simplified Cohort)
-        // Day 1, Day 7, Day 30 Retention
-        // Percentage of users who registered X days ago and returned Y days after registration
-        
+        // 3. Retention (Cohort Analysis)
         const calculateRetention = async (daysAfter: number) => {
-            // Users who registered at least (daysAfter + 1) days ago
-            const refDate = new Date();
-            refDate.setDate(refDate.getDate() - (daysAfter + 1));
+            const cohortDate = new Date();
+            cohortDate.setDate(now.getDate() - (daysAfter + 1));
             
-            const [usersCohort] = await db.select({ count: count() })
+            // Users who registered exactly around cohort period or before
+            const cohortUsers = await db.select({ id: users.id, createdAt: users.createdAt })
                 .from(users)
-                .where(sql`${users.createdAt} <= ${refDate.getTime()}`);
+                .where(sql`${users.createdAt} <= ${cohortDate}`);
             
-            if (usersCohort.count === 0) return 0;
+            if (cohortUsers.length === 0) return 0;
 
-            // Of those users, how many had an event at least (daysAfter) days after registration
-            // This is a proxy for retention
-            const [returnedUsers] = await db.select({ count: countDistinct(analyticsEvents.userId) })
+            const cohortUserIds = cohortUsers.map(u => u.id);
+            
+            // Returned users = users from cohort who have events occurring at least 'daysAfter' later
+            const [returnedRes] = await db.select({ count: countDistinct(analyticsEvents.userId) })
                 .from(analyticsEvents)
                 .innerJoin(users, eq(analyticsEvents.userId, users.id))
                 .where(and(
-                    sql`${analyticsEvents.createdAt} >= ${users.createdAt} + ${daysAfter * 24 * 60 * 60 * 1000}`,
-                    sql`${users.createdAt} <= ${refDate.getTime()}`
+                    sql`${analyticsEvents.userId} IN ${cohortUserIds}`,
+                    sql`${analyticsEvents.createdAt} >= date(${users.createdAt}, '+' || ${daysAfter} || ' days')`
                 ));
 
-            return (returnedUsers.count / usersCohort.count) * 100;
+            return (returnedRes.count / cohortUsers.length) * 100;
         };
 
         const retention = {
@@ -98,23 +99,23 @@ export async function GET(req: Request) {
             day30: await calculateRetention(30),
         };
 
-        // 4. DAU (Daily Active Users) - Distinct users with any event today
+        // 4. DAU
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
         
         const [dauRes] = await db.select({ count: countDistinct(analyticsEvents.userId) })
             .from(analyticsEvents)
-            .where(sql`${analyticsEvents.createdAt} >= ${startOfToday.getTime()}`);
+            .where(sql`${analyticsEvents.createdAt} >= ${startOfToday}`);
 
         return NextResponse.json({
             activationRate: Number(activationRate.toFixed(1)),
             funnel,
             retention: {
-                day1: Number(retention.day1.toFixed(1)),
-                day7: Number(retention.day7.toFixed(1)),
-                day30: Number(retention.day30.toFixed(1)),
+                day1: Number(retention.day1.toFixed(1)).toString() === "NaN" ? 0 : Number(retention.day1.toFixed(1)),
+                day7: Number(retention.day7.toFixed(1)).toString() === "NaN" ? 0 : Number(retention.day7.toFixed(1)),
+                day30: Number(retention.day30.toFixed(1)).toString() === "NaN" ? 0 : Number(retention.day30.toFixed(1)),
             },
-            dau: dauRes.count,
+            dau: dauRes.count || 0,
         });
     } catch (error) {
         console.error('Detailed Analytics Error:', error);

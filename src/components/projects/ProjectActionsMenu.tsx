@@ -13,6 +13,7 @@ import { Project } from '@/types';
 import { useData } from '@/lib/store';
 import { EditProjectDialog } from './EditProjectDialog';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface ProjectActionsMenuProps {
     project: Project;
@@ -21,6 +22,7 @@ interface ProjectActionsMenuProps {
 export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
     const { dispatch } = useData();
     const [showEdit, setShowEdit] = useState(false);
+    const router = useRouter();
 
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -77,6 +79,9 @@ export function ProjectActionsMenu({ project }: ProjectActionsMenuProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuLabel>Дії</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => router.push(`/projects/${project.id}`)}>
+                        <PlayCircle className="w-4 h-4 mr-2 text-primary" /> Відкрити проект
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleEditClick}>
                         <Edit className="w-4 h-4 mr-2" /> Редагувати
                     </DropdownMenuItem>

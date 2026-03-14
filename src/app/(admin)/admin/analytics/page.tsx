@@ -75,11 +75,11 @@ export default function AnalyticsPage() {
                     setDetailed(detailedJson);
                     setLiveEvents(liveJson);
                 } else {
-                    toast.error("Failed to fetch analytics data");
+                    toast.error("Не вдалося завантажити дані аналітики");
                 }
             } catch (error) {
                 console.error(error);
-                toast.error("Error loading analytics");
+                toast.error("Помилка завантаження аналітики");
             } finally {
                 setLoading(false);
             }
@@ -94,7 +94,7 @@ export default function AnalyticsPage() {
             if (res.ok) {
                 const data = await res.json();
                 setLiveEvents(data);
-                toast.success("Live feed updated");
+                toast.success("Стрічку оновлено");
             }
         } catch (error) {
             console.error(error);
@@ -115,19 +115,19 @@ export default function AnalyticsPage() {
         <div className="space-y-8 pb-12">
             <div className="flex justify-between items-start">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
-                    <p className="text-slate-500 mt-2">Comprehensive overview of system activation, retention, and performance.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Аналітика</h1>
+                    <p className="text-slate-500 mt-2">Комплексний огляд активації, утримання та ефективності системи.</p>
                 </div>
                 <Button variant="outline" size="sm" onClick={refreshLive} disabled={liveLoading} className="gap-2 bg-slate-900 border-slate-800 text-slate-100 hover:bg-slate-800">
                     <Zap className={cn("h-4 w-4 text-amber-400", liveLoading && "animate-pulse")} />
-                    Refresh Live
+                    Оновити Live
                 </Button>
             </div>
 
             <Tabs defaultValue="overview" className="space-y-6">
                 <TabsList className="bg-slate-900 border-slate-800">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="live">Live Activity</TabsTrigger>
+                    <TabsTrigger value="overview">Огляд</TabsTrigger>
+                    <TabsTrigger value="live">Активність у Реальному Часі</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview" className="space-y-8">
@@ -135,46 +135,46 @@ export default function AnalyticsPage() {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                         <Card className="bg-slate-900 border-slate-800 text-slate-100">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-100">Total Users</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-100">Всього користувачів</CardTitle>
                                 <Users className="h-4 w-4 text-slate-400" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-slate-100">{stats?.totalUsers}</div>
                                 <p className="text-xs text-slate-400">
-                                    +{stats?.newUsers} in last 30d
+                                    +{stats?.newUsers} за останні 30д
                                 </p>
                             </CardContent>
                         </Card>
                         <Card className="bg-slate-900 border-slate-800 text-slate-100">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-100">Activation Rate</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-100">Рівень Активації</CardTitle>
                                 <Activity className="h-4 w-4 text-indigo-400" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-slate-100">{detailed?.activationRate}%</div>
                                 <p className="text-xs text-slate-400">
-                                    {detailed?.activationRate && detailed.activationRate < 20 ? "Problem in onboarding" : "Normal activation"}
+                                    {detailed?.activationRate && detailed.activationRate < 20 ? "Проблема в онбордингу" : "Нормальна активація"}
                                 </p>
                             </CardContent>
                         </Card>
                         <Card className="bg-slate-900 border-slate-800 text-slate-100">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-100">Daily Active Users</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-100">Активні Користувачі (DAU)</CardTitle>
                                 <Users className="h-4 w-4 text-emerald-400" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-slate-100">{detailed?.dau}</div>
-                                <p className="text-xs text-slate-400">Unique users today</p>
+                                <p className="text-xs text-slate-400">Унікальних юзерів сьогодні</p>
                             </CardContent>
                         </Card>
                         <Card className="bg-slate-900 border-slate-800 text-slate-100">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium text-slate-100">Pro Conversion</CardTitle>
+                                <CardTitle className="text-sm font-medium text-slate-100">Конверсія в Pro</CardTitle>
                                 <TrendingUp className="h-4 w-4 text-amber-400" />
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold text-slate-100">{stats?.conversionRate}%</div>
-                                <p className="text-xs text-slate-400">Free to Pro Rate</p>
+                                <p className="text-xs text-slate-400">З безкоштовних у Pro</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -183,30 +183,30 @@ export default function AnalyticsPage() {
                         {/* Retention Chart */}
                         <Card className="col-span-4 bg-slate-900 border-slate-800 text-slate-100">
                             <CardHeader>
-                                <CardTitle className="text-slate-100">Retention</CardTitle>
-                                <CardDescription className="text-slate-400">Percentage of users returning over time</CardDescription>
+                                <CardTitle className="text-slate-100">Утримання (Retention)</CardTitle>
+                                <CardDescription className="text-slate-400">Відсоток користувачів, які повернулися через деякий час</CardDescription>
                             </CardHeader>
                             <CardContent className="pt-2">
                                 <div className="grid grid-cols-3 gap-4 mb-4">
                                     <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                                        <div className="text-sm text-slate-400 mb-1">Day 1</div>
+                                        <div className="text-sm text-slate-400 mb-1">День 1</div>
                                         <div className="text-2xl font-bold text-indigo-400">{detailed?.retention.day1}%</div>
                                     </div>
                                     <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                                        <div className="text-sm text-slate-400 mb-1">Day 7</div>
+                                        <div className="text-sm text-slate-400 mb-1">День 7</div>
                                         <div className="text-2xl font-bold text-emerald-400">{detailed?.retention.day7}%</div>
                                     </div>
                                     <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                                        <div className="text-sm text-slate-400 mb-1">Day 30</div>
+                                        <div className="text-sm text-slate-400 mb-1">День 30</div>
                                         <div className="text-2xl font-bold text-amber-400">{detailed?.retention.day30}%</div>
                                     </div>
                                 </div>
                                 <div className="h-[200px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={[
-                                    { name: 'Day 1', value: detailed?.retention.day1 },
-                                    { name: 'Day 7', value: detailed?.retention.day7 },
-                                    { name: 'Day 30', value: detailed?.retention.day30 }
+                                    { name: 'День 1', value: detailed?.retention.day1 },
+                                    { name: 'День 7', value: detailed?.retention.day7 },
+                                    { name: 'День 30', value: detailed?.retention.day30 }
                                     ]}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                                     <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
@@ -225,8 +225,8 @@ export default function AnalyticsPage() {
                         {/* Conversion Funnel */}
                         <Card className="col-span-3 bg-slate-900 border-slate-800 text-slate-100">
                             <CardHeader>
-                                <CardTitle className="text-slate-100">Activation Funnel</CardTitle>
-                                <CardDescription className="text-slate-400">User progression through key milestones</CardDescription>
+                                <CardTitle className="text-slate-100">Воронка Активації</CardTitle>
+                                <CardDescription className="text-slate-400">Прогрес користувачів по ключових етапах</CardDescription>
                             </CardHeader>
                             <CardContent className="pl-2">
                                 <div className="h-[300px] w-full">
@@ -259,8 +259,8 @@ export default function AnalyticsPage() {
                     {/* Activity Over Time (Existing) */}
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader>
-                            <CardTitle className="text-slate-100">Detailed Activity</CardTitle>
-                            <CardDescription className="text-slate-400">Daily tasks created vs completed</CardDescription>
+                            <CardTitle className="text-slate-100">Детальна Активність</CardTitle>
+                            <CardDescription className="text-slate-400">Щоденна кількість створених та завершених завдань</CardDescription>
                         </CardHeader>
                         <CardContent className="pl-2">
                             <div className="h-[300px] w-full">
@@ -280,9 +280,9 @@ export default function AnalyticsPage() {
                                             contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
                                             itemStyle={{ color: '#f8fafc' }}
                                         />
-                                        <Line type="monotone" dataKey="tasks_created" stroke="#3b82f6" strokeWidth={2} dot={false} name="Tasks Created" />
-                                        <Line type="monotone" dataKey="tasks_completed" stroke="#22c55e" strokeWidth={2} dot={false} name="Tasks Completed" />
-                                        <Line type="monotone" dataKey="active_users" stroke="#6366f1" strokeWidth={2} dot={false} name="Active Users" />
+                                        <Line type="monotone" dataKey="tasks_created" stroke="#3b82f6" strokeWidth={2} dot={false} name="Завдань створено" />
+                                        <Line type="monotone" dataKey="tasks_completed" stroke="#22c55e" strokeWidth={2} dot={false} name="Завдань виконано" />
+                                        <Line type="monotone" dataKey="active_users" stroke="#6366f1" strokeWidth={2} dot={false} name="Активні юзери" />
                                     </LineChart>
                                 </ResponsiveContainer>
                             </div>
@@ -294,12 +294,12 @@ export default function AnalyticsPage() {
                     <Card className="bg-slate-900 border-slate-800 text-slate-100">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div>
-                                <CardTitle className="text-slate-100">Live Activity Feed</CardTitle>
-                                <CardDescription className="text-slate-400">The last 100 actions performed by users across the system.</CardDescription>
+                                <CardTitle className="text-slate-100">Стрічка Живої Активності</CardTitle>
+                                <CardDescription className="text-slate-400">Останні 100 подій у системі в режимі реального часу.</CardDescription>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Zap className="h-4 w-4 text-amber-400 animate-pulse" />
-                                <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">Real-time</span>
+                                <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">У прямому ефірі</span>
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -307,10 +307,10 @@ export default function AnalyticsPage() {
                                 <table className="w-full text-sm text-left">
                                     <thead className="bg-slate-800/50 text-slate-400 font-medium uppercase text-xs tracking-wider">
                                         <tr>
-                                            <th className="px-4 py-3">Event</th>
-                                            <th className="px-4 py-3">User</th>
-                                            <th className="px-4 py-3">Time</th>
-                                            <th className="px-4 py-3">Metadata</th>
+                                            <th className="px-4 py-3">Подія</th>
+                                            <th className="px-4 py-3">Користувач</th>
+                                            <th className="px-4 py-3">Час</th>
+                                            <th className="px-4 py-3">Деталі</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-800">
@@ -346,7 +346,7 @@ export default function AnalyticsPage() {
                                             </tr>
                                         )) : (
                                             <tr>
-                                                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">No recent activity detected.</td>
+                                                <td colSpan={4} className="px-4 py-8 text-center text-slate-500">Поки що немає активності.</td>
                                             </tr>
                                         )}
                                     </tbody>

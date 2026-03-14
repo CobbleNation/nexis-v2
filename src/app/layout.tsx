@@ -6,6 +6,7 @@ import { DataProvider } from "@/lib/store";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { NotificationManager } from "@/components/features/NotificationManager";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -53,6 +54,7 @@ export default function RootLayout({
             >
               <TooltipProvider>
                 <NotificationManager />
+                <AnalyticsTracker />
                 {children}
                 <Toaster />
               </TooltipProvider>

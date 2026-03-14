@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, actions, goals, habits, habitLogs, analyticsDailyAgg } from '@/db/schema';
+import { users, actions, goals, habits, habitLogs, analyticsDailyAgg, analyticsEvents } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
-import { sql, count, countDistinct } from 'drizzle-orm';
+import { sql, count, countDistinct, eq, and } from 'drizzle-orm';
 
 async function checkAdmin() {
     const cookieStore = await cookies();
@@ -34,18 +34,24 @@ export async function GET(req: Request) {
 
         const date30DaysAgo = new Date();
         date30DaysAgo.setDate(date30DaysAgo.getDate() - 30);
+        
         const [newUsersRes] = await db.select({ count: count() })
             .from(users)
-            .where(sql`${users.createdAt} >= ${date30DaysAgo.getTime()}`);
+            .where(sql`${users.createdAt} >= ${date30DaysAgo}`);
         const newUsers = newUsersRes.count;
 
-        // 2. Active Users (DAU/MAU) - Utilizing analytics_daily_agg for speed if populated, or fallback to sessions
-        // For MVP without aggregation job running yet, we query sessions or actions table
-        // Best proxy for DAU in this MVP: distinct users in 'actions' updated recently (active usage)
+        // 2. Active Users (DAU) - Distinct users with any event today
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
 
-        // Let's use specific queries for "Actions"
-        const [tasksCreatedRes] = await db.select({ count: count() }).from(actions).where(sql`${actions.type} = 'task'`);
-        const [tasksCompletedRes] = await db.select({ count: count() }).from(actions).where(sql`${actions.type} = 'task' AND ${actions.completed} = true`);
+        const [dauRes] = await db.select({ count: countDistinct(analyticsEvents.userId) })
+            .from(analyticsEvents)
+            .where(sql`${analyticsEvents.createdAt} >= ${startOfToday}`);
+        const activeUsersDAU = dauRes.count;
+
+        // Fallback or proxies for other metrics
+        const [tasksCreatedRes] = await db.select({ count: count() }).from(actions).where(eq(actions.type, 'task'));
+        const [tasksCompletedRes] = await db.select({ count: count() }).from(actions).where(and(eq(actions.type, 'task'), eq(actions.completed, true)));
 
         const tasksCreated = tasksCreatedRes.count;
         const tasksCompleted = tasksCompletedRes.count;
@@ -57,16 +63,16 @@ export async function GET(req: Request) {
         const [habitCheckinsRes] = await db.select({ count: count() }).from(habitLogs);
         const habitCheckins = habitCheckinsRes.count;
 
-        // Pro Conversion using SQL
-        const [proUsersRes] = await db.select({ count: count() }).from(users).where(sql`${users.subscriptionTier} = 'pro'`);
+        // Pro Conversion
+        const [proUsersRes] = await db.select({ count: count() }).from(users).where(eq(users.subscriptionTier, 'pro'));
         const conversionRate = totalUsers > 0 ? ((proUsersRes.count / totalUsers) * 100).toFixed(1) : 0;
 
         return NextResponse.json({
             stats: {
                 totalUsers,
                 newUsers,
-                activeUsersDAU: 0, // Placeholder, requires agg table or complex session query
-                activeUsersMAU: 0,
+                activeUsersDAU,
+                activeUsersMAU: 0, // Placeholder
                 conversionRate: Number(conversionRate),
                 tasksCreated,
                 tasksCompleted,
