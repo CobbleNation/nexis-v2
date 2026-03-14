@@ -23,6 +23,7 @@ interface User {
     cardToken?: string;
 
     onboardingCompleted?: boolean;
+    createdAt?: Date | string;
 
     role?: 'user' | 'support' | 'manager' | 'admin';
     customLimits?: Record<string, any> | null;

@@ -9,7 +9,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { Bell, Check, X, Info, CheckCircle, AlertTriangle, AlertOctagon, ArrowLeft } from 'lucide-react';
+import { Bell, Check, X, Info, CheckCircle, AlertTriangle, AlertOctagon, ArrowLeft, Star } from 'lucide-react';
 import { useData } from "@/lib/store";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -57,6 +57,7 @@ export function NotificationsPopover() {
             case 'success': return <CheckCircle className="h-4 w-4 text-emerald-500" />;
             case 'warning': return <AlertTriangle className="h-4 w-4 text-amber-500" />;
             case 'error': return <AlertOctagon className="h-4 w-4 text-rose-500" />;
+            case 'announcement': return <Star className="h-4 w-4 text-orange-500 fill-orange-500" />;
             default: return <Info className="h-4 w-4 text-blue-500" />;
         }
     };

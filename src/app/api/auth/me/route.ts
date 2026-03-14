@@ -68,6 +68,7 @@ export async function GET() {
             cardLast4: user.cardLast4,
             cardToken: user.cardToken,
             onboardingCompleted: user.onboardingCompleted,
+            createdAt: user.createdAt,
             customLimits: limits ?? null
         }
     }, { headers: noCacheHeaders });

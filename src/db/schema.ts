@@ -455,7 +455,7 @@ export const notifications = sqliteTable('notifications', {
     userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
     title: text('title').notNull(),
     message: text('message').notNull(),
-    type: text('type').notNull(), // 'info' | 'success' | 'warning' | 'error'
+    type: text('type').notNull(), // 'info' | 'success' | 'warning' | 'error' | 'announcement'
     read: boolean('read').notNull().default(false),
     link: text('link'),
     createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),

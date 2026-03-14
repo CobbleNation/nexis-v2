@@ -22,9 +22,10 @@ import { trackEventClient } from '@/lib/analytics-client';
 
 interface AiOnboardingModalProps {
   onSuccess: () => void;
+  onMinimize?: () => void;
 }
 
-export function AiOnboardingModal({ onSuccess }: AiOnboardingModalProps) {
+export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalProps) {
   const [step, setStep] = useState(0); // 0: Intro, 1: Q1, 2: Q2, 3: Q3, 4: Q4, 5: Generating, 6: Success
   const [answers, setAnswers] = useState({
     areas: '',
@@ -83,10 +84,17 @@ export function AiOnboardingModal({ onSuccess }: AiOnboardingModalProps) {
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight">Створіть свою систему життя за 60 секунд</h1>
             <p className="text-xl text-muted-foreground">Розкажіть нам про свої цілі та спосіб життя. ШІ згенерує для вас структуру сфер життя, цілей та завдань.</p>
-            <Button size="lg" className="w-full h-14 text-lg rounded-2xl group" onClick={handleNext}>
-              Почати
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
+            <div className="flex flex-col gap-3">
+              <Button size="lg" className="w-full h-14 text-lg rounded-2xl group shadow-lg shadow-orange-500/20" onClick={handleNext}>
+                Почати
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              {onMinimize && (
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={onMinimize}>
+                  Зробити пізніше
+                </Button>
+              )}
+            </div>
           </div>
         );
 
@@ -253,11 +261,11 @@ export function AiOnboardingModal({ onSuccess }: AiOnboardingModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-hidden">
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-background/80 backdrop-blur-xl p-0 md:p-4 overflow-hidden animate-in fade-in duration-500">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="bg-white dark:bg-slate-950 w-full max-w-3xl rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col pt-8"
+        className="bg-white dark:bg-slate-950 w-full h-full md:h-auto md:max-w-3xl md:rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col pt-8 border-none"
       >
         {/* Progress Bar (at top of modal) */}
         {step > 0 && step < 5 && (
