@@ -60,6 +60,10 @@ export async function POST(req: Request) {
         // Re-seed Logic
         await seedLifeAreas(userId);
 
+        // Allow onboarding to be retriggered
+        const { users } = await import('@/db/schema');
+        await db.update(users).set({ onboardingCompleted: false }).where(eq(users.id, userId));
+
         const { trackEvent } = await import('@/lib/analytics-server');
         await trackEvent({
             eventName: 'data_reset',
