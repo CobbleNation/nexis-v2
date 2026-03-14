@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, Settings, RotateCcw, ShieldCheck, Trash2, AlertTriangle, CreditCard, History } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Settings, RotateCcw, ShieldCheck, Trash2, AlertTriangle, CreditCard, History, Mail, ExternalLink } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LIMITS } from '@/lib/limits';
 
@@ -98,6 +98,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
 
     const [user, setUser] = useState<UserDetails | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isResending, setIsResending] = useState(false);
     const [saving, setSaving] = useState(false);
     const [savingLimits, setSavingLimits] = useState(false);
     const [payments, setPayments] = useState<Payment[]>([]);
@@ -320,6 +321,32 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         });
     };
 
+    async function handleResendVerification() {
+        if (!user) return;
+        setIsResending(true);
+        try {
+            const res = await fetch('/api/admin/users/bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userIds: [user.id],
+                    action: 'resend_verification'
+                })
+            });
+
+            if (res.ok) {
+                toast.success('Лист-підтвердження надіслано');
+            } else {
+                const data = await res.json();
+                toast.error(data.error || 'Помилка при надсиланні листа');
+            }
+        } catch (err) {
+            toast.error('Помилка з\'єднання');
+        } finally {
+            setIsResending(false);
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-96">
@@ -359,6 +386,18 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
+                    {!user.emailVerified && (
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="bg-slate-900 border-slate-700 hover:bg-slate-800 text-orange-500 gap-2"
+                                    onClick={handleResendVerification}
+                                    disabled={isResending}
+                                >
+                                    <Mail className="h-4 w-4" />
+                                    {isResending ? 'Надсилаємо...' : 'Надіслати підтвердження'}
+                                </Button>
+                            )}
                     <Badge variant={!!user.emailVerified ? 'outline' : 'destructive'} className={!!user.emailVerified ? "border-emerald-500 text-emerald-500" : ""}>
                         {!!user.emailVerified ? 'ВЕРИФІКОВАНО' : 'НЕВЕРИФІКОВАНО'}
                     </Badge>

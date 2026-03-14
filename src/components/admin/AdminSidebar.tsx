@@ -12,7 +12,8 @@ import {
     ArrowLeft,
     Activity,
     Menu,
-    Mail
+    Mail,
+    BarChart3
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -21,6 +22,7 @@ import { useState } from 'react';
 
 const adminNavItems = [
     { href: '/admin', label: 'Головна', icon: LayoutDashboard },
+    { href: '/admin/analytics', label: 'Аналітика', icon: BarChart3 },
     { href: '/admin/users', label: 'Користувачі', icon: Users },
     { href: '/admin/payments', label: 'Платежі', icon: Activity },
     { href: '/admin/mail', label: 'Пошта', icon: Mail },

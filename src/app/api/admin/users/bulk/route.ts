@@ -52,25 +52,34 @@ export async function POST(req: Request) {
                     .from(users)
                     .where(inArray(users.id, userIds));
 
+                const results = { success: 0, failed: 0 };
                 for (const user of usersToResend) {
-                    const verificationToken = randomBytes(32).toString('hex');
-                    const tokenExpiry = new Date(Date.now() + 24 * 3600000); // 24 hours
-
-                    // Update user with new token
-                    await db.update(users)
-                        .set({
-                            verificationToken,
-                            verificationTokenExpiry: tokenExpiry
-                        })
-                        .where(eq(users.id, user.id));
-
-                    // Send email
                     try {
+                        const verificationToken = randomBytes(32).toString('hex');
+                        const tokenExpiry = new Date(Date.now() + 24 * 3600000); // 24 hours
+
+                        // Update user with new token
+                        await db.update(users)
+                            .set({
+                                verificationToken,
+                                verificationTokenExpiry: tokenExpiry
+                            })
+                            .where(eq(users.id, user.id));
+
+                        // Send email
                         await sendVerificationEmail(user.email, user.name, verificationToken);
+                        results.success++;
                     } catch (emailError) {
                         console.error(`Failed to resend verification email to ${user.email}:`, emailError);
-                        // Continue to next user
+                        results.failed++;
                     }
+                }
+                
+                if (results.failed > 0 && results.success === 0) {
+                    return NextResponse.json({ 
+                        error: 'Failed to send any verification emails', 
+                        details: results 
+                    }, { status: 500 });
                 }
                 break;
 
