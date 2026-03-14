@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { trackEventClient } from '@/lib/analytics-client';
-import { DEFAULT_AREAS } from '@/lib/seed-areas';
+import { DEFAULT_AREAS } from '@/lib/default-areas';
 
 interface AiOnboardingModalProps {
   onSuccess: () => void;

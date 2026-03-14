@@ -6,7 +6,8 @@ import { verifyJWT } from '@/lib/auth-utils';
 import { trackEvent } from '@/lib/analytics-server';
 import { cookies } from 'next/headers';
 import { eq, and, gte } from 'drizzle-orm';
-import { seedLifeAreas, DEFAULT_AREAS } from '@/lib/seed-areas';
+import { seedLifeAreas } from '@/lib/seed-areas';
+import { DEFAULT_AREAS } from '@/lib/default-areas';
 import { DEFAULT_METRICS } from '@/lib/seed-metrics';
 import { v4 as uuidv4 } from 'uuid';
 
