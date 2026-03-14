@@ -119,7 +119,11 @@ function ProjectsContent() {
                     const tasksCount = state.actions.filter(a => a.projectId === project.id && !a.completed).length;
 
                     return (
-                        <Link href={`/projects/${project.id}`} key={project.id} className="group">
+                        <div 
+                            key={project.id} 
+                            onClick={() => router.push(`/projects/${project.id}`)}
+                            className="group cursor-pointer"
+                        >
                             <div className="bg-white dark:bg-card p-6 rounded-[2rem] border border-border/50 shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300 h-full flex flex-col relative overflow-hidden">
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-4 relative z-10">
@@ -129,7 +133,7 @@ function ProjectsContent() {
                                     )}>
                                         {project.icon || <Folder className="w-6 h-6" />}
                                     </div>
-                                    <div className="z-20">
+                                    <div className="z-20" onClick={(e) => e.stopPropagation()}>
                                         <ProjectActionsMenu project={project} />
                                     </div>
                                 </div>
@@ -199,7 +203,7 @@ function ProjectsContent() {
                                     </div>
                                 </div>
                             </div>
-                        </Link>
+                        </div>
                     );
                 })}
 

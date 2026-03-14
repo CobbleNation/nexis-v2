@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Loader2, Settings, RotateCcw, ShieldCheck, Trash2, AlertTriangle, CreditCard, History, Mail, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Settings, RotateCcw, ShieldCheck, Trash2, AlertTriangle, CreditCard, History, Mail, ExternalLink, Activity } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LIMITS } from '@/lib/limits';
 
@@ -146,6 +146,8 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
     };
     const [limitsForm, setLimitsForm] = useState<LimitsForm>(getDefaultLimitsForm());
     const [limitsLoading, setLimitsLoading] = useState(true);
+    const [activity, setActivity] = useState<any[]>([]);
+    const [activityLoading, setActivityLoading] = useState(true);
 
     async function fetchPayments() {
         try {
@@ -158,6 +160,20 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
             console.error('Failed to fetch payments', err);
         } finally {
             setPaymentsLoading(false);
+        }
+    }
+
+    async function fetchActivity() {
+        try {
+            const res = await fetch(`/api/admin/analytics/live?userId=${id}&days=30`);
+            if (res.ok) {
+                const data = await res.json();
+                setActivity(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch activity', err);
+        } finally {
+            setActivityLoading(false);
         }
     }
 
@@ -212,6 +228,7 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
         fetchUser();
         fetchLimits();
         fetchPayments();
+        fetchActivity();
     }, [id, router]);
 
     const handleSave = async () => {
@@ -419,6 +436,10 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                     <TabsTrigger value="finance" className="data-[state=active]:bg-slate-800 flex items-center gap-2">
                         <CreditCard className="h-4 w-4" />
                         Фінанси
+                    </TabsTrigger>
+                    <TabsTrigger value="activity" className="data-[state=active]:bg-slate-800 flex items-center gap-2">
+                        <History className="h-4 w-4" />
+                        Активність
                     </TabsTrigger>
                 </TabsList>
 
@@ -928,6 +949,61 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                                     </td>
                                                     <td className="px-4 py-3 font-mono text-xs text-slate-500">
                                                         {p.invoiceId || '—'}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="activity">
+                    <Card className="bg-slate-900 border-slate-800 text-slate-100">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Activity className="h-5 w-5 text-indigo-500" />
+                                Останні Дії Користувача
+                            </CardTitle>
+                            <CardDescription>Лог подій за останні 30 днів</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {activityLoading ? (
+                                <div className="flex justify-center py-6">
+                                    <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+                                </div>
+                            ) : activity.length === 0 ? (
+                                <div className="text-center py-10 text-slate-500 border border-dashed border-slate-800 rounded-lg">
+                                    <History className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                                    Активності не знайдено
+                                </div>
+                            ) : (
+                                <div className="rounded-md border border-slate-800 overflow-hidden">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-slate-950 text-slate-400 font-medium uppercase text-xs tracking-wider">
+                                            <tr>
+                                                <th className="px-4 py-3">Подія</th>
+                                                <th className="px-4 py-3">Час</th>
+                                                <th className="px-4 py-3">Метадані</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-800">
+                                            {activity.map((event) => (
+                                                <tr key={event.id} className="hover:bg-slate-800/30 transition-colors">
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-300 border border-slate-700">
+                                                            {event.eventName.replace(/_/g, ' ')}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-slate-400">
+                                                        {format(new Date(event.createdAt), 'MMM d, HH:mm:ss')}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <code className="text-[10px] text-slate-500 truncate block max-w-xs">
+                                                            {event.metadata ? JSON.stringify(event.metadata) : '-'}
+                                                        </code>
                                                     </td>
                                                 </tr>
                                             ))}
