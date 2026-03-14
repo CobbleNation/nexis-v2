@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, 
@@ -14,7 +16,8 @@ import {
   Activity, 
   Flame,
   Zap,
-  Smile
+  Smile,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -27,7 +30,11 @@ interface AiOnboardingModalProps {
 }
 
 export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalProps) {
-  // 0: Intro, 1: Areas, 2: 3-12m Goals, 3: 1-5y Goals, 4: Challenges, 5: Structure, 6: Generating, 7: Success
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user } = useAuth();
+
+  // 0: Intro, 1: Areas, 2: 3-12m Goals, 3: 1-5y Goals, 4: Challenges, 5: Structure, 6: Generating, 7: Success, 8: Pro Paywall, 9: Deep Planning Interface
   const [step, setStep] = useState(0); 
   const [answers, setAnswers] = useState({
     goals: '',
@@ -41,6 +48,25 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
 
   useEffect(() => {
     trackEventClient({ eventName: 'ai_onboarding_started' });
+    
+    // Check for Deep Planning Resumption
+    if (searchParams?.get('resume_onboarding') === 'deep_plan') {
+       const savedContext = localStorage.getItem('onboarding_deep_plan_context');
+       if (savedContext) {
+           try {
+               const parsed = JSON.parse(savedContext);
+               setAnswers(parsed.answers);
+               setSelectedAreaIds(parsed.selectedAreaIds);
+               setGeneratedData(parsed.generatedData);
+           } catch(e) { console.error("Failed to parse saved context"); }
+       }
+       setStep(9); // Jump directly to Deep Planning
+       
+       // Optional: Clean up URL visually
+       const newUrl = new URL(window.location.href);
+       newUrl.searchParams.delete('resume_onboarding');
+       window.history.replaceState({}, '', newUrl.toString());
+    }
     // Lock scroll when modal is open
     document.body.style.overflow = 'hidden';
     return () => {
@@ -319,14 +345,92 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                 Почати зараз
               </Button>
               <Button size="lg" variant="secondary" className="w-full h-12 text-base rounded-xl border-orange-200/50 bg-orange-50/50 hover:bg-orange-100/50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300 dark:hover:bg-orange-900/40" onClick={() => {
-                // Future Implementation: Redirect to Deep Planning Chat
-                alert('Функція глибокого планування (Pro) буде доступна найближчим часом!');
-                handleFinish();
+                const isPro = user?.subscriptionTier === 'pro';
+                if (isPro) {
+                   setStep(9); // Deep Planning Interface
+                } else {
+                   setStep(8); // Paywall
+                }
               }}>
                 <Sparkles className="w-4 h-4 mr-2" />
-                Спланувати детальніше (Pro)
+                Спланувати детальніше
               </Button>
             </div>
+          </div>
+        );
+
+      case 8: // Pro Paywall
+        return (
+          <div className="text-center space-y-6 max-w-lg mx-auto py-4">
+             <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                <ShieldCheck className="w-8 h-8 text-orange-500" />
+             </div>
+             <div>
+                <h2 className="text-2xl font-extrabold tracking-tight">Відкрийте Глибоке Планування</h2>
+                <p className="text-muted-foreground mt-2 text-sm">Ця функція доступна лише для користувачів Zynorvia Pro. Ми збережемо всі ваші дані і повернемо вас сюди одразу після оформлення підписки.</p>
+             </div>
+             
+             <div className="text-left bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 space-y-3">
+                <div className="flex items-start gap-3">
+                   <CheckCircle2 className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                   <div>
+                       <div className="font-bold text-sm">Детальний розбір цілей</div>
+                       <div className="text-xs text-muted-foreground">ШІ задасть вам додаткові питання та створить покрокові плани дій для кожної цілі.</div>
+                   </div>
+                </div>
+                <div className="flex items-start gap-3">
+                   <CheckCircle2 className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                   <div>
+                       <div className="font-bold text-sm">Розклад ідеального дня</div>
+                       <div className="text-xs text-muted-foreground">Збалансований щоденний розклад, який допоможе системно рухатись до цілей.</div>
+                   </div>
+                </div>
+             </div>
+
+             <div className="flex flex-col gap-3 pt-4">
+                 <Button size="lg" className="h-12 w-full text-base rounded-xl shadow-xl shadow-orange-500/20" onClick={() => {
+                     // Save state to localStorage Before redirecting
+                     localStorage.setItem('onboarding_deep_plan_context', JSON.stringify({
+                         answers,
+                         selectedAreaIds,
+                         generatedData
+                     }));
+                     trackEventClient({ eventName: 'deep_planning_paywall_clicked' });
+                     router.push('/payment?action=subscription&return_to=deep_plan');
+                 }}>
+                    Оформити підписку
+                 </Button>
+                 <Button variant="ghost" className="h-10 text-muted-foreground" onClick={() => setStep(7)}>
+                    Назад
+                 </Button>
+             </div>
+          </div>
+        );
+
+      case 9: // Deep Planning Workspace (V1 Placeholder)
+        return (
+          <div className="space-y-6 max-w-2xl mx-auto h-[70vh] flex flex-col">
+             <div className="border-b border-border/40 pb-4">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                   <Sparkles className="w-5 h-5 text-orange-500" />
+                   Глибоке Планування
+                </h2>
+                <p className="text-sm text-muted-foreground">Давайте розберемо ваші цілі на конкретні задачі та побудуємо ідеальний розклад.</p>
+             </div>
+             
+             <div className="flex-1 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col items-center justify-center text-center space-y-4">
+                <Brain className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto" />
+                <div>
+                    <h3 className="font-bold text-lg">Чат з AI Coach</h3>
+                    <p className="text-sm text-muted-foreground max-w-sm mx-auto mt-1">Функціонал детального інтерактивного чату для розбиття цілей знаходиться в розробці. Ваші дані збережено успішно!</p>
+                </div>
+             </div>
+
+             <div className="pt-2">
+                <Button size="lg" className="w-full h-12 rounded-xl" onClick={handleFinish}>
+                   Повернутися до Dashboard
+                </Button>
+             </div>
           </div>
         );
     }

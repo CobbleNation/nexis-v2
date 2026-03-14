@@ -5,7 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Sparkles } from "lucide-react";
 import { AiOnboardingModal } from "@/components/onboarding/AiOnboardingModal";
 
@@ -16,6 +16,7 @@ export default function MainLayout({
 }>) {
     const { user, isLoading, updateProfile } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [isOnboardingMinimized, setIsOnboardingMinimized] = useState(false);
 
@@ -38,8 +39,10 @@ export default function MainLayout({
                 // New user -> Open modal immediately
                 setShowOnboarding(true);
             }
+        } else if (user && searchParams?.get('resume_onboarding') === 'deep_plan') {
+            setShowOnboarding(true);
         }
-    }, [user]);
+    }, [user, searchParams]);
 
     if (isLoading) {
         return (

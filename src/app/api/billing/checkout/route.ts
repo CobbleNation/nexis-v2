@@ -30,6 +30,7 @@ export async function POST(req: Request) {
         // Allow any period string for testing (e.g., '1m'), default to 'month'
         let requestedPeriod = body.period || 'month';
         const action = body.action || 'subscription'; // 'subscription' | 'attach_card'
+        const returnTo = body.return_to; // e.g. 'deep_plan'
 
         // Override requestedPeriod if the admin set a custom testing period (not month/year)
         if (user.subscriptionPeriod && !['month', 'year'].includes(user.subscriptionPeriod)) {
@@ -55,6 +56,11 @@ export async function POST(req: Request) {
         const REFERENCE = uuidv4();
         const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
+        const redirectUrl = new URL(`${BASE_URL}/payment/success`);
+        if (returnTo) {
+            redirectUrl.searchParams.set('return_to', returnTo);
+        }
+
         // 2. Create Invoice in Monobank
         const invoice = await monobank.createInvoice({
             amount: amount,
@@ -70,7 +76,7 @@ export async function POST(req: Request) {
                     }
                 ]
             },
-            redirectUrl: `${BASE_URL}/payment/success`, // Redirect user here after payment
+            redirectUrl: redirectUrl.toString(), // Redirect user here after payment
             webHookUrl: `${BASE_URL}/api/billing/webhook`, // Monobank notifies here
             saveCard: true
         });

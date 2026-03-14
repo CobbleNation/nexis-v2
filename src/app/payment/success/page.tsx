@@ -1,23 +1,27 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 
-export default function PaymentSuccessPage() {
+function SuccessContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     useEffect(() => {
+        const returnTo = searchParams?.get('return_to');
+        const destination = returnTo === 'deep_plan' ? '/?resume_onboarding=deep_plan' : '/overview';
+
         // Optional: verify payment status via API call here if needed
         const timer = setTimeout(() => {
-            router.push('/overview');
+            router.push(destination);
         }, 5000);
 
         return () => clearTimeout(timer);
-    }, [router]);
+    }, [router, searchParams]);
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] flex items-center justify-center p-4">
@@ -44,14 +48,29 @@ export default function PaymentSuccessPage() {
                     </CardContent>
                     <CardFooter className="flex justify-center pb-8">
                         <Button
-                            onClick={() => router.push('/overview')}
+                            onClick={() => {
+                                const returnTo = searchParams?.get('return_to');
+                                router.push(returnTo === 'deep_plan' ? '/?resume_onboarding=deep_plan' : '/overview');
+                            }}
                             className="bg-green-600 hover:bg-green-700 text-white"
                         >
-                            Перейти до Dashboard
+                            Продовжити
                         </Button>
                     </CardFooter>
                 </Card>
             </motion.div>
         </div>
+    );
+}
+
+export default function PaymentSuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-50 dark:bg-[#0B1121] flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+        }>
+            <SuccessContent />
+        </Suspense>
     );
 }

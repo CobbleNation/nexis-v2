@@ -27,6 +27,9 @@ function PaymentContent() {
     // Handle action parameter
     const actionParam = searchParams.get('action');
     const action = actionParam === 'attach_card' ? 'attach_card' : 'subscription';
+    
+    // Check for return_to parameter
+    const returnTo = searchParams.get('return_to');
 
     // Update period if URL changes (optional but good for consistency)
     useEffect(() => {
@@ -54,7 +57,7 @@ function PaymentContent() {
             const res = await fetch('/api/billing/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ period, action })
+                body: JSON.stringify({ period, action, return_to: returnTo })
             });
             if (!res.ok) throw new Error('Checkout failed');
 
