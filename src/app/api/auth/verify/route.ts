@@ -48,6 +48,15 @@ export async function POST(req: Request) {
             })
             .where(eq(users.id, user.id));
 
+        // Track Verification
+        const { trackEvent } = await import('@/lib/analytics-server');
+        await trackEvent({
+            eventName: 'email_verified',
+            userId: user.id,
+            plan: user.subscriptionTier as any || 'free',
+            source: 'web'
+        });
+
         // Auto-login: Create session and set cookies
         const accessToken = await createAccessToken({ userId: user.id, role: user.role });
         const refreshToken = await createRefreshToken({ userId: user.id });

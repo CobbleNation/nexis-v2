@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { actions } from '@/db/schema';
+import { actions, analyticsEvents } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
 import { trackEvent } from '@/lib/analytics-server';
 import { cookies } from 'next/headers';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 
@@ -71,6 +71,26 @@ export async function POST(req: Request) {
             dueDate: validData.dueDate ? new Date(validData.dueDate) : undefined,
             frequency: validData.frequency,
         }).returning();
+
+        // Check for first entry
+        const existingEvents = await db.select()
+            .from(analyticsEvents)
+            .where(and(
+                eq(analyticsEvents.userId, user.userId as string),
+                eq(analyticsEvents.eventName, 'created_first_entry')
+            ))
+            .limit(1);
+
+        if (existingEvents.length === 0) {
+            await trackEvent({
+                eventName: 'created_first_entry',
+                userId: user.userId as string,
+                entityType: validData.type,
+                entityId: newItem.id,
+                source: 'web',
+                metadata: { trigger: 'action_created' }
+            });
+        }
 
         // Track Action Creation
         await trackEvent({

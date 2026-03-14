@@ -1,32 +1,40 @@
 import { NextResponse } from 'next/server';
-import { trackEvent, AnalyticsEvent } from '@/lib/analytics-server';
-import { z } from 'zod';
-
-const eventSchema = z.object({
-    eventName: z.enum([
-        'user_registered', 'user_login', 'task_created', 'task_completed',
-        'goal_created', 'project_created', 'habit_created', 'habit_checked',
-        'upgrade_started', 'upgrade_completed', 'app_visited'
-    ] as [string, ...string[]]),
-    userId: z.string().optional().nullable(),
-    sessionId: z.string().optional().nullable(),
-    entityType: z.enum(['task', 'project', 'goal', 'habit', 'user']).optional().nullable(),
-    entityId: z.string().optional().nullable(),
-    plan: z.enum(['free', 'pro']).optional().nullable(),
-    source: z.enum(['web', 'mobile', 'admin']).optional().nullable(),
-    metadata: z.record(z.string(), z.any()).optional().nullable(),
-});
+import { verifyJWT } from '@/lib/auth-utils';
+import { cookies } from 'next/headers';
+import { trackEvent, EventName } from '@/lib/analytics-server';
+import { db } from '@/db';
+import { users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
-        const eventData = eventSchema.parse(body);
+        const cookieStore = await cookies();
+        const token = cookieStore.get('access_token')?.value;
+        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        await trackEvent(eventData as AnalyticsEvent);
+        const payload = await verifyJWT(token);
+        if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        const body = await req.json();
+        const { eventName, metadata } = body;
+
+        if (!eventName) {
+            return NextResponse.json({ error: 'Event name is required' }, { status: 400 });
+        }
+
+        const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
+
+        await trackEvent({
+            eventName: eventName as EventName,
+            userId: payload.userId as string,
+            plan: user?.subscriptionTier as any || 'free',
+            source: 'web',
+            metadata
+        });
 
         return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error('Track API Error:', error);
-        return NextResponse.json({ error: 'Invalid Event Data' }, { status: 400 });
+    } catch (err) {
+        console.error("Tracking API Error:", err);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

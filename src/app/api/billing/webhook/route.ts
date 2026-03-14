@@ -169,5 +169,15 @@ async function processPaymentWebhook(body: any, payment: any) {
     await db.update(users).set(updateData).where(eq(users.id, user.id));
     console.log(`[Webhook] Activated Pro (${period}) for user ${user.id} until ${newExpiresAt.toISOString()}`);
 
+    // Track Subscription Started
+    const { trackEvent } = await import('@/lib/analytics-server');
+    await trackEvent({
+        eventName: 'subscription_started',
+        userId: user.id,
+        plan: 'pro',
+        source: 'web',
+        metadata: { period, amount: payment.amount, currency: payment.currency }
+    });
+
     return NextResponse.json({ message: 'OK' });
 }

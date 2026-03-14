@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { actions } from '@/db/schema';
+import { actions, analyticsEvents } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
+import { trackEvent } from '@/lib/analytics-server';
 import { cookies } from 'next/headers';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
 const updateSchema = z.object({
@@ -44,6 +45,17 @@ export async function PATCH(req: Request, props: { params: Promise<{ id: string 
 
         if (!updated) {
             return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        }
+
+        // Track Task Completion
+        if (validData.completed === true) {
+            await trackEvent({
+                eventName: 'completed_task',
+                userId: user.userId as string,
+                entityType: 'task',
+                entityId: updated.id,
+                source: 'web'
+            });
         }
 
         return NextResponse.json(updated);

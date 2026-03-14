@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, userLimits } from '@/db/schema';
+import { users, userLimits, analyticsEvents } from '@/db/schema';
 import { verifyPassword, createAccessToken, createRefreshToken, setAuthCookies, createSession } from '@/lib/auth-utils';
 import { trackEvent } from '@/lib/analytics-server';
 import { z } from 'zod';
-import { eq } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 const loginSchema = z.object({
     email: z.string().email(),
@@ -45,8 +45,16 @@ export async function POST(req: Request) {
         await setAuthCookies(accessToken, refreshToken);
 
         // Track Login
+        const existingLogin = await db.select()
+            .from(analyticsEvents)
+            .where(and(
+                eq(analyticsEvents.userId, user.id),
+                sql`${analyticsEvents.eventName} IN ('user_login', 'first_login')`
+            ))
+            .limit(1);
+
         await trackEvent({
-            eventName: 'user_login',
+            eventName: existingLogin.length === 0 ? 'first_login' : 'user_login',
             userId: user.id,
             plan: user.subscriptionTier as 'free' | 'pro' || 'free',
             source: 'web'

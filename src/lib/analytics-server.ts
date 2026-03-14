@@ -14,7 +14,13 @@ export type EventName =
     | 'habit_checked'
     | 'upgrade_started'
     | 'upgrade_completed'
-    | 'app_visited';
+    | 'app_visited'
+    | 'email_verified'
+    | 'first_login'
+    | 'created_first_entry'
+    | 'completed_task'
+    | 'opened_dashboard'
+    | 'subscription_started';
 
 export interface AnalyticsEvent {
     userId?: string | null;
