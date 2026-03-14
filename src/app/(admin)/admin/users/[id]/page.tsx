@@ -4,6 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -993,17 +994,44 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                             {activity.map((event) => (
                                                 <tr key={event.id} className="hover:bg-slate-800/30 transition-colors">
                                                     <td className="px-4 py-3">
-                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-800 text-slate-300 border border-slate-700">
-                                                            {event.eventName.replace(/_/g, ' ')}
+                                                        <span className={cn(
+                                                            "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border",
+                                                            event.eventName.includes('created') || event.eventName.includes('imported')
+                                                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                                : "bg-slate-800 text-slate-300 border-slate-700"
+                                                        )}>
+                                                            {event.eventName === 'task_created' ? 'Створено завдання' :
+                                                             event.eventName === 'task_updated' ? 'Оновлено завдання' :
+                                                             event.eventName === 'project_created' ? 'Створено проект' :
+                                                             event.eventName === 'project_updated' ? 'Оновлено проект' :
+                                                             event.eventName === 'goal_created' ? 'Створено ціль' :
+                                                             event.eventName === 'goal_updated' ? 'Оновлено ціль' :
+                                                             event.eventName === 'habit_created' ? 'Створено звичку' :
+                                                             event.eventName === 'habit_updated' ? 'Оновлено звичку' :
+                                                             event.eventName === 'metric_created' ? 'Створено метрику' :
+                                                             event.eventName === 'metric_updated' ? 'Оновлено метрику' :
+                                                             event.eventName === 'note_created' ? 'Створено нотатку' :
+                                                             event.eventName === 'note_updated' ? 'Оновлено нотатку' :
+                                                             event.eventName === 'journal_created' ? 'Створено запис у журналі' :
+                                                             event.eventName === 'journal_updated' ? 'Оновлено запис у журналі' :
+                                                             event.eventName === 'app_visited' ? 'Відвідування сайту' :
+                                                             event.eventName.replace(/_/g, ' ')}
                                                         </span>
                                                     </td>
                                                     <td className="px-4 py-3 text-slate-400">
                                                         {format(new Date(event.createdAt), 'MMM d, HH:mm:ss')}
                                                     </td>
                                                     <td className="px-4 py-3">
-                                                        <code className="text-[10px] text-slate-500 truncate block max-w-xs">
-                                                            {event.metadata ? JSON.stringify(event.metadata) : '-'}
-                                                        </code>
+                                                        <div className="text-[10px] text-slate-500 bg-slate-950/50 p-1.5 rounded border border-slate-800/50 max-w-xs break-words">
+                                                            {event.metadata ? (
+                                                                Object.entries(event.metadata).map(([key, val]) => (
+                                                                    <div key={key} className="flex gap-1">
+                                                                        <span className="text-slate-600 font-medium">{key}:</span>
+                                                                        <span className="text-slate-400">{String(val)}</span>
+                                                                    </div>
+                                                                ))
+                                                            ) : '-'}
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}

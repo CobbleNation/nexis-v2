@@ -20,13 +20,33 @@ export type EventName =
     | 'created_first_entry'
     | 'completed_task'
     | 'opened_dashboard'
-    | 'subscription_started';
+    | 'subscription_started'
+    | 'task_updated'
+    | 'project_updated'
+    | 'goal_updated'
+    | 'habit_updated'
+    | 'note_created'
+    | 'note_updated'
+    | 'metric_created'
+    | 'metric_updated'
+    | 'journal_created'
+    | 'journal_updated'
+    | 'routine_created'
+    | 'routine_updated'
+    | 'area_updated'
+    | 'task_imported'
+    | 'task_deleted'
+    | 'project_deleted'
+    | 'goal_deleted'
+    | 'habit_deleted'
+    | 'note_deleted'
+    | 'area_deleted';
 
 export interface AnalyticsEvent {
     userId?: string | null;
     sessionId?: string | null;
     eventName: EventName;
-    entityType?: 'task' | 'project' | 'goal' | 'habit' | 'user' | null;
+    entityType?: 'task' | 'project' | 'goal' | 'habit' | 'user' | 'note' | 'metric' | 'journal' | 'routine' | 'area' | null;
     entityId?: string | null;
     plan?: 'free' | 'pro' | null;
     source?: 'web' | 'mobile' | 'admin' | null;

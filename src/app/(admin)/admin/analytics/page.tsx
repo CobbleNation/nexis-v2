@@ -321,11 +321,29 @@ export default function AnalyticsPage() {
                                                         "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase",
                                                         event.eventName.includes('verify') || event.eventName.includes('login') || event.eventName.includes('register') 
                                                             ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                                                            : event.eventName.includes('created') 
+                                                            : event.eventName.includes('created') || event.eventName.includes('imported')
                                                                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                                                 : "bg-slate-700/50 text-slate-400 border border-slate-600/30"
                                                     )}>
-                                                        {event.eventName.replace(/_/g, ' ')}
+                                                        {event.eventName === 'task_created' ? 'Створено завдання' :
+                                                         event.eventName === 'task_updated' ? 'Оновлено завдання' :
+                                                         event.eventName === 'project_created' ? 'Створено проект' :
+                                                         event.eventName === 'project_updated' ? 'Оновлено проект' :
+                                                         event.eventName === 'goal_created' ? 'Створено ціль' :
+                                                         event.eventName === 'goal_updated' ? 'Оновлено ціль' :
+                                                         event.eventName === 'habit_created' ? 'Створено звичку' :
+                                                         event.eventName === 'habit_updated' ? 'Оновлено звичку' :
+                                                         event.eventName === 'metric_created' ? 'Створено метрику' :
+                                                         event.eventName === 'metric_updated' ? 'Оновлено метрику' :
+                                                         event.eventName === 'note_created' ? 'Створено нотатку' :
+                                                         event.eventName === 'note_updated' ? 'Оновлено нотатку' :
+                                                         event.eventName === 'journal_created' ? 'Створено запис у журналі' :
+                                                         event.eventName === 'journal_updated' ? 'Оновлено запис у журналі' :
+                                                         event.eventName === 'app_visited' ? 'Відвідування сайту' :
+                                                         event.eventName === 'user_login' ? 'Вхід у систему' :
+                                                         event.eventName === 'email_verified' ? 'Email підтверджено' :
+                                                         event.eventName === 'user_registered' ? 'Реєстрація' :
+                                                         event.eventName.replace(/_/g, ' ')}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3">
@@ -339,9 +357,16 @@ export default function AnalyticsPage() {
                                                     <div className="text-[10px]">{format(new Date(event.createdAt), 'MMM dd')}</div>
                                                 </td>
                                                 <td className="px-4 py-3">
-                                                    <code className="text-[10px] text-slate-500 bg-slate-800/50 px-1.5 py-0.5 rounded block max-w-[200px] truncate">
-                                                        {event.metadata ? JSON.stringify(event.metadata) : '-'}
-                                                    </code>
+                                                    <div className="text-[10px] text-slate-400 bg-slate-800/50 px-2 py-1 rounded border border-slate-700/50 max-w-[250px] break-words">
+                                                        {event.metadata ? (
+                                                            Object.entries(event.metadata).map(([key, val]) => (
+                                                                <div key={key} className="flex gap-1">
+                                                                    <span className="text-slate-500">{key}:</span>
+                                                                    <span className="text-slate-200">{String(val)}</span>
+                                                                </div>
+                                                            ))
+                                                        ) : '-'}
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )) : (

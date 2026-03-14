@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { db } from '@/db';
 import { actions, goals, notes, projects, lifeAreas, metricDefinitions, metricEntries, calendarEvents, focuses, checkIns, insights, periods, experiments, users, routines, journalEntries, fileAssets, libraryItems, habits, habitLogs, notifications } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
+import { trackEvent } from '@/lib/analytics-server';
 import { cookies } from 'next/headers';
 import { eq, and, gte } from 'drizzle-orm';
 import { seedLifeAreas, DEFAULT_AREAS } from '@/lib/seed-areas';
@@ -264,8 +265,23 @@ export async function POST(req: Request) {
             const actionData = rawData;
 
             await db.insert(actions).values({ ...actionData, userId } as any).onConflictDoUpdate({ target: actions.id, set: { ...actionData, userId } as any });
+
+            // Tracking for Action
+            await trackEvent({
+                eventName: type === 'ADD_ACTION' ? (actionData.type === 'habit' ? 'habit_created' : 'task_created') : (actionData.type === 'habit' ? 'habit_updated' : 'task_updated'),
+                userId,
+                entityType: actionData.type,
+                entityId: actionData.id,
+                metadata: { title: actionData.title }
+            });
         } else if (type === 'DELETE_ACTION') {
             await db.delete(actions).where(eq(actions.id, data.id));
+            await trackEvent({
+                eventName: 'task_deleted',
+                userId,
+                entityType: 'task',
+                entityId: data.id
+            });
         } else if (type === 'TOGGLE_ACTION') {
             const [current] = await db.select().from(actions).where(eq(actions.id, data.id));
             if (current) {
@@ -293,14 +309,34 @@ export async function POST(req: Request) {
             // Note: We don't strictly enforce 30-day rule here in Sync to avoid blocking data consistency if client was allowed.
             // Client UI and specific API routes are the first line of defense. 
             await db.insert(goals).values({ ...goalData, userId }).onConflictDoUpdate({ target: goals.id, set: { ...goalData, userId } });
+            await trackEvent({
+                eventName: 'goal_updated',
+                userId,
+                entityType: 'goal',
+                entityId: goalData.id,
+                metadata: { title: goalData.title }
+            });
         } else if (type === 'DELETE_GOAL') {
             await db.delete(goals).where(and(eq(goals.id, data.id), eq(goals.userId, userId)));
+            await trackEvent({
+                eventName: 'goal_deleted',
+                userId,
+                entityType: 'goal',
+                entityId: data.id
+            });
         } else if (type === 'ADD_NOTE') {
             const noteData = { ...data };
             if (typeof noteData.createdAt === 'string') noteData.createdAt = new Date(noteData.createdAt);
             if (typeof noteData.updatedAt === 'string') noteData.updatedAt = new Date(noteData.updatedAt);
             if (typeof noteData.date === 'string' && noteData.date) noteData.date = new Date(noteData.date);
             await db.insert(notes).values({ ...noteData, userId });
+            await trackEvent({
+                eventName: 'note_created',
+                userId,
+                entityType: 'note',
+                entityId: noteData.id,
+                metadata: { title: noteData.title }
+            });
         } else if (type === 'ADD_EVENT') {
             const eventData = { ...data };
             if (typeof eventData.createdAt === 'string') eventData.createdAt = new Date(eventData.createdAt);
@@ -330,12 +366,26 @@ export async function POST(req: Request) {
             const metricData = { ...data };
             if (typeof metricData.createdAt === 'string') metricData.createdAt = new Date(metricData.createdAt);
             await db.insert(metricDefinitions).values({ ...metricData, userId });
+            await trackEvent({
+                eventName: 'metric_created',
+                userId,
+                entityType: 'metric',
+                entityId: metricData.id,
+                metadata: { name: metricData.name }
+            });
         } else if (type === 'ADD_METRIC_ENTRY') {
             const entryData = { ...data };
             if (typeof entryData.createdAt === 'string') entryData.createdAt = new Date(entryData.createdAt);
             if (typeof entryData.date === 'string') entryData.date = new Date(entryData.date);
 
             await db.insert(metricEntries).values({ ...entryData, userId });
+            await trackEvent({
+                eventName: 'metric_updated',
+                userId,
+                entityType: 'metric',
+                entityId: entryData.metricId,
+                metadata: { value: entryData.value }
+            });
 
             // Update Linked Goals
             const linkedGoals = await db.select().from(goals).where(and(eq(goals.userId, userId), eq(goals.targetMetricId, entryData.metricId)));
@@ -372,6 +422,13 @@ export async function POST(req: Request) {
             if (typeof projectData.deadline === 'string' && projectData.deadline) projectData.deadline = new Date(projectData.deadline);
 
             await db.insert(projects).values({ ...projectData, userId }).onConflictDoUpdate({ target: projects.id, set: { ...projectData, userId } });
+            await trackEvent({
+                eventName: type === 'ADD_PROJECT' ? 'project_created' : 'project_updated',
+                userId,
+                entityType: 'project',
+                entityId: projectData.id,
+                metadata: { title: projectData.title }
+            });
         } else if (type === 'ADD_ROUTINE' || type === 'UPDATE_ROUTINE') {
             const routineData = { ...data };
             if (typeof routineData.createdAt === 'string') routineData.createdAt = new Date(routineData.createdAt);
@@ -386,6 +443,13 @@ export async function POST(req: Request) {
             if (typeof noteData.updatedAt === 'string') noteData.updatedAt = new Date(noteData.updatedAt);
             if (typeof noteData.date === 'string' && noteData.date) noteData.date = new Date(noteData.date);
             await db.insert(notes).values({ ...noteData, userId }).onConflictDoUpdate({ target: notes.id, set: { ...noteData, userId } });
+            await trackEvent({
+                eventName: 'note_updated',
+                userId,
+                entityType: 'note',
+                entityId: noteData.id,
+                metadata: { title: noteData.title }
+            });
         } else if (type === 'DELETE_NOTE') {
             await db.delete(notes).where(eq(notes.id, data.id));
         } else if (type === 'ADD_JOURNAL' || type === 'UPDATE_JOURNAL') {
@@ -394,6 +458,13 @@ export async function POST(req: Request) {
             if (typeof journalData.updatedAt === 'string') journalData.updatedAt = new Date(journalData.updatedAt);
             if (typeof journalData.date === 'string') journalData.date = new Date(journalData.date);
             await db.insert(journalEntries).values({ ...journalData, userId }).onConflictDoUpdate({ target: journalEntries.id, set: { ...journalData, userId } });
+            await trackEvent({
+                eventName: type === 'ADD_JOURNAL' ? 'journal_created' : 'journal_updated',
+                userId,
+                entityType: 'journal',
+                entityId: journalData.id,
+                metadata: { date: journalData.date }
+            });
         } else if (type === 'DELETE_JOURNAL') {
             await db.delete(journalEntries).where(eq(journalEntries.id, data.id));
         } else if (type === 'ADD_FILE' || type === 'UPDATE_FILE') {
