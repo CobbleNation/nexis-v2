@@ -996,25 +996,48 @@ export default function UserDetailsPage({ params }: { params: Promise<{ id: stri
                                                     <td className="px-4 py-3">
                                                         <span className={cn(
                                                             "px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border",
-                                                            event.eventName.includes('created') || event.eventName.includes('imported')
+                                                            event.eventName.includes('created') || event.eventName.includes('imported') || event.eventName.includes('completed') || event.eventName.includes('checked')
                                                                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                                                : "bg-slate-800 text-slate-300 border-slate-700"
+                                                                : event.eventName.includes('deleted') || event.eventName.includes('uncompleted') || event.eventName.includes('unchecked')
+                                                                    ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                                                                    : "bg-slate-800 text-slate-300 border-slate-700"
                                                         )}>
                                                             {event.eventName === 'task_created' ? 'Створено завдання' :
                                                              event.eventName === 'task_updated' ? 'Оновлено завдання' :
+                                                             event.eventName === 'task_completed' ? 'Виконано завдання' :
+                                                             event.eventName === 'task_uncompleted' ? 'Скасовано виконання' :
+                                                             event.eventName === 'task_deleted' ? 'Видалено завдання' :
                                                              event.eventName === 'project_created' ? 'Створено проект' :
                                                              event.eventName === 'project_updated' ? 'Оновлено проект' :
+                                                             event.eventName === 'project_deleted' ? 'Видалено проект' :
                                                              event.eventName === 'goal_created' ? 'Створено ціль' :
                                                              event.eventName === 'goal_updated' ? 'Оновлено ціль' :
+                                                             event.eventName === 'goal_deleted' ? 'Видалено ціль' :
                                                              event.eventName === 'habit_created' ? 'Створено звичку' :
                                                              event.eventName === 'habit_updated' ? 'Оновлено звичку' :
+                                                             event.eventName === 'habit_deleted' ? 'Видалено звичку' :
+                                                             event.eventName === 'habit_checked' ? 'Чекін звички' :
+                                                             event.eventName === 'habit_unchecked' ? 'Скасовано чекін' :
                                                              event.eventName === 'metric_created' ? 'Створено метрику' :
                                                              event.eventName === 'metric_updated' ? 'Оновлено метрику' :
                                                              event.eventName === 'note_created' ? 'Створено нотатку' :
                                                              event.eventName === 'note_updated' ? 'Оновлено нотатку' :
+                                                             event.eventName === 'note_deleted' ? 'Видалено нотатку' :
                                                              event.eventName === 'journal_created' ? 'Створено запис у журналі' :
                                                              event.eventName === 'journal_updated' ? 'Оновлено запис у журналі' :
+                                                             event.eventName === 'journal_deleted' ? 'Видалено запис у журналі' :
+                                                             event.eventName === 'event_created' ? 'Створено подію' :
+                                                             event.eventName === 'event_deleted' ? 'Видалено подію' :
+                                                             event.eventName === 'routine_created' ? 'Створено рутину' :
+                                                             event.eventName === 'routine_updated' ? 'Оновлено рутину' :
+                                                             event.eventName === 'routine_deleted' ? 'Видалено рутину' :
+                                                             event.eventName === 'file_created' ? 'Завантажено файл' :
+                                                             event.eventName === 'file_deleted' ? 'Видалено файл' :
                                                              event.eventName === 'app_visited' ? 'Відвідування сайту' :
+                                                             event.eventName === 'settings_updated' ? 'Оновлено налаштування' :
+                                                             event.eventName === 'profile_updated' ? 'Оновлено профіль' :
+                                                             event.eventName === 'data_reset' ? 'Скидання даних' :
+                                                             event.eventName === 'account_deleted' ? 'Видалено акаунт' :
                                                              event.eventName.replace(/_/g, ' ')}
                                                         </span>
                                                     </td>

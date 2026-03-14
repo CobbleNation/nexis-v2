@@ -277,9 +277,9 @@ export async function POST(req: Request) {
         } else if (type === 'DELETE_ACTION') {
             await db.delete(actions).where(eq(actions.id, data.id));
             await trackEvent({
-                eventName: 'task_deleted',
+                eventName: data.type === 'habit' ? 'habit_deleted' : 'task_deleted',
                 userId,
-                entityType: 'task',
+                entityType: data.type === 'habit' ? 'habit' : 'task',
                 entityId: data.id
             });
         } else if (type === 'TOGGLE_ACTION') {
@@ -288,6 +288,14 @@ export async function POST(req: Request) {
                 await db.update(actions)
                     .set({ completed: !current.completed, updatedAt: new Date() })
                     .where(eq(actions.id, data.id));
+
+                await trackEvent({
+                    eventName: !current.completed ? 'task_completed' : 'task_uncompleted',
+                    userId,
+                    entityType: 'task',
+                    entityId: data.id,
+                    metadata: { title: current.title }
+                });
             }
         } else if (type === 'ADD_GOAL') {
             const goalData = { ...data };
@@ -298,6 +306,14 @@ export async function POST(req: Request) {
             if (typeof goalData.endDate === 'string' && goalData.endDate) goalData.endDate = new Date(goalData.endDate);
 
             await db.insert(goals).values({ ...goalData, userId }).onConflictDoUpdate({ target: goals.id, set: { ...goalData, userId } });
+
+            await trackEvent({
+                eventName: 'goal_created',
+                userId,
+                entityType: 'goal',
+                entityId: goalData.id,
+                metadata: { title: goalData.title }
+            });
         } else if (type === 'UPDATE_GOAL') {
             const goalData = { ...data };
             if (typeof goalData.createdAt === 'string') goalData.createdAt = new Date(goalData.createdAt);
@@ -362,6 +378,14 @@ export async function POST(req: Request) {
                 allDay: eventData.allDay || false,
                 areaId: eventData.areaId
             });
+
+            await trackEvent({
+                eventName: 'event_created',
+                userId,
+                entityType: 'event',
+                entityId: eventData.id,
+                metadata: { title: eventData.title }
+            });
         } else if (type === 'ADD_METRIC_DEF') {
             const metricData = { ...data };
             if (typeof metricData.createdAt === 'string') metricData.createdAt = new Date(metricData.createdAt);
@@ -413,8 +437,22 @@ export async function POST(req: Request) {
             if (typeof areaData.updatedAt === 'string') areaData.updatedAt = new Date(areaData.updatedAt);
 
             await db.insert(lifeAreas).values({ ...areaData, userId }).onConflictDoUpdate({ target: lifeAreas.id, set: { ...areaData, userId } });
+
+            await trackEvent({
+                eventName: 'area_updated',
+                userId,
+                entityType: 'area',
+                entityId: areaData.id,
+                metadata: { title: areaData.title }
+            });
         } else if (type === 'DELETE_AREA') {
             await db.delete(lifeAreas).where(eq(lifeAreas.id, data.id));
+            await trackEvent({
+                eventName: 'area_deleted',
+                userId,
+                entityType: 'area',
+                entityId: data.id
+            });
         } else if (type === 'ADD_PROJECT' || type === 'UPDATE_PROJECT') {
             const projectData = { ...data };
             if (typeof projectData.createdAt === 'string') projectData.createdAt = new Date(projectData.createdAt);
@@ -435,8 +473,22 @@ export async function POST(req: Request) {
             if (typeof routineData.updatedAt === 'string') routineData.updatedAt = new Date(routineData.updatedAt);
 
             await db.insert(routines).values({ ...routineData, userId }).onConflictDoUpdate({ target: routines.id, set: { ...routineData, userId } });
+
+            await trackEvent({
+                eventName: type === 'ADD_ROUTINE' ? 'routine_created' : 'routine_updated',
+                userId,
+                entityType: 'routine',
+                entityId: routineData.id,
+                metadata: { title: routineData.title }
+            });
         } else if (type === 'DELETE_ROUTINE') {
             await db.delete(routines).where(eq(routines.id, data.id));
+            await trackEvent({
+                eventName: 'routine_deleted',
+                userId,
+                entityType: 'routine',
+                entityId: data.id
+            });
         } else if (type === 'UPDATE_NOTE') {
             const noteData = { ...data };
             if (typeof noteData.createdAt === 'string') noteData.createdAt = new Date(noteData.createdAt);
@@ -452,6 +504,12 @@ export async function POST(req: Request) {
             });
         } else if (type === 'DELETE_NOTE') {
             await db.delete(notes).where(eq(notes.id, data.id));
+            await trackEvent({
+                eventName: 'note_deleted',
+                userId,
+                entityType: 'note',
+                entityId: data.id
+            });
         } else if (type === 'ADD_JOURNAL' || type === 'UPDATE_JOURNAL') {
             const journalData = { ...data };
             if (typeof journalData.createdAt === 'string') journalData.createdAt = new Date(journalData.createdAt);
@@ -467,27 +525,75 @@ export async function POST(req: Request) {
             });
         } else if (type === 'DELETE_JOURNAL') {
             await db.delete(journalEntries).where(eq(journalEntries.id, data.id));
+            await trackEvent({
+                eventName: 'journal_deleted',
+                userId,
+                entityType: 'journal',
+                entityId: data.id
+            });
         } else if (type === 'ADD_FILE' || type === 'UPDATE_FILE') {
             const fileData = { ...data };
             if (typeof fileData.createdAt === 'string') fileData.createdAt = new Date(fileData.createdAt);
             if (typeof fileData.updatedAt === 'string') fileData.updatedAt = new Date(fileData.updatedAt);
             await db.insert(fileAssets).values({ ...fileData, userId }).onConflictDoUpdate({ target: fileAssets.id, set: { ...fileData, userId } });
+
+            await trackEvent({
+                eventName: type === 'ADD_FILE' ? 'file_created' : 'file_updated',
+                userId,
+                entityType: 'file',
+                entityId: fileData.id,
+                metadata: { name: fileData.name }
+            });
         } else if (type === 'DELETE_FILE') {
             await db.delete(fileAssets).where(eq(fileAssets.id, data.id));
+            await trackEvent({
+                eventName: 'file_deleted',
+                userId,
+                entityType: 'file',
+                entityId: data.id
+            });
         } else if (type === 'ADD_LIBRARY_ITEM' || type === 'UPDATE_LIBRARY_ITEM') {
             const libData = { ...data };
             if (typeof libData.createdAt === 'string') libData.createdAt = new Date(libData.createdAt);
             if (typeof libData.updatedAt === 'string') libData.updatedAt = new Date(libData.updatedAt);
             await db.insert(libraryItems).values({ ...libData, userId }).onConflictDoUpdate({ target: libraryItems.id, set: { ...libData, userId } });
+
+            await trackEvent({
+                eventName: type === 'ADD_LIBRARY_ITEM' ? 'library_item_created' : 'library_item_updated',
+                userId,
+                entityType: 'library_item',
+                entityId: libData.id,
+                metadata: { title: libData.title }
+            });
         } else if (type === 'DELETE_LIBRARY_ITEM') {
             await db.delete(libraryItems).where(eq(libraryItems.id, data.id));
+            await trackEvent({
+                eventName: 'library_item_deleted',
+                userId,
+                entityType: 'library_item',
+                entityId: data.id
+            });
         } else if (type === 'ADD_HABIT' || type === 'UPDATE_HABIT') {
             const habitData = { ...data };
             if (typeof habitData.createdAt === 'string') habitData.createdAt = new Date(habitData.createdAt);
             if (typeof habitData.updatedAt === 'string') habitData.updatedAt = new Date(habitData.updatedAt);
             await db.insert(habits).values({ ...habitData, userId }).onConflictDoUpdate({ target: habits.id, set: { ...habitData, userId } });
+
+            await trackEvent({
+                eventName: type === 'ADD_HABIT' ? 'habit_created' : 'habit_updated',
+                userId,
+                entityType: 'habit',
+                entityId: habitData.id,
+                metadata: { title: habitData.title }
+            });
         } else if (type === 'DELETE_HABIT') {
             await db.delete(habits).where(eq(habits.id, data.id));
+            await trackEvent({
+                eventName: 'habit_deleted',
+                userId,
+                entityType: 'habit',
+                entityId: data.id
+            });
         } else if (type === 'LOG_HABIT') {
             const logData = { ...data };
             // Logs don't usually have created/updated at in legacy types but schema might have them.
@@ -496,8 +602,23 @@ export async function POST(req: Request) {
             // Assume schema matches HabitLog interface.
             // We should ensure date is string YYYY-MM-DD
             await db.insert(habitLogs).values({ ...logData, userId }).onConflictDoUpdate({ target: habitLogs.id, set: { ...logData, userId } });
+
+            await trackEvent({
+                eventName: 'habit_checked',
+                userId,
+                entityType: 'habit',
+                entityId: logData.habitId,
+                metadata: { date: logData.date }
+            });
         } else if (type === 'DELETE_HABIT_LOG') {
             await db.delete(habitLogs).where(eq(habitLogs.id, data.id));
+            await trackEvent({
+                eventName: 'habit_unchecked',
+                userId,
+                entityType: 'habit',
+                entityId: data.id,
+                metadata: { date: data.date }
+            });
         } else if (type === 'ADD_NOTIFICATION') {
             const notifData = { ...data };
             if (typeof notifData.createdAt === 'string') notifData.createdAt = new Date(notifData.createdAt);
@@ -520,10 +641,23 @@ export async function POST(req: Request) {
                 // Mark all as read
                 await db.update(notifications).set({ read: true }).where(eq(notifications.userId, userId));
             }
+
+            await trackEvent({
+                eventName: 'notifications_read',
+                userId,
+                entityType: 'user',
+                metadata: { count: data.ids?.length || 'all' }
+            });
         } else if (type === 'UPDATE_SETTINGS') {
             // Persist email digest preference to users table
             if (data.email !== undefined) {
                 await db.update(users).set({ emailDigest: data.email, updatedAt: new Date() }).where(eq(users.id, userId));
+                await trackEvent({
+                    eventName: 'settings_updated',
+                    userId,
+                    entityType: 'user',
+                    metadata: { type: 'email_digest', value: data.email }
+                });
             }
         }
         // Add others as needed, but for now Focus Level relies on Actions, Goals checkins mainly.

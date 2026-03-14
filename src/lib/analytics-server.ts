@@ -34,19 +34,38 @@ export type EventName =
     | 'routine_created'
     | 'routine_updated'
     | 'area_updated'
+    | 'task_uncompleted'
     | 'task_imported'
     | 'task_deleted'
     | 'project_deleted'
     | 'goal_deleted'
     | 'habit_deleted'
+    | 'habit_checked'
+    | 'habit_unchecked'
     | 'note_deleted'
-    | 'area_deleted';
+    | 'area_deleted'
+    | 'event_created'
+    | 'event_updated'
+    | 'event_deleted'
+    | 'routine_deleted'
+    | 'journal_deleted'
+    | 'file_created'
+    | 'file_updated'
+    | 'file_deleted'
+    | 'library_item_created'
+    | 'library_item_updated'
+    | 'library_item_deleted'
+    | 'settings_updated'
+    | 'profile_updated'
+    | 'data_reset'
+    | 'account_deleted'
+    | 'notifications_read';
 
 export interface AnalyticsEvent {
     userId?: string | null;
     sessionId?: string | null;
     eventName: EventName;
-    entityType?: 'task' | 'project' | 'goal' | 'habit' | 'user' | 'note' | 'metric' | 'journal' | 'routine' | 'area' | null;
+    entityType?: 'task' | 'project' | 'goal' | 'habit' | 'user' | 'note' | 'metric' | 'journal' | 'routine' | 'area' | 'event' | 'file' | 'library_item' | null;
     entityId?: string | null;
     plan?: 'free' | 'pro' | null;
     source?: 'web' | 'mobile' | 'admin' | null;

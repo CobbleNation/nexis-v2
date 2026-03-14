@@ -59,6 +59,14 @@ export async function POST(req: Request) {
             await db.update(users)
                 .set(updateData)
                 .where(eq(users.id, userId));
+                
+            const { trackEvent } = await import('@/lib/analytics-server');
+            await trackEvent({
+                eventName: 'profile_updated',
+                userId,
+                entityType: 'user',
+                metadata: { updatedFields: Object.keys(updateData) }
+            });
         }
 
         return NextResponse.json({

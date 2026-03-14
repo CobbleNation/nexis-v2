@@ -60,6 +60,14 @@ export async function POST(req: Request) {
         // Re-seed Logic
         await seedLifeAreas(userId);
 
+        const { trackEvent } = await import('@/lib/analytics-server');
+        await trackEvent({
+            eventName: 'data_reset',
+            userId,
+            entityType: 'user',
+            metadata: { timestamp: new Date().toISOString() }
+        });
+
         return NextResponse.json({ success: true, message: 'Account reset successfully' });
 
     } catch (error: any) {
