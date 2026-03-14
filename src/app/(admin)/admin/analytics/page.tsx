@@ -26,7 +26,6 @@ interface TimeseriesData {
     active_users: number;
 }
 
-export default function AnalyticsPage() {
 interface DetailedAnalytics {
     activationRate: number;
     funnel: { stage: string; count: number }[];
