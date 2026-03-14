@@ -13,7 +13,7 @@ function SuccessContent() {
 
     useEffect(() => {
         const returnTo = searchParams?.get('return_to');
-        const destination = returnTo === 'deep_plan' ? '/?resume_onboarding=deep_plan' : '/overview';
+        const destination = returnTo === 'deep_plan' ? '/overview?resume_onboarding=deep_plan' : '/overview';
 
         // Optional: verify payment status via API call here if needed
         const timer = setTimeout(() => {
@@ -50,7 +50,7 @@ function SuccessContent() {
                         <Button
                             onClick={() => {
                                 const returnTo = searchParams?.get('return_to');
-                                router.push(returnTo === 'deep_plan' ? '/?resume_onboarding=deep_plan' : '/overview');
+                                router.push(returnTo === 'deep_plan' ? '/overview?resume_onboarding=deep_plan' : '/overview');
                             }}
                             className="bg-green-600 hover:bg-green-700 text-white"
                         >
