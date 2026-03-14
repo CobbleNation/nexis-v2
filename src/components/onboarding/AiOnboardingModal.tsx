@@ -41,6 +41,11 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
 
   useEffect(() => {
     trackEventClient({ eventName: 'ai_onboarding_started' });
+    // Lock scroll when modal is open
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
   }, []);
 
   const handleNext = () => setStep(s => s + 1);
@@ -309,9 +314,19 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
               </div>
             )}
 
-            <Button size="lg" className="w-full h-12 text-base rounded-xl shadow-xl shadow-orange-500/20" onClick={handleFinish}>
-              Розпочати
-            </Button>
+            <div className="flex flex-col gap-3 pt-4">
+              <Button size="lg" className="w-full h-12 text-base rounded-xl shadow-xl shadow-orange-500/20" onClick={handleFinish}>
+                Почати зараз
+              </Button>
+              <Button size="lg" variant="secondary" className="w-full h-12 text-base rounded-xl border-orange-200/50 bg-orange-50/50 hover:bg-orange-100/50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300 dark:hover:bg-orange-900/40" onClick={() => {
+                // Future Implementation: Redirect to Deep Planning Chat
+                alert('Функція глибокого планування (Pro) буде доступна найближчим часом!');
+                handleFinish();
+              }}>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Спланувати детальніше (Pro)
+              </Button>
+            </div>
           </div>
         );
     }
@@ -336,8 +351,9 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
         )}
 
         <div className="p-6 md:p-8 overflow-y-auto w-full custom-scrollbar flex-1 flex flex-col justify-center">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="popLayout">
             <motion.div
+              className="w-full"
               key={step}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}

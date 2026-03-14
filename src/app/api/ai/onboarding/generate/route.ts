@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, lifeAreas, goals, actions, habits, analyticsEvents } from '@/db/schema';
+import { users, lifeAreas, goals, actions, habits, analyticsEvents, metricDefinitions } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
 import { AI_ONBOARDING_SYSTEM_PROMPT } from '@/lib/ai/prompts';
@@ -34,7 +34,9 @@ export async function POST(req: Request) {
         // Structured prompt from user answers
         const userPrompt = `
 Generate a life management system for this user.
-IMPORTANT: You MUST NOT create new Life Areas. You must create Goals (and tasks/habits) and map them directly to these pre-existing Life Area IDs:
+IMPORTANT RULES:
+1. YOU MUST RESPOND ONLY IN UKRAINIAN (УКРАЇНСЬКОЮ МОВОЮ). ABSOLUTELY NO ENGLISH.
+2. You MUST NOT create new Life Areas. You must create Goals (and tasks/habits) and map them directly to these pre-existing Life Area IDs:
 Selected Area IDs: ${selectedAreaIds.join(', ')}
 
 User Profile:
@@ -50,6 +52,11 @@ Output JSON format:
       "areaId": "<one of the Selected Area IDs exactly as provided>",
       "title": "Goal Title",
       "description": "Short description",
+      "metric": {
+        "name": "What to measure (e.g., Дохід, Вага, Кількість книг) - ONLY supply if the user mentioned a specific number/amount in their goal",
+        "unit": "Unit of measurement (e.g., грн, кг, шт)",
+        "target": 100000 // The numeric target value
+      },
       "tasks": [
         { "title": "Task title (actionable)" }
       ]
@@ -65,7 +72,7 @@ Output JSON format:
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [
-                { role: "system", content: "You are an expert life coach AI. Output ONLY valid JSON matching the requested structure." },
+                { role: "system", content: "You are an expert life coach AI. Output ONLY valid JSON matching the requested structure. ALWAYS answer in Ukrainian." },
                 { role: "user", content: userPrompt }
             ],
             response_format: { type: "json_object" },
@@ -99,6 +106,24 @@ Output JSON format:
                 
                 const realGoalId = uuidv4();
                 
+                let targetMetricId: string | undefined = undefined;
+                let metricTargetValue: number | undefined = undefined;
+
+                if (goal.metric && goal.metric.name && goal.metric.target != null) {
+                    targetMetricId = uuidv4();
+                    metricTargetValue = Number(goal.metric.target);
+                    
+                    await db.insert(metricDefinitions).values({
+                        id: targetMetricId,
+                        userId,
+                        areaId: realAreaId,
+                        name: goal.metric.name,
+                        unit: goal.metric.unit || '',
+                        type: 'number',
+                        frequency: 'weekly'
+                    });
+                }
+                
                 await db.insert(goals).values({
                     id: realGoalId,
                     userId,
@@ -107,6 +132,8 @@ Output JSON format:
                     description: goal.description || '',
                     type: 'strategic',
                     status: 'active',
+                    targetMetricId: targetMetricId || null,
+                    metricTargetValue: metricTargetValue || null,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 });
