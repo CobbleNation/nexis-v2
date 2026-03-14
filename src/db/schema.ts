@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, uniqueIndex, index } from 'drizzle-orm/sqlite-core';
 
 // Helper for boolean
 const boolean = (col: string) => integer(col, { mode: 'boolean' });
@@ -392,7 +392,10 @@ export const analyticsEvents = sqliteTable('analytics_events', {
     source: text('source'), // 'web', 'mobile', 'admin'
     metadata: text('metadata', { mode: 'json' }).$type<any>(),
     createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
-});
+}, (table) => ({
+    userEventIdx: index('analytics_user_event_idx').on(table.userId, table.eventName),
+    createdAtIdx: index('analytics_created_at_idx').on(table.createdAt)
+}));
 
 export const analyticsDailyAgg = sqliteTable('analytics_daily_agg', {
     date: text('date').notNull(), // YYYY-MM-DD

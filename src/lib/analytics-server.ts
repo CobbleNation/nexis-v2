@@ -84,20 +84,19 @@ export async function trackEvent(event: AnalyticsEvent) {
         return;
     }
 
-    try {
-        await db.insert(analyticsEvents).values({
-            id: uuidv4(),
-            userId: event.userId,
-            sessionId: event.sessionId,
-            eventName: event.eventName,
-            entityType: event.entityType,
-            entityId: event.entityId,
-            plan: event.plan,
-            source: event.source || 'web',
-            metadata: event.metadata,
-            createdAt: new Date(),
-        });
-    } catch (error) {
+    // Fire and forget the database insert to avoid blocking API responses
+    db.insert(analyticsEvents).values({
+        id: uuidv4(),
+        userId: event.userId,
+        sessionId: event.sessionId,
+        eventName: event.eventName,
+        entityType: event.entityType,
+        entityId: event.entityId,
+        plan: event.plan,
+        source: event.source || 'web',
+        metadata: event.metadata,
+        createdAt: new Date(),
+    }).catch((error) => {
         console.error('[Analytics] Failed to track event:', event.eventName, error);
-    }
+    });
 }
