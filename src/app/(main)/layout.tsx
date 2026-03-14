@@ -9,6 +9,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Sparkles } from "lucide-react";
 import { AiOnboardingModal } from "@/components/onboarding/AiOnboardingModal";
 
+function OnboardingResumer({ setShowOnboarding }: { setShowOnboarding: (val: boolean) => void }) {
+    const searchParams = useSearchParams();
+    
+    useEffect(() => {
+        if (searchParams?.get('resume_onboarding') === 'deep_plan') {
+            setShowOnboarding(true);
+        }
+    }, [searchParams, setShowOnboarding]);
+
+    return null;
+}
+
 export default function MainLayout({
     children,
 }: Readonly<{
@@ -16,7 +28,6 @@ export default function MainLayout({
 }>) {
     const { user, isLoading, updateProfile } = useAuth();
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [isOnboardingMinimized, setIsOnboardingMinimized] = useState(false);
 
@@ -39,10 +50,8 @@ export default function MainLayout({
                 // New user -> Open modal immediately
                 setShowOnboarding(true);
             }
-        } else if (user && searchParams?.get('resume_onboarding') === 'deep_plan') {
-            setShowOnboarding(true);
         }
-    }, [user, searchParams]);
+    }, [user]);
 
     if (isLoading) {
         return (
@@ -69,6 +78,12 @@ export default function MainLayout({
 
     return (
         <div className="flex min-h-screen bg-background text-foreground">
+            {user && (
+                <React.Suspense fallback={null}>
+                    <OnboardingResumer setShowOnboarding={setShowOnboarding} />
+                </React.Suspense>
+            )}
+
             {showOnboarding && (
                 <AiOnboardingModal 
                     onSuccess={handleOnboardingSuccess} 
