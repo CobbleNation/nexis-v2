@@ -22,6 +22,8 @@ interface User {
     cardLast4?: string;
     cardToken?: string;
 
+    onboardingCompleted?: boolean;
+
     role?: 'user' | 'support' | 'manager' | 'admin';
     customLimits?: Record<string, any> | null;
 }

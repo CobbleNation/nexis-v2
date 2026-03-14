@@ -59,7 +59,10 @@ export type EventName =
     | 'profile_updated'
     | 'data_reset'
     | 'account_deleted'
-    | 'notifications_read';
+    | 'notifications_read'
+    | 'ai_onboarding_started'
+    | 'ai_plan_generated'
+    | 'ai_plan_accepted';
 
 export interface AnalyticsEvent {
     userId?: string | null;

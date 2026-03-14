@@ -67,6 +67,7 @@ export async function GET() {
             role: user.role,
             cardLast4: user.cardLast4,
             cardToken: user.cardToken,
+            onboardingCompleted: user.onboardingCompleted,
             customLimits: limits ?? null
         }
     }, { headers: noCacheHeaders });

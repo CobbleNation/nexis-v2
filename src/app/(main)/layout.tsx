@@ -3,24 +3,32 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { AiOnboardingModal } from "@/components/onboarding/AiOnboardingModal";
 
 export default function MainLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading, updateProfile } = useAuth();
     const router = useRouter();
+    const [showOnboarding, setShowOnboarding] = useState(false);
 
     useEffect(() => {
         if (!isLoading && !user) {
             router.replace('/login');
         }
     }, [isLoading, user, router]);
+
+    useEffect(() => {
+        if (user && user.onboardingCompleted === false) {
+            setShowOnboarding(true);
+        }
+    }, [user]);
 
     if (isLoading) {
         return (
@@ -34,8 +42,14 @@ export default function MainLayout({
         return null; // Will redirect
     }
 
+    const handleOnboardingSuccess = async () => {
+        await updateProfile({ onboardingCompleted: true });
+        setShowOnboarding(false);
+    };
+
     return (
         <div className="flex min-h-screen bg-background text-foreground">
+            {showOnboarding && <AiOnboardingModal onSuccess={handleOnboardingSuccess} />}
             <React.Suspense fallback={<div className="w-64 hidden md:block bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800" />}>
                 <Sidebar />
             </React.Suspense>

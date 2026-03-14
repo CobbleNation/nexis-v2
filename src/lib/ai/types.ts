@@ -129,3 +129,32 @@ export interface GoalCreatorVariant {
 export interface GoalCreatorResponse {
     variants: GoalCreatorVariant[];
 }
+
+export interface OnboardingArea {
+    id: string;
+    title: string;
+    color: string;
+    icon: string;
+    goals: {
+        id: string;
+        title: string;
+        description: string;
+        type: 'strategic' | 'tactical' | 'vision';
+        tasks: {
+            id: string;
+            title: string;
+            priority: 'low' | 'medium' | 'high';
+        }[];
+    }[];
+}
+
+export interface OnboardingHabit {
+    id: string;
+    title: string;
+    frequency: 'daily' | 'weekly';
+}
+
+export interface OnboardingResponse {
+    areas: OnboardingArea[];
+    habits: OnboardingHabit[];
+}

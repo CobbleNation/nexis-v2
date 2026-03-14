@@ -8,7 +8,7 @@ const JWT_SECRET = new TextEncoder().encode(
 const ACCESS_TOKEN_EXPIRY = '15m'; // 15 minutes
 const REFRESH_TOKEN_EXPIRY = '30d'; // 30 days
 
-export async function createAccessToken(payload: { userId: string; role?: string }) {
+export async function createAccessToken(payload: { userId: string; role?: string; onboardingCompleted?: boolean }) {
     return new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()

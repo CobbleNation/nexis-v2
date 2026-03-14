@@ -40,6 +40,7 @@ export const users = sqliteTable('users', {
 
     // Email Preferences
     emailDigest: boolean('email_digest').default(false),
+    onboardingCompleted: boolean('onboarding_completed').default(false),
 });
 
 export const sessions = sqliteTable('sessions', {

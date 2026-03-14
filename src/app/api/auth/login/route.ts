@@ -37,7 +37,11 @@ export async function POST(req: Request) {
         }
 
         // Create Tokens
-        const accessToken = await createAccessToken({ userId: user.id, role: user.role });
+        const accessToken = await createAccessToken({ 
+            userId: user.id, 
+            role: user.role, 
+            onboardingCompleted: user.onboardingCompleted || false 
+        });
         const refreshToken = await createRefreshToken({ userId: user.id, role: user.role });
 
         // Store session in DB and set cookies
@@ -82,6 +86,7 @@ export async function POST(req: Request) {
                 autoRenew: user.autoRenew,
                 cardLast4: user.cardLast4,
                 cardToken: user.cardToken,
+                onboardingCompleted: user.onboardingCompleted,
                 customLimits: limits ?? null
             }
         });
