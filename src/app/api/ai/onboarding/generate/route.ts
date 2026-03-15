@@ -48,14 +48,16 @@ ${areaGoalsText}
 
 INSTRUCTIONS:
 First, analyze if the user provided enough information to build a comprehensive system (Goals, Projects, Specific Tasks, Metrics). 
-If the information is extremely vague for ANY of the selected areas (e.g., they just wrote "I don't know" or left it blank), set "clarificationNeeded" to true, and provide specific "questions" to ask the user to clarify their vision for that area.
-If "clarificationNeeded" is false, proceed to generate the FULL system ("goals", "projects", "habits").
+Якщо інформації для якоїсь зі сфер замало (наприклад, користувач просто написав "Не знаю" або залишив пустим), встанови "clarificationNeeded": true.
+ПРАВИЛО УТОЧНЕНЬ: Замість того, щоб жорстко вимагати деталі, ти ПОВИНЕН запропонувати свої варіанти. Наприклад: "Щоб покращити сферу Здоров'я, я пропоную такі проекти: 1) Регулярні тренування 2) Здоровий сон. Який з них тобі ближче, чи маєш власні ідеї?".
+Запитай це у полі "question".
+Якщо "clarificationNeeded" is false, proceed to generate the FULL system ("goals", "projects", "habits").
 
 Output JSON format:
 {
   "clarificationNeeded": boolean,
   "questions": [
-    { "areaId": "<Area ID>", "question": "Detailed question..." }
+    { "areaId": "<Area ID>", "question": "Friendly question WITH 2-3 SUGGESTIONS built-in..." }
   ],
   "goals": [
     {

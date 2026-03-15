@@ -554,6 +554,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
              answers={answers} 
              selectedAreaIds={selectedAreaIds} 
              onFinish={handleFinish} 
+             onMinimize={onMinimize}
           />
         );
     }
