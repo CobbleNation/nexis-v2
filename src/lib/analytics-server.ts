@@ -66,7 +66,8 @@ export type EventName =
     | 'notifications_read'
     | 'ai_onboarding_started'
     | 'ai_plan_generated'
-    | 'ai_plan_accepted';
+    | 'ai_plan_accepted'
+    | 'deep_planning_chat_saved';
 
 export interface AnalyticsEvent {
     userId?: string | null;

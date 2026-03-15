@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Sparkles, X } from "lucide-react";
 import { AiOnboardingModal } from "@/components/onboarding/AiOnboardingModal";
+import { toast } from "sonner";
 
 function OnboardingResumer({ setShowOnboarding }: { setShowOnboarding: (val: boolean) => void }) {
     const searchParams = useSearchParams();
@@ -41,6 +42,10 @@ export default function MainLayout({
     const handleDismissResumer = () => {
         setIsResumerDismissed(true);
         localStorage.setItem('onboarding_resumer_dismissed', 'true');
+        toast('Повернутися до налаштувань можна в: Меню → Головна → Налаштування AI', {
+            icon: '💡',
+            duration: 5000,
+        });
     };
 
     useEffect(() => {

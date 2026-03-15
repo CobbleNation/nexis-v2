@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Brain, User, Send, Loader2, Sparkles } from 'lucide-react';
+import { Brain, User, Send, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Message {
@@ -17,12 +17,36 @@ interface DeepPlanningChatProps {
   };
   selectedAreaIds: string[];
   onFinish: () => void;
+  onMinimize?: () => void;
 }
 
-export function DeepPlanningChat({ answers, selectedAreaIds, onFinish }: DeepPlanningChatProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
+// Simple bold markdown parser
+const renderMarkdownMsg = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, idx) => {
+         if (part.startsWith('**') && part.endsWith('**')) {
+             return <strong key={idx}>{part.slice(2, -2)}</strong>;
+         }
+         return part;
+    });
+};
+
+export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimize }: DeepPlanningChatProps) {
+  const [messages, setMessages] = useState<Message[]>(() => {
+     // Try to restore from localStorage first
+     if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('onboarding_deep_plan_chat');
+        if (saved) {
+           try { return JSON.parse(saved); } catch(e) {}
+        }
+     }
+     return [];
+  });
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const initialized = useRef(false);
 
@@ -36,9 +60,18 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish }: DeepPla
   }, [messages, isLoading]);
 
   useEffect(() => {
-    // Prevent double fetch in Strict Mode
+    // Save to localStorage on change
+    if (messages.length > 0) {
+        localStorage.setItem('onboarding_deep_plan_chat', JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
+
+    // If we already restored state, skip the initial proactive prompt
+    if (messages.length > 0) return;
 
     const startChat = async () => {
       setIsLoading(true);
@@ -118,10 +151,58 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish }: DeepPla
     }
   };
 
+  const handleConfirmFinish = async () => {
+     setIsSaving(true);
+     try {
+         const res = await fetch('/api/ai/onboarding/deep-plan/summarize-and-save', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({
+                 messages,
+                 selectedAreaIds
+             })
+         });
+         
+         if (!res.ok) throw new Error('Save failed');
+         
+         // Clear local storage since we finished
+         localStorage.removeItem('onboarding_deep_plan_chat');
+         localStorage.removeItem('onboarding_deep_plan_context');
+         onFinish();
+
+     } catch (e) {
+         console.error('Failed to save deep plan', e);
+         alert('Помилка при збереженні плану. Спробуйте ще раз.');
+     } finally {
+         setIsSaving(false);
+         setShowFinishDialog(false);
+     }
+  };
+
   return (
-    <div className="flex flex-col h-[75vh] w-full max-w-3xl mx-auto overflow-hidden">
+    <div className="flex flex-col h-[75vh] w-full max-w-3xl mx-auto overflow-hidden relative">
+      {/* Finish Overlay Dialog */}
+      {showFinishDialog && (
+         <div className="absolute inset-0 z-50 bg-background/90 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl space-y-4 text-center">
+               <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <CheckCircle2 className="w-8 h-8 text-orange-500" />
+               </div>
+               <h3 className="text-xl font-bold">Готові зберегти систему?</h3>
+               <p className="text-sm text-muted-foreground">Ми проаналізуємо нашу розмову та створимо готові задачі та звички.</p>
+               <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowFinishDialog(false)} disabled={isSaving}>Скасувати</Button>
+                  <Button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white" onClick={handleConfirmFinish} disabled={isSaving}>
+                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                     {isSaving ? 'Створення...' : 'Створити'}
+                  </Button>
+               </div>
+            </div>
+         </div>
+      )}
+
       {/* Header */}
-      <div className="flex flex-col md:flex-row items-start justify-between border-b border-border/40 pb-4 mb-2 px-2 shrink-0 gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-border/40 pb-4 mb-2 px-2 shrink-0 gap-4">
         <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
                 <Brain className="w-6 h-6 text-orange-500" />
@@ -129,9 +210,16 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish }: DeepPla
             </h2>
             <p className="text-sm text-muted-foreground mt-1">Деталізуємо ваші цілі та будуємо стратегію щоденних дій.</p>
         </div>
-        <Button onClick={onFinish} variant="secondary" className="shrink-0 bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-300 rounded-xl px-4 py-2 font-semibold">
-           Завершити планування
-        </Button>
+        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+            {onMinimize && (
+               <Button onClick={onMinimize} variant="ghost" className="text-muted-foreground flex-1 sm:flex-none">
+                  Повернутися пізніше
+               </Button>
+            )}
+            <Button onClick={() => setShowFinishDialog(true)} variant="secondary" className="flex-1 sm:flex-none bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-300 rounded-xl px-4 py-2 font-semibold">
+               Завершити планування
+            </Button>
+        </div>
       </div>
 
       {/* Chat Area */}
@@ -149,7 +237,7 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish }: DeepPla
                 {message.role === 'user' ? <User className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
               </div>
               <div className={`px-4 py-3 rounded-2xl whitespace-pre-wrap text-sm leading-relaxed shadow-sm ${message.role === 'user' ? 'bg-orange-500 text-white rounded-tr-sm' : 'bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 text-foreground rounded-tl-sm'}`}>
-                {message.content}
+                {renderMarkdownMsg(message.content)}
               </div>
             </motion.div>
           ))}

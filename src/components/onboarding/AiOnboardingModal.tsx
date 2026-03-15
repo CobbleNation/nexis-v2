@@ -45,6 +45,8 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
   });
   const [selectedAreaIds, setSelectedAreaIds] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [missingAreas, setMissingAreas] = useState<string[]>([]);
   const [generatedData, setGeneratedData] = useState<any>(null);
 
   useEffect(() => {
@@ -82,6 +84,34 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
     setSelectedAreaIds(prev => 
       prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
     );
+  };
+
+  const handleValidation = async () => {
+    setIsValidating(true);
+    try {
+        const response = await fetch('/api/ai/onboarding/validate-areas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                selectedAreaIds,
+                goalsText: answers.goals
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.missingAreas && data.missingAreas.length > 0) {
+            setMissingAreas(data.missingAreas);
+            setStep(5.5); // Go to validation step
+        } else {
+            startGeneration(); // All good, generate system
+        }
+    } catch (e) {
+        console.error("Validation failed, proceeding to generation", e);
+        startGeneration();
+    } finally {
+        setIsValidating(false);
+    }
   };
 
   const startGeneration = async () => {
@@ -252,8 +282,44 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
             </div>
             <div className="flex gap-3 pt-2">
               <Button size="lg" variant="outline" className="flex-1 h-12 rounded-xl" onClick={handleBack}>Назад</Button>
-              <Button size="lg" className="flex-[2] h-12 rounded-xl" onClick={startGeneration}>Згенерувати систему</Button>
+              <Button size="lg" className="flex-[2] h-12 rounded-xl" onClick={handleValidation} disabled={isValidating}>
+                {isValidating ? (
+                   <span className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Перевірка...
+                   </span>
+                ) : 'Згенерувати систему'}
+              </Button>
             </div>
+          </div>
+        );
+
+      case 5.5: // Validation Step
+        const missingAreaTitles = missingAreas
+             .map(id => DEFAULT_AREAS.find(a => a.iconName === id)?.title)
+             .filter(Boolean)
+             .join(', ');
+
+        return (
+          <div className="space-y-6 max-w-2xl mx-auto h-[60vh] flex flex-col justify-center">
+             <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900 rounded-3xl p-8 flex flex-col items-center text-center space-y-6">
+                <Brain className="w-16 h-16 text-orange-500" />
+                <div className="space-y-2">
+                   <h2 className="text-2xl font-bold text-foreground">Забули про деякі сфери?</h2>
+                   <p className="text-muted-foreground text-lg w-[90%] mx-auto">
+                      Ви обрали <b>{missingAreaTitles}</b> як важливі сфери, але не вказали для них цілей на наступні 3-12 місяців. Система буде ефективнішою, якщо ми врахуємо все.
+                   </p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-4 w-full pt-4">
+                   <Button size="lg" variant="outline" onClick={() => setStep(2)} className="h-14 flex-1 text-base rounded-2xl border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20">
+                      Повернутися і дописати цілі
+                   </Button>
+                   <Button size="lg" onClick={startGeneration} className="h-14 flex-1 text-base rounded-2xl bg-orange-500 hover:bg-orange-600 text-white shadow-md">
+                      Продовжити як є
+                   </Button>
+                </div>
+             </div>
           </div>
         );
 
