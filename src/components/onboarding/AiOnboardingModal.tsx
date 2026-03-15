@@ -37,8 +37,13 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
 
   // 0: Intro, 1: Areas, 2: 3-12m Goals, 3: 1-5y Goals, 4: Challenges, 5: Structure, 6: Generating, 7: Success, 8: Pro Paywall, 9: Deep Planning Interface
   const [step, setStep] = useState(0); 
-  const [answers, setAnswers] = useState({
-    goals: '',
+  const [answers, setAnswers] = useState<{
+    areaGoals: Record<string, string>;
+    longTermGoals: string;
+    challenges: string;
+    structure: string;
+  }>({
+    areaGoals: {},
     longTermGoals: '',
     challenges: '',
     structure: 'Balanced'
@@ -48,6 +53,8 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
   const [isValidating, setIsValidating] = useState(false);
   const [missingAreas, setMissingAreas] = useState<string[]>([]);
   const [generatedData, setGeneratedData] = useState<any>(null);
+  const [clarificationQuestions, setClarificationQuestions] = useState<{ areaId: string; question: string }[]>([]);
+  const [clarificationAnswers, setClarificationAnswers] = useState<Record<string, string>>({});
 
   useEffect(() => {
     trackEventClient({ eventName: 'ai_onboarding_started' });
@@ -86,51 +93,39 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
     );
   };
 
-  const handleValidation = async () => {
-    setIsValidating(true);
-    try {
-        const response = await fetch('/api/ai/onboarding/validate-areas', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                selectedAreaIds,
-                goalsText: answers.goals
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (data.missingAreas && data.missingAreas.length > 0) {
-            setMissingAreas(data.missingAreas);
-            setStep(5.5); // Go to validation step
-        } else {
-            startGeneration(); // All good, generate system
-        }
-    } catch (e) {
-        console.error("Validation failed, proceeding to generation", e);
-        startGeneration();
-    } finally {
-        setIsValidating(false);
-    }
-  };
+  // Deprecated `handleValidation` removed - we'll handle clarification post-generation
 
   const startGeneration = async () => {
     setStep(6);
     setIsGenerating(true);
     
     try {
+      // Append clarification answers if any
+      const submissionAnswers = { ...answers, areaGoals: { ...answers.areaGoals } };
+      if (Object.keys(clarificationAnswers).length > 0) {
+          Object.keys(clarificationAnswers).forEach(areaId => {
+              submissionAnswers.areaGoals[areaId] = (submissionAnswers.areaGoals[areaId] || '') + `\n[Уточнення]: ${clarificationAnswers[areaId]}`;
+          });
+      }
+
       const res = await fetch('/api/ai/onboarding/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers, selectedAreaIds })
+        body: JSON.stringify({ answers: submissionAnswers, selectedAreaIds })
       });
 
       if (!res.ok) throw new Error('Generation failed');
       
-      const data = await res.json();
-      setGeneratedData(data);
-      setStep(7);
-      trackEventClient({ eventName: 'ai_plan_generated' });
+      const payload = await res.json();
+      
+      if (payload.clarificationNeeded) {
+          setClarificationQuestions(payload.questions || []);
+          setStep(6.5);
+      } else {
+          setGeneratedData(payload.data || payload);
+          setStep(7);
+          trackEventClient({ eventName: 'ai_plan_generated' });
+      }
     } catch (err) {
       console.error(err);
       alert('Помилка генерації. Будь ласка, спробуйте ще раз.');
@@ -205,18 +200,37 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
         );
 
       case 2:
+        const hasAnyGoal = selectedAreaIds.some(id => answers.areaGoals[id]?.trim().length > 0);
         return (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold tracking-tight">Які ваші основні цілі на наступні 3-12 місяців?</h2>
-            <textarea
-              className="w-full min-h-[120px] p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-orange-500 text-base resize-none"
-              placeholder="Чого ви хочете досягти найближчим часом?"
-              value={answers.goals}
-              onChange={(e) => setAnswers({ ...answers, goals: e.target.value })}
-            />
-            <div className="flex gap-3">
+          <div className="space-y-4 flex flex-col min-h-[50vh]">
+            <h2 className="text-2xl font-bold tracking-tight">Які ваші основні цілі для кожної сфери?</h2>
+            <div className="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar max-h-[40vh]">
+               {selectedAreaIds.map((areaId) => {
+                  const areaDef = DEFAULT_AREAS.find(a => a.iconName === areaId) || DEFAULT_AREAS[0];
+                  return (
+                     <div key={areaId} className="space-y-2">
+                        <label className="font-semibold text-sm flex items-center gap-2">
+                           <div className={`w-6 h-6 rounded-full ${areaDef.color} flex items-center justify-center text-[10px] text-white`}>
+                              {areaDef.title[0]}
+                           </div>
+                           {areaDef.title}
+                        </label>
+                        <textarea
+                          className="w-full min-h-[80px] p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-orange-500 text-sm resize-none"
+                          placeholder={`Ваші цілі щодо сфери "${areaDef.title}" на найближчі місяці...`}
+                          value={answers.areaGoals[areaId] || ''}
+                          onChange={(e) => setAnswers({ 
+                              ...answers, 
+                              areaGoals: { ...answers.areaGoals, [areaId]: e.target.value } 
+                          })}
+                        />
+                     </div>
+                  );
+               })}
+            </div>
+            <div className="flex gap-3 pt-4 shrink-0">
               <Button size="lg" variant="outline" className="flex-1 h-12 rounded-xl" onClick={handleBack}>Назад</Button>
-              <Button size="lg" className="flex-[2] h-12 rounded-xl" onClick={handleNext} disabled={!answers.goals.trim()}>Продовжити</Button>
+              <Button size="lg" className="flex-[2] h-12 rounded-xl" onClick={handleNext} disabled={!hasAnyGoal}>Продовжити</Button>
             </div>
           </div>
         );
@@ -282,14 +296,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
             </div>
             <div className="flex gap-3 pt-2">
               <Button size="lg" variant="outline" className="flex-1 h-12 rounded-xl" onClick={handleBack}>Назад</Button>
-              <Button size="lg" className="flex-[2] h-12 rounded-xl" onClick={handleValidation} disabled={isValidating}>
-                {isValidating ? (
-                   <span className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Перевірка...
-                   </span>
-                ) : 'Згенерувати систему'}
-              </Button>
+              <Button size="lg" className="flex-[2] h-12 rounded-xl" onClick={startGeneration}>Згенерувати систему</Button>
             </div>
           </div>
         );
@@ -348,6 +355,46 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
           </div>
         );
 
+      case 6.5: // Clarification Step
+        return (
+          <div className="space-y-6 flex flex-col min-h-[50vh]">
+            <div className="flex flex-col items-center justify-center text-center space-y-2 mb-2">
+                <Brain className="w-12 h-12 text-orange-500 mb-2" />
+                <h2 className="text-2xl font-bold tracking-tight">AI потребує уточнення</h2>
+                <p className="text-sm text-muted-foreground w-4/5">Для того щоб побудувати максимально точну та ефективну систему, дайте відповідь на кілька запитань.</p>
+            </div>
+            
+            <div className="space-y-5 flex-1 overflow-y-auto px-1 custom-scrollbar max-h-[40vh]">
+               {clarificationQuestions.map((q, idx) => {
+                  const areaDef = DEFAULT_AREAS.find(a => a.iconName === q.areaId) || DEFAULT_AREAS[0];
+                  return (
+                     <div key={idx} className="space-y-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <label className="font-semibold text-sm flex items-center gap-2 text-orange-600 dark:text-orange-400">
+                           <div className={`w-5 h-5 rounded-full ${areaDef.color} flex items-center justify-center text-[9px] text-white`}>
+                              {areaDef.title[0]}
+                           </div>
+                           {areaDef.title}
+                        </label>
+                        <p className="text-sm font-medium tracking-wide">{q.question}</p>
+                        <textarea
+                          className="w-full min-h-[80px] mt-2 p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-orange-500 text-sm resize-none"
+                          placeholder="Ваша відповідь..."
+                          value={clarificationAnswers[q.areaId] || ''}
+                          onChange={(e) => setClarificationAnswers(prev => ({ ...prev, [q.areaId]: e.target.value }))}
+                        />
+                     </div>
+                  );
+               })}
+            </div>
+            
+            <div className="flex gap-3 pt-4 shrink-0">
+               <Button size="lg" className="w-full h-12 rounded-xl bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/20" onClick={startGeneration}>
+                  Продовжити створення
+               </Button>
+            </div>
+          </div>
+        );
+
       case 7:
         return (
           <div className="space-y-6 max-w-2xl mx-auto overflow-y-auto max-h-[80vh] px-2 pb-6 scrollbar-hide">
@@ -379,6 +426,33 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                              {goal.tasks && goal.tasks.length > 0 && (
                                <ul className="pl-5 mt-1.5 space-y-1 text-muted-foreground text-[13px] list-disc">
                                   {goal.tasks.slice(0, 2).map((t: any, tidx: number) => (
+                                    <li key={tidx} className="leading-tight">{t.title}</li>
+                                  ))}
+                               </ul>
+                             )}
+                          </div>
+                     </div>
+                  </Card>
+                 );
+              })}
+
+              {generatedData?.projects?.map((proj: any, idx: number) => {
+                 const areaDef = DEFAULT_AREAS.find(a => a.iconName === proj.areaId) || DEFAULT_AREAS[0];
+                 
+                 return (
+                  <Card key={`proj-${idx}`} className="p-4 border-l-4 overflow-hidden" style={{ borderLeftColor: '#3b82f6' }} >
+                     <div className="flex items-center gap-2 mb-2">
+                        <Layout className={`w-4 h-4 text-muted-foreground`} />
+                        <h3 className="font-bold text-sm text-blue-600 dark:text-blue-400">Проект ({areaDef?.title || 'Сфера'})</h3>
+                     </div>
+                     <div className="space-y-2">
+                          <div className="text-sm">
+                             <div className="flex items-start gap-1.5 font-semibold">
+                               <span className="leading-tight">{proj.title}</span>
+                             </div>
+                             {proj.tasks && proj.tasks.length > 0 && (
+                               <ul className="pl-5 mt-1.5 space-y-1 text-muted-foreground text-[13px] list-disc">
+                                  {proj.tasks.slice(0, 2).map((t: any, tidx: number) => (
                                     <li key={tidx} className="leading-tight">{t.title}</li>
                                   ))}
                                </ul>

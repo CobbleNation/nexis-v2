@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, lifeAreas, goals, actions, habits, analyticsEvents, metricDefinitions } from '@/db/schema';
+import { users, lifeAreas, goals, actions, habits, analyticsEvents, metricDefinitions, projects } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
-import { AI_ONBOARDING_SYSTEM_PROMPT } from '@/lib/ai/prompts';
-import { OnboardingResponse } from '@/lib/ai/types';
 import OpenAI from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 import { eq } from 'drizzle-orm';
@@ -32,35 +30,59 @@ export async function POST(req: Request) {
         const { answers, selectedAreaIds } = body;
 
         // Structured prompt from user answers
+        const areaGoalsText = selectedAreaIds.map((id: string) => `Area ${id}: ${answers.areaGoals?.[id] || 'Not specified'}`).join('\n');
+
         const userPrompt = `
-Generate a life management system for this user.
+Generate a highly detailed life management system for this user.
 IMPORTANT RULES:
 1. YOU MUST RESPOND ONLY IN UKRAINIAN (УКРАЇНСЬКОЮ МОВОЮ). ABSOLUTELY NO ENGLISH.
-2. You MUST NOT create new Life Areas. You must create Goals (and tasks/habits) and map them directly to these pre-existing Life Area IDs:
+2. You MUST NOT create new Life Areas. You must create Goals, Projects, and Habits and map them directly to these pre-existing Life Area IDs:
 Selected Area IDs: ${selectedAreaIds.join(', ')}
 
 User Profile:
-- 3-12 Month Goals: ${answers.goals || 'Not specified'}
+- Specific Goals by Area: 
+${areaGoalsText}
 - 1-5 Year Vision: ${answers.longTermGoals || 'Not specified'}
 - Daily Challenges/Obstacles: ${answers.challenges || 'Not specified'}
 - Preferred Structure Level: ${answers.structure || 'Balanced'}
 
+INSTRUCTIONS:
+First, analyze if the user provided enough information to build a comprehensive system (Goals, Projects, Specific Tasks, Metrics). 
+If the information is extremely vague for ANY of the selected areas (e.g., they just wrote "I don't know" or left it blank), set "clarificationNeeded" to true, and provide specific "questions" to ask the user to clarify their vision for that area.
+If "clarificationNeeded" is false, proceed to generate the FULL system ("goals", "projects", "habits").
+
 Output JSON format:
 {
+  "clarificationNeeded": boolean,
+  "questions": [
+    { "areaId": "<Area ID>", "question": "Detailed question..." }
+  ],
   "goals": [
     {
-      "areaId": "<one of the Selected Area IDs exactly as provided>",
+      "areaId": "<Area ID>",
       "title": "Goal Title",
       "description": "Short description",
+      "type": "strategic", // "vision", "strategic", or "tactical"
       "metric": {
-        "name": "What to measure (e.g., Дохід, Вага, Кількість книг) - ONLY supply if the user mentioned a specific number/amount in their goal",
-        "unit": "Unit of measurement (e.g., грн, кг, шт)",
-        "target": 100000 // The numeric target value
+        "name": "What to measure (e.g., Дохід) - ONLY if a specific number was given",
+        "unit": "Unit (e.g., $)",
+        "target": 1000,
+        "frequency": "weekly" // "daily", "weekly", or "monthly"
       },
       "tasks": [
-        { "title": "Task title (actionable)" }
+        { "title": "Task title (actionable step specifically for this goal)" }
       ]
     }
+  ],
+  "projects": [
+     {
+       "areaId": "<Area ID>",
+       "title": "Project Title",
+       "description": "Description",
+       "tasks": [
+           { "title": "Task title (actionable step specifically for this project)" }
+       ]
+     }
   ],
   "habits": [
     { "title": "Habit Title", "frequency": "daily" }
@@ -84,6 +106,14 @@ Output JSON format:
 
         const result = JSON.parse(content);
 
+        // If AI needs clarification, return early
+        if (result.clarificationNeeded) {
+            return NextResponse.json({ 
+                clarificationNeeded: true, 
+                questions: result.questions || [] 
+            });
+        }
+
         // --- Database Population ---
         
         // Get all user's areas to map the requested 'areaId' (which corresponds to iconName in DEFAULT_AREAS) to the real DB UUID
@@ -92,17 +122,17 @@ Output JSON format:
         // Helper to find the real area ID based on the 'iconName' (passed as areaId by frontend)
         const getRealAreaId = (requestedAreaId: string) => {
              const area = userAreas.find(a => a.icon === requestedAreaId);
-             return area ? area.id : userAreas[0]?.id; // Fallback to the first available area
+             return area ? area.id : userAreas[0]?.id; // Fallback
         };
 
-        // 1. Create Goals & Tasks mapped to existing areas
+        // 1. Create Goals & Linked Tasks
         if (result.goals && Array.isArray(result.goals)) {
             for (const goal of result.goals) {
                 const validAreaId = selectedAreaIds.includes(goal.areaId) ? goal.areaId : selectedAreaIds[0];
                 if (!validAreaId) continue;
                 
                 const realAreaId = getRealAreaId(validAreaId);
-                if (!realAreaId) continue; // Safety check if user has no areas at all
+                if (!realAreaId) continue;
                 
                 const realGoalId = uuidv4();
                 
@@ -120,7 +150,7 @@ Output JSON format:
                         name: goal.metric.name,
                         unit: goal.metric.unit || '',
                         type: 'number',
-                        frequency: 'weekly'
+                        frequency: ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'].includes(goal.metric.frequency) ? goal.metric.frequency : 'weekly'
                     });
                 }
                 
@@ -130,7 +160,7 @@ Output JSON format:
                     areaId: realAreaId,
                     title: goal.title,
                     description: goal.description || '',
-                    type: 'strategic',
+                    type: ['vision', 'strategic', 'tactical'].includes(goal.type) ? goal.type : 'strategic',
                     status: 'active',
                     targetMetricId: targetMetricId || null,
                     metricTargetValue: metricTargetValue || null,
@@ -138,7 +168,6 @@ Output JSON format:
                     updatedAt: new Date()
                 });
 
-                // Create Tasks for each Goal
                 if (goal.tasks && Array.isArray(goal.tasks)) {
                     for (const task of goal.tasks) {
                         await db.insert(actions).values({
@@ -158,7 +187,46 @@ Output JSON format:
             }
         }
 
-        // 2. Create Habits
+        // 2. Create Projects & Linked Tasks
+        if (result.projects && Array.isArray(result.projects)) {
+             for (const proj of result.projects) {
+                const validAreaId = selectedAreaIds.includes(proj.areaId) ? proj.areaId : selectedAreaIds[0];
+                const realAreaId = getRealAreaId(validAreaId);
+                if (!realAreaId) continue; 
+
+                const realProjectId = uuidv4();
+
+                await db.insert(projects).values({
+                    id: realProjectId,
+                    userId,
+                    areaId: realAreaId,
+                    title: proj.title,
+                    description: proj.description || '',
+                    status: 'active',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+
+                if (proj.tasks && Array.isArray(proj.tasks)) {
+                    for (const task of proj.tasks) {
+                        await db.insert(actions).values({
+                            id: uuidv4(),
+                            userId,
+                            areaId: realAreaId,
+                            projectId: realProjectId,
+                            title: task.title,
+                            type: 'task',
+                            status: 'pending',
+                            priority: 'medium',
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        });
+                    }
+                }
+             }
+        }
+
+        // 3. Create Habits
         if (result.habits && Array.isArray(result.habits)) {
             for (const habit of result.habits) {
                 await db.insert(habits).values({
@@ -173,18 +241,19 @@ Output JSON format:
             }
         }
 
-        // 3. Mark Onboarding as Completed
+        // 4. Mark Onboarding as Completed
         await db.update(users)
             .set({ onboardingCompleted: true, updatedAt: new Date() })
             .where(eq(users.id, userId));
 
-        // 4. Track Events
+        // 5. Track Events
         await trackEvent({
             eventName: 'ai_plan_generated',
             userId,
             metadata: { 
                 goalsCount: result.goals?.length || 0,
-                habitCount: result.habits?.length || 0
+                habitCount: result.habits?.length || 0,
+                projectCount: result.projects?.length || 0
             }
         });
 
@@ -193,7 +262,10 @@ Output JSON format:
             userId
         });
 
-        return NextResponse.json(result);
+        return NextResponse.json({
+             clarificationNeeded: false,
+             data: result // Returning the full schema for UI render mapping
+        });
 
     } catch (error: any) {
         console.error('AI Onboarding Error:', error);

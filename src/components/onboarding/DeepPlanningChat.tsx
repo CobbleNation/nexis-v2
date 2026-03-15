@@ -10,7 +10,7 @@ interface Message {
 
 interface DeepPlanningChatProps {
   answers: {
-    goals: string;
+    areaGoals: Record<string, string>;
     longTermGoals: string;
     challenges: string;
     structure: string;

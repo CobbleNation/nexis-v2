@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db';
-import { users, lifeAreas, goals, actions, habits, analyticsEvents, metricDefinitions } from '@/db/schema';
+import { users, lifeAreas, goals, actions, habits, analyticsEvents, metricDefinitions, projects } from '@/db/schema';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
 import OpenAI from 'openai';
@@ -36,10 +36,10 @@ export async function POST(req: Request) {
         // Convert the chat log into a single transcript string
         const transcript = messages.map((m: any) => `${m.role === 'assistant' ? 'AI' : 'User'}: ${m.content}`).join('\n\n');
 
-        const systemPrompt = `You are an expert system architect parsing a completed life coaching conversation into database records.
+        const systemPrompt = `You are an expert system architect parsing a completed deep life coaching conversation into database records.
 IMPORTANT RULES:
 1. YOU MUST RESPOND ONLY IN UKRAINIAN (УКРАЇНСЬКОЮ МОВОЮ).
-2. You MUST NOT create new Life Areas. You must create Goals (and tasks/habits) and map them directly to these pre-existing Life Area IDs:
+2. You MUST NOT create new Life Areas. You must create Goals, Projects, Tasks, Metrics, and Habits and map them directly to these pre-existing Life Area IDs:
 Selected Area IDs: ${selectedAreaIds.join(', ')}
 
 Conversation Transcript:
@@ -48,24 +48,36 @@ ${transcript}
 """
 
 TASK:
-Analyze the transcript above and extract the concrete goals, tasks, and habits that were discussed and agreed upon. If the user mentioned specific numbers to reach (like weights, money, pages), parse them into the 'metric' object.
+Analyze the transcript above and extract absolutely EVERY concrete Goal, Project, Task, Metric, and Habit that was discussed and agreed upon. This is a Deep Planning session, meaning the breakdown must be exhaustive.
 
 Output JSON format:
 {
   "goals": [
     {
-      "areaId": "<one of the Selected Area IDs exactly as provided>",
+      "areaId": "<Area ID>",
       "title": "Goal Title",
       "description": "Short description based on chat context",
+      "type": "strategic", // "vision", "strategic", or "tactical"
       "metric": {
         "name": "What to measure (e.g., Дохід) - ONLY if a specific number was given",
         "unit": "Unit (e.g., $)",
-        "target": 1000 // Number
+        "target": 1000,
+        "frequency": "weekly" // "daily", "weekly", or "monthly"
       },
       "tasks": [
-        { "title": "Specific actionable task" }
+        { "title": "Specific actionable task for this goal" }
       ]
     }
+  ],
+  "projects": [
+     {
+       "areaId": "<Area ID>",
+       "title": "Project Title",
+       "description": "Description",
+       "tasks": [
+           { "title": "Actionable task for this project" }
+       ]
+     }
   ],
   "habits": [
     { "title": "Habit Title", "frequency": "daily" }
@@ -88,7 +100,7 @@ Output JSON format:
 
         const result = JSON.parse(content);
 
-        // --- Database Population (Same logic as standard onboarding generation) ---
+        // --- Database Population ---
         
         const userAreas = await db.select().from(lifeAreas).where(eq(lifeAreas.userId, userId));
         
@@ -97,6 +109,7 @@ Output JSON format:
              return area ? area.id : userAreas[0]?.id; // Fallback
         };
 
+        // 1. Create Goals & Linked Tasks
         if (result.goals && Array.isArray(result.goals)) {
             for (const goal of result.goals) {
                 const validAreaId = selectedAreaIds.includes(goal.areaId) ? goal.areaId : selectedAreaIds[0];
@@ -120,7 +133,7 @@ Output JSON format:
                         name: goal.metric.name,
                         unit: goal.metric.unit || '',
                         type: 'number',
-                        frequency: 'weekly'
+                        frequency: ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'].includes(goal.metric.frequency) ? goal.metric.frequency : 'weekly'
                     });
                 }
                 
@@ -130,7 +143,7 @@ Output JSON format:
                     areaId: realAreaId,
                     title: goal.title,
                     description: goal.description || '',
-                    type: 'strategic',
+                    type: ['vision', 'strategic', 'tactical'].includes(goal.type) ? goal.type : 'strategic',
                     status: 'active',
                     targetMetricId: targetMetricId || null,
                     metricTargetValue: metricTargetValue || null,
@@ -157,6 +170,46 @@ Output JSON format:
             }
         }
 
+        // 2. Create Projects & Linked Tasks
+        if (result.projects && Array.isArray(result.projects)) {
+             for (const proj of result.projects) {
+                const validAreaId = selectedAreaIds.includes(proj.areaId) ? proj.areaId : selectedAreaIds[0];
+                const realAreaId = getRealAreaId(validAreaId);
+                if (!realAreaId) continue; 
+
+                const realProjectId = uuidv4();
+
+                await db.insert(projects).values({
+                    id: realProjectId,
+                    userId,
+                    areaId: realAreaId,
+                    title: proj.title,
+                    description: proj.description || '',
+                    status: 'active',
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                });
+
+                if (proj.tasks && Array.isArray(proj.tasks)) {
+                    for (const task of proj.tasks) {
+                        await db.insert(actions).values({
+                            id: uuidv4(),
+                            userId,
+                            areaId: realAreaId,
+                            projectId: realProjectId,
+                            title: task.title,
+                            type: 'task',
+                            status: 'pending',
+                            priority: 'medium',
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        });
+                    }
+                }
+             }
+        }
+
+        // 3. Create Habits
         if (result.habits && Array.isArray(result.habits)) {
             for (const habit of result.habits) {
                 await db.insert(habits).values({
@@ -181,6 +234,7 @@ Output JSON format:
             metadata: { 
                 goalsCount: result.goals?.length || 0,
                 habitCount: result.habits?.length || 0,
+                projectCount: result.projects?.length || 0,
                 messageCount: messages.length
             }
         });
