@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { trackEventClient } from '@/lib/analytics-client';
 import { DEFAULT_AREAS } from '@/lib/default-areas';
+import { DeepPlanningChat } from './DeepPlanningChat';
 
 interface AiOnboardingModalProps {
   onSuccess: () => void;
@@ -407,31 +408,13 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
           </div>
         );
 
-      case 9: // Deep Planning Workspace (V1 Placeholder)
+      case 9: // Deep Planning Chat
         return (
-          <div className="space-y-6 max-w-2xl mx-auto h-[70vh] flex flex-col">
-             <div className="border-b border-border/40 pb-4">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                   <Sparkles className="w-5 h-5 text-orange-500" />
-                   Глибоке Планування
-                </h2>
-                <p className="text-sm text-muted-foreground">Давайте розберемо ваші цілі на конкретні задачі та побудуємо ідеальний розклад.</p>
-             </div>
-             
-             <div className="flex-1 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-slate-100 dark:border-slate-800 p-6 flex flex-col items-center justify-center text-center space-y-4">
-                <Brain className="w-12 h-12 text-slate-300 dark:text-slate-700 mx-auto" />
-                <div>
-                    <h3 className="font-bold text-lg">Чат з AI Coach</h3>
-                    <p className="text-sm text-muted-foreground max-w-sm mx-auto mt-1">Функціонал детального інтерактивного чату для розбиття цілей знаходиться в розробці. Ваші дані збережено успішно!</p>
-                </div>
-             </div>
-
-             <div className="pt-2">
-                <Button size="lg" className="w-full h-12 rounded-xl" onClick={handleFinish}>
-                   Повернутися до Dashboard
-                </Button>
-             </div>
-          </div>
+          <DeepPlanningChat 
+             answers={answers} 
+             selectedAreaIds={selectedAreaIds} 
+             onFinish={handleFinish} 
+          />
         );
     }
   };
