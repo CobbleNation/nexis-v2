@@ -481,20 +481,37 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
               </div>
             )}
 
-            <div className="flex flex-col gap-3 pt-4">
-              <Button size="lg" className="w-full h-12 text-base rounded-xl shadow-xl shadow-orange-500/20" onClick={handleFinish}>
-                Почати зараз
-              </Button>
-              <Button size="lg" variant="secondary" className="w-full h-12 text-base rounded-xl border-orange-200/50 bg-orange-50/50 hover:bg-orange-100/50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300 dark:hover:bg-orange-900/40" onClick={() => {
-                const isPro = user?.subscriptionTier === 'pro';
-                if (isPro) {
-                   setStep(9); // Deep Planning Interface
-                } else {
-                   setStep(8); // Paywall
-                }
-              }}>
-                <Sparkles className="w-4 h-4 mr-2" />
-                Спланувати детальніше
+            <div className="flex flex-col gap-3 pt-6">
+              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 text-left">
+                 <div className="flex items-start gap-3">
+                     <div className="bg-orange-100 dark:bg-orange-900/30 p-1.5 rounded-lg shrink-0 mt-0.5">
+                        <Sparkles className="w-4 h-4 text-orange-500" />
+                     </div>
+                     <div>
+                         <div className="font-bold text-[15px] flex items-center gap-2">
+                             Глибоке Планування 
+                             {user?.subscriptionTier !== 'pro' && (
+                                <span className="text-[10px] uppercase font-bold bg-orange-200/80 dark:bg-orange-800/80 text-orange-800 dark:text-orange-200 px-1.5 py-0.5 rounded-md">Pro</span>
+                             )}
+                         </div>
+                         <div className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                             ШІ-коуч детально проаналізує ваші цілі та розіб'є їх на конкретні щоденні кроки.
+                         </div>
+                     </div>
+                 </div>
+                 <Button size="lg" className="w-full h-11 mt-4 text-[15px] font-semibold rounded-xl bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5" onClick={() => {
+                   const isPro = user?.subscriptionTier === 'pro';
+                   if (isPro) {
+                      setStep(9); // Deep Planning Interface
+                   } else {
+                      setStep(8); // Paywall
+                   }
+                 }}>
+                   Спланувати детальніше
+                 </Button>
+              </div>
+              <Button size="lg" variant="ghost" className="w-full h-11 text-[15px] rounded-xl text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800" onClick={handleFinish}>
+                Ні, почати роботу зараз
               </Button>
             </div>
           </div>
