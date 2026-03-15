@@ -2,12 +2,18 @@ import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { DEFAULT_AREAS } from '@/lib/default-areas';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
     try {
+        if (!process.env.OPENAI_API_KEY) {
+            return NextResponse.json({ error: 'AI service not configured.' }, { status: 500 });
+        }
+
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+
         const body = await req.json();
         const { messages, selectedAreaIds, initialAnswers } = body;
 
