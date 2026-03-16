@@ -30,22 +30,22 @@ export default async function LandingPage() {
       <main className="flex-1 z-10 pt-32 pb-20 space-y-32">
         
         {/* SECTION 1 — HERO */}
-        <section className="px-4 text-center max-w-7xl mx-auto mt-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-8">
-            <SparklesIcon className="w-4 h-4" />
+        <section className="px-4 text-center max-w-6xl mx-auto mt-12">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-base font-medium mb-10">
+            <Sparkles className="w-5 h-5" />
             <span>Нове: ШІ автоматично створює вашу систему</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1] text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
+          <h1 className="text-6xl md:text-[5.5rem] font-extrabold tracking-tight mb-8 leading-[1.1] text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
             Зупиніть хаос. <br />Побудуйте систему для свого життя.
           </h1>
-          <p className="text-xl text-slate-400 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-2xl text-slate-400 mb-12 max-w-4xl mx-auto leading-relaxed">
             Zynorvia використовує штучний інтелект для організації ваших цілей, завдань, звичок і життєвих пріоритетів в єдину зручну систему, яка зберігає ваш фокус кожного дня.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href={ctaLink} className="w-full sm:w-auto px-8 py-4 rounded-full bg-primary hover:bg-primary/90 text-white font-semibold text-lg flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(79,70,229,0.5)]">
-              {ctaText} <ArrowRight className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+            <Link href={ctaLink} className="w-full sm:w-auto px-10 py-5 rounded-full bg-primary hover:bg-primary/90 text-white font-bold text-xl flex items-center justify-center gap-3 transition-transform hover:scale-105 active:scale-95 shadow-[0_0_40px_-10px_rgba(79,70,229,0.5)]">
+              {ctaText} <ArrowRight className="w-6 h-6" />
             </Link>
-            <Link href="#how-it-works" className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white font-semibold text-lg border border-white/10 flex items-center justify-center transition-colors">
+            <Link href="#how-it-works" className="w-full sm:w-auto px-10 py-5 rounded-full bg-white/5 hover:bg-white/10 text-white font-bold text-xl border border-white/10 flex items-center justify-center transition-colors">
               Як це працює
             </Link>
           </div>
@@ -273,43 +273,43 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 2 — THE PROBLEM */}
-        <section className="px-4 max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">Чому інші додатки не працюють</h2>
-          <p className="text-slate-400 max-w-3xl mx-auto mb-16 text-lg">
+        <section className="px-4 max-w-6xl mx-auto text-center mt-32">
+          <h2 className="text-4xl md:text-6xl font-bold mb-8">Чому інші додатки не працюють</h2>
+          <p className="text-xl text-slate-400 max-w-4xl mx-auto mb-20 leading-relaxed">
              Більшість додатків лише керують вашими завданнями, але не структурою вашого життя. Результат? Нескінченні списки справ, які лише посилюють тривогу та стрес.
           </p>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 gap-8">
              {[
-               { icon: <ListTodo className="w-8 h-8 text-rose-400" />, title: "Занадто багато справ", desc: "Сотні невиконаних завдань без реального прогресу у важливих сферах." },
-               { icon: <Crosshair className="w-8 h-8 text-rose-400" />, title: "Відсутність системи", desc: "Ви ставите великі цілі 1 січня, але забуваєте про них вже до 15-го." },
-               { icon: <Brain className="w-8 h-8 text-rose-400" />, title: "Ментальне перевантаження", desc: "Інструменти планування стають настільки хаотичними, що ви перестаєте ними користуватися." }
+               { icon: <ListTodo className="w-10 h-10 text-rose-400" />, title: "Занадто багато справ", desc: "Сотні невиконаних завдань без реального прогресу у важливих сферах." },
+               { icon: <Crosshair className="w-10 h-10 text-rose-400" />, title: "Відсутність системи", desc: "Ви ставите великі цілі 1 січня, але забуваєте про них вже до 15-го." },
+               { icon: <Brain className="w-10 h-10 text-rose-400" />, title: "Ментальне перевантаження", desc: "Інструменти планування стають настільки хаотичними, що ви перестаєте ними користуватися." }
              ].map((pain, i) => (
-                <div key={i} className="p-8 rounded-3xl bg-white/5 border border-white/5 text-left">
-                   <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-6">
+                <div key={i} className="p-10 rounded-3xl bg-white/5 border border-white/5 text-left">
+                   <div className="w-16 h-16 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-8">
                       {pain.icon}
                    </div>
-                   <h3 className="text-xl font-bold mb-3">{pain.title}</h3>
-                   <p className="text-slate-400 leading-relaxed">{pain.desc}</p>
+                   <h3 className="text-2xl font-bold mb-4">{pain.title}</h3>
+                   <p className="text-lg text-slate-400 leading-relaxed">{pain.desc}</p>
                 </div>
              ))}
           </div>
         </section>
 
         {/* SECTION 3 — THE SOLUTION */}
-        <section className="px-4 max-w-7xl mx-auto">
-          <div className="bg-gradient-to-br from-indigo-900/40 to-slate-900/40 rounded-[3rem] p-8 md:p-16 border border-white/10 md:flex items-center gap-12">
-             <div className="md:w-1/2 mb-10 md:mb-0">
-                <span className="text-indigo-400 font-semibold tracking-wider uppercase text-sm mb-4 block">РІШЕННЯ</span>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6">Ваша Персональна Система Життя</h2>
-                <p className="text-slate-400 text-lg leading-relaxed mb-8">
+        <section className="px-4 max-w-6xl mx-auto">
+          <div className="bg-gradient-to-br from-indigo-900/40 to-slate-900/40 rounded-[3rem] p-10 md:p-20 border border-white/10 md:flex items-center gap-16">
+             <div className="md:w-1/2 mb-12 md:mb-0">
+                <span className="text-indigo-400 font-bold tracking-widest uppercase text-base mb-6 block">РІШЕННЯ</span>
+                <h2 className="text-4xl md:text-6xl font-bold mb-8 leading-tight">Ваша Персональна Система Життя</h2>
+                <p className="text-slate-400 text-xl leading-relaxed mb-10">
                    Zynorvia — це "Операційна Система Життя", яка об'єднує ваші життєві сфери, великі цілі, щоденні завдання та звички на одній платформі під керівництвом штучного інтелекту. Все працює в гармонії.
                 </p>
-                <ul className="space-y-4">
+                <ul className="space-y-6">
                    {['Організація за сферами (Здоров\'я, Фінанси тощо)', 'Прив\'язка завдань безпосередньо до цілей', 'Відстеження щоденних звичок', 'Інтелектуальні підказки від ШІ'].map((item, i) => (
-                      <li key={i} className="flex items-center gap-3 text-slate-300">
-                         <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                            <Check className="w-4 h-4 text-indigo-400" />
+                      <li key={i} className="flex items-center gap-4 text-slate-300 text-lg">
+                         <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0">
+                            <Check className="w-5 h-5 text-indigo-400" />
                          </div>
                          {item}
                       </li>
@@ -354,53 +354,53 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 4 — AI POWER */}
-        <section className="px-4 max-w-6xl mx-auto text-center">
-           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/20 mb-8 border border-indigo-500/30">
-              <Brain className="w-8 h-8 text-indigo-400" />
+        <section className="px-4 max-w-5xl mx-auto text-center">
+           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-indigo-500/20 mb-10 border border-indigo-500/30">
+              <Brain className="w-10 h-10 text-indigo-400" />
            </div>
-           <h2 className="text-4xl md:text-5xl font-bold mb-6">ШІ Побудує Вашу Систему за Секунди</h2>
-           <p className="text-slate-400 text-lg max-w-3xl mx-auto mb-12">
+           <h2 className="text-5xl md:text-6xl font-bold mb-8">ШІ Побудує Вашу Систему за Секунди</h2>
+           <p className="text-xl text-slate-400 max-w-4xl mx-auto mb-16 leading-relaxed">
               Не знаєте з чого почати? Дайте відповідь на кілька запитань про ваші бажання, і наш штучний інтелект миттєво згенерує повноцінний структурований життєвий план.
            </p>
            
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               {[
-                { label: "Сфери Життя", icon: <Target className="w-5 h-5" /> },
-                { label: "Розумні Цілі", icon: <Crosshair className="w-5 h-5" /> },
-                { label: "Тижневі Завдання", icon: <ListTodo className="w-5 h-5" /> },
-                { label: "Щоденні Звички", icon: <CheckCircle2 className="w-5 h-5" /> },
+                { label: "Сфери Життя", icon: <Target className="w-6 h-6" /> },
+                { label: "Розумні Цілі", icon: <Crosshair className="w-6 h-6" /> },
+                { label: "Тижневі Завдання", icon: <ListTodo className="w-6 h-6" /> },
+                { label: "Щоденні Звички", icon: <CheckCircle2 className="w-6 h-6" /> },
               ].map((item, i) => (
-                 <div key={i} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center gap-3">
+                 <div key={i} className="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-center gap-4">
                     <div className="text-indigo-400">{item.icon}</div>
-                    <div className="font-medium text-sm text-slate-300">{item.label}</div>
+                    <div className="font-bold text-base text-slate-300">{item.label}</div>
                  </div>
               ))}
            </div>
         </section>
 
         {/* SECTION 5 — HOW IT WORKS */}
-        <section id="how-it-works" className="px-4 py-20 bg-slate-900/50 border-y border-white/5 relative">
-          <div className="max-w-7xl mx-auto">
-             <div className="text-center mb-16">
-               <h2 className="text-3xl md:text-5xl font-bold mb-4">Як це працює</h2>
-               <p className="text-slate-400">Три прості кроки до ясності.</p>
+        <section id="how-it-works" className="px-4 py-24 bg-slate-900/50 border-y border-white/5 relative">
+          <div className="max-w-6xl mx-auto">
+             <div className="text-center mb-20">
+               <h2 className="text-4xl md:text-6xl font-bold mb-6">Як це працює</h2>
+               <p className="text-xl text-slate-400">Три прості кроки до ясності.</p>
              </div>
              
-             <div className="grid md:grid-cols-3 gap-8 relative">
+             <div className="grid md:grid-cols-3 gap-12 relative">
                 {/* Connecting line for desktop */}
-                <div className="hidden md:block absolute top-[45px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+                <div className="hidden md:block absolute top-[55px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
                 
                 {[
                   { step: "01", title: "Розкажіть ШІ про цілі", desc: "Поспілкуйтесь з нашим ШІ-коучем про те, де ви є і чого прагнете." },
                   { step: "02", title: "ШІ будує структуру", desc: "Спостерігайте, як ваші бажання розбиваються на конкретні проекти та звички." },
                   { step: "03", title: "Слідуйте фокусу", desc: "Прокидайтеся щодня, знаючи точний план дій для успіху." }
                 ].map((item, i) => (
-                   <div key={i} className="relative text-center z-10 px-4">
-                      <div className="w-24 h-24 mx-auto bg-slate-950 border border-white/10 rounded-full flex items-center justify-center text-2xl font-bold text-indigo-400 mb-6 shadow-xl">
+                   <div key={i} className="relative text-center z-10 px-6">
+                      <div className="w-28 h-28 mx-auto bg-slate-950 border border-white/10 rounded-full flex items-center justify-center text-3xl font-extrabold text-indigo-400 mb-8 shadow-2xl">
                          {item.step}
                       </div>
-                      <h3 className="text-xl font-bold mb-3">{item.title}</h3>
-                      <p className="text-slate-400 text-sm leading-relaxed">{item.desc}</p>
+                      <h3 className="text-2xl font-bold mb-4">{item.title}</h3>
+                      <p className="text-lg text-slate-400 leading-relaxed">{item.desc}</p>
                    </div>
                 ))}
              </div>
@@ -408,23 +408,23 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 6 — KEY FEATURES */}
-        <section className="px-4 max-w-7xl mx-auto">
-           <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center">Все, що потрібно. Нічого зайвого.</h2>
+        <section className="px-4 max-w-6xl mx-auto">
+           <h2 className="text-4xl md:text-6xl font-bold mb-16 text-center">Все, що потрібно. Нічого зайвого.</h2>
            
-           <div className="grid md:grid-cols-2 gap-8">
+           <div className="grid md:grid-cols-2 gap-10">
               {[
-                { title: "AI Планування Життя", desc: "Миттєво перетворюйте абстрактні думки на структуровану базу реальних цілей.", icon: <Brain /> },
-                { title: "Система Цілей і Завдань", desc: "Ніколи не втрачайте контекст. Усі завдання прямо прив'язані до ваших масштабних цілей.", icon: <Target /> },
-                { title: "Управління Сферами", desc: "Збалансовуйте Здоров'я, Фінанси, Стосунки та інше в окремих панелях панелі.", icon: <Lightbulb /> },
-                { title: "Дашборд Щоденного Фокусу", desc: "Вимкніть зайвий шум. Бачте лише найважливіші завдання і звички, заплановані на сьогодні.", icon: <Focus /> },
+                { title: "AI Планування Життя", desc: "Миттєво перетворюйте абстрактні думки на структуровану базу реальних цілей.", icon: <Brain className="w-8 h-8"/> },
+                { title: "Система Цілей і Завдань", desc: "Ніколи не втрачайте контекст. Усі завдання прямо прив'язані до ваших масштабних цілей.", icon: <Target className="w-8 h-8"/> },
+                { title: "Управління Сферами", desc: "Збалансовуйте Здоров'я, Фінанси, Стосунки та інше в окремих панелях.", icon: <Lightbulb className="w-8 h-8"/> },
+                { title: "Дашборд Щоденного Фокусу", desc: "Вимкніть зайвий шум. Бачте лише найважливіші завдання і звички, заплановані на сьогодні.", icon: <Focus className="w-8 h-8"/> },
               ].map((feat, i) => (
-                 <div key={i} className="flex gap-6 p-6 rounded-3xl bg-white/5 hover:bg-white/[0.07] border border-white/5 transition-colors group">
-                    <div className="w-16 h-16 shrink-0 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                 <div key={i} className="flex gap-8 p-8 rounded-[2.5rem] bg-white/5 hover:bg-white/[0.07] border border-white/5 transition-colors group">
+                    <div className="w-20 h-20 shrink-0 rounded-3xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                        {feat.icon}
                     </div>
                     <div>
-                       <h3 className="text-xl font-bold mb-2">{feat.title}</h3>
-                       <p className="text-slate-400 text-sm leading-relaxed">{feat.desc}</p>
+                       <h3 className="text-2xl font-bold mb-3">{feat.title}</h3>
+                       <p className="text-base text-slate-400 leading-relaxed">{feat.desc}</p>
                     </div>
                  </div>
               ))}
@@ -432,12 +432,12 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 7 — PRODUCT SCREENSHOTS */}
-        <section className="px-4 max-w-7xl mx-auto space-y-20">
+        <section className="px-4 max-w-6xl mx-auto space-y-32">
             {/* Screenshot 1 */}
-            <div className="md:flex items-center gap-12 flex-row-reverse">
-                <div className="md:w-1/2 mb-8 md:mb-0">
-                    <h3 className="text-3xl font-bold mb-4">Кришталево Чистий Дашборд</h3>
-                    <p className="text-slate-400 text-lg">Усе ваше життя як на долоні. Відстежуйте прогрес, переглядайте дедлайни та бачте свій щоденний фокус — усе зібрано у найкрасивішому просторі.</p>
+            <div className="md:flex items-center gap-16 flex-row-reverse">
+                <div className="md:w-1/2 mb-10 md:mb-0">
+                    <h3 className="text-4xl font-bold mb-6">Кришталево Чистий Дашборд</h3>
+                    <p className="text-xl text-slate-400 leading-relaxed">Усе ваше життя як на долоні. Відстежуйте прогрес, переглядайте дедлайни та бачте свій щоденний фокус — усе зібрано у найкрасивішому просторі.</p>
                 </div>
                 <div className="md:w-1/2 rounded-2xl border border-white/10 bg-slate-900 overflow-hidden shadow-2xl relative">
                     <div className="aspect-[4/3] bg-slate-950 p-4">
@@ -474,10 +474,10 @@ export default async function LandingPage() {
                 </div>
             </div>
             {/* Screenshot 2 */}
-            <div className="md:flex items-center gap-12">
-                <div className="md:w-1/2 mb-8 md:mb-0">
-                    <h3 className="text-3xl font-bold mb-4">Глибоке Планування з AI</h3>
-                    <p className="text-slate-400 text-lg">Спілкуйтеся зі своєю системою. Штучний інтелект розуміє контекст вашого життя і автоматично створює об'єкти в базі даних для кожної вашої обіцянки.</p>
+            <div className="md:flex items-center gap-16">
+                <div className="md:w-1/2 mb-10 md:mb-0">
+                    <h3 className="text-4xl font-bold mb-6">Глибоке Планування з AI</h3>
+                    <p className="text-xl text-slate-400 leading-relaxed">Спілкуйтеся зі своєю системою. Штучний інтелект розуміє контекст вашого життя і автоматично створює об'єкти в базі даних для кожної вашої обіцянки.</p>
                 </div>
                 <div className="md:w-1/2 rounded-2xl border border-white/10 bg-slate-900 overflow-hidden shadow-2xl relative">
                     <div className="aspect-[4/3] bg-slate-950 p-4">
@@ -520,24 +520,24 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 8 — SOCIAL PROOF */}
-        <section className="px-4 py-40 bg-gradient-to-b from-transparent to-slate-900/50">
-           <div className="max-w-5xl mx-auto text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-12">Що кажуть перші користувачі</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                 <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl text-left relative">
-                    <span className="text-4xl text-indigo-500/20 absolute top-4 left-4">"</span>
-                    <p className="text-slate-300 relative z-10 italic mb-6">"Нарешті додаток, який розуміє, що тренування пов'язано з моєю метою здоров'я. Він побудував всю мою систему буквально за 2 хвилини."</p>
-                    <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center"><User className="w-5 h-5 text-indigo-400"/></div>
-                       <div><div className="font-bold text-sm">Денис</div><div className="text-xs text-slate-500">Ранній користувач</div></div>
+        <section className="px-4 py-32 bg-gradient-to-b from-transparent to-slate-900/50">
+           <div className="max-w-6xl mx-auto text-center">
+              <h2 className="text-4xl md:text-5xl font-bold mb-16">Що кажуть перші користувачі</h2>
+              <div className="grid md:grid-cols-2 gap-8">
+                 <div className="bg-slate-900 border border-slate-800 p-10 rounded-3xl text-left relative">
+                    <span className="text-5xl text-indigo-500/20 absolute top-6 left-6">"</span>
+                    <p className="text-lg text-slate-300 relative z-10 italic mb-8">"Нарешті додаток, який розуміє, що тренування пов'язано з моєю метою здоров'я. Він побудував всю мою систему буквально за 2 хвилини."</p>
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-12 rounded-full bg-indigo-500/20 flex items-center justify-center"><User className="w-6 h-6 text-indigo-400"/></div>
+                       <div><div className="font-bold text-base">Денис</div><div className="text-sm text-slate-500">Ранній користувач</div></div>
                     </div>
                  </div>
-                 <div className="bg-slate-900 border border-slate-800 p-8 rounded-3xl text-left relative">
-                    <span className="text-4xl text-emerald-500/20 absolute top-4 left-4">"</span>
-                    <p className="text-slate-300 relative z-10 italic mb-6">"Екран Фокусу кардинально змінив мій день. Я більше не бачу 100 справ, які треба зробити за місяць, я бачу ті 3 речі, які потрібно зробити прямо зараз."</p>
-                    <div className="flex items-center gap-3">
-                       <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center"><User className="w-5 h-5 text-emerald-400"/></div>
-                       <div><div className="font-bold text-sm">Олександр</div><div className="text-xs text-slate-500">Підприємець</div></div>
+                 <div className="bg-slate-900 border border-slate-800 p-10 rounded-3xl text-left relative">
+                    <span className="text-5xl text-emerald-500/20 absolute top-6 left-6">"</span>
+                    <p className="text-lg text-slate-300 relative z-10 italic mb-8">"Екран Фокусу кардинально змінив мій день. Я більше не бачу 100 справ, які треба зробити за місяць, я бачу ті 3 речі, які потрібно зробити прямо зараз."</p>
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center"><User className="w-6 h-6 text-emerald-400"/></div>
+                       <div><div className="font-bold text-base">Олександр</div><div className="text-sm text-slate-500">Підприємець</div></div>
                     </div>
                  </div>
               </div>
@@ -545,41 +545,41 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 9 — PRICING */}
-        <section className="px-4 py-40 max-w-7xl mx-auto bg-slate-950 rounded-[4rem] border border-white/5 shadow-2xl">
-           <div className="text-center mb-16">
-             <h2 className="text-3xl md:text-5xl font-bold mb-4">Прозорі Тарифи</h2>
-             <p className="text-slate-400">Почніть організовувати життя безкоштовно, або розблокуйте силу ШІ з преміум планом.</p>
+        <section className="px-4 py-32 max-w-6xl mx-auto">
+           <div className="text-center mb-20">
+             <h2 className="text-4xl md:text-6xl font-bold mb-6">Прозорі Тарифи</h2>
+             <p className="text-xl text-slate-400">Почніть організовувати життя безкоштовно, або розблокуйте силу ШІ з преміум планом.</p>
            </div>
            
-           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+           <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
               {/* Free Plan */}
-              <div className="p-8 md:p-10 rounded-3xl border border-slate-800 bg-slate-900/50 relative flex flex-col">
-                 <h3 className="text-2xl font-bold mb-2">Базовий</h3>
-                 <div className="text-4xl font-bold mb-6">₴0</div>
-                 <ul className="space-y-4 mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-slate-300 text-sm md:text-base"><Check className="w-5 h-5 text-emerald-500"/> Основні Цілі та Завдання</li>
-                    <li className="flex items-center gap-3 text-slate-300 text-sm md:text-base"><Check className="w-5 h-5 text-emerald-500"/> Базові Сфери Життя</li>
-                    <li className="flex items-center gap-3 text-slate-300 text-sm md:text-base"><Check className="w-5 h-5 text-emerald-500"/> Трекінг Звичок</li>
-                    <li className="flex items-center gap-3 text-slate-500 text-sm md:text-base"><Check className="w-5 h-5 text-slate-700"/> Обмежений ШІ-Помічник</li>
+              <div className="p-10 md:p-12 rounded-[3.5rem] border border-slate-800 bg-slate-900/50 relative flex flex-col">
+                 <h3 className="text-3xl font-bold mb-4">Базовий</h3>
+                 <div className="text-5xl font-extrabold mb-8">₴0</div>
+                 <ul className="space-y-5 mb-10 flex-1">
+                    <li className="flex items-center gap-4 text-slate-300 text-base md:text-lg"><Check className="w-6 h-6 text-emerald-500"/> Основні Цілі та Завдання</li>
+                    <li className="flex items-center gap-4 text-slate-300 text-base md:text-lg"><Check className="w-6 h-6 text-emerald-500"/> Базові Сфери Життя</li>
+                    <li className="flex items-center gap-4 text-slate-300 text-base md:text-lg"><Check className="w-6 h-6 text-emerald-500"/> Трекінг Звичок</li>
+                    <li className="flex items-center gap-4 text-slate-500 text-base md:text-lg"><Check className="w-6 h-6 text-slate-700"/> Обмежений ШІ-Помічник</li>
                  </ul>
-                 <Link href="/register" className="w-full py-4 rounded-xl border border-white/10 hover:bg-white/5 text-center font-semibold transition-colors">
+                 <Link href="/register" className="w-full py-5 rounded-2xl border border-white/10 hover:bg-white/5 text-center font-bold text-lg transition-colors">
                     Почати Безкоштовно
                  </Link>
               </div>
 
               {/* Pro Plan */}
-              <div className="p-8 md:p-10 rounded-3xl border-2 border-primary bg-primary/5 relative flex flex-col shadow-[0_0_30px_-10px_rgba(79,70,229,0.3)] transform md:-translate-y-4">
-                 <div className="absolute top-0 right-8 transform -translate-y-1/2 bg-primary text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">Найпопулярніший</div>
-                 <h3 className="text-2xl font-bold mb-2 flex items-center gap-2 text-primary">Pro План <Zap className="w-5 h-5 fill-current" /></h3>
-                 <div className="text-4xl font-bold mb-1">₴199<span className="text-lg text-slate-400 font-normal">/міс</span></div>
-                 <p className="text-xs text-indigo-400 mb-6 font-medium">Оплата щомісяця</p>
-                 <ul className="space-y-4 mb-8 flex-1">
-                    <li className="flex items-center gap-3 text-slate-200 text-sm md:text-base"><Check className="w-5 h-5 text-primary"/> Безлімітне ШІ-Планування</li>
-                    <li className="flex items-center gap-3 text-slate-200 text-sm md:text-base"><Check className="w-5 h-5 text-primary"/> Розширений ШІ-Аналіз</li>
-                    <li className="flex items-center gap-3 text-slate-200 text-sm md:text-base"><Check className="w-5 h-5 text-primary"/> Необмежені Звички та Проекти</li>
-                    <li className="flex items-center gap-3 text-slate-200 text-sm md:text-base"><Check className="w-5 h-5 text-primary"/> Пріоритетна Підтримка</li>
+              <div className="p-10 md:p-12 rounded-[3.5rem] border-2 border-primary bg-primary/5 relative flex flex-col shadow-[0_0_40px_-10px_rgba(79,70,229,0.3)] transform md:-translate-y-4">
+                 <div className="absolute top-0 right-10 transform -translate-y-1/2 bg-primary text-white text-sm font-bold px-5 py-2 rounded-full uppercase tracking-wider">Найпопулярніший</div>
+                 <h3 className="text-3xl font-bold mb-4 flex items-center gap-3 text-primary">Pro План <Zap className="w-6 h-6 fill-current" /></h3>
+                 <div className="text-5xl font-extrabold mb-2">₴199<span className="text-2xl text-slate-400 font-medium">/міс</span></div>
+                 <p className="text-sm text-indigo-400 mb-8 font-semibold">Оплата щомісяця</p>
+                 <ul className="space-y-5 mb-10 flex-1">
+                    <li className="flex items-center gap-4 text-slate-200 text-base md:text-lg"><Check className="w-6 h-6 text-primary"/> Безлімітне ШІ-Планування</li>
+                    <li className="flex items-center gap-4 text-slate-200 text-base md:text-lg"><Check className="w-6 h-6 text-primary"/> Розширений ШІ-Аналіз</li>
+                    <li className="flex items-center gap-4 text-slate-200 text-base md:text-lg"><Check className="w-6 h-6 text-primary"/> Необмежені Звички та Проекти</li>
+                    <li className="flex items-center gap-4 text-slate-200 text-base md:text-lg"><Check className="w-6 h-6 text-primary"/> Пріоритетна Підтримка</li>
                  </ul>
-                 <Link href="/register?plan=pro" className="w-full py-4 rounded-xl bg-primary hover:bg-primary/90 text-white text-center font-bold text-lg transition-colors shadow-lg shadow-primary/20">
+                 <Link href="/register?plan=pro" className="w-full py-5 rounded-2xl bg-primary hover:bg-primary/90 text-white text-center font-bold text-xl transition-colors shadow-lg shadow-primary/20">
                     Отримати Суперсилу
                  </Link>
               </div>
@@ -587,16 +587,16 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 10 — FINAL CTA */}
-        <section className="px-4 py-40 max-w-5xl mx-auto text-center">
-           <div className="bg-gradient-to-r from-indigo-900/80 to-purple-900/80 rounded-[4rem] p-12 md:p-24 border border-white/10 relative overflow-hidden shadow-2xl">
+        <section className="px-4 py-32 max-w-6xl mx-auto text-center">
+           <div className="bg-gradient-to-r from-indigo-900/80 to-purple-900/80 rounded-[4rem] p-16 md:p-32 border border-white/10 relative overflow-hidden shadow-[0_0_50px_-10px_rgba(79,70,229,0.3)]">
               <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
               <div className="relative z-10">
-                 <h2 className="text-4xl md:text-6xl font-extrabold mb-6 text-white text-shadow-sm">Візьміть Контроль над Життям</h2>
-                 <p className="text-indigo-200 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
+                 <h2 className="text-5xl md:text-7xl font-extrabold mb-8 text-white text-shadow-sm leading-tight">Візьміть Контроль над Життям</h2>
+                 <p className="text-indigo-200 text-xl md:text-2xl mb-16 max-w-3xl mx-auto leading-relaxed">
                     Приєднуйтесь до тисяч людей, які припинили дрейфувати і почали будувати власну життєву систему вже сьогодні.
                  </p>
-                 <Link href={ctaLink} className="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-full bg-white text-indigo-950 font-bold text-lg hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95 shadow-xl">
-                    {ctaText} <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center"><ArrowRight className="w-4 h-4 text-indigo-900" /></div>
+                 <Link href={ctaLink} className="inline-flex items-center justify-center gap-4 px-12 py-6 rounded-full bg-white text-indigo-950 font-bold text-xl hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95 shadow-xl">
+                    {ctaText} <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center"><ArrowRight className="w-4 h-4 text-indigo-900" /></div>
                  </Link>
               </div>
            </div>
