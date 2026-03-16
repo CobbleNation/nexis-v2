@@ -455,6 +455,7 @@ export const notifications = sqliteTable('notifications', {
     userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
     title: text('title').notNull(),
     message: text('message').notNull(),
+    content: text('content'), // Added for V8 rich-text notifications
     type: text('type').notNull(), // 'info' | 'success' | 'warning' | 'error' | 'announcement'
     read: boolean('read').notNull().default(false),
     link: text('link'),

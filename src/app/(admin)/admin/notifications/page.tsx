@@ -12,6 +12,7 @@ import { Megaphone, Send, AlertCircle, Info, Star } from 'lucide-react';
 export default function AdminNotificationsPage() {
     const [title, setTitle] = useState('');
     const [message, setMessage] = useState('');
+    const [content, setContent] = useState('');
     const [type, setType] = useState('announcement');
     const [link, setLink] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -31,7 +32,7 @@ export default function AdminNotificationsPage() {
             const res = await fetch('/api/admin/notifications/broadcast', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, message, type, link })
+                body: JSON.stringify({ title, message, content, type, link })
             });
 
             if (res.ok) {
@@ -39,6 +40,7 @@ export default function AdminNotificationsPage() {
                 toast.success(`Успішно надіслано ${data.count} користувачам!`);
                 setTitle('');
                 setMessage('');
+                setContent('');
                 setLink('');
             } else {
                 const err = await res.json();
@@ -85,13 +87,23 @@ export default function AdminNotificationsPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold">Повідомлення</label>
-                        <Textarea 
-                            placeholder="Опишіть деталі оновлення або новини..." 
-                            rows={5}
+                        <label className="text-sm font-semibold">Коротке повідомлення (для списку)</label>
+                        <Input 
+                            placeholder="Короткий опис на 1-2 рядки..." 
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            className="rounded-xl resize-none"
+                            className="h-11 rounded-xl"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold">Повний контент (Патчноут) <span className="text-muted-foreground font-normal ml-1">(Опціонально)</span></label>
+                        <Textarea 
+                            placeholder="Детальний опис оновлення, який відкриється при натисканні..." 
+                            rows={8}
+                            value={content}
+                            onChange={(e) => setContent(e.target.value)}
+                            className="rounded-xl resize-y"
                         />
                     </div>
 

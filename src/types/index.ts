@@ -330,7 +330,8 @@ export interface Notification {
     userId: string;
     title: string;
     message: string;
-    type: 'info' | 'success' | 'warning' | 'error';
+    content?: string; // Rich text
+    type: 'info' | 'success' | 'warning' | 'error' | 'announcement';
     date: string; // ISO date
     read: boolean;
     link?: string; // Optional link to relevant page

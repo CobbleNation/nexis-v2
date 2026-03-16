@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { title, message, type = 'announcement', link } = body;
+        const { title, message, content, type = 'announcement', link } = body;
 
         if (!title || !message) {
             return NextResponse.json({ error: 'Title and message are required' }, { status: 400 });
@@ -39,6 +39,7 @@ export async function POST(req: Request) {
             userId: u.id,
             title,
             message,
+            content: content || null,
             type,
             link,
             read: false,

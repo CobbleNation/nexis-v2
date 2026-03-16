@@ -9,6 +9,13 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import { Bell, Check, X, Info, CheckCircle, AlertTriangle, AlertOctagon, ArrowLeft, Star } from 'lucide-react';
 import { useData } from "@/lib/store";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +28,7 @@ export function NotificationsPopover() {
     const { state, dispatch } = useData();
     const { notifications } = state;
     const [isOpen, setIsOpen] = React.useState(false);
+    const [selectedNotification, setSelectedNotification] = React.useState<Notification | null>(null);
     const router = useRouter();
 
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -46,6 +54,17 @@ export function NotificationsPopover() {
         if (!notification.read) {
             dispatch({ type: 'MARK_NOTIFICATIONS_READ', payload: { ids: [notification.id] } });
         }
+        
+        // If it has rich content, open the modal instead of navigating
+        if ((notification as any).content) {
+            setSelectedNotification(notification);
+            // Optionally close the popover on desktop, but keeping it open might be fine.
+            if (window.innerWidth >= 768) {
+                setIsOpen(false);
+            }
+            return;
+        }
+
         if (notification.link) {
             setIsOpen(false);
             router.push(notification.link);
@@ -117,7 +136,7 @@ export function NotificationsPopover() {
                                         className={cn(
                                             "flex gap-3 p-4 border-b border-border/40 hover:bg-muted/30 transition-colors relative group text-left",
                                             !notification.read && "bg-primary/5 hover:bg-primary/10",
-                                            notification.link ? "cursor-pointer" : "cursor-default"
+                                            (notification.link || (notification as any).content) ? "cursor-pointer" : "cursor-default"
                                         )}
                                     >
                                         <div className={cn("mt-1 p-1.5 rounded-full bg-background border shadow-sm h-fit shrink-0",
@@ -233,6 +252,46 @@ export function NotificationsPopover() {
                     </ScrollArea>
                 </PopoverContent>
             </Popover>
+
+            {/* Rich Text Notification Modal */}
+            <Dialog open={!!selectedNotification} onOpenChange={(open) => !open && setSelectedNotification(null)}>
+                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl p-0 gap-0">
+                    <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-xl border-b p-6 flex items-start gap-4">
+                        <div className={`p-3 rounded-2xl h-fit shrink-0 ${
+                            selectedNotification?.type === 'announcement' ? 'bg-orange-500 text-white' : 'bg-primary/10 text-primary'
+                        }`}>
+                            {selectedNotification && getIcon(selectedNotification.type)}
+                        </div>
+                        <div className="flex-1 pr-6">
+                            <DialogTitle className="text-xl md:text-2xl font-bold leading-tight">
+                                {selectedNotification?.title}
+                            </DialogTitle>
+                            <DialogDescription className="mt-1.5 flex items-center gap-2">
+                                <span>{selectedNotification && formatDistanceToNow(new Date(selectedNotification.date), { locale: uk, addSuffix: true })}</span>
+                                {selectedNotification?.type === 'announcement' && (
+                                    <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-semibold">
+                                        Офіційне оголошення
+                                    </span>
+                                )}
+                            </DialogDescription>
+                        </div>
+                    </div>
+                    <div className="p-6 text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                        {(selectedNotification as any)?.content}
+                    </div>
+                    {selectedNotification?.link && (
+                        <div className="p-6 pt-0 border-t mt-4 flex justify-end">
+                            <Button onClick={() => {
+                                setSelectedNotification(null);
+                                setIsOpen(false);
+                                router.push(selectedNotification.link!);
+                            }} className="rounded-xl">
+                                Переглянути деталі
+                            </Button>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

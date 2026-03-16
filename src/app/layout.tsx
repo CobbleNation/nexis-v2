@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { DataProvider } from "@/lib/store";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ColorProvider } from "@/components/providers/color-provider";
 import { NotificationManager } from "@/components/features/NotificationManager";
 import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import "./globals.css";
@@ -48,16 +49,20 @@ export default function RootLayout({
           <DataProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="light"
+              defaultTheme="system"
               enableSystem
               disableTransitionOnChange
             >
-              <TooltipProvider>
-                <NotificationManager />
-                <AnalyticsTracker />
-                {children}
-                <Toaster />
-              </TooltipProvider>
+              <ColorProvider>
+                <TooltipProvider>
+                  <NotificationManager />
+                  <AnalyticsTracker />
+                  <div vaul-drawer-wrapper="">
+                    {children}
+                  </div>
+                  <Toaster position="bottom-right" className="rounded-2xl" />
+                </TooltipProvider>
+              </ColorProvider>
             </ThemeProvider>
           </DataProvider>
         </AuthProvider>

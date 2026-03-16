@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, History, CheckSquare, Target, Menu } from 'lucide-react';
+import { LayoutDashboard, History, CheckSquare, Target, Menu, Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SidebarContent } from '@/components/layout/Sidebar';
@@ -27,26 +27,26 @@ export function MobileNav() {
                 href="/overview"
                 className={cn(
                     "flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 active:scale-95 w-16",
-                    pathname.startsWith('/overview') ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"
+                    pathname.startsWith('/overview') ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                 )}
             >
-                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", pathname.startsWith('/overview') ? "bg-primary/10" : "bg-transparent")}>
-                    <LayoutDashboard className={cn("h-5 w-5", pathname.startsWith('/overview') ? "text-primary" : "text-muted-foreground")} />
+                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", pathname.startsWith('/overview') ? "bg-primary/10 shadow-sm" : "bg-transparent")}>
+                    <LayoutDashboard className={cn("h-5 w-5", pathname.startsWith('/overview') ? "text-primary fill-primary/20" : "text-muted-foreground")} strokeWidth={pathname.startsWith('/overview') ? 2.5 : 2} />
                 </div>
-                <span className="text-[10px]">Огляд</span>
+                <span className={cn("text-[10px] tracking-wide", pathname.startsWith('/overview') && "font-semibold")}>Огляд</span>
             </Link>
 
             <Link
                 href="/timeline"
                 className={cn(
                     "flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 active:scale-95 w-16",
-                    pathname.startsWith('/timeline') ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"
+                    pathname.startsWith('/timeline') ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                 )}
             >
-                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", pathname.startsWith('/timeline') ? "bg-primary/10" : "bg-transparent")}>
-                    <History className={cn("h-5 w-5", pathname.startsWith('/timeline') ? "text-primary" : "text-muted-foreground")} />
+                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", pathname.startsWith('/timeline') ? "bg-primary/10 shadow-sm" : "bg-transparent")}>
+                    <History className={cn("h-5 w-5", pathname.startsWith('/timeline') ? "text-primary fill-primary/20" : "text-muted-foreground")} strokeWidth={pathname.startsWith('/timeline') ? 2.5 : 2} />
                 </div>
-                <span className="text-[10px]">Розклад</span>
+                <span className={cn("text-[10px] tracking-wide", pathname.startsWith('/timeline') && "font-semibold")}>Розклад</span>
             </Link>
 
             <button
@@ -60,16 +60,16 @@ export function MobileNav() {
             </button>
 
             <Link
-                href="/goals?tab=active"
+                href="/dashboard"
                 className={cn(
                     "flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 active:scale-95 w-16",
-                    pathname.startsWith('/goals') ? "text-primary font-bold" : "text-muted-foreground hover:text-foreground"
+                    pathname === '/dashboard' || pathname === '/' ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                 )}
             >
-                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", pathname.startsWith('/goals') ? "bg-primary/10" : "bg-transparent")}>
-                    <Target className={cn("h-5 w-5", pathname.startsWith('/goals') ? "text-primary" : "text-muted-foreground")} />
+                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", (pathname === '/dashboard' || pathname === '/') ? "bg-primary/10 shadow-sm" : "bg-transparent")}>
+                    <Home className={cn("h-5 w-5", (pathname === '/dashboard' || pathname === '/') ? "text-primary fill-primary/20" : "text-muted-foreground")} strokeWidth={(pathname === '/dashboard' || pathname === '/') ? 2.5 : 2} />
                 </div>
-                <span className="text-[10px]">Цілі</span>
+                <span className={cn("text-[10px] tracking-wide", (pathname === '/dashboard' || pathname === '/') && "font-semibold")}>Головна</span>
             </Link>
 
             <Sheet open={open} onOpenChange={setOpen}>
@@ -81,8 +81,12 @@ export function MobileNav() {
                         <span className="text-[10px]">Меню</span>
                     </button>
                 </SheetTrigger>
-                <SheetContent side="left" className="p-0 w-[85%] max-w-[320px] border-r-border bg-sidebar">
-                    <SidebarContent onNavigate={() => setOpen(false)} />
+                <SheetContent side="bottom" className="h-[80vh] rounded-t-[32px] p-0 flex flex-col items-center hide-bottom-safe-area">
+                    <div className="w-12 h-1.5 bg-muted rounded-full mt-4 flex-shrink-0" />
+                    
+                    <div className="w-full flex-1 overflow-y-auto mt-6 px-6 pb-20 no-scrollbar relative z-10">
+                        <SidebarContent onNavigate={() => setOpen(false)} />
+                    </div>
                 </SheetContent>
             </Sheet>
 

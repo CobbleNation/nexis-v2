@@ -16,12 +16,14 @@ import { Switch } from '@/components/ui/switch';
 import { useData } from '@/lib/store';
 import { BookOpen } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useColorTheme } from '@/components/providers/color-provider';
 
 export default function SettingsPage() {
-    const { user, updateProfile, deleteAccount, logout } = useAuth();
-    const { theme, setTheme } = useTheme();
     const { state, dispatch } = useData();
+    const { theme, setTheme, systemTheme } = useTheme();
+    const { themeColor, setThemeColor } = useColorTheme();
     const { notificationSettings } = state;
+    const { user, updateProfile, deleteAccount, logout } = useAuth();
     const router = useRouter();
 
     // Local state for profile form
@@ -252,6 +254,62 @@ export default function SettingsPage() {
                                                 <div className="text-center font-bold text-sm text-foreground">Системна</div>
                                             </button>
                                         </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="border-none shadow-sm bg-white dark:bg-card rounded-3xl mt-6">
+                                <CardHeader>
+                                    <CardTitle>Кольорова тема</CardTitle>
+                                    <CardDescription>
+                                        Оберіть основний колір акцентів для інтерфейсу Zynorvia.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <button
+                                            onClick={() => setThemeColor('orange')}
+                                            className={cn(
+                                                "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98]",
+                                                themeColor === 'orange' ? "border-orange-500 bg-orange-50 dark:bg-orange-500/10" : "border-border bg-white dark:bg-secondary hover:border-orange-200 dark:hover:border-orange-800"
+                                            )}
+                                        >
+                                            <div className="w-8 h-8 rounded-full bg-[#f97316] mb-3 shadow-md" />
+                                            <span className="text-sm font-bold text-foreground">Захід Сонця</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setThemeColor('purple')}
+                                            className={cn(
+                                                "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98]",
+                                                themeColor === 'purple' ? "border-purple-500 bg-purple-50 dark:bg-purple-500/10" : "border-border bg-white dark:bg-secondary hover:border-purple-200 dark:hover:border-purple-800"
+                                            )}
+                                        >
+                                            <div className="w-8 h-8 rounded-full bg-[#8b5cf6] mb-3 shadow-md" />
+                                            <span className="text-sm font-bold text-foreground">Космічний Пил</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setThemeColor('blue')}
+                                            className={cn(
+                                                "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98]",
+                                                themeColor === 'blue' ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10" : "border-border bg-white dark:bg-secondary hover:border-blue-200 dark:hover:border-blue-800"
+                                            )}
+                                        >
+                                            <div className="w-8 h-8 rounded-full bg-[#3b82f6] mb-3 shadow-md" />
+                                            <span className="text-sm font-bold text-foreground">Синє Море</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => setThemeColor('emerald')}
+                                            className={cn(
+                                                "flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98]",
+                                                themeColor === 'emerald' ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10" : "border-border bg-white dark:bg-secondary hover:border-emerald-200 dark:hover:border-emerald-800"
+                                            )}
+                                        >
+                                            <div className="w-8 h-8 rounded-full bg-[#10b981] mb-3 shadow-md" />
+                                            <span className="text-sm font-bold text-foreground">Смарагдовий Ліс</span>
+                                        </button>
                                     </div>
                                 </CardContent>
                             </Card>
