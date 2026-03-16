@@ -53,10 +53,7 @@ export default async function LandingPage() {
           <div className="mt-20 relative mx-auto max-w-4xl">
              <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent z-10" />
              <div className="rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-xl p-2 shadow-2xl relative overflow-hidden">
-                <img src="/dashboard-preview.png" alt="Zynorvia Dashboard Interface" className="w-full h-auto rounded-xl object-cover opacity-90" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.nextElementSibling?.classList.remove('hidden') }} />
-                <div className="hidden aspect-video w-full rounded-xl bg-slate-800/50 flex items-center justify-center border border-white/5">
-                   <div className="text-slate-500 font-medium">Dashboard Interface Preview</div>
-                </div>
+                <img src="/dashboard-preview.png" alt="Zynorvia Dashboard Interface" className="w-full h-auto rounded-xl object-cover opacity-90 block" />
              </div>
           </div>
         </section>
