@@ -42,7 +42,7 @@ export function OverviewYear({ filteredGoals, activeArea }: OverviewYearProps) {
             {/* 1. HERO BLOCK (Meaning) */}
             <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-black text-white p-10 md:p-16 text-center shadow-xl">
                 <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('/noise.png')]"></div>
-                <Compass className="h-12 w-12 text-orange-400 mx-auto mb-6 opacity-80" />
+                <Compass className="h-12 w-12 text-primary mx-auto mb-6 opacity-80" />
 
                 <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight tracking-tight">
                     {summaryText}
@@ -50,7 +50,7 @@ export function OverviewYear({ filteredGoals, activeArea }: OverviewYearProps) {
 
                 <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-sm font-medium hover:bg-white/20 transition-colors cursor-default">
                     <span className="text-slate-400">Динаміка фокусу:</span>
-                    <span className="text-orange-400 uppercase tracking-widest text-xs font-bold">{focusType}</span>
+                    <span className="text-primary uppercase tracking-widest text-xs font-bold">{focusType}</span>
                 </div>
             </div>
 

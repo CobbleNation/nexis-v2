@@ -53,10 +53,10 @@ export function MobileNav() {
                 onClick={() => setShowQuickAdd(true)}
                 className="flex flex-col items-center justify-center -mt-6 p-1 relative z-10"
             >
-                <div className="h-14 w-14 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-full shadow-lg shadow-orange-500/30 flex items-center justify-center text-white active:scale-95 transition-transform">
+                <div className="h-14 w-14 bg-gradient-to-tr from-primary to-primary/80 rounded-full shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground active:scale-95 transition-transform">
                     <CheckSquare className="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-bold mt-1 text-orange-600">Додати</span>
+                <span className="text-[10px] font-bold mt-1 text-primary">Додати</span>
             </button>
 
             <Link

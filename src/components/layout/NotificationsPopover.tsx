@@ -76,7 +76,7 @@ export function NotificationsPopover() {
             case 'success': return <CheckCircle className="h-4 w-4 text-emerald-500" />;
             case 'warning': return <AlertTriangle className="h-4 w-4 text-amber-500" />;
             case 'error': return <AlertOctagon className="h-4 w-4 text-rose-500" />;
-            case 'announcement': return <Star className="h-4 w-4 text-orange-500 fill-orange-500" />;
+            case 'announcement': return <Star className="h-4 w-4 text-primary fill-primary" />;
             default: return <Info className="h-4 w-4 text-blue-500" />;
         }
     };
@@ -146,7 +146,7 @@ export function NotificationsPopover() {
                                         </div>
                                         <div className="flex-1 space-y-1 min-w-0">
                                             <div className="flex justify-between items-start gap-2">
-                                                <p className={cn("text-sm font-medium leading-none truncate", !notification.read && "text-primary dark:text-orange-400")}>
+                                                <p className={cn("text-sm font-medium leading-none truncate", !notification.read && "text-primary")}>
                                                     {notification.title}
                                                 </p>
                                                 <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
@@ -189,7 +189,7 @@ export function NotificationsPopover() {
             >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-orange-500 border-2 border-background rounded-full animate-pulse" />
+                    <span className="absolute top-2 right-2 h-2.5 w-2.5 bg-primary border-2 border-background rounded-full animate-pulse" />
                 )}
             </Button>
 
@@ -258,7 +258,7 @@ export function NotificationsPopover() {
                 <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl p-0 gap-0">
                     <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-xl border-b p-6 flex items-start gap-4">
                         <div className={`p-3 rounded-2xl h-fit shrink-0 ${
-                            selectedNotification?.type === 'announcement' ? 'bg-orange-500 text-white' : 'bg-primary/10 text-primary'
+                            selectedNotification?.type === 'announcement' ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'
                         }`}>
                             {selectedNotification && getIcon(selectedNotification.type)}
                         </div>
@@ -269,7 +269,7 @@ export function NotificationsPopover() {
                             <DialogDescription className="mt-1.5 flex items-center gap-2">
                                 <span>{selectedNotification && formatDistanceToNow(new Date(selectedNotification.date), { locale: uk, addSuffix: true })}</span>
                                 {selectedNotification?.type === 'announcement' && (
-                                    <span className="px-2 py-0.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-xs font-semibold">
+                                    <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-semibold">
                                         Офіційне оголошення
                                     </span>
                                 )}

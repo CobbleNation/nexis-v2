@@ -83,7 +83,7 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
                 "group flex flex-col p-4 bg-white dark:bg-card border rounded-2xl transition-all shadow-sm",
                 task.completed ? "border-slate-100 dark:border-border bg-slate-50/50 dark:bg-secondary/20" :
                     isOverdue ? "border-red-200 dark:border-red-900/50 bg-red-50/30 dark:bg-red-950/10 hover:border-red-300 dark:hover:border-red-800" :
-                        "border-slate-200 dark:border-border hover:border-orange-200 dark:hover:border-primary/50 hover:shadow-md"
+                        "border-slate-200 dark:border-border hover:border-primary/20 dark:hover:border-primary/50 hover:shadow-md"
             )}
         >
             <div className="flex items-start gap-4">
@@ -93,10 +93,10 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
                     className={cn(
                         "h-6 w-6 rounded-lg border-2 transition-all flex items-center justify-center shrink-0 mt-0.5",
                         task.completed
-                            ? "bg-orange-500 border-orange-500 text-white shadow-md shadow-orange-200/50"
+                            ? "bg-primary border-primary text-white shadow-md shadow-orange-200/50"
                             : isOverdue
                                 ? "border-red-200 bg-red-50/50 text-red-300 cursor-not-allowed"
-                                : "border-slate-300 dark:border-slate-600 hover:border-orange-400 dark:hover:border-primary hover:bg-orange-50 dark:hover:bg-primary/10 text-orange-600 dark:text-primary"
+                                : "border-slate-300 dark:border-slate-600 hover:border-orange-400 dark:hover:border-primary hover:bg-primary/5 dark:hover:bg-primary/10 text-primary dark:text-primary"
                     )}
                 >
                     {task.completed ? <Check className="w-4 h-4" /> : isOverdue ? <Clock className="w-3 h-3" /> : null}
@@ -110,7 +110,7 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
                         >
                             {/* Title & Priority */}
                             <div className="flex items-start gap-2">
-                                <p className={cn("text-base font-medium truncate leading-tight text-slate-900 dark:text-foreground group-hover:text-orange-600 dark:group-hover:text-primary transition-colors", task.completed && "line-through text-slate-400 dark:text-muted-foreground")}>
+                                <p className={cn("text-base font-medium truncate leading-tight text-slate-900 dark:text-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors", task.completed && "line-through text-slate-400 dark:text-muted-foreground")}>
                                     {task.title}
                                 </p>
                                 {task.priority === 'high' && (
@@ -182,7 +182,7 @@ export function ActionCard({ task, onComplete, areas }: ActionCardProps) {
                                     Редагувати
                                 </DropdownMenuItem>
                                 {task.status === 'deferred' ? (
-                                    <DropdownMenuItem onClick={handleRestore} className="gap-2 text-orange-600 focus:text-orange-700">
+                                    <DropdownMenuItem onClick={handleRestore} className="gap-2 text-primary focus:text-primary">
                                         <ArrowUpRight className="w-4 h-4" />
                                         Повернути в Активні
                                     </DropdownMenuItem>

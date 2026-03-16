@@ -641,9 +641,9 @@ export function QuickAddModal({
     };
 
     const ENTITIES = [
-        { id: 'task', label: 'Завдання', icon: CheckSquare, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-        { id: 'habit', label: 'Звичка', icon: Zap, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-        { id: 'event', label: 'Подія', icon: Calendar, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+        { id: 'task', label: 'Завдання', icon: CheckSquare, color: 'text-primary', bg: 'bg-primary/10' },
+        { id: 'habit', label: 'Звичка', icon: Zap, color: 'text-primary', bg: 'bg-primary/10' },
+        { id: 'event', label: 'Подія', icon: Calendar, color: 'text-primary', bg: 'bg-primary/10' },
         { id: 'content', label: 'Контент', icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-500/10' },
         { id: 'project', label: 'Проект', icon: Folder, color: 'text-blue-500', bg: 'bg-blue-500/10' },
         { id: 'goal', label: 'Ціль', icon: Target, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
@@ -996,7 +996,7 @@ export function QuickAddModal({
                                         <div className="space-y-2">
                                             {subtasks.map(st => (
                                                 <div key={st.id} className="flex items-center gap-2 text-sm group">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                                                     <span className="flex-1 text-slate-700 dark:text-foreground truncate">{st.title}</span>
                                                     <button onClick={() => setSubtasks(prev => prev.filter(p => p.id !== st.id))} className="text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <Trash2 className="w-3.5 h-3.5" />
@@ -1004,7 +1004,7 @@ export function QuickAddModal({
                                                 </div>
                                             ))}
                                             <div className="flex items-center gap-2">
-                                                <Plus className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                                                <Plus className="w-3.5 h-3.5 text-primary shrink-0" />
                                                 <input
                                                     value={newSubtask}
                                                     onChange={(e) => setNewSubtask(e.target.value)}
@@ -1016,7 +1016,7 @@ export function QuickAddModal({
                                                         }
                                                     }}
                                                     placeholder="Додати етап (Enter)..."
-                                                    className="bg-transparent border-none text-sm focus:ring-0 p-0 w-full placeholder:text-orange-300/50 text-slate-700 dark:text-foreground h-6"
+                                                    className="bg-transparent border-none text-sm focus:ring-0 p-0 w-full placeholder:text-primary/50 text-slate-700 dark:text-foreground h-6"
                                                 />
                                             </div>
                                         </div>
@@ -1195,7 +1195,7 @@ export function QuickAddModal({
                                                             }}
                                                             className={cn(
                                                                 "h-6 flex-1 rounded text-[10px] font-bold transition-all border border-transparent",
-                                                                isSelected ? "bg-orange-500 text-white" : "bg-slate-100 dark:bg-secondary text-slate-500"
+                                                                isSelected ? "bg-primary text-primary-foreground" : "bg-slate-100 dark:bg-secondary text-slate-500"
                                                             )}
                                                         >
                                                             {day}
@@ -1435,7 +1435,7 @@ export function QuickAddModal({
                                                             className={cn(
                                                                 "h-8 flex-1 rounded-md text-xs font-medium transition-all border border-transparent",
                                                                 isSelected
-                                                                    ? "bg-orange-500 text-white shadow-md shadow-orange-200 dark:shadow-none"
+                                                                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 dark:shadow-none"
                                                                     : "bg-slate-100 dark:bg-secondary/40 text-slate-500 dark:text-muted-foreground hover:bg-slate-200 dark:hover:bg-secondary/60 hover:text-slate-700 dark:hover:text-foreground"
                                                             )}
                                                         >
@@ -1454,7 +1454,7 @@ export function QuickAddModal({
                                 <div className="pt-2">
                                     <div className="flex items-center justify-between p-2 border border-slate-200 dark:border-border bg-white dark:bg-secondary/10 rounded-md shadow-sm">
                                         <span className="text-xs font-semibold text-slate-600 dark:text-foreground">Фокус</span>
-                                        <Switch checked={isFocus} onCheckedChange={setIsFocus} className="scale-75 data-[state=checked]:bg-orange-500" />
+                                        <Switch checked={isFocus} onCheckedChange={setIsFocus} className="scale-75 data-[state=checked]:bg-primary" />
                                     </div>
                                 </div>
                             )}
@@ -1468,7 +1468,7 @@ export function QuickAddModal({
                             Press <span className="font-bold text-slate-600 dark:text-slate-300">Enter</span> to create
                         </div>
                         <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="hover:text-orange-600">Скасувати</Button>
+                            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="hover:text-primary">Скасувати</Button>
                             {/* Hide Create button if Journal Completed */}
                             {!(type === 'content' && contentType === 'journal' && (() => {
                                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1481,7 +1481,7 @@ export function QuickAddModal({
                                         id={type === 'content' ? 'note-submit-btn' : 'task-create-btn'}
                                         size="sm"
                                         onClick={handleSubmit}
-                                        className="bg-orange-600 text-white hover:bg-orange-700 rounded-md shadow-sm px-6 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md shadow-sm px-6 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Створити {type === 'content' ? CONTENT_TYPES.find(c => c.id === contentType)?.label : currentEntity.label}
                                     </Button>

@@ -27,7 +27,7 @@ export function ContextBrief({ activeCount, highPriorityCount, stagnantAreas, fo
 
     return (
         <div className="flex items-start gap-4 p-6 bg-slate-50 dark:bg-card border border-slate-100 dark:border-border rounded-2xl">
-            <div className="h-10 w-10 shrink-0 rounded-full bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 flex items-center justify-center">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary flex items-center justify-center">
                 <Sparkles className="h-5 w-5" />
             </div>
             <div className="space-y-1">

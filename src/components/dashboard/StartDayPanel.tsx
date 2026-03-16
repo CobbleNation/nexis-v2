@@ -9,7 +9,7 @@ interface StartDayPanelProps {
 export function StartDayPanel({ onStartDay }: StartDayPanelProps) {
     return (
         <div className="w-full bg-white dark:bg-card border border-border/50 rounded-3xl p-10 md:p-14 shadow-sm flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in-95 duration-500">
-            <div className="w-24 h-24 bg-orange-500/10 text-orange-500 rounded-full flex items-center justify-center mb-2 shadow-inner">
+            <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-2 shadow-inner">
                 <Sun className="w-12 h-12" />
             </div>
             <div className="space-y-3">

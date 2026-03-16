@@ -31,7 +31,7 @@ export function YearView({ date, items, onEditItem, onCompleteItem, onDeleteItem
         switch (item.type) {
             case 'task': return { bg: 'bg-blue-50 dark:bg-blue-950/40', border: 'border-blue-200/80 dark:border-blue-800/60', text: 'text-blue-900 dark:text-blue-100', accent: 'bg-blue-500' };
             case 'routine': return { bg: 'bg-purple-50 dark:bg-purple-950/40', border: 'border-purple-200/80 dark:border-purple-800/60', text: 'text-purple-900 dark:text-purple-100', accent: 'bg-purple-500' };
-            case 'event': return { bg: 'bg-orange-50 dark:bg-orange-950/40', border: 'border-orange-200/80 dark:border-orange-800/60', text: 'text-orange-900 dark:text-orange-100', accent: 'bg-orange-500' };
+            case 'event': return { bg: 'bg-primary/5 dark:bg-primary/20', border: 'border-primary/20/80 dark:border-orange-800/60', text: 'text-orange-900 dark:text-orange-100', accent: 'bg-primary' };
             default: return { bg: 'bg-rose-50 dark:bg-rose-950/40', border: 'border-rose-200/80 dark:border-rose-800/60', text: 'text-rose-900 dark:text-rose-100', accent: 'bg-rose-500' };
         }
     };
@@ -59,7 +59,7 @@ export function YearView({ date, items, onEditItem, onCompleteItem, onDeleteItem
                     const monthItems = strategicItems.filter(i => isSameMonth(new Date(i.date), month));
 
                     return (
-                        <div key={month.toISOString()} className="border border-slate-100 dark:border-border/50 rounded-xl p-3 flex flex-col relative group hover:border-orange-200 dark:hover:border-orange-800 transition-all hover:shadow-sm bg-slate-50/30 dark:bg-card/30">
+                        <div key={month.toISOString()} className="border border-slate-100 dark:border-border/50 rounded-xl p-3 flex flex-col relative group hover:border-primary/20 dark:hover:border-orange-800 transition-all hover:shadow-sm bg-slate-50/30 dark:bg-card/30">
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm font-bold uppercase text-foreground">
                                     {format(month, 'LLLL', { locale: uk })}
@@ -73,7 +73,7 @@ export function YearView({ date, items, onEditItem, onCompleteItem, onDeleteItem
                                     const styles = getItemStyles(item);
                                     let color = "bg-blue-500"; // Tasks
                                     if (item.type === 'deadline') color = "bg-rose-500";
-                                    if (item.type === 'event') color = "bg-orange-500";
+                                    if (item.type === 'event') color = "bg-primary";
                                     if (item.type === 'routine') color = "bg-purple-500";
 
                                     return (

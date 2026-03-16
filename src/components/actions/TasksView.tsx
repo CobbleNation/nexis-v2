@@ -111,7 +111,7 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
         const area = state.areas.find(a => a.id === task.areaId);
         const feedback = area ? `Вклад у сферу ${area.title}` : "Дію виконано";
         toast(feedback, {
-            icon: <Activity className="w-4 h-4 text-orange-500" />,
+            icon: <Activity className="w-4 h-4 text-primary" />,
             description: "Рух - це життя.",
         });
     };
@@ -188,7 +188,7 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
             <div className="py-4 px-4 md:px-8 space-y-1 shrink-0">
                 <div className="flex items-center justify-between">
                     <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-900 dark:text-foreground">
-                        <Calendar className="w-6 h-6 text-orange-500" />
+                        <Calendar className="w-6 h-6 text-primary" />
                         Завдання
                     </h2>
                     {/* Desktop Filter Toggle */}
@@ -198,14 +198,14 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
                             className={cn(
                                 "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                                 showFilters
-                                    ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                                    ? "bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary"
                                     : "bg-slate-100 dark:bg-secondary/50 text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground"
                             )}
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             <span className="hidden sm:inline">Фільтри</span>
                             {hasActiveFilters && (
-                                <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                <span className="text-[10px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                                     {selectedAreas.length + selectedProjects.length + (withDeadline || dateTo ? 1 : 0)}
                                 </span>
                             )}
@@ -220,13 +220,13 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
                                     className={cn(
                                         "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
                                         hasActiveFilters
-                                            ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400"
+                                            ? "bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary"
                                             : "bg-slate-100 dark:bg-secondary/50 text-slate-500 dark:text-muted-foreground hover:text-slate-700 dark:hover:text-foreground"
                                     )}
                                 >
                                     <SlidersHorizontal className="w-4 h-4" />
                                     {hasActiveFilters && (
-                                        <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                        <span className="text-[10px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                                             {selectedAreas.length + selectedProjects.length + (withDeadline || dateTo ? 1 : 0)}
                                         </span>
                                     )}
@@ -235,7 +235,7 @@ export function TasksView({ filter = 'active' }: { filter?: 'active' | 'complete
                             <SheetContent side="right" className="w-[85vw] sm:w-[400px] p-0 flex flex-col border-l-orange-100 dark:border-l-border">
                                 <SheetHeader className="p-6 pb-2 text-left border-b border-slate-100 dark:border-border">
                                     <SheetTitle className="flex items-center gap-2">
-                                        <SlidersHorizontal className="w-5 h-5 text-orange-500" />
+                                        <SlidersHorizontal className="w-5 h-5 text-primary" />
                                         Фільтри Завдань
                                     </SheetTitle>
                                     <SheetDescription className="hidden">Налаштування фільтрації завдань</SheetDescription>

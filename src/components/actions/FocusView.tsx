@@ -76,7 +76,7 @@ export function FocusView() {
                                     <Button
                                         size="sm"
                                         onClick={() => completeFocusTask(task)}
-                                        className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl shadow-orange-200 dark:shadow-none text-xs"
+                                        className="bg-primary hover:bg-primary/90 text-white rounded-xl shadow-orange-200 dark:shadow-none text-xs"
                                     >
                                         <CheckCircle2 className="w-4 h-4 mr-1" /> Готово
                                     </Button>
@@ -107,7 +107,7 @@ export function FocusView() {
                             </div>
                             <div className="max-h-[50vh] overflow-y-auto space-y-2">
                                 {candidates.map(candidate => (
-                                    <div key={candidate.id} onClick={() => { addToFocus(candidate); setIsSelectorOpen(false); }} className="p-3 bg-slate-50 dark:bg-secondary/20 hover:bg-orange-50 dark:hover:bg-primary/10 rounded-xl cursor-pointer transition-colors text-sm font-medium dark:text-foreground">
+                                    <div key={candidate.id} onClick={() => { addToFocus(candidate); setIsSelectorOpen(false); }} className="p-3 bg-slate-50 dark:bg-secondary/20 hover:bg-primary/5 dark:hover:bg-primary/10 rounded-xl cursor-pointer transition-colors text-sm font-medium dark:text-foreground">
                                         {candidate.title}
                                     </div>
                                 ))}

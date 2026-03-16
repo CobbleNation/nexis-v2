@@ -185,14 +185,14 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
       {showFinishDialog && (
          <div className="absolute inset-0 z-50 bg-background/90 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl space-y-4 text-center">
-               <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
-                  <CheckCircle2 className="w-8 h-8 text-orange-500" />
+               <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <CheckCircle2 className="w-8 h-8 text-primary" />
                </div>
                <h3 className="text-xl font-bold">Готові зберегти систему?</h3>
                <p className="text-sm text-muted-foreground">Ми проаналізуємо нашу розмову та створимо готові задачі та звички.</p>
                <div className="flex gap-3 pt-4">
                   <Button variant="outline" className="flex-1" onClick={() => setShowFinishDialog(false)} disabled={isSaving}>Скасувати</Button>
-                  <Button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white" onClick={handleConfirmFinish} disabled={isSaving}>
+                  <Button className="flex-1 bg-primary hover:bg-primary/90 text-white" onClick={handleConfirmFinish} disabled={isSaving}>
                      {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                      {isSaving ? 'Створення...' : 'Створити'}
                   </Button>
@@ -205,7 +205,7 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
       <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between border-b border-border/40 pb-4 mb-2 px-2 shrink-0 gap-4 text-center sm:text-left">
         <div>
             <h2 className="text-xl font-bold flex items-center justify-center sm:justify-start gap-2">
-                <Brain className="w-6 h-6 text-orange-500" />
+                <Brain className="w-6 h-6 text-primary" />
                 Глибоке планування Zynorvia
             </h2>
             <p className="text-sm text-muted-foreground mt-1 text-center sm:text-left">Деталізуємо ваші цілі та будуємо стратегію щоденних дій.</p>
@@ -216,7 +216,7 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
                   Повернутися пізніше
                </Button>
             )}
-            <Button onClick={() => setShowFinishDialog(true)} variant="secondary" className="flex-1 sm:flex-none bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-300 rounded-xl px-4 py-2 font-semibold">
+            <Button onClick={() => setShowFinishDialog(true)} variant="secondary" className="flex-1 sm:flex-none bg-primary/10 text-primary hover:bg-orange-200 dark:bg-primary/20 dark:text-primary rounded-xl px-4 py-2 font-semibold">
                Завершити планування
             </Button>
         </div>
@@ -233,10 +233,10 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
               transition={{ duration: 0.3 }}
               className={`flex gap-3 max-w-[85%] ${message.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
             >
-              <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.role === 'user' ? 'bg-orange-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+              <div className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${message.role === 'user' ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
                 {message.role === 'user' ? <User className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
               </div>
-              <div className={`px-4 py-3 rounded-2xl whitespace-pre-wrap text-sm leading-relaxed shadow-sm ${message.role === 'user' ? 'bg-orange-500 text-white rounded-tr-sm' : 'bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 text-foreground rounded-tl-sm'}`}>
+              <div className={`px-4 py-3 rounded-2xl whitespace-pre-wrap text-sm leading-relaxed shadow-sm ${message.role === 'user' ? 'bg-primary text-white rounded-tr-sm' : 'bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 text-foreground rounded-tl-sm'}`}>
                 {renderMarkdownMsg(message.content)}
               </div>
             </motion.div>
@@ -248,10 +248,10 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
               className="flex gap-3 mr-auto max-w-[85%]"
             >
               <div className="shrink-0 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                <Brain className="w-4 h-4 text-orange-500 animate-pulse" />
+                <Brain className="w-4 h-4 text-primary animate-pulse" />
               </div>
               <div className="px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
                 <span className="text-sm text-muted-foreground">Аналізує...</span>
               </div>
             </motion.div>
@@ -263,8 +263,8 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
                className="flex flex-col items-center justify-center h-full space-y-4 pt-10"
              >
                 <div className="relative">
-                   <div className="w-16 h-16 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mx-auto" />
-                   <Brain className="w-6 h-6 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                   <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto" />
+                   <Brain className="w-6 h-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
                 <div className="text-muted-foreground text-sm font-medium animate-pulse">Готуємо персональні питання...</div>
              </motion.div>
@@ -275,7 +275,7 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
 
       {/* Input Area */}
       <div className="pt-2 px-1 shrink-0 bg-background/80 backdrop-blur-sm relative z-10 p-2">
-        <form onSubmit={handleSubmit} className="flex items-end gap-2 relative bg-slate-100 dark:bg-slate-900 focus-within:ring-2 focus-within:ring-orange-500/50 rounded-2xl p-1.5 transition-all shadow-sm border border-transparent dark:border-slate-800">
+        <form onSubmit={handleSubmit} className="flex items-end gap-2 relative bg-slate-100 dark:bg-slate-900 focus-within:ring-2 focus-within:ring-primary/50 rounded-2xl p-1.5 transition-all shadow-sm border border-transparent dark:border-slate-800">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -295,7 +295,7 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
             type="submit" 
             disabled={!input.trim() || isLoading}
             size="icon"
-            className="shrink-0 h-[44px] w-[44px] rounded-xl bg-orange-500 hover:bg-orange-600 text-white transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+            className="shrink-0 h-[44px] w-[44px] rounded-xl bg-primary hover:bg-primary/90 text-white transition-transform active:scale-95 disabled:opacity-50 disabled:active:scale-100"
           >
             <Send className="w-5 h-5 ml-1" />
           </Button>

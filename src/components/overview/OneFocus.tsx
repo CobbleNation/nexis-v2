@@ -14,9 +14,9 @@ interface OneFocusProps {
 export function OneFocus({ action, onComplete, onSetFocus }: OneFocusProps) {
     if (!action) {
         return (
-            <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-card border border-slate-200 dark:border-border border-dashed rounded-3xl text-center space-y-4 shadow-sm group hover:border-orange-200 dark:hover:border-orange-800 transition-colors">
-                <div className="h-16 w-16 bg-slate-50 dark:bg-secondary group-hover:bg-orange-50 dark:group-hover:bg-orange-900/20 rounded-full flex items-center justify-center mb-2 transition-colors">
-                    <Target className="h-8 w-8 text-slate-300 dark:text-muted-foreground group-hover:text-orange-400 dark:group-hover:text-orange-500 transition-colors" />
+            <div className="flex flex-col items-center justify-center p-12 bg-white dark:bg-card border border-slate-200 dark:border-border border-dashed rounded-3xl text-center space-y-4 shadow-sm group hover:border-primary/20 dark:hover:border-orange-800 transition-colors">
+                <div className="h-16 w-16 bg-slate-50 dark:bg-secondary group-hover:bg-primary/5 dark:group-hover:bg-primary/20 rounded-full flex items-center justify-center mb-2 transition-colors">
+                    <Target className="h-8 w-8 text-slate-300 dark:text-muted-foreground group-hover:text-primary dark:group-hover:text-primary transition-colors" />
                 </div>
                 <div>
                     <h2 className="text-xl font-bold text-foreground">Фокус не встановлено</h2>
@@ -34,14 +34,14 @@ export function OneFocus({ action, onComplete, onSetFocus }: OneFocusProps) {
     }
 
     return (
-        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-card border-2 border-orange-100 dark:border-orange-900/30 p-8 lg:p-10 shadow-xl transition-all hover:scale-[1.005] hover:shadow-2xl group">
+        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-card border-2 border-primary/10 dark:border-primary/20 p-8 lg:p-10 shadow-xl transition-all hover:scale-[1.005] hover:shadow-2xl group">
             {/* Orange Accent Line */}
             <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-b from-orange-500 to-amber-600" />
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 pl-6">
                 <div className="space-y-4 flex-1">
                     <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-orange-600/80">
+                        <div className="flex items-center gap-2 text-primary/80">
                             <Target className="h-4 w-4" />
                             <span className="text-xs font-bold tracking-[0.2em] uppercase">Головний Фокус</span>
                         </div>
@@ -52,7 +52,7 @@ export function OneFocus({ action, onComplete, onSetFocus }: OneFocusProps) {
 
                     {action.areaId && (
                         <div className="flex items-center gap-3">
-                            <span className="text-sm font-bold text-orange-700 bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
+                            <span className="text-sm font-bold text-primary bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
                                 {action.areaId === 'general' ? 'Загальне' : 'Проектна Сфера'}
                             </span>
                         </div>
@@ -62,7 +62,7 @@ export function OneFocus({ action, onComplete, onSetFocus }: OneFocusProps) {
                 <div className="flex-shrink-0">
                     <Button
                         size="lg"
-                        className="h-16 w-16 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/30 active:scale-95 transition-all flex items-center justify-center p-0"
+                        className="h-16 w-16 rounded-full bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center justify-center p-0"
                         onClick={() => onComplete?.(action.id)}
                     >
                         <CheckCircle2 className="h-8 w-8" />
@@ -72,7 +72,7 @@ export function OneFocus({ action, onComplete, onSetFocus }: OneFocusProps) {
             </div>
 
             {/* Decorative background glow (Subtle) */}
-            <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-orange-500/5 blur-[80px] pointer-events-none" />
+            <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-primary/5 blur-[80px] pointer-events-none" />
         </div>
     );
 }

@@ -56,8 +56,8 @@ export function LifeStatus() {
             title: 'Індекс Фокусу',
             value: `${metrics.score}%`,
             icon: Activity,
-            color: 'text-orange-500',
-            bg: 'bg-orange-500/10'
+            color: 'text-primary',
+            bg: 'bg-primary/10'
         },
         {
             title: 'Завдання (Сьогодні)',

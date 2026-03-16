@@ -78,7 +78,7 @@ export function TaskFilters({
                     <SlidersHorizontal className="w-4 h-4 text-slate-500 dark:text-muted-foreground" />
                     <span className="text-sm font-semibold text-slate-700 dark:text-foreground">Фільтри</span>
                     {activeCount > 0 && (
-                        <span className="text-[10px] font-bold bg-orange-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                        <span className="text-[10px] font-bold bg-primary text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                             {activeCount}
                         </span>
                     )}
@@ -112,7 +112,7 @@ export function TaskFilters({
                             </span>
                         </div>
                         {selectedAreas.length > 0 && (
-                            <span className="text-[10px] font-medium bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[10px] font-medium bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary px-1.5 py-0.5 rounded-full">
                                 {selectedAreas.length}
                             </span>
                         )}
@@ -126,7 +126,7 @@ export function TaskFilters({
                                     className={cn(
                                         "w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all mb-2 border",
                                         selectedAreas.length === state.areas.length
-                                            ? "bg-orange-500 text-white border-orange-600 shadow-sm"
+                                            ? "bg-primary text-white border-orange-600 shadow-sm"
                                             : "bg-white dark:bg-card border-slate-200 dark:border-border text-slate-700 dark:text-foreground hover:bg-slate-50 dark:hover:bg-secondary/50 shadow-sm"
                                     )}
                                 >
@@ -143,7 +143,7 @@ export function TaskFilters({
                                     className={cn(
                                         "w-full flex items-center justify-between px-3 py-1.5 text-sm rounded-lg transition-all",
                                         selectedAreas.includes(area.id)
-                                            ? "bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400"
+                                            ? "bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary"
                                             : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-secondary/30"
                                     )}
                                 >
@@ -155,7 +155,7 @@ export function TaskFilters({
                                         <span className="truncate text-left">{area.title}</span>
                                     </div>
                                     {selectedAreas.includes(area.id) && (
-                                        <Check className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400 shrink-0" />
+                                        <Check className="w-3.5 h-3.5 text-primary dark:text-primary shrink-0" />
                                     )}
                                 </button>
                             ))}

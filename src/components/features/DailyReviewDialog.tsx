@@ -138,7 +138,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                 ) : (
                     <Button
                         variant="outline"
-                        className="gap-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40"
+                        className="gap-2 border-amber-200 dark:border-amber-800 bg-primary/5/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-primary/10 dark:hover:bg-amber-950/40"
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -167,7 +167,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                 ) : (
                     <Button
                         variant="outline"
-                        className="gap-2 border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/40"
+                        className="gap-2 border-amber-200 dark:border-amber-800 bg-primary/5/50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 hover:bg-primary/10 dark:hover:bg-amber-950/40"
                     >
                         <Sparkles className="w-4 h-4" />
                         AI Аналіз Дня
@@ -184,7 +184,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
 
                 {step === 'info' && (
                     <div className="p-8 text-center space-y-6">
-                        <div className="mx-auto w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-4">
+                        <div className="mx-auto w-16 h-16 bg-primary/10 dark:bg-amber-900/30 rounded-full flex items-center justify-center mb-4">
                             <Sparkles className="w-8 h-8 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div>
@@ -208,7 +208,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                             <Button
                                 onClick={handleStart}
                                 size="lg"
-                                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-lg shadow-amber-500/20"
+                                className="w-full bg-primary hover:bg-amber-600 text-white font-bold shadow-lg shadow-amber-500/20"
                                 disabled={limits.count >= 2 || (limits.lastRun > 0 && Date.now() - limits.lastRun < 4 * 60 * 60 * 1000)}
                             >
                                 <Sparkles className="w-4 h-4 mr-2" />
@@ -223,7 +223,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
 
                 {step === 'loading' && (
                     <div className="p-12 flex flex-col items-center justify-center space-y-4">
-                        <Loader2 className="w-10 h-10 text-amber-500 animate-spin" />
+                        <Loader2 className="w-10 h-10 text-primary animate-spin" />
                         <p className="text-sm font-medium text-muted-foreground animate-pulse">
                             Аналізуємо ваші дані...
                         </p>
@@ -241,10 +241,10 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                             <div className="relative z-10 flex items-start justify-between">
                                 <div className="space-y-1">
                                     <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                                        <Sparkles className="w-5 h-5 text-amber-100" />
+                                        <Sparkles className="w-5 h-5 text-primary-foreground" />
                                         Аналіз Дня
                                     </h2>
-                                    <p className="text-amber-100 text-sm font-medium">
+                                    <p className="text-primary-foreground text-sm font-medium">
                                         {new Date().toLocaleDateString('uk-UA', { weekday: 'long', day: 'numeric', month: 'long' })}
                                     </p>
                                 </div>
@@ -255,11 +255,11 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
 
                             <div className="relative z-10 mt-6 grid grid-cols-2 gap-3">
                                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                                    <p className="text-amber-100 text-xs font-medium mb-1">Фокус</p>
+                                    <p className="text-primary-foreground text-xs font-medium mb-1">Фокус</p>
                                     <p className="text-2xl font-bold text-white">{review.score}/100</p>
                                 </div>
                                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                                    <p className="text-amber-100 text-xs font-medium mb-1">Задач</p>
+                                    <p className="text-primary-foreground text-xs font-medium mb-1">Задач</p>
                                     <p className="text-2xl font-bold text-white">{review.completedCount} <span className="text-sm font-normal opacity-70">/ {review.totalCount}</span></p>
                                 </div>
                             </div>
@@ -289,7 +289,7 @@ export function DailyReviewDialog({ customTrigger }: { customTrigger?: React.Rea
                                         <div className="space-y-2">
                                             {review.focusPoints.map((point, i) => (
                                                 <div key={i} className="flex gap-3 items-start p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
-                                                    <div className="w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
+                                                    <div className="w-5 h-5 rounded-full bg-primary/10 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold">
                                                         {i + 1}
                                                     </div>
                                                     <p className="text-sm text-slate-600 dark:text-slate-400">{point}</p>

@@ -63,7 +63,7 @@ export function SelectFocusModal({ open, onOpenChange, onSelect }: SelectFocusMo
                 {/* Header */}
                 <div className="px-6 pt-7 pb-4">
                     <div className="flex items-center gap-3 mb-1">
-                        <div className="w-9 h-9 bg-orange-500 rounded-full flex items-center justify-center">
+                        <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center">
                             <Target className="w-5 h-5 text-white" />
                         </div>
                         <h2 className="text-xl font-black tracking-tight">Обрати фокус дня</h2>
@@ -84,7 +84,7 @@ export function SelectFocusModal({ open, onOpenChange, onSelect }: SelectFocusMo
                                 className={cn(
                                     "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all",
                                     activeTab === tab.key
-                                        ? "bg-orange-500 text-white shadow-sm"
+                                        ? "bg-primary text-white shadow-sm"
                                         : "text-muted-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
                                 )}
                             >
@@ -113,11 +113,11 @@ export function SelectFocusModal({ open, onOpenChange, onSelect }: SelectFocusMo
                                         ? state.projects.find(p => p.id === task.projectId)?.title
                                         : undefined
                                 })}
-                                className="w-full flex items-start gap-3 p-4 text-left bg-slate-50 dark:bg-slate-800/50 hover:bg-orange-50 dark:hover:bg-orange-950/20 border border-transparent hover:border-orange-200 dark:hover:border-orange-900/50 rounded-2xl transition-all group"
+                                className="w-full flex items-start gap-3 p-4 text-left bg-slate-50 dark:bg-slate-800/50 hover:bg-primary/5 dark:hover:bg-primary/20 border border-transparent hover:border-primary/20 dark:hover:border-primary/20 rounded-2xl transition-all group"
                             >
-                                <CheckSquare className="w-5 h-5 text-muted-foreground group-hover:text-orange-500 mt-0.5 shrink-0 transition-colors" />
+                                <CheckSquare className="w-5 h-5 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0 transition-colors" />
                                 <div>
-                                    <p className="font-bold text-sm group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{task.title}</p>
+                                    <p className="font-bold text-sm group-hover:text-primary dark:group-hover:text-primary transition-colors">{task.title}</p>
                                     {task.projectId && (
                                         <p className="text-xs text-muted-foreground mt-0.5">
                                             {state.projects.find(p => p.id === task.projectId)?.title}
@@ -142,11 +142,11 @@ export function SelectFocusModal({ open, onOpenChange, onSelect }: SelectFocusMo
                                         title: project.title,
                                         relatedTasksCount: tasksCount
                                     })}
-                                    className="w-full flex items-start gap-3 p-4 text-left bg-slate-50 dark:bg-slate-800/50 hover:bg-orange-50 dark:hover:bg-orange-950/20 border border-transparent hover:border-orange-200 dark:hover:border-orange-900/50 rounded-2xl transition-all group"
+                                    className="w-full flex items-start gap-3 p-4 text-left bg-slate-50 dark:bg-slate-800/50 hover:bg-primary/5 dark:hover:bg-primary/20 border border-transparent hover:border-primary/20 dark:hover:border-primary/20 rounded-2xl transition-all group"
                                 >
-                                    <Folder className="w-5 h-5 text-muted-foreground group-hover:text-orange-500 mt-0.5 shrink-0 transition-colors" />
+                                    <Folder className="w-5 h-5 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0 transition-colors" />
                                     <div>
-                                        <p className="font-bold text-sm group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{project.title}</p>
+                                        <p className="font-bold text-sm group-hover:text-primary dark:group-hover:text-primary transition-colors">{project.title}</p>
                                         {tasksCount > 0 && (
                                             <p className="text-xs text-muted-foreground mt-0.5">{tasksCount} незавершених задач</p>
                                         )}
@@ -167,10 +167,10 @@ export function SelectFocusModal({ open, onOpenChange, onSelect }: SelectFocusMo
                                     id: goal.id,
                                     title: goal.title
                                 })}
-                                className="w-full flex items-start gap-3 p-4 text-left bg-slate-50 dark:bg-slate-800/50 hover:bg-orange-50 dark:hover:bg-orange-950/20 border border-transparent hover:border-orange-200 dark:hover:border-orange-900/50 rounded-2xl transition-all group"
+                                className="w-full flex items-start gap-3 p-4 text-left bg-slate-50 dark:bg-slate-800/50 hover:bg-primary/5 dark:hover:bg-primary/20 border border-transparent hover:border-primary/20 dark:hover:border-primary/20 rounded-2xl transition-all group"
                             >
-                                <Flag className="w-5 h-5 text-muted-foreground group-hover:text-orange-500 mt-0.5 shrink-0 transition-colors" />
-                                <p className="font-bold text-sm group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors">{goal.title}</p>
+                                <Flag className="w-5 h-5 text-muted-foreground group-hover:text-primary mt-0.5 shrink-0 transition-colors" />
+                                <p className="font-bold text-sm group-hover:text-primary dark:group-hover:text-primary transition-colors">{goal.title}</p>
                             </button>
                         ))
                     )}

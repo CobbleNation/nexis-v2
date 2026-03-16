@@ -159,8 +159,8 @@ export function OverviewHeader() {
 
             {/* Right side: Streak */}
             <div className="flex items-center gap-2 shrink-0">
-                <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0">
-                    <Flame className="w-4 h-4 text-orange-500" />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Flame className="w-4 h-4 text-primary" />
                 </div>
                 <div>
                     <div className="font-black text-base tracking-tight leading-none">{streak} дн.</div>

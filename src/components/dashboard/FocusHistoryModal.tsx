@@ -63,7 +63,7 @@ export function FocusHistoryModal({ open, onOpenChange }: FocusHistoryModalProps
             <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto rounded-3xl p-6 md:p-8 border-border/50 shadow-xl bg-card">
                 <DialogHeader className="mb-6">
                     <DialogTitle className="text-2xl font-black tracking-tight text-foreground flex items-center gap-2">
-                        <Timer className="w-6 h-6 text-orange-500" />
+                        <Timer className="w-6 h-6 text-primary" />
                         Історія сесій фокусу
                     </DialogTitle>
                 </DialogHeader>
@@ -75,7 +75,7 @@ export function FocusHistoryModal({ open, onOpenChange }: FocusHistoryModalProps
                             onClick={() => setShowCalendar(!showCalendar)}
                             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                         >
-                            <CalendarIcon className="w-4 h-4 text-orange-500" />
+                            <CalendarIcon className="w-4 h-4 text-primary" />
                             <span className="font-bold text-sm">
                                 {format(selectedDate, 'd MMMM yyyy', { locale: uk })}
                             </span>
@@ -107,7 +107,7 @@ export function FocusHistoryModal({ open, onOpenChange }: FocusHistoryModalProps
                         ) : (
                             filteredHistory.map((log) => (
                                 <div key={log.id} className="flex gap-4 p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-border/50 shadow-sm">
-                                    <div className="w-12 h-12 shrink-0 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center">
+                                    <div className="w-12 h-12 shrink-0 rounded-full bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center">
                                         <Clock className="w-5 h-5" />
                                     </div>
                                     <div className="flex-1 min-w-0">

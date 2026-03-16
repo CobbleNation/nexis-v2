@@ -362,7 +362,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                     {[1, 2, 3, 4].map(i => (
                         <div key={i} className={cn(
                             "h-1.5 w-8 rounded-full transition-all duration-500",
-                            i <= step ? "bg-orange-600 shadow-sm shadow-orange-200 dark:shadow-none" : "bg-slate-200 dark:bg-secondary"
+                            i <= step ? "bg-primary/90 shadow-sm shadow-orange-200 dark:shadow-none" : "bg-slate-200 dark:bg-secondary"
                         )} />
                     ))}
                 </div>
@@ -426,8 +426,8 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                 desc="Головна зміна. Конкретний, вимірюваний результат."
                                 selected={goalType === 'strategic'}
                                 onClick={() => { setGoalType('strategic'); setStep(2); }}
-                                colorClass="text-amber-500 dark:text-amber-400"
-                                bgClass="bg-amber-50 dark:bg-amber-950/30"
+                                colorClass="text-primary dark:text-amber-400"
+                                bgClass="bg-primary/5 dark:bg-amber-950/30"
                                 borderClass="border-amber-200 dark:border-amber-800"
                             />
                             <GoalTypeCard
@@ -439,9 +439,9 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                 desc="Короткий спринт для фокусу на важливому зараз."
                                 selected={goalType === 'tactical'}
                                 onClick={() => { setGoalType('tactical'); setStep(2); }}
-                                colorClass="text-orange-500 dark:text-orange-400"
-                                bgClass="bg-orange-50 dark:bg-orange-950/30"
-                                borderClass="border-orange-200 dark:border-orange-800"
+                                colorClass="text-primary dark:text-primary"
+                                bgClass="bg-primary/5 dark:bg-primary/20"
+                                borderClass="border-primary/20 dark:border-orange-800"
                             />
                         </div>
 
@@ -498,7 +498,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                         <SelectValue placeholder="Шаблон..." />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="custom" className="font-semibold text-orange-600 dark:text-orange-400">Свій варіант...</SelectItem>
+                                        <SelectItem value="custom" className="font-semibold text-primary dark:text-primary">Свій варіант...</SelectItem>
                                         {GOAL_TEMPLATES.map(t => (
                                             <SelectItem key={t.id} value={t.id}>{t.label} ...</SelectItem>
                                         ))}
@@ -570,7 +570,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                                     }
                                                 }}
                                                 disabled={isSuggestingMetrics}
-                                                className="text-amber-600 hover:text-amber-700 h-8 text-xs font-bold bg-amber-50 dark:bg-amber-950/20 hover:bg-amber-100 dark:hover:bg-amber-950/40 border border-amber-200 dark:border-amber-900"
+                                                className="text-amber-600 hover:text-amber-700 h-8 text-xs font-bold bg-primary/5 dark:bg-amber-950/20 hover:bg-primary/10 dark:hover:bg-amber-950/40 border border-amber-200 dark:border-amber-900"
                                             >
                                                 {isSuggestingMetrics ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
                                                 {isSuggestingMetrics ? "Шукаю..." : "AI Підказка (Pro)"}
@@ -596,7 +596,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                                                         });
                                                         setIsMetricWizardOpen(true);
                                                     }}
-                                                    className="p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/10 hover:bg-amber-100 dark:hover:bg-amber-950/30 cursor-pointer transition-colors group"
+                                                    className="p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-primary/5/50 dark:bg-amber-950/10 hover:bg-primary/10 dark:hover:bg-amber-950/30 cursor-pointer transition-colors group"
                                                 >
                                                     <div className="flex items-center justify-between mb-1">
                                                         <span className="font-bold text-sm text-slate-800 dark:text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{suggestion.name}</span>
@@ -821,7 +821,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                         onClick={handleSubmit}
                         disabled={isLoading || !!dateError}
                         id="goal-create-btn"
-                        className="bg-orange-600 hover:bg-orange-700 text-white px-10 h-11 rounded-xl font-bold text-base shadow-xl shadow-orange-500/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-primary/90 hover:bg-orange-700 text-white px-10 h-11 rounded-xl font-bold text-base shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isLoading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
                         {initialData ? "Зберегти Зміни" : "Створити Ціль"}

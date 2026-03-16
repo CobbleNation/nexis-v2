@@ -167,13 +167,13 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
       case 0:
         return (
           <div className="text-center space-y-5 max-w-lg mx-auto">
-            <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-2 scale-110">
-              <Sparkles className="w-8 h-8 text-orange-500 animate-pulse" />
+            <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-2 scale-110">
+              <Sparkles className="w-8 h-8 text-primary animate-pulse" />
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight">Створіть свою систему життя за 60 секунд</h1>
             <p className="text-lg text-muted-foreground leading-snug">Розкажіть нам про свої цілі та спосіб життя. ШІ згенерує для вас структуру сфер життя, цілей та завдань.</p>
             <div className="flex flex-col gap-3 mt-4">
-              <Button size="lg" className="w-full h-12 text-base rounded-xl group shadow-lg shadow-orange-500/20" onClick={handleNext}>
+              <Button size="lg" className="w-full h-12 text-base rounded-xl group shadow-lg shadow-primary/20" onClick={handleNext}>
                 Почати
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
@@ -200,17 +200,17 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                     onClick={() => toggleArea(area.iconName)}
                     className={`p-4 rounded-xl text-left border-2 transition-all flex flex-col items-center justify-center gap-2 ${
                       isSelected 
-                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 shadow-sm' 
-                      : 'border-slate-200 dark:border-slate-800 hover:border-orange-200 hover:bg-slate-50 dark:hover:bg-slate-900'
+                      ? 'border-primary bg-primary/5 dark:bg-primary/20 shadow-sm' 
+                      : 'border-slate-200 dark:border-slate-800 hover:border-primary/20 hover:bg-slate-50 dark:hover:bg-slate-900'
                     }`}
                   >
-                    <div className={isSelected ? 'text-orange-500' : 'text-muted-foreground'}>
+                    <div className={isSelected ? 'text-primary' : 'text-muted-foreground'}>
                        {/* Placeholder icon representation since dynamic icon rendering is tricky here, but we could map it */}
                        <div className={`w-8 h-8 rounded-full ${area.color} opacity-80 mb-1 flex items-center justify-center`}>
                           <span className="text-white text-xs font-bold">{area.title[0]}</span>
                        </div>
                     </div>
-                    <span className={`font-semibold text-sm ${isSelected ? 'text-orange-700 dark:text-orange-300' : ''}`}>{area.title}</span>
+                    <span className={`font-semibold text-sm ${isSelected ? 'text-primary dark:text-primary' : ''}`}>{area.title}</span>
                   </button>
                 );
               })}
@@ -243,7 +243,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                            {areaDef.title}
                         </label>
                         <textarea
-                          className="w-full min-h-[80px] p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-orange-500 text-sm resize-none"
+                          className="w-full min-h-[80px] p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-primary text-sm resize-none"
                           placeholder={`Ваші цілі щодо сфери "${areaDef.title}" на найближчі місяці...`}
                           value={answers.areaGoals[areaId] || ''}
                           onChange={(e) => setAnswers({ 
@@ -270,7 +270,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
               <p className="text-sm text-muted-foreground">Це допоможе ШІ створити більш стратегічний та довгостроковий план.</p>
             </div>
             <textarea
-              className="w-full min-h-[120px] p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-orange-500 text-base resize-none"
+              className="w-full min-h-[120px] p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-primary text-base resize-none"
               placeholder="Де ви бачите себе через 5 років?"
               value={answers.longTermGoals}
               onChange={(e) => setAnswers({ ...answers, longTermGoals: e.target.value })}
@@ -287,7 +287,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
           <div className="space-y-4">
             <h2 className="text-2xl font-bold tracking-tight">Що зараз здається хаотичним або заважає вам?</h2>
             <textarea
-              className="w-full min-h-[120px] p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-orange-500 text-base resize-none"
+              className="w-full min-h-[120px] p-4 rounded-xl bg-slate-100 dark:bg-slate-800 border-none focus:ring-2 focus:ring-primary text-base resize-none"
               placeholder="Опишіть поточні проблеми, брак часу або рутину..."
               value={answers.challenges}
               onChange={(e) => setAnswers({ ...answers, challenges: e.target.value })}
@@ -310,8 +310,8 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                   onClick={() => setAnswers({ ...answers, structure: level })}
                   className={`p-5 rounded-xl text-left border-2 transition-all ${
                     answers.structure === level 
-                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 shadow-sm' 
-                    : 'border-slate-200 dark:border-slate-800 hover:border-orange-200 hover:bg-slate-50 dark:hover:bg-slate-900'
+                    ? 'border-primary bg-primary/5 dark:bg-primary/20 shadow-sm' 
+                    : 'border-slate-200 dark:border-slate-800 hover:border-primary/20 hover:bg-slate-50 dark:hover:bg-slate-900'
                   }`}
                 >
                   <div className="font-bold text-base">{level === 'Simple' ? 'Проста' : level === 'Balanced' ? 'Збалансована' : 'Деталізована'}</div>
@@ -336,8 +336,8 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
 
         return (
           <div className="space-y-6 max-w-2xl mx-auto h-[60vh] flex flex-col justify-center">
-             <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-900 rounded-3xl p-8 flex flex-col items-center text-center space-y-6">
-                <Brain className="w-16 h-16 text-orange-500" />
+             <div className="bg-primary/5 dark:bg-primary/20 border border-primary/20 dark:border-primary/20 rounded-3xl p-8 flex flex-col items-center text-center space-y-6">
+                <Brain className="w-16 h-16 text-primary" />
                 <div className="space-y-2">
                    <h2 className="text-2xl font-bold text-foreground">Забули про деякі сфери?</h2>
                    <p className="text-muted-foreground text-lg w-[90%] mx-auto">
@@ -346,10 +346,10 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4 w-full pt-4">
-                   <Button size="lg" variant="outline" onClick={() => setStep(2)} className="h-14 flex-1 text-base rounded-2xl border-orange-500/30 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20">
+                   <Button size="lg" variant="outline" onClick={() => setStep(2)} className="h-14 flex-1 text-base rounded-2xl border-primary/30 text-primary dark:text-primary hover:bg-primary/5 dark:hover:bg-primary/20">
                       Повернутися і дописати цілі
                    </Button>
-                   <Button size="lg" onClick={startGeneration} className="h-14 flex-1 text-base rounded-2xl bg-orange-500 hover:bg-orange-600 text-white shadow-md">
+                   <Button size="lg" onClick={startGeneration} className="h-14 flex-1 text-base rounded-2xl bg-primary hover:bg-primary/90 text-white shadow-md">
                       Продовжити як є
                    </Button>
                 </div>
@@ -362,8 +362,8 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
         return (
           <div className="text-center space-y-8 py-12">
             <div className="relative">
-              <div className="w-24 h-24 border-4 border-orange-500/20 border-t-orange-500 rounded-full animate-spin mx-auto" />
-              <Brain className="w-10 h-10 text-orange-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-bounce" />
+              <div className="w-24 h-24 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto" />
+              <Brain className="w-10 h-10 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-bounce" />
             </div>
             <div className="space-y-2">
               <h2 className="text-3xl font-bold">Zynorvia AI аналізує ваші відповіді...</h2>
@@ -375,7 +375,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                   <span>Визначення ключових сфер...</span>
                </div>
                <div className="flex items-center gap-3 text-sm font-medium">
-                  <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
                   <span>Формування стратегічних цілей...</span>
                </div>
             </div>
@@ -386,7 +386,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
         return (
           <div className="space-y-6 flex flex-col min-h-[50vh]">
             <div className="flex flex-col items-center justify-center text-center space-y-2 mb-2">
-                <Brain className="w-12 h-12 text-orange-500 mb-2" />
+                <Brain className="w-12 h-12 text-primary mb-2" />
                 <h2 className="text-2xl font-bold tracking-tight">AI потребує уточнення</h2>
                 <p className="text-sm text-muted-foreground w-4/5">Для того щоб побудувати максимально точну та ефективну систему, дайте відповідь на кілька запитань.</p>
             </div>
@@ -396,7 +396,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                   const areaDef = DEFAULT_AREAS.find(a => a.iconName === q.areaId) || DEFAULT_AREAS[0];
                   return (
                      <div key={idx} className="space-y-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
-                        <label className="font-semibold text-sm flex items-center gap-2 text-orange-600 dark:text-orange-400">
+                        <label className="font-semibold text-sm flex items-center gap-2 text-primary dark:text-primary">
                            <div className={`w-5 h-5 rounded-full ${areaDef.color} flex items-center justify-center text-[9px] text-white`}>
                               {areaDef.title[0]}
                            </div>
@@ -404,7 +404,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                         </label>
                         <p className="text-sm font-medium tracking-wide">{q.question}</p>
                         <textarea
-                          className="w-full min-h-[80px] mt-2 p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-orange-500 text-sm resize-none"
+                          className="w-full min-h-[80px] mt-2 p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary text-sm resize-none"
                           placeholder="Ваша відповідь..."
                           value={clarificationAnswers[q.areaId] || ''}
                           onChange={(e) => setClarificationAnswers(prev => ({ ...prev, [q.areaId]: e.target.value }))}
@@ -415,7 +415,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
             </div>
             
             <div className="flex gap-3 pt-4 shrink-0">
-               <Button size="lg" className="w-full h-12 rounded-xl bg-orange-500 hover:bg-orange-600 text-white shadow-xl shadow-orange-500/20" onClick={startGeneration}>
+               <Button size="lg" className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20" onClick={startGeneration}>
                   Продовжити створення
                </Button>
             </div>
@@ -446,7 +446,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                      </div>
                      <div className="space-y-2">
                           <div className="text-sm">
-                             <div className="flex items-start gap-1.5 font-semibold text-orange-600 dark:text-orange-400">
+                             <div className="flex items-start gap-1.5 font-semibold text-primary dark:text-primary">
                                <Target className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                                <span className="leading-tight">{goal.title}</span>
                              </div>
@@ -494,13 +494,13 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
             {generatedData?.habits && generatedData.habits.length > 0 && (
               <div className="bg-slate-50 dark:bg-slate-900/50 p-5 rounded-2xl">
                  <h3 className="font-bold flex items-center gap-2 mb-3 text-sm">
-                    <Flame className="w-4 h-4 text-orange-500" />
+                    <Flame className="w-4 h-4 text-primary" />
                     Ключові звички
                  </h3>
                  <div className="flex flex-wrap gap-2">
                     {generatedData.habits.map((habit: any, hidx: number) => (
                       <span key={hidx} className="px-2.5 py-1 bg-white dark:bg-slate-800 rounded-lg text-xs font-semibold border border-slate-100 dark:border-slate-800 flex items-center gap-1.5 shadow-sm">
-                          <Zap className="w-3 h-3 text-orange-500" />
+                          <Zap className="w-3 h-3 text-primary" />
                           {habit.title}
                       </span>
                     ))}
@@ -509,16 +509,16 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
             )}
 
             <div className="flex flex-col gap-3 pt-6">
-              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/30 rounded-2xl p-4 text-left">
+              <div className="bg-primary/5 dark:bg-primary/20 border border-primary/10 dark:border-primary/20 rounded-2xl p-4 text-left">
                  <div className="flex items-start gap-3">
-                     <div className="bg-orange-100 dark:bg-orange-900/30 p-1.5 rounded-lg shrink-0 mt-0.5">
-                        <Sparkles className="w-4 h-4 text-orange-500" />
+                     <div className="bg-primary/10 dark:bg-primary/20 p-1.5 rounded-lg shrink-0 mt-0.5">
+                        <Sparkles className="w-4 h-4 text-primary" />
                      </div>
                      <div>
                          <div className="font-bold text-[15px] flex items-center gap-2">
                              Глибоке Планування 
                              {user?.subscriptionTier !== 'pro' && (
-                                <span className="text-[10px] uppercase font-bold bg-orange-200/80 dark:bg-orange-800/80 text-orange-800 dark:text-orange-200 px-1.5 py-0.5 rounded-md">Pro</span>
+                                <span className="text-[10px] uppercase font-bold bg-primary/20 dark:bg-primary/20 text-primary dark:text-primary px-1.5 py-0.5 rounded-md">Pro</span>
                              )}
                          </div>
                          <div className="text-xs text-muted-foreground mt-0.5 leading-snug">
@@ -526,7 +526,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                          </div>
                      </div>
                  </div>
-                 <Button size="lg" className="w-full h-11 mt-4 text-[15px] font-semibold rounded-xl bg-orange-500 hover:bg-orange-600 text-white shadow-lg shadow-orange-500/20 transition-all hover:-translate-y-0.5" onClick={() => {
+                 <Button size="lg" className="w-full h-11 mt-4 text-[15px] font-semibold rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-0.5" onClick={() => {
                    const isPro = user?.subscriptionTier === 'pro';
                    if (isPro) {
                       setStep(9); // Deep Planning Interface
@@ -547,8 +547,8 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
       case 8: // Pro Paywall
         return (
           <div className="text-center space-y-6 max-w-lg mx-auto py-4">
-             <div className="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-2">
-                <ShieldCheck className="w-8 h-8 text-orange-500" />
+             <div className="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <ShieldCheck className="w-8 h-8 text-primary" />
              </div>
              <div>
                 <h2 className="text-2xl font-extrabold tracking-tight">Відкрийте Глибоке Планування</h2>
@@ -557,14 +557,14 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
              
              <div className="text-left bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-5 space-y-3">
                 <div className="flex items-start gap-3">
-                   <CheckCircle2 className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                   <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                    <div>
                        <div className="font-bold text-sm">Детальний розбір цілей</div>
                        <div className="text-xs text-muted-foreground">ШІ задасть вам додаткові питання та створить покрокові плани дій для кожної цілі.</div>
                    </div>
                 </div>
                 <div className="flex items-start gap-3">
-                   <CheckCircle2 className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+                   <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                    <div>
                        <div className="font-bold text-sm">Розклад ідеального дня</div>
                        <div className="text-xs text-muted-foreground">Збалансований щоденний розклад, який допоможе системно рухатись до цілей.</div>
@@ -573,7 +573,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
              </div>
 
              <div className="flex flex-col gap-3 pt-4">
-                 <Button size="lg" className="h-12 w-full text-base rounded-xl shadow-xl shadow-orange-500/20" onClick={() => {
+                 <Button size="lg" className="h-12 w-full text-base rounded-xl shadow-xl shadow-primary/20" onClick={() => {
                      // Save state to localStorage Before redirecting
                      localStorage.setItem('onboarding_deep_plan_context', JSON.stringify({
                          answers,
@@ -615,7 +615,7 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
         {step > 0 && step < 6 && (
           <div className="absolute top-0 left-0 w-full h-1 bg-slate-100 dark:bg-slate-900">
              <motion.div 
-               className="h-full bg-orange-500"
+               className="h-full bg-primary"
                initial={{ width: '0%' }}
                animate={{ width: `${(step / 5) * 100}%` }}
              />

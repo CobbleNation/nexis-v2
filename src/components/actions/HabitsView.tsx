@@ -45,7 +45,7 @@ export function HabitsView() {
             <div className="flex items-center justify-between py-4">
                 <div>
                     <h2 className="text-2xl font-bold flex items-center gap-2 text-slate-900 dark:text-foreground">
-                        <Zap className="w-6 h-6 text-orange-500" />
+                        <Zap className="w-6 h-6 text-primary" />
                         Звички
                     </h2>
                     <p className="text-muted-foreground text-sm">Ваш щоденний ритм та дисципліна</p>
@@ -80,7 +80,7 @@ export function HabitsView() {
                                         >
                                             <CalendarDays className="w-4 h-4" />
                                         </button>
-                                        <div className="flex items-center gap-1 sm:gap-1.5 text-orange-500 font-bold text-xs bg-orange-50 dark:bg-orange-500/10 px-2 py-1.5 rounded-full">
+                                        <div className="flex items-center gap-1 sm:gap-1.5 text-primary font-bold text-xs bg-primary/5 dark:bg-primary/10 px-2 py-1.5 rounded-full">
                                             <Flame className={cn("w-3.5 h-3.5 fill-orange-500 transition-all", isCompleted ? "scale-110" : "scale-100")} />
                                             {habit.streak}
                                         </div>

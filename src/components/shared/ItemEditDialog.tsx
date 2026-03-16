@@ -185,7 +185,7 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
                                         </span>
                                     )}
                                     {formData.dueDate && (
-                                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-md text-orange-700 dark:text-orange-400">
+                                        <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/5 dark:bg-primary/20 px-2 py-1 rounded-md text-primary dark:text-primary">
                                             <Clock className="w-3 h-3" /> Виконати до: {typeof formData.dueDate === 'string' ? formData.dueDate.split('T')[0] : formData.dueDate}
                                         </span>
                                     )}
@@ -198,7 +198,7 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
                                         <span className="inline-flex items-center gap-1 text-xs font-bold bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-md text-red-600">Високий пріоритет</span>
                                     )}
                                     {formData.isFocus && (
-                                        <span className="inline-flex items-center gap-1 text-xs font-bold bg-orange-50 dark:bg-orange-900/20 px-2 py-1 rounded-md text-orange-600">⚡ Фокус</span>
+                                        <span className="inline-flex items-center gap-1 text-xs font-bold bg-primary/5 dark:bg-primary/20 px-2 py-1 rounded-md text-primary">⚡ Фокус</span>
                                     )}
                                 </div>
                                 {/* Project info */}
@@ -412,7 +412,7 @@ export function ItemEditDialog({ itemId, type, open, onOpenChange }: ItemEditDia
                         <Button variant="ghost" onClick={() => onOpenChange(false)}>
                             Скасувати
                         </Button>
-                        <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600 text-white">
+                        <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 text-white">
                             <Save className="h-4 w-4 mr-2" />
                             Зберегти
                         </Button>
