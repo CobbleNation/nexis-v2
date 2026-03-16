@@ -97,9 +97,10 @@ Output JSON format:
             temperature: 0.2, // Low temp for reliable formatting
         });
 
-        const content = completion.choices[0].message.content;
+        let content = completion.choices[0].message.content;
         if (!content) throw new Error('No content from OpenAI');
 
+        content = content.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
         const result = JSON.parse(content);
 
         // --- Database Population ---
@@ -151,7 +152,7 @@ Output JSON format:
                         id: targetMetricId,
                         userId,
                         areaId: realAreaId,
-                        name: goal.metric.name,
+                        name: goal.metric.name || 'Метрика',
                         unit: goal.metric.unit || '',
                         type: 'number',
                         frequency: ['daily', 'weekly', 'monthly', 'quarterly', 'yearly'].includes(goal.metric.frequency) ? goal.metric.frequency : 'weekly'
@@ -162,7 +163,7 @@ Output JSON format:
                     id: realGoalId,
                     userId,
                     areaId: realAreaId,
-                    title: goal.title,
+                    title: goal.title || 'Нова ціль',
                     description: goal.description || '',
                     type: ['vision', 'strategic', 'tactical'].includes(goal.type) ? goal.type : 'strategic',
                     status: 'active',
@@ -179,7 +180,7 @@ Output JSON format:
                             userId,
                             areaId: realAreaId,
                             linkedGoalId: realGoalId,
-                            title: task.title,
+                            title: task.title || 'Нова задача',
                             type: 'task',
                             status: 'pending',
                             priority: 'medium',
@@ -204,7 +205,7 @@ Output JSON format:
                     id: realProjectId,
                     userId,
                     areaId: realAreaId,
-                    title: proj.title,
+                    title: proj.title || 'Новий проєкт',
                     description: proj.description || '',
                     status: 'active',
                     createdAt: new Date(),
@@ -218,7 +219,7 @@ Output JSON format:
                             userId,
                             areaId: realAreaId,
                             projectId: realProjectId,
-                            title: task.title,
+                            title: task.title || 'Нова задача',
                             type: 'task',
                             status: 'pending',
                             priority: 'medium',
@@ -236,7 +237,7 @@ Output JSON format:
                 await db.insert(habits).values({
                     id: uuidv4(),
                     userId,
-                    title: habit.title,
+                    title: habit.title || 'Нова звичка',
                     frequency: habit.frequency || 'daily',
                     status: 'active',
                     createdAt: new Date(),
