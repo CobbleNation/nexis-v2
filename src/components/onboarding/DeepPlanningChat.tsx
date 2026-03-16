@@ -45,6 +45,8 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showFinishDialog, setShowFinishDialog] = useState(false);
+  const [isGeneratingPlan, setIsGeneratingPlan] = useState(false);
+  const [generatedPlan, setGeneratedPlan] = useState<any | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -151,14 +153,39 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
     }
   };
 
-  const handleConfirmFinish = async () => {
-     setIsSaving(true);
+  const handleGeneratePlan = async () => {
+     setIsGeneratingPlan(true);
      try {
-         const res = await fetch('/api/ai/onboarding/deep-plan/summarize-and-save', {
+         const res = await fetch('/api/ai/onboarding/deep-plan/summarize', {
              method: 'POST',
              headers: { 'Content-Type': 'application/json' },
              body: JSON.stringify({
                  messages,
+                 selectedAreaIds
+             })
+         });
+         
+         if (!res.ok) throw new Error('Summarize failed');
+         const data = await res.json();
+         setGeneratedPlan(data.plan);
+         setShowFinishDialog(false);
+         
+     } catch (e) {
+         console.error('Failed to summarize deep plan', e);
+         alert('Помилка при створенні плану. Спробуйте ще раз.');
+     } finally {
+         setIsGeneratingPlan(false);
+     }
+  };
+
+  const handleSavePlan = async () => {
+     setIsSaving(true);
+     try {
+         const res = await fetch('/api/ai/onboarding/deep-plan/save', {
+             method: 'POST',
+             headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({
+                 plan: generatedPlan,
                  selectedAreaIds
              })
          });
@@ -175,7 +202,6 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
          alert('Помилка при збереженні плану. Спробуйте ще раз.');
      } finally {
          setIsSaving(false);
-         setShowFinishDialog(false);
      }
   };
 
@@ -191,10 +217,10 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
                <h3 className="text-xl font-bold">Готові зберегти систему?</h3>
                <p className="text-sm text-muted-foreground">Ми проаналізуємо нашу розмову та створимо готові задачі та звички.</p>
                <div className="flex gap-3 pt-4">
-                  <Button variant="outline" className="flex-1" onClick={() => setShowFinishDialog(false)} disabled={isSaving}>Скасувати</Button>
-                  <Button className="flex-1 bg-primary hover:bg-primary/90 text-white" onClick={handleConfirmFinish} disabled={isSaving}>
-                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-                     {isSaving ? 'Створення...' : 'Створити'}
+                  <Button variant="outline" className="flex-1" onClick={() => setShowFinishDialog(false)} disabled={isGeneratingPlan}>Скасувати</Button>
+                  <Button className="flex-1 bg-primary hover:bg-primary/90 text-white" onClick={handleGeneratePlan} disabled={isGeneratingPlan}>
+                     {isGeneratingPlan ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                     {isGeneratingPlan ? 'Створення...' : 'Створити'}
                   </Button>
                </div>
             </div>
@@ -208,8 +234,11 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
                 <Brain className="w-6 h-6 text-primary" />
                 Глибоке планування Zynorvia
             </h2>
-            <p className="text-sm text-muted-foreground mt-1 text-center sm:text-left">Деталізуємо ваші цілі та будуємо стратегію щоденних дій.</p>
+            <p className="text-sm text-muted-foreground mt-1 text-center sm:text-left">
+              {generatedPlan ? 'Перегляньте ваш згенерований план.' : 'Деталізуємо ваші цілі та будуємо стратегію щоденних дій.'}
+            </p>
         </div>
+        {!generatedPlan && (
         <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
             {onMinimize && (
                <Button onClick={onMinimize} variant="ghost" className="text-muted-foreground flex-1 sm:flex-none">
@@ -220,9 +249,11 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
                Завершити планування
             </Button>
         </div>
+        )}
       </div>
 
-      {/* Chat Area */}
+      {/* Chat / Review Area */}
+      {!generatedPlan ? (
       <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4 custom-scrollbar">
         <AnimatePresence initial={false}>
           {messages.map((message, i) => (
@@ -272,8 +303,76 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
         </AnimatePresence>
         <div ref={messagesEndRef} className="h-2" />
       </div>
+      ) : (
+      <div className="flex-1 overflow-y-auto px-2 py-4 space-y-6 custom-scrollbar">
+         <div className="bg-primary/10 text-primary p-4 rounded-2xl flex items-start gap-3">
+             <Brain className="w-6 h-6 shrink-0 mt-0.5" />
+             <p className="text-sm font-medium leading-relaxed">Ось ваш персональний план на основі нашої розмови. Перегляньте його перед збереженням. Якщо щось не так, ви можете повернутися до чату і попросити змінити.</p>
+         </div>
 
-      {/* Input Area */}
+         {generatedPlan.goals && generatedPlan.goals.length > 0 && (
+            <div className="space-y-3">
+               <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-5 h-5 text-indigo-500" /> Створені цілі</h3>
+               <div className="grid gap-3 sm:grid-cols-2">
+               {generatedPlan.goals.map((goal: any, i: number) => (
+                  <div key={i} className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl">
+                      <div className="font-bold text-base mb-1">{goal.title}</div>
+                      <p className="text-muted-foreground text-sm leading-relaxed mb-3">{goal.description}</p>
+                      {goal.tasks && goal.tasks.length > 0 && (
+                          <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+                             <div className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-500">Завдання</div>
+                             <ul className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
+                                 {goal.tasks.map((t: any, j: number) => <li key={j} className="flex gap-2 items-start"><span className="text-primary mt-1">•</span><span className="leading-tight">{t.title}</span></li>)}
+                             </ul>
+                          </div>
+                      )}
+                  </div>
+               ))}
+               </div>
+            </div>
+         )}
+
+         {generatedPlan.projects && generatedPlan.projects.length > 0 && (
+            <div className="space-y-3">
+               <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-5 h-5 text-indigo-500" /> Проєкти</h3>
+               <div className="grid gap-3 sm:grid-cols-2">
+               {generatedPlan.projects.map((proj: any, i: number) => (
+                  <div key={i} className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl">
+                      <div className="font-bold text-base mb-1">{proj.title}</div>
+                      <p className="text-muted-foreground text-sm leading-relaxed mb-3">{proj.description}</p>
+                      {proj.tasks && proj.tasks.length > 0 && (
+                          <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+                             <div className="text-xs font-bold uppercase tracking-wider mb-2 text-slate-500">Завдання</div>
+                             <ul className="space-y-1.5 text-sm text-slate-700 dark:text-slate-300">
+                                 {proj.tasks.map((t: any, j: number) => <li key={j} className="flex gap-2 items-start"><span className="text-primary mt-1">•</span><span className="leading-tight">{t.title}</span></li>)}
+                             </ul>
+                          </div>
+                      )}
+                  </div>
+               ))}
+               </div>
+            </div>
+         )}
+         
+         {generatedPlan.habits && generatedPlan.habits.length > 0 && (
+             <div className="space-y-3">
+                 <h3 className="font-bold text-lg flex items-center gap-2"><Sparkles className="w-5 h-5 text-emerald-500" /> Звички</h3>
+                 <div className="flex flex-wrap gap-2">
+                     {generatedPlan.habits.map((h: any, i: number) => (
+                         <div key={i} className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 rounded-lg text-sm font-medium">
+                             {h.title} <span className="opacity-70 font-normal ml-1">({h.frequency})</span>
+                         </div>
+                     ))}
+                 </div>
+             </div>
+         )}
+         
+         <div className="h-6" />
+      </div>
+      )}
+
+      {/* Input Area / Review Footer Area */}
+      {!generatedPlan ? (
       <div className="pt-2 px-1 shrink-0 bg-background/80 backdrop-blur-sm relative z-10 p-2">
         <form onSubmit={handleSubmit} className="flex items-end gap-2 relative bg-slate-100 dark:bg-slate-900 focus-within:ring-2 focus-within:ring-primary/50 rounded-2xl p-1.5 transition-all shadow-sm border border-transparent dark:border-slate-800">
           <textarea
@@ -304,6 +403,17 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
              <span className="text-[10px] text-muted-foreground">Натисніть Enter для відправки. Shift + Enter для нового рядка.</span>
         </div>
       </div>
+      ) : (
+      <div className="pt-4 shrink-0 bg-background/80 backdrop-blur-sm border-t border-border/40 flex flex-col sm:flex-row justify-between gap-4 mt-2 px-2 pb-4">
+          <Button variant="outline" onClick={() => setGeneratedPlan(null)} disabled={isSaving} className="font-semibold rounded-xl h-12 w-full sm:w-auto px-6">
+              Змінити в чаті
+          </Button>
+          <Button className="bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl h-12 text-md shadow-md w-full sm:w-auto px-8" onClick={handleSavePlan} disabled={isSaving}>
+             {isSaving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
+             Зберегти систему
+          </Button>
+      </div>
+      )}
     </div>
   );
 }
