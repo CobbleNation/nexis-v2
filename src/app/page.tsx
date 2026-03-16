@@ -2,7 +2,7 @@ import { LandingHeader } from "@/components/landing/LandingHeader"
 import { LandingFooter } from "@/components/landing/LandingFooter"
 import { getSession } from "@/lib/auth-utils"
 import Link from "next/link"
-import { ArrowRight, Brain, CheckCircle2, Target, Focus, CheckCircle, Crosshair, ListTodo, Lightbulb, User, Check, Zap, CheckSquare, ShieldCheck, Layout, Sparkles } from "lucide-react"
+import { ArrowRight, Brain, CheckCircle2, Target, Focus, CheckCircle, Crosshair, ListTodo, Lightbulb, User, Check, Zap, CheckSquare, ShieldCheck, Layout, Sparkles, Search, Bell, Activity, Flame } from "lucide-react"
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -14,7 +14,7 @@ export default async function LandingPage() {
   const user = await getSession();
   
   const ctaLink = user ? "/overview" : "/register";
-  const ctaText = user ? "Перейти до системи" : "Start Free";
+  const ctaText = user ? "Перейти до системи" : "Почати безкоштовно";
 
   return (
     <div className="flex flex-col min-h-screen bg-[#020817] text-slate-50 overflow-x-hidden font-sans selection:bg-primary/30">
@@ -53,118 +53,220 @@ export default async function LandingPage() {
           <div className="mt-20 relative mx-auto max-w-6xl">
              <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent z-20 pointer-events-none" />
              <div className="rounded-2xl border border-white/10 bg-slate-900/50 backdrop-blur-xl p-2 shadow-2xl relative overflow-hidden text-left">
-                {/* Dashboard Mockup Component restored from OLD LandingHero.tsx */}
-                <div className="relative w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-[#0B1121] aspect-[16/9] overflow-hidden">
-                   {/* Mock UI Header */}
-                   <div className="h-10 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f1629] flex items-center px-4 gap-2">
-                       <div className="flex gap-1.5">
-                           <div className="w-3 h-3 rounded-full bg-red-500/20" />
-                           <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
-                           <div className="w-3 h-3 rounded-full bg-green-500/20" />
-                       </div>
-                       <div className="ml-4 h-5 w-64 rounded bg-slate-100 dark:bg-slate-800" />
-                   </div>
+                {/* Dashboard Mockup Component derived exactly from user screenshot */}
+                <div className="relative w-full rounded-xl border border-slate-800 dark:border-slate-800 bg-[#0B1121] aspect-[16/9] overflow-hidden flex font-sans text-slate-300">
+                    {/* Sidebar */}
+                    <div className="w-[180px] lg:w-[220px] border-r border-slate-800 bg-[#0f1629] p-3 hidden md:flex flex-col text-xs space-y-4 overflow-y-auto">
+                        {/* Logo */}
+                        <div className="flex items-center gap-2 px-2 py-1 mb-2 text-white font-bold text-[13px]">
+                            <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center shrink-0"></div>
+                            Zynorvia
+                        </div>
+                        
+                        {/* Create Button */}
+                        <div className="bg-orange-500 text-white rounded-lg py-2 text-center font-bold text-[11px] shadow-[0_0_15px_rgba(249,115,22,0.3)] mx-2">
+                            + Створити
+                        </div>
 
-                   {/* Mock UI Content */}
-                   <div className="flex h-[calc(100%-2.5rem)] text-left bg-slate-50 dark:bg-[#020817]">
-                       {/* Sidebar Mock */}
-                       <div className="w-16 md:w-48 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0B1121] p-4 hidden md:flex flex-col gap-4">
-                           <div className="space-y-1">
-                               <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-lg text-xs font-bold">
-                                   <Layout className="w-3 h-3" /> <span className="hidden lg:inline">Огляд</span>
-                               </div>
-                               <div className="flex items-center gap-2 px-3 py-2 text-slate-500 dark:text-slate-400 rounded-lg text-xs font-medium">
-                                   <Target className="w-3 h-3" /> <span className="hidden lg:inline">Цілі</span>
-                               </div>
-                               <div className="flex items-center gap-2 px-3 py-2 text-slate-500 dark:text-slate-400 rounded-lg text-xs font-medium">
-                                   <Zap className="w-3 h-3" /> <span className="hidden lg:inline">Звички</span>
-                               </div>
-                           </div>
-                           <div className="mt-auto border-t border-slate-100 dark:border-slate-800 pt-4 space-y-2">
-                               <div className="h-2 w-20 bg-slate-100 dark:bg-slate-800 rounded-full" />
-                               <div className="h-2 w-12 bg-slate-100 dark:bg-slate-800 rounded-full" />
-                           </div>
-                       </div>
+                        <div className="space-y-4 flex-1">
+                            {/* Головна */}
+                            <div className="space-y-1">
+                                <div className="text-[9px] font-bold text-slate-500 mb-1 px-2 uppercase tracking-wide">Головна</div>
+                                <div className="flex items-center justify-between px-2 py-1.5 bg-orange-500/10 text-orange-400 rounded-lg font-bold">
+                                    <div className="flex items-center gap-2"><Layout className="w-3.5 h-3.5" /> Огляд</div>
+                                </div>
+                                <div className="flex items-center px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <div className="flex items-center gap-2"><Sparkles className="w-3.5 h-3.5" /> Налаштування AI</div>
+                                </div>
+                            </div>
 
-                       {/* Main Dashboard Mock */}
-                       <div className="flex-1 p-4 md:p-6 space-y-4 md:space-y-6 overflow-hidden">
-                           {/* Greeting & Stats */}
-                           <div className="flex justify-between items-end">
-                               <div className="min-w-0">
-                                   <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white truncate">Добрий ранок, Олександр</h3>
-                                   <p className="text-[10px] md:text-xs text-slate-500 truncate">У тебе залишилось 4 завдання на сьогодні.</p>
-                               </div>
-                               <div className="flex gap-2 shrink-0">
-                                   <div className="text-right">
-                                       <div className="text-base md:text-lg font-bold text-slate-900 dark:text-white">85%</div>
-                                       <div className="text-[10px] text-slate-500">Прогрес</div>
-                                   </div>
-                               </div>
-                           </div>
+                            {/* AI Інструменти */}
+                            <div className="space-y-1">
+                                <div className="text-[9px] font-bold text-slate-500 mb-1 px-2 uppercase tracking-wide">AI Інструменти</div>
+                                <div className="flex items-center justify-between px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <div className="flex items-center gap-2"><div className="w-4 flex justify-center text-yellow-500">💡</div> Аналіз Дня</div>
+                                    <div className="w-3 h-3 text-slate-600 font-bold uppercase font-sans"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+                                </div>
+                                <div className="flex items-center justify-between px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <div className="flex items-center gap-2"><div className="w-4 flex justify-center text-purple-500">🔮</div> AI Стратегія</div>
+                                    <div className="w-3 h-3 text-slate-600 font-bold uppercase font-sans"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+                                </div>
+                            </div>
 
-                           {/* Grid Cards */}
-                           <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4">
-                               {/* Goal Card */}
-                               <div className="p-3 md:p-4 rounded-xl bg-white dark:bg-[#0B1121] border border-slate-100 dark:border-slate-800 shadow-sm space-y-2 md:space-y-3">
-                                   <div className="flex items-center gap-2 text-[10px] md:text-xs font-medium text-slate-500">
-                                       <Target className="w-3 h-3 text-emerald-500" /> Цілі Q1
-                                   </div>
-                                   <div className="space-y-2">
-                                       <div>
-                                           <div className="flex justify-between text-[10px] font-bold mb-1 text-slate-700 dark:text-slate-300">
-                                               <span>Продукт</span>
-                                               <span>75%</span>
-                                           </div>
-                                           <div className="h-1 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                               <div className="h-full w-[75%] bg-emerald-500 rounded-full" />
-                                           </div>
-                                       </div>
-                                   </div>
-                               </div>
+                            {/* Управління */}
+                            <div className="space-y-1">
+                                <div className="text-[9px] font-bold text-slate-500 mb-1 px-2 uppercase tracking-wide">Управління</div>
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <Target className="w-3.5 h-3.5 opacity-70" /> Сфери
+                                </div>
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <Crosshair className="w-3.5 h-3.5 opacity-70" /> Цілі
+                                </div>
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <Layout className="w-3.5 h-3.5 opacity-70" /> Проекти
+                                </div>
+                            </div>
 
-                               {/* Habits Card */}
-                               <div className="p-3 md:p-4 rounded-xl bg-white dark:bg-[#0B1121] border border-slate-100 dark:border-slate-800 shadow-sm space-y-2 md:space-y-3">
-                                   <div className="flex items-center gap-2 text-[10px] md:text-xs font-medium text-slate-500">
-                                       <Zap className="w-3 h-3 text-orange-500" /> Звички
-                                   </div>
-                                   <div className="space-y-1 md:space-y-2">
-                                       <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                           <div className="h-3 w-3 rounded bg-orange-500 text-white flex items-center justify-center text-[6px]">✓</div>
-                                           <span className="text-[10px] md:text-xs font-medium line-through text-slate-400">Медитація</span>
-                                       </div>
-                                       <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                           <div className="h-3 w-3 rounded border border-slate-200 dark:border-slate-700" />
-                                           <span className="text-[10px] md:text-xs font-medium">Читання</span>
-                                       </div>
-                                   </div>
-                               </div>
+                            {/* Щоденно */}
+                            <div className="space-y-1">
+                                <div className="text-[9px] font-bold text-slate-500 mb-1 px-2 uppercase tracking-wide">Щоденно</div>
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <CheckSquare className="w-3.5 h-3.5 opacity-70" /> Дії
+                                </div>
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                    <ListTodo className="w-3.5 h-3.5 opacity-70" /> Розклад
+                                </div>
+                            </div>
 
-                               {/* Next Action */}
-                               <div className="p-3 md:p-4 rounded-xl bg-gradient-to-br from-orange-500 to-rose-600 text-white shadow-md flex flex-col justify-between min-h-[80px]">
-                                   <div className="text-[10px] font-medium opacity-80 uppercase tracking-wider">Наступним</div>
+                            {/* Ресурси */}
+                            <div className="space-y-1">
+                                <div className="text-[9px] font-bold text-slate-500 mb-1 px-2 uppercase tracking-wide">Ресурси</div>
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                   <Lightbulb className="w-3.5 h-3.5 opacity-70" /> Контент
+                                </div>
+                                <div className="flex items-center gap-2 px-2 py-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-lg font-medium transition-colors">
+                                   <Activity className="w-3.5 h-3.5 opacity-70" /> Аналітика
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Pro Banner */}
+                        <div className="mt-4 border border-orange-500/20 bg-gradient-to-br from-orange-500/10 to-transparent rounded-xl p-3 relative overflow-hidden group">
+                            <div className="flex items-center gap-1.5 text-white font-bold text-[10px] mb-2 relative z-10">
+                                <Zap className="w-3 h-3 text-orange-400" /> Перейти на Pro
+                            </div>
+                            <p className="text-[8px] text-slate-400 mb-3 relative z-10 leading-[1.3] pr-2">Розблокуйте всі AI інструменти та преміум функції для максимальної продуктивності.</p>
+                            <div className="w-full py-1.5 text-center bg-orange-500 hover:bg-orange-600 transition-colors text-[9px] text-white font-bold rounded-lg relative z-10 cursor-pointer shadow-md">Оновити зараз</div>
+                            <div className="absolute top-0 right-0 -mr-6 -mt-6 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+                                <Sparkles className="w-24 h-24 text-orange-500" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content Area */}
+                    <div className="flex-1 flex flex-col bg-[#020510] overflow-hidden relative">
+                        {/* Top Navbar */}
+                        <div className="h-14 border-b border-slate-800/80 flex items-center justify-between px-6 shrink-0 bg-[#0f1629]">
+                            <div className="flex items-center bg-[#151c31] rounded-full px-3 py-1.5 w-[200px] lg:w-[280px] border border-slate-800 text-[10px] text-slate-500 gap-2 font-medium">
+                                <Search className="w-3.5 h-3.5 text-slate-600" />
+                                <span>Пошук (Цілі, Нотатки, Завдання)...</span>
+                            </div>
+                            <div className="flex items-center gap-5 text-slate-400">
+                                <div className="relative">
+                                    <Bell className="w-4 h-4 hover:text-white transition-colors" />
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-7 h-7 rounded-full bg-[#1b120c] border border-orange-900/50 font-bold text-orange-500 flex items-center justify-center text-[9px]">CA</div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Main Body */}
+                        <div className="flex-1 overflow-y-auto p-4 lg:p-8 flex flex-col gap-6 lg:gap-8">
+                            
+                            {/* Header / Title */}
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <div className="text-[9px] text-slate-500 uppercase font-black tracking-widest mb-2 flex items-center gap-2">
+                                        ДЕНЬ <div className="w-1 h-1 rounded-full bg-slate-600"/> СИСТЕМА
+                                    </div>
+                                    <h2 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Огляд Системи</h2>
+                                </div>
+                                <div className="text-right flex items-center gap-4">
+                                    <div className="flex flex-col items-end">
+                                        <div className="text-3xl lg:text-4xl font-extrabold text-rose-500/90 leading-none flex items-center gap-2">
+                                            11 <div className="w-7 h-7 rounded-full border border-slate-800 bg-slate-900 flex items-center justify-center"><Activity className="w-3.5 h-3.5 text-slate-400" /></div>
+                                        </div>
+                                        <div className="text-[8px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1.5">РІВЕНЬ ФОКУСУ</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Stats Row */}
+                            <div className="flex justify-between items-center px-2 text-slate-300">
+                                <div className="flex items-center gap-3">
+                                   <div className="w-9 h-9 rounded-full border border-slate-700 bg-slate-800/50 flex items-center justify-center text-[9px] font-bold text-slate-300">0%</div>
                                    <div>
-                                       <div className="text-xs md:text-sm font-bold truncate">Маркетинг</div>
-                                       <div className="text-[8px] md:text-[10px] opacity-80 mt-1">14:00 - 15:30</div>
-                                   </div>
-                               </div>
-                           </div>
-
-                           {/* Bottom List */}
-                           <div className="hidden sm:block p-4 rounded-xl bg-white dark:bg-[#0B1121] border border-slate-100 dark:border-slate-800 shadow-sm flex-1">
-                               <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-3">
-                                   <Layout className="w-3 h-3" /> Останні записи
-                               </div>
-                               <div className="space-y-3">
-                                   <div className="flex gap-3 text-xs text-slate-700 dark:text-slate-300">
-                                       <div className="text-slate-400 w-12 shrink-0">10:45</div>
-                                       <div className="truncate">
-                                           <span className="font-bold text-slate-800 dark:text-slate-200">Продуктивний інсайт... </span>
+                                       <div className="text-[9px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                                           фокус дня <div className="w-3 h-3 rounded-full border border-slate-600 flex items-center justify-center text-[7px] text-slate-400">i</div>
                                        </div>
+                                       <div className="text-sm font-bold text-white">Відсутній</div>
                                    </div>
-                               </div>
-                           </div>
-                       </div>
-                   </div>
+                                </div>
+                                <div className="flex items-center gap-3 text-right">
+                                   <div>
+                                       <div className="text-sm font-bold text-white flex justify-end gap-1 mb-1">0 дн.</div>
+                                       <div className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">СТРІК</div>
+                                   </div>
+                                   <div className="w-9 h-9 rounded-full border border-orange-500/20 bg-orange-500/10 flex items-center justify-center text-orange-500"><Flame className="w-4 h-4" /></div>
+                                </div>
+                            </div>
+
+                            {/* Focus of the day */}
+                            <div className="rounded-xl lg:rounded-2xl border border-slate-800/80 bg-[#0c1222] p-4 lg:p-6 shadow-sm">
+                                <div className="flex items-center gap-2.5 text-[11px] font-bold text-white mb-6 uppercase tracking-widest"><div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center shadow-[0_0_10px_rgba(249,115,22,0.4)]"><Target className="w-3 h-3 text-white" /></div> ФОКУС ДНЯ</div>
+                                
+                                <div className="border border-dashed border-slate-700/60 rounded-xl p-8 lg:p-12 flex flex-col items-center justify-center text-center bg-[#0a0e1a]">
+                                    <div className="w-12 h-12 rounded-full border border-orange-500/20 bg-orange-500/10 flex items-center justify-center mb-4">
+                                        <Target className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-white mb-2">Фокус дня не визначено</h3>
+                                    <p className="text-[11px] font-medium text-orange-500/70 mb-8 max-w-[250px]">Оберіть головну ціль для підвищення продуктивності</p>
+                                    <div className="flex gap-4">
+                                        <div className="px-5 py-2.5 mx-auto border border-slate-700/80 rounded-full text-[11px] font-bold text-slate-300 hover:bg-slate-800 cursor-pointer transition-colors">+ Вручну</div>
+                                        <div className="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 rounded-full text-[11px] font-bold text-white shadow-[0_0_15px_rgba(249,115,22,0.4)] flex items-center gap-2 cursor-pointer transition-colors"><Sparkles className="w-3 h-3"/> AI Фокус</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Bottom Grid */}
+                            <div className="grid md:grid-cols-[1fr_260px] gap-6 flex-1 min-h-[200px]">
+                                <div className="rounded-xl lg:rounded-2xl border border-slate-800/80 bg-[#0c1222] p-5 flex flex-col">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="text-[11px] font-bold text-white">Завдання на сьогодні</div>
+                                        <div className="text-[9px] font-bold text-slate-500 bg-[#161f36] px-2.5 py-1 rounded-full tracking-widest">0 / 0</div>
+                                    </div>
+                                    <div className="flex-1 bg-[#0a0e1a] rounded-xl border border-slate-800/40" />
+                                </div>
+                                <div className="rounded-xl lg:rounded-2xl border border-slate-800/80 bg-[#0c1222] p-5 flex flex-col">
+                                    <div className="flex items-center gap-2.5 text-[11px] font-bold text-white mb-6"><Activity className="w-3.5 h-3.5 text-emerald-500" /> Активність</div>
+                                    
+                                    <div className="flex-1 flex flex-col justify-end">
+                                        <div className="flex justify-between items-end h-[60px] mb-3">
+                                            {/* Bar columns */}
+                                            {[
+                                                [30, 20, 10, 20, 20], // ВІВ
+                                                [10, 40, 25, 25, 0],  // СЕР
+                                                [40, 15, 10, 5, 30],  // ЧТВ
+                                                [15, 35, 20, 10, 20],  // ПТН
+                                                [55, 15, 15, 5, 10],  // СУБ
+                                                [25, 30, 15, 10, 20],  // НЕД
+                                            ].map((col, i) => (
+                                                <div key={i} className="flex flex-col justify-end gap-[3px] w-5">
+                                                    {col.map((h, j) => h > 0 ? <div key={j} style={{height: `${h}%`}} className="w-full bg-[#1b253b] rounded-[2px]" /> : null)}
+                                                </div>
+                                            ))}
+                                            {/* PON - Orange column */}
+                                            <div className="flex flex-col justify-end gap-[3px] w-5 relative">
+                                                <div className="w-full h-[15%] bg-[#1b253b] rounded-[2px]" />
+                                                <div className="w-full h-[45%] bg-[#1b253b] rounded-[2px]" />
+                                                <div className="w-full h-[30%] bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)] rounded-[2px]" />
+                                                {/* Tooltip dot mock */}
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between text-[7px] font-bold text-slate-500 mb-4 px-1">
+                                            <div>ВІВ</div><div>СЕР</div><div>ЧТВ</div><div>ПТН</div><div>СУБ</div><div>НЕД</div><div className="text-orange-500">ПОН</div>
+                                        </div>
+                                        <div className="flex justify-end gap-3 text-[7px] text-slate-500 font-bold uppercase">
+                                            <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-[#1b253b]" /> ПУСТО</div>
+                                            <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> ВИКОНАНО</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
              </div>
           </div>
@@ -418,7 +520,7 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 8 — SOCIAL PROOF */}
-        <section className="px-4 py-20 border-y border-white/5 bg-gradient-to-b from-transparent to-slate-900/50">
+        <section className="px-4 py-40 bg-gradient-to-b from-transparent to-slate-900/50">
            <div className="max-w-5xl mx-auto text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-12">Що кажуть перші користувачі</h2>
               <div className="grid md:grid-cols-2 gap-6">
@@ -443,7 +545,7 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 9 — PRICING */}
-        <section className="px-4 max-w-7xl mx-auto">
+        <section className="px-4 py-40 max-w-7xl mx-auto bg-slate-950 rounded-[4rem] border border-white/5 shadow-2xl">
            <div className="text-center mb-16">
              <h2 className="text-3xl md:text-5xl font-bold mb-4">Прозорі Тарифи</h2>
              <p className="text-slate-400">Почніть організовувати життя безкоштовно, або розблокуйте силу ШІ з преміум планом.</p>
@@ -485,16 +587,16 @@ export default async function LandingPage() {
         </section>
 
         {/* SECTION 10 — FINAL CTA */}
-        <section className="px-4 max-w-5xl mx-auto text-center mt-20">
-           <div className="bg-gradient-to-r from-indigo-900/80 to-purple-900/80 rounded-[3rem] p-12 md:p-20 border border-white/10 relative overflow-hidden">
+        <section className="px-4 py-40 max-w-5xl mx-auto text-center">
+           <div className="bg-gradient-to-r from-indigo-900/80 to-purple-900/80 rounded-[4rem] p-12 md:p-24 border border-white/10 relative overflow-hidden shadow-2xl">
               <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
               <div className="relative z-10">
                  <h2 className="text-4xl md:text-6xl font-extrabold mb-6 text-white text-shadow-sm">Візьміть Контроль над Життям</h2>
-                 <p className="text-indigo-200 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+                 <p className="text-indigo-200 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
                     Приєднуйтесь до тисяч людей, які припинили дрейфувати і почали будувати власну життєву систему вже сьогодні.
                  </p>
-                 <Link href={ctaLink} className="inline-flex items-center justify-center gap-2 px-10 py-5 rounded-full bg-white text-indigo-950 font-bold text-lg hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95 shadow-2xl">
-                    {ctaText} <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center ml-2"><ArrowRight className="w-4 h-4 text-indigo-900" /></div>
+                 <Link href={ctaLink} className="inline-flex items-center justify-center gap-3 px-10 py-5 rounded-full bg-white text-indigo-950 font-bold text-lg hover:bg-slate-100 transition-transform hover:scale-105 active:scale-95 shadow-xl">
+                    {ctaText} <div className="w-7 h-7 rounded-full bg-indigo-100 flex items-center justify-center"><ArrowRight className="w-4 h-4 text-indigo-900" /></div>
                  </Link>
               </div>
            </div>
