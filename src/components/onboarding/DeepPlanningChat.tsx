@@ -202,13 +202,13 @@ export function DeepPlanningChat({ answers, selectedAreaIds, onFinish, onMinimiz
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-border/40 pb-4 mb-2 px-2 shrink-0 gap-4">
+      <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between border-b border-border/40 pb-4 mb-2 px-2 shrink-0 gap-4 text-center sm:text-left">
         <div>
-            <h2 className="text-xl font-bold flex items-center gap-2">
+            <h2 className="text-xl font-bold flex items-center justify-center sm:justify-start gap-2">
                 <Brain className="w-6 h-6 text-orange-500" />
-                Zynorvia Deep Planning
+                Глибоке планування Zynorvia
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">Деталізуємо ваші цілі та будуємо стратегію щоденних дій.</p>
+            <p className="text-sm text-muted-foreground mt-1 text-center sm:text-left">Деталізуємо ваші цілі та будуємо стратегію щоденних дій.</p>
         </div>
         <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
             {onMinimize && (

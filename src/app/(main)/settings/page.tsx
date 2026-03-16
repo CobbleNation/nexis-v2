@@ -69,8 +69,8 @@ export default function SettingsPage() {
 
                 toast.success('Акаунт успішно очищено', { id: toastId });
                 localStorage.removeItem('zynorvia-data');
-                // Reload to refresh state
-                window.location.reload();
+                // Redirect to overview to trigger AI onboarding
+                window.location.href = '/overview';
             } catch (e) {
                 toast.error('Не вдалося скинути дані', { id: toastId });
             }
