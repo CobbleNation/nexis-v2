@@ -16,8 +16,8 @@ services:
       - DATABASE_URL=${DATABASE_URL:-}
       - NEXTAUTH_URL=${NEXTAUTH_URL:-https://zynorvia.com}
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-some-strong-secret}
-    # If using Turso/external DB, you don't need a local DB service here.
-    # If using local SQLite file, you'd need to map a volume to persist it.
+    volumes:
+      - nexis_uploads:/app/public/uploads
 
   caddy:
     image: caddy:2-alpine
@@ -37,3 +37,4 @@ services:
 volumes:
   caddy_data:
   caddy_config:
+  nexis_uploads:
