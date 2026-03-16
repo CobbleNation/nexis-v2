@@ -8,6 +8,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { eq } from 'drizzle-orm';
 import { trackEvent } from '@/lib/analytics-server';
 
+import { DEFAULT_AREAS } from '@/lib/default-areas';
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
@@ -119,7 +121,26 @@ Output JSON format:
         // --- Database Population ---
         
         // Get all user's areas to map the requested 'areaId' (which corresponds to iconName in DEFAULT_AREAS) to the real DB UUID
-        const userAreas = await db.select().from(lifeAreas).where(eq(lifeAreas.userId, userId));
+        let userAreas = await db.select().from(lifeAreas).where(eq(lifeAreas.userId, userId));
+        
+        // If the user has no areas yet, initialize the ones they selected
+        if (userAreas.length === 0 && selectedAreaIds && selectedAreaIds.length > 0) {
+            const areasToInsert = DEFAULT_AREAS
+                .filter(a => selectedAreaIds.includes(a.iconName))
+                .map((a, index) => ({
+                    id: uuidv4(),
+                    userId,
+                    title: a.title,
+                    color: a.color,
+                    icon: a.iconName,
+                    order: index
+                }));
+            
+            if (areasToInsert.length > 0) {
+                await db.insert(lifeAreas).values(areasToInsert);
+                userAreas = await db.select().from(lifeAreas).where(eq(lifeAreas.userId, userId)); // Refresh
+            }
+        }
         
         // Helper to find the real area ID based on the 'iconName' (passed as areaId by frontend)
         const getRealAreaId = (requestedAreaId: string) => {
