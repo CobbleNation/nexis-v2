@@ -31,6 +31,7 @@ export async function POST(req: Request) {
         // Get all users
         const allUsers = await db.select({ id: users.id }).from(users);
 
+        const now = new Date();
         // Create notifications for all users
         // Note: For very large user bases, this should be a background job / batch process.
         // For current scale, we'll do them in a loop or batch insert.
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
             type,
             link,
             read: false,
-            createdAt: new Date()
+            createdAt: now
         }));
 
         // Batch insert in chunks of 100 to avoid statement limits

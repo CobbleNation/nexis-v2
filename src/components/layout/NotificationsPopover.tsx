@@ -156,6 +156,11 @@ export function NotificationsPopover() {
                                             <p className="text-xs text-muted-foreground leading-relaxed break-words">
                                                 {notification.message}
                                             </p>
+                                            {(notification as any)?.content && (
+                                                <p className="text-[11px] font-semibold text-primary/80 mt-1">
+                                                    Натисніть, щоб прочитати детальніше
+                                                </p>
+                                            )}
                                         </div>
                                         {!notification.read && (
                                             <Button
@@ -276,9 +281,10 @@ export function NotificationsPopover() {
                             </DialogDescription>
                         </div>
                     </div>
-                    <div className="p-6 text-sm md:text-base leading-relaxed whitespace-pre-wrap">
-                        {(selectedNotification as any)?.content}
-                    </div>
+                    <div 
+                        className="p-6 text-sm md:text-base leading-relaxed break-words prose dark:prose-invert max-w-none"
+                        dangerouslySetInnerHTML={{ __html: (selectedNotification as any)?.content || '' }}
+                    />
                     {selectedNotification?.link && (
                         <div className="p-6 pt-0 border-t mt-4 flex justify-end">
                             <Button onClick={() => {
