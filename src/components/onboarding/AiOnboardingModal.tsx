@@ -36,23 +36,58 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
   const { user } = useAuth();
 
   // 0: Intro, 1: Areas, 2: 3-12m Goals, 3: 1-5y Goals, 4: Challenges, 5: Structure, 6: Generating, 7: Success, 8: Pro Paywall, 9: Deep Planning Interface
-  const [step, setStep] = useState(0); 
-  const [answers, setAnswers] = useState<{
-    areaGoals: Record<string, string>;
-    longTermGoals: string;
-    challenges: string;
-    structure: string;
-  }>({
-    areaGoals: {},
-    longTermGoals: '',
-    challenges: '',
-    structure: 'Balanced'
+  const [step, setStep] = useState(() => {
+      if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('resume_onboarding') === 'deep_plan') return 9;
+      }
+      return 0;
+  }); 
+
+  const [answers, setAnswers] = useState(() => {
+      if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('resume_onboarding') === 'deep_plan') {
+              const savedContext = localStorage.getItem('onboarding_deep_plan_context');
+              if (savedContext) {
+                  try {
+                      return JSON.parse(savedContext).answers || { areaGoals: {}, longTermGoals: '', challenges: '', structure: 'Balanced' };
+                  } catch(e) {}
+              }
+          }
+      }
+      return { areaGoals: {}, longTermGoals: '', challenges: '', structure: 'Balanced' };
   });
-  const [selectedAreaIds, setSelectedAreaIds] = useState<string[]>([]);
+
+  const [selectedAreaIds, setSelectedAreaIds] = useState<string[]>(() => {
+      if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('resume_onboarding') === 'deep_plan') {
+              const savedContext = localStorage.getItem('onboarding_deep_plan_context');
+              if (savedContext) {
+                  try { return JSON.parse(savedContext).selectedAreaIds || []; } catch(e) {}
+              }
+          }
+      }
+      return [];
+  });
+
+  const [generatedData, setGeneratedData] = useState<any>(() => {
+      if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('resume_onboarding') === 'deep_plan') {
+              const savedContext = localStorage.getItem('onboarding_deep_plan_context');
+              if (savedContext) {
+                  try { return JSON.parse(savedContext).generatedData; } catch(e) {}
+              }
+          }
+      }
+      return null;
+  });
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
   const [missingAreas, setMissingAreas] = useState<string[]>([]);
-  const [generatedData, setGeneratedData] = useState<any>(null);
   const [clarificationQuestions, setClarificationQuestions] = useState<{ areaId: string; question: string }[]>([]);
   const [clarificationAnswers, setClarificationAnswers] = useState<Record<string, string>>({});
 
@@ -61,28 +96,15 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
     
     // Check for Deep Planning Resumption
     if (searchParams?.get('resume_onboarding') === 'deep_plan') {
-       const savedContext = localStorage.getItem('onboarding_deep_plan_context');
-       if (savedContext) {
-           try {
-               const parsed = JSON.parse(savedContext);
-               setAnswers(parsed.answers);
-               setSelectedAreaIds(parsed.selectedAreaIds);
-               setGeneratedData(parsed.generatedData);
-           } catch(e) { console.error("Failed to parse saved context"); }
-       }
-       setStep(9); // Jump directly to Deep Planning
-       
-       // Optional: Clean up URL visually
-       const newUrl = new URL(window.location.href);
-       newUrl.searchParams.delete('resume_onboarding');
-       window.history.replaceState({}, '', newUrl.toString());
+       // Optional: Clean up URL visually using router to prevent Next.js desync
+       router.replace('/overview');
     }
     // Lock scroll when modal is open
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, []);
+  }, [searchParams, router]);
 
   const handleNext = () => setStep(s => s + 1);
   const handleBack = () => setStep(s => s - 1);
@@ -193,8 +215,13 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
                 );
               })}
             </div>
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2">
               <Button size="lg" className="w-full h-12 rounded-xl" onClick={handleNext} disabled={selectedAreaIds.length === 0}>Продовжити</Button>
+              {onMinimize && (
+                <Button variant="ghost" className="text-muted-foreground hover:text-foreground h-10 text-sm" onClick={onMinimize}>
+                  Зробити пізніше
+                </Button>
+              )}
             </div>
           </div>
         );

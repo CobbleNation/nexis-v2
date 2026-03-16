@@ -49,11 +49,10 @@ ${areaGoalsText}
 - Preferred Structure Level: ${answers.structure || 'Balanced'}
 
 INSTRUCTIONS:
-First, analyze if the user provided enough information to build a comprehensive system (Goals, Projects, Specific Tasks, Metrics). 
-Якщо інформації для якоїсь зі сфер замало (наприклад, користувач просто написав "Не знаю" або залишив пустим), встанови "clarificationNeeded": true.
-ПРАВИЛО УТОЧНЕНЬ: Замість того, щоб жорстко вимагати деталі, ти ПОВИНЕН запропонувати свої варіанти. Наприклад: "Щоб покращити сферу Здоров'я, я пропоную такі проекти: 1) Регулярні тренування 2) Здоровий сон. Який з них тобі ближче, чи маєш власні ідеї?".
-Запитай це у полі "question".
-Якщо "clarificationNeeded" is false, proceed to generate the FULL system ("goals", "projects", "habits").
+First, ATTEMPT TO GENERATE A COMPLETE SYSTEM using the provided information, even if it is vague. You must auto-generate reasonable goals, metrics, projects, and actionable tasks based on general best practices for the chosen life areas.
+Якщо інформація абсолютно відсутня, ти можеш встановити "clarificationNeeded": true, але старайся цього уникати.
+ПРАВИЛО УТОЧНЕНЬ: Уточнення мають стосуватися ЛИШЕ відсутніх конкретних параметрів для метрик або цілей (наприклад: "У якій валюті вимірювати дохід?", "Скільки кілограмів ви хочете скинути?"). НЕ запитуй користувача, які кроки чи проекти йому створити — придумай їх самостійно і запропонуй готову систему.
+Якщо "clarificationNeeded" is false (ЦЕ МАЄ БУТИ В БІЛЬШОСТІ ВИПАДКІВ, НАВІТЬ ЯКЩО ІНФОРМАЦІЯ ЗАГАЛЬНА), згенеруй ПОВНУ систему ("goals", "projects", "habits"), пропонуючи конкретні, добре сформульовані цілі та метрики автоматично.
 
 Output JSON format:
 {

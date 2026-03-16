@@ -86,6 +86,8 @@ export default function MainLayout({
         await updateProfile({ onboardingCompleted: true });
         setShowOnboarding(false);
         setIsOnboardingMinimized(false);
+        // Force a hard reload to ensure all newly generated AI data (projects, goals) is fetched
+        window.location.href = '/overview';
     };
 
     const handleMinimize = () => {
@@ -114,14 +116,14 @@ export default function MainLayout({
                     <div className="relative group">
                         <button 
                             onClick={() => setShowOnboarding(true)}
-                            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-2xl shadow-xl shadow-orange-500/20 transition-all hover:scale-105 active:scale-95 pr-10"
+                            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-3 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 pr-10"
                         >
                             <Sparkles className="w-5 h-5 animate-pulse" />
                             <span className="font-semibold text-sm">Налаштування AI</span>
                         </button>
                         <button
                             onClick={handleDismissResumer}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-orange-100 hover:text-white hover:bg-orange-600 rounded-full transition-colors"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary/80 rounded-full transition-colors"
                         >
                             <X className="w-4 h-4" />
                         </button>

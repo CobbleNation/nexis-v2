@@ -76,7 +76,7 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
     };
 
     const getScoreColor = (s: number) => {
-        if (s >= 85) return "text-orange-600"; // User wanted orange for high score
+        if (s >= 85) return "text-primary"; 
         if (s >= 50) return "text-emerald-500";
         return "text-red-500"; // Low score warning
     };
@@ -103,8 +103,8 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
     const breakdownContent = (
         <div className="flex flex-col">
             {/* Narrative Header */}
-            <div className="p-5 bg-gradient-to-br from-orange-50/80 to-white/50 dark:from-orange-950/20 dark:to-background border-b border-orange-100/50 dark:border-orange-900/20">
-                <h4 className={cn("text-lg font-bold mb-2 tracking-tight flex items-center gap-2 text-orange-950 dark:text-orange-100")}>
+            <div className="p-5 bg-gradient-to-br from-primary/5 to-white/50 dark:from-primary/10 dark:to-background border-b border-primary/10 dark:border-primary/20">
+                <h4 className={cn("text-lg font-bold mb-2 tracking-tight flex items-center gap-2 text-foreground")}>
                     {metrics?.state?.title || "Аналіз стану"}
                 </h4>
                 <p className="text-sm text-zinc-600 dark:text-muted-foreground leading-relaxed font-normal">
@@ -115,40 +115,40 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
             {/* Breakdown */}
             <div className="p-5 bg-white dark:bg-card space-y-4">
                 <div className="flex justify-between items-center text-sm group">
-                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">Фокус (35%)</span>
+                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-primary transition-colors">Фокус (35%)</span>
                     <div className="flex items-center gap-3">
-                        <div className="h-2 w-20 bg-orange-50 dark:bg-secondary rounded-full overflow-hidden border border-orange-100/50 dark:border-border">
-                            <div className="h-full bg-orange-500 rounded-full shadow-[0_0_10px_rgba(249,115,22,0.3)]" style={{ width: `${breakdown.focus}%` }} />
+                        <div className="h-2 w-20 bg-primary/10 dark:bg-secondary rounded-full overflow-hidden border border-primary/20 dark:border-border">
+                            <div className="h-full bg-primary rounded-full shadow-sm" style={{ width: `${breakdown.focus}%` }} />
                         </div>
                         <span className="font-mono text-xs text-zinc-400 font-bold w-6 text-right">{breakdown.focus}</span>
                     </div>
                 </div>
 
                 <div className="flex justify-between items-center text-sm group">
-                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">Цілі (30%)</span>
+                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-primary transition-colors">Цілі (30%)</span>
                     <div className="flex items-center gap-3">
-                        <div className="h-2 w-20 bg-orange-50 dark:bg-secondary rounded-full overflow-hidden border border-orange-100/50 dark:border-border">
-                            <div className="h-full bg-orange-400 rounded-full" style={{ width: `${breakdown.goals}%` }} />
+                        <div className="h-2 w-20 bg-primary/10 dark:bg-secondary rounded-full overflow-hidden border border-primary/20 dark:border-border">
+                            <div className="h-full bg-primary/80 rounded-full" style={{ width: `${breakdown.goals}%` }} />
                         </div>
                         <span className="font-mono text-xs text-zinc-400 font-bold w-6 text-right">{breakdown.goals}</span>
                     </div>
                 </div>
 
                 <div className="flex justify-between items-center text-sm group">
-                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">Сфери (20%)</span>
+                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-primary transition-colors">Сфери (20%)</span>
                     <div className="flex items-center gap-3">
-                        <div className="h-2 w-20 bg-orange-50 dark:bg-secondary rounded-full overflow-hidden border border-orange-100/50 dark:border-border">
-                            <div className="h-full bg-orange-300 rounded-full" style={{ width: `${breakdown.spheres}%` }} />
+                        <div className="h-2 w-20 bg-primary/10 dark:bg-secondary rounded-full overflow-hidden border border-primary/20 dark:border-border">
+                            <div className="h-full bg-primary/60 rounded-full" style={{ width: `${breakdown.spheres}%` }} />
                         </div>
                         <span className="font-mono text-xs text-zinc-400 font-bold w-6 text-right">{breakdown.spheres}</span>
                     </div>
                 </div>
 
                 <div className="flex justify-between items-center text-sm group">
-                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">Час (15%)</span>
+                    <span className="text-zinc-500 dark:text-muted-foreground font-medium group-hover:text-primary transition-colors">Час (15%)</span>
                     <div className="flex items-center gap-3">
-                        <div className="h-2 w-20 bg-orange-50 dark:bg-secondary rounded-full overflow-hidden border border-orange-100/50 dark:border-border">
-                            <div className="h-full bg-orange-200 rounded-full" style={{ width: `${breakdown.time}%` }} />
+                        <div className="h-2 w-20 bg-primary/10 dark:bg-secondary rounded-full overflow-hidden border border-primary/20 dark:border-border">
+                            <div className="h-full bg-primary/40 rounded-full" style={{ width: `${breakdown.time}%` }} />
                         </div>
                         <span className="font-mono text-xs text-zinc-400 font-bold w-6 text-right">{breakdown.time}</span>
                     </div>
@@ -199,7 +199,7 @@ export function ContextState({ score, metrics, period, areaName, activeColor }: 
                                 </div>
                             </div>
                         </TooltipTrigger>
-                        <TooltipContent side="left" className="hidden md:block p-0 border border-orange-100 dark:border-orange-900/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-popover text-zinc-900 dark:text-foreground max-w-sm overflow-hidden rounded-2xl" align="start" sideOffset={15}>
+                        <TooltipContent side="left" className="hidden md:block p-0 border border-primary/20 dark:border-primary/30 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white dark:bg-popover text-zinc-900 dark:text-foreground max-w-sm overflow-hidden rounded-2xl" align="start" sideOffset={15}>
                             {breakdownContent}
                         </TooltipContent>
                     </Tooltip>

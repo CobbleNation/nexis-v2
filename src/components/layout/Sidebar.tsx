@@ -234,7 +234,10 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                 }
                             }
 
-                            const isActive = pathname.startsWith(item.href.split('?')[0]);
+                            let isActive = pathname.startsWith(item.href.split('?')[0]);
+                            if (item.name === 'Налаштування AI') {
+                                isActive = false;
+                            }
                             const Icon = item.icon;
 
                             return (
