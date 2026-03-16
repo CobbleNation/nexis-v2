@@ -2,9 +2,23 @@ import { NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { cookies } from 'next/headers';
+import { verifyJWT } from '@/lib/auth-utils';
 
 export async function POST(request: Request) {
     try {
+        const cookieStore = await cookies();
+        const token = cookieStore.get('access_token')?.value;
+
+        if (!token) {
+            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+        }
+
+        const payload = await verifyJWT(token);
+        if (!payload || !payload.userId) {
+            return NextResponse.json({ success: false, message: 'Invalid Token' }, { status: 401 });
+        }
+
         const data = await request.formData();
         const file: File | null = data.get('file') as unknown as File;
 

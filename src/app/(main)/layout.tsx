@@ -14,7 +14,8 @@ function OnboardingResumer({ setShowOnboarding }: { setShowOnboarding: (val: boo
     const searchParams = useSearchParams();
     
     useEffect(() => {
-        if (searchParams?.get('resume_onboarding') === 'deep_plan') {
+        const resume = searchParams?.get('resume_onboarding');
+        if (resume === 'deep_plan' || resume === 'true') {
             setShowOnboarding(true);
         }
     }, [searchParams, setShowOnboarding]);

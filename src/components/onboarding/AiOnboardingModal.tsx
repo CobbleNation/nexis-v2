@@ -94,8 +94,8 @@ export function AiOnboardingModal({ onSuccess, onMinimize }: AiOnboardingModalPr
   useEffect(() => {
     trackEventClient({ eventName: 'ai_onboarding_started' });
     
-    // Check for Deep Planning Resumption
-    if (searchParams?.get('resume_onboarding') === 'deep_plan') {
+    const resume = searchParams?.get('resume_onboarding');
+    if (resume === 'deep_plan' || resume === 'true') {
        // Optional: Clean up URL visually using router to prevent Next.js desync
        router.replace('/overview');
     }
