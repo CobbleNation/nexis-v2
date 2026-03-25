@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, History, CheckSquare, Target, Menu, Home } from 'lucide-react';
+import { LayoutDashboard, History, CheckSquare, Target, Menu, Home, Folder } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SidebarContent } from '@/components/layout/Sidebar';
@@ -60,16 +60,16 @@ export function MobileNav() {
             </button>
 
             <Link
-                href="/dashboard"
+                href="/projects"
                 className={cn(
                     "flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 active:scale-95 w-16",
-                    pathname === '/dashboard' || pathname === '/' ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                    pathname.startsWith('/projects') ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                 )}
             >
-                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", (pathname === '/dashboard' || pathname === '/') ? "bg-primary/10 shadow-sm" : "bg-transparent")}>
-                    <Home className={cn("h-5 w-5", (pathname === '/dashboard' || pathname === '/') ? "text-primary fill-primary/20" : "text-muted-foreground")} strokeWidth={(pathname === '/dashboard' || pathname === '/') ? 2.5 : 2} />
+                <div className={cn("relative flex items-center justify-center h-8 w-8 rounded-xl mb-1 transition-colors", pathname.startsWith('/projects') ? "bg-primary/10 shadow-sm" : "bg-transparent")}>
+                    <Folder className={cn("h-5 w-5", pathname.startsWith('/projects') ? "text-primary fill-primary/20" : "text-muted-foreground")} strokeWidth={pathname.startsWith('/projects') ? 2.5 : 2} />
                 </div>
-                <span className={cn("text-[10px] tracking-wide", (pathname === '/dashboard' || pathname === '/') && "font-semibold")}>Головна</span>
+                <span className={cn("text-[10px] tracking-wide", pathname.startsWith('/projects') && "font-semibold")}>Проекти</span>
             </Link>
 
             <Sheet open={open} onOpenChange={setOpen}>
@@ -81,8 +81,8 @@ export function MobileNav() {
                         <span className="text-[10px]">Меню</span>
                     </button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="h-[80vh] rounded-t-[32px] p-0 flex flex-col items-center hide-bottom-safe-area">
-                    <div className="w-12 h-1.5 bg-muted rounded-full mt-4 flex-shrink-0" />
+                <SheetContent side="bottom" className="h-[100dvh] rounded-none p-0 flex flex-col items-center hide-bottom-safe-area pt-top-safe">
+                    <div className="w-12 h-1.5 bg-muted rounded-full mt-6 mb-2 flex-shrink-0" />
                     
                     <div className="w-full flex-1 overflow-y-auto mt-6 px-6 pb-20 no-scrollbar relative z-10">
                         <SidebarContent onNavigate={() => setOpen(false)} />

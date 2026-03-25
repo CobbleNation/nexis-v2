@@ -11,10 +11,17 @@ import { DEFAULT_AREAS } from '@/lib/default-areas';
 import { DEFAULT_METRICS } from '@/lib/seed-metrics';
 import { v4 as uuidv4 } from 'uuid';
 
-export async function GET() {
+// Helper to extract token from Authorization header or cookie
+function getTokenFromRequest(req: Request, cookieStore: any): string | undefined {
+    const authHeader = req.headers.get('authorization');
+    if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7);
+    return cookieStore.get('access_token')?.value;
+}
+
+export async function GET(req: Request) {
     try {
         const cookieStore = await cookies();
-        const token = cookieStore.get('access_token')?.value;
+        const token = getTokenFromRequest(req, cookieStore);
 
         if (!token) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -234,7 +241,7 @@ function sanitizeAction(data: Record<string, any>) {
 export async function POST(req: Request) {
     try {
         const cookieStore = await cookies();
-        const token = cookieStore.get('access_token')?.value;
+        const token = getTokenFromRequest(req, cookieStore);
 
         if (!token) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -252,29 +259,41 @@ export async function POST(req: Request) {
         console.log(`Sync POST received: ${type}`);
 
         if (type === 'ADD_ACTION' || type === 'UPDATE_ACTION') {
-            const rawData = sanitizeAction({ ...data });
-            if (typeof rawData.createdAt === 'string') rawData.createdAt = new Date(rawData.createdAt);
-            if (typeof rawData.updatedAt === 'string') rawData.updatedAt = new Date(rawData.updatedAt);
-            // dueDate is a timestamp column in DB - convert if string
-            if (typeof rawData.dueDate === 'string' && rawData.dueDate) rawData.dueDate = new Date(rawData.dueDate);
-            // reminderAt, startTime, date are `text` columns, keep them as strings
-            if (rawData.reminderAt !== undefined && typeof rawData.reminderAt !== 'string') rawData.reminderAt = String(rawData.reminderAt);
-            // Strip empty string timestamps to null to avoid DB errors
-            if (rawData.reminderAt === '') rawData.reminderAt = null;
-            if (rawData.startTime === '') rawData.startTime = null;
-            if (rawData.date === '') rawData.date = null;
-            const actionData = rawData;
+            try {
+                const rawData = sanitizeAction({ ...data });
+                if (typeof rawData.createdAt === 'string') rawData.createdAt = new Date(rawData.createdAt);
+                if (typeof rawData.updatedAt === 'string') rawData.updatedAt = new Date(rawData.updatedAt);
+                // dueDate is a timestamp column in DB - convert if string
+                if (typeof rawData.dueDate === 'string' && rawData.dueDate) rawData.dueDate = new Date(rawData.dueDate);
+                // reminderAt, startTime, date are `text` columns, keep them as strings
+                if (rawData.reminderAt !== undefined && typeof rawData.reminderAt !== 'string') rawData.reminderAt = String(rawData.reminderAt);
+                // Strip empty string timestamps to null to avoid DB errors
+                if (rawData.reminderAt === '') rawData.reminderAt = null;
+                if (rawData.startTime === '') rawData.startTime = null;
+                if (rawData.date === '') rawData.date = null;
+                
+                // Handle parsing issues like NaN duration
+                if (Number.isNaN(rawData.duration)) rawData.duration = null;
 
-            await db.insert(actions).values({ ...actionData, userId } as any).onConflictDoUpdate({ target: actions.id, set: { ...actionData, userId } as any });
+                const actionData = rawData;
 
-            // Tracking for Action
-            await trackEvent({
-                eventName: type === 'ADD_ACTION' ? (actionData.type === 'habit' ? 'habit_created' : 'task_created') : (actionData.type === 'habit' ? 'habit_updated' : 'task_updated'),
-                userId,
-                entityType: actionData.type,
-                entityId: actionData.id,
-                metadata: { title: actionData.title }
-            });
+                await db.insert(actions).values({ ...actionData, userId } as any).onConflictDoUpdate({ target: actions.id, set: { ...actionData, userId } as any });
+
+                // Tracking for Action
+                await trackEvent({
+                    eventName: type === 'ADD_ACTION' ? (actionData.type === 'habit' ? 'habit_created' : 'task_created') : (actionData.type === 'habit' ? 'habit_updated' : 'task_updated'),
+                    userId,
+                    entityType: actionData.type,
+                    entityId: actionData.id,
+                    metadata: { title: actionData.title }
+                });
+            } catch (err) {
+                console.error("Failed to sync action", err, data);
+                // We wrap this inside try-catch so that if one task fails (e.g. strict DB constraint),
+                // it throws an error that is logged but does not necessarily break other things if it was part of batch.
+                // However, since it's a single sync, we return 500.
+                return NextResponse.json({ error: "Failed to sync action: " + (err as Error).message }, { status: 500 });
+            }
         } else if (type === 'DELETE_ACTION') {
             await db.delete(actions).where(eq(actions.id, data.id));
             await trackEvent({
@@ -452,6 +471,14 @@ export async function POST(req: Request) {
                 eventName: 'area_deleted',
                 userId,
                 entityType: 'area',
+                entityId: data.id
+            });
+        } else if (type === 'DELETE_PROJECT') {
+            await db.delete(projects).where(and(eq(projects.id, data.id), eq(projects.userId, userId)));
+            await trackEvent({
+                eventName: 'project_deleted',
+                userId,
+                entityType: 'project',
                 entityId: data.id
             });
         } else if (type === 'ADD_PROJECT' || type === 'UPDATE_PROJECT') {
