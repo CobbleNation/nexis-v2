@@ -445,15 +445,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
         const loadData = async () => {
             // 2. Always Sync with Server (Source of Truth)
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 15000);
+
             try {
-                const res = await fetch('/api/sync');
+                const res = await fetch('/api/sync', { signal: controller.signal });
                 if (res.ok) {
                     const apiData = await res.json();
                     // Notifications now come from DB via sync API
                     dispatch({ type: 'INIT_DATA', payload: apiData });
                 }
-            } catch (e) {
-                console.error("Sync failed", e);
+            } catch (e: any) {
+                if (e?.name === 'AbortError') {
+                    console.warn('Sync fetch timed out after 15s');
+                } else {
+                    console.error("Sync failed", e);
+                }
+            } finally {
+                clearTimeout(timeout);
             }
 
             dispatch({ type: 'SET_LOADING', payload: false });

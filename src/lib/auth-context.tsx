@@ -64,36 +64,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     async function checkSession() {
-        // Circuit breaker: prevent infinite loader if network hangs
-        const fallbackTimer = setTimeout(() => {
-            if (isLoading) {
-                console.warn("Auth session check timeout: forcefully unlocking loader.");
-                setIsLoading(false);
-            }
-        }, 8000);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000);
+        const fetchOpts = { cache: 'no-store' as const, signal: controller.signal };
+
+        const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms', '/auth/verify', '/auth/verified'];
 
         try {
             // Try to get user with current access token
-            const res = await fetch('/api/auth/me', { cache: 'no-store' });
+            const res = await fetch('/api/auth/me', fetchOpts);
             if (res.ok) {
                 const data = await res.json();
-
                 setUser(data.user);
-                clearTimeout(fallbackTimer);
                 return;
             }
 
             // Access token expired/invalid — try refresh
-            const refreshRes = await fetch('/api/auth/refresh', { method: 'POST', cache: 'no-store' });
+            const refreshRes = await fetch('/api/auth/refresh', { method: 'POST', ...fetchOpts });
             if (!refreshRes.ok) {
-                // Both tokens failed — no valid session exists.
-                // Hard redirect to login to prevent any authenticated UI flash.
                 setUser(null);
-                setIsLoading(false);
-
-                // Only redirect if we're on a protected route (not already on login/register/public)
                 const path = window.location.pathname;
-                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms', '/auth/verify', '/auth/verified'];
                 if (!publicPaths.includes(path)) {
                     window.location.href = '/login';
                 }
@@ -101,23 +91,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             // Refresh succeeded — retry /me with new access token
-            const retryRes = await fetch('/api/auth/me', { cache: 'no-store' });
+            const retryRes = await fetch('/api/auth/me', fetchOpts);
             if (retryRes.ok) {
                 const data = await retryRes.json();
-
                 setUser(data.user);
             } else {
                 setUser(null);
                 const path = window.location.pathname;
-                const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/pricing', '/privacy', '/terms', '/auth/verify', '/auth/verified'];
                 if (!publicPaths.includes(path)) {
                     window.location.href = '/login';
                 }
             }
-        } catch {
+        } catch (e: any) {
+            if (e?.name === 'AbortError') {
+                console.warn('Auth check timed out after 10s');
+            }
             setUser(null);
         } finally {
-            clearTimeout(fallbackTimer);
+            clearTimeout(timeout);
             setIsLoading(false);
         }
     }
