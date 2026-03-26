@@ -6,21 +6,11 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Sparkles, X } from "lucide-react";
+import { Loader2, Sparkles, X, Brain } from "lucide-react";
 import { toast } from "sonner";
+import { UnifiedAssistant } from "@/components/ai/UnifiedAssistant";
 
-function OnboardingResumer({ setShowOnboarding }: { setShowOnboarding: (val: boolean) => void }) {
-    const searchParams = useSearchParams();
-    
-    useEffect(() => {
-        const resume = searchParams?.get('resume_onboarding');
-        if (resume === 'deep_plan' || resume === 'true') {
-            setShowOnboarding(true);
-        }
-    }, [searchParams, setShowOnboarding]);
 
-    return null;
-}
 
 export default function MainLayout({
     children,
@@ -30,10 +20,27 @@ export default function MainLayout({
     const { user, isLoading, updateProfile } = useAuth();
     const router = useRouter();
 
+    const [showAssistant, setShowAssistant] = useState(false);
+
+    useEffect(() => {
+        const handleOpenAssistant = () => setShowAssistant(true);
+        window.addEventListener('open-assistant', handleOpenAssistant);
+        return () => window.removeEventListener('open-assistant', handleOpenAssistant);
+    }, []);
+
+    useEffect(() => {
+        if (user && user.onboardingCompleted === false) {
+             toast('Заповніть профіль, щоб Nexis міг краще вам допомагати!', {
+                 action: { label: 'Заповнити', onClick: () => setShowAssistant(true) },
+                 duration: 60000,
+             })
+        }
+    }, [user]);
+
     if (isLoading) {
         return (
             <div className="flex min-h-screen bg-background items-center justify-center">
-                ... 
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -56,6 +63,8 @@ export default function MainLayout({
                     {children}
                 </main>
             </div>
+            
+            <UnifiedAssistant open={showAssistant} onClose={() => setShowAssistant(false)} />
         </div>
     );
 }
