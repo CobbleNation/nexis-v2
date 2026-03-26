@@ -13,9 +13,22 @@ const noCacheHeaders = {
     'Expires': '0',
 };
 
-export async function POST() {
+export async function POST(req: Request) {
     const cookieStore = await cookies();
-    const refreshToken = cookieStore.get('refresh_token')?.value;
+    
+    // Support both cookie-based (web) and body-based (mobile) refresh tokens
+    let refreshToken = cookieStore.get('refresh_token')?.value;
+    let isMobileClient = false;
+    
+    if (!refreshToken) {
+        try {
+            const body = await req.json();
+            refreshToken = body.refreshToken;
+            isMobileClient = true;
+        } catch {
+            // No body provided
+        }
+    }
 
     if (!refreshToken) {
         return NextResponse.json({ error: 'No refresh token' }, { status: 401, headers: noCacheHeaders });
@@ -24,22 +37,21 @@ export async function POST() {
     // 1. Verify JWT signature
     const payload = await verifyJWT(refreshToken);
     if (!payload || !payload.userId) {
-        await clearAuthCookies();
+        if (!isMobileClient) await clearAuthCookies();
         return NextResponse.json({ error: 'Invalid refresh token' }, { status: 401, headers: noCacheHeaders });
     }
 
     // 2. Validate session exists in DB (prevents ghost sessions)
     const session = await validateSession(refreshToken);
     if (!session) {
-        // Token has valid JWT but no DB session — it was revoked (user logged out)
-        await clearAuthCookies();
+        if (!isMobileClient) await clearAuthCookies();
         return NextResponse.json({ error: 'Session revoked' }, { status: 401, headers: noCacheHeaders });
     }
 
     // 3. Look up user from DB to get the CURRENT role
     const [user] = await db.select().from(users).where(eq(users.id, payload.userId as string)).limit(1);
     if (!user) {
-        await clearAuthCookies();
+        if (!isMobileClient) await clearAuthCookies();
         return NextResponse.json({ error: 'User not found' }, { status: 401, headers: noCacheHeaders });
     }
 
@@ -49,7 +61,15 @@ export async function POST() {
 
     await revokeSession(refreshToken);
     await createSession(user.id, newRefreshToken);
-    await setAuthCookies(newAccessToken, newRefreshToken);
+    
+    if (!isMobileClient) {
+        await setAuthCookies(newAccessToken, newRefreshToken);
+    }
 
-    return NextResponse.json({ success: true }, { headers: noCacheHeaders });
+    return NextResponse.json({ 
+        success: true,
+        // Return tokens for mobile clients
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+    }, { headers: noCacheHeaders });
 }

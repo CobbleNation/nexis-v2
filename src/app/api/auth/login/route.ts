@@ -88,7 +88,10 @@ export async function POST(req: Request) {
                 cardToken: user.cardToken,
                 onboardingCompleted: user.onboardingCompleted,
                 customLimits: limits ?? null
-            }
+            },
+            // Tokens in body for mobile clients (web uses cookies)
+            accessToken,
+            refreshToken,
         });
     } catch (err) {
         console.error("Login Critical Error:", err);

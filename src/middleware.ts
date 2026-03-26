@@ -71,7 +71,10 @@ export async function middleware(request: NextRequest) {
     }
 
     // 3. AUTHENTICATION (EVERYTHING ELSE)
-    const accessToken = request.cookies.get('access_token')?.value;
+    // Support both cookies (web) and Authorization header (mobile)
+    const authHeader = request.headers.get('authorization');
+    const bearerToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    const accessToken = bearerToken || request.cookies.get('access_token')?.value;
     const refreshToken = request.cookies.get('refresh_token')?.value;
 
     let isAuthorized = false;
@@ -122,6 +125,7 @@ export const config = {
         '/api/admin/:path*',
         '/api/users/:path*',
         '/api/ai/:path*',
+        '/api/sync/:path*',
         '/admin/:path*',
         '/overview/:path*',
         '/settings/:path*',

@@ -97,6 +97,8 @@ export const goals = sqliteTable('goals', {
     additionalMetricIds: text('additional_metric_ids', { mode: 'json' }).$type<string[]>(),
     horizon: text('horizon'),
     expectedImpact: text('expected_impact'),
+    impactScore: real('impact_score'), // 0.0 to 1.0
+    energyCost: text('energy_cost'), // low, medium, high
 
     // Sub-goals are for Tactical milestones or just checklist
     subGoals: text('sub_goals', { mode: 'json' }).$type<{ id: string; title: string; completed: boolean }[]>(),
@@ -121,6 +123,8 @@ export const projects = sqliteTable('projects', {
     startDate: checkTimestamp('start_date'),
     deadline: checkTimestamp('deadline'),
     metricIds: text('metric_ids', { mode: 'json' }).$type<string[]>(),
+    impactScore: real('impact_score'), // 0.0 to 1.0
+    energyCost: text('energy_cost'), // low, medium, high
 
     // M:N Relation
     goalIds: text('goal_ids', { mode: 'json' }).$type<string[]>(),
@@ -155,6 +159,8 @@ export const actions = sqliteTable('actions', {
     fromRoutineId: text('from_routine_id'),
     energyLevel: text('energy_level'),
     impact: text('impact'),
+    impactScore: real('impact_score'), // 0.0 to 1.0
+    energyCost: text('energy_cost'), // low, medium, high
     reminderAt: text('reminder_at'),
     reminderSent: boolean('reminder_sent').default(false),
 
@@ -498,4 +504,50 @@ export const adminEmails = sqliteTable('admin_emails', {
     receivedAt: checkTimestamp('received_at'),
     sentAt: checkTimestamp('sent_at'),
     createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
+});
+
+// --- Nexis Life OS AI Tables ---
+
+export const userProfiles = sqliteTable('user_profiles', {
+    id: text('id').primaryKey(), // UUID
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull().unique(),
+    
+    // JSON columns for flexibility in the complex nested profile
+    health: text('health', { mode: 'json' }).$type<{ chronotype: 'morning_lark' | 'night_owl' | 'fluid' }>(),
+    emotionalState: text('emotional_state', { mode: 'json' }).$type<{ baseMood: number; currentStress: number; motivationLevel: 'depleted' | 'driven' | 'stable' }>(),
+    energyProfile: text('energy_profile', { mode: 'json' }).$type<{ peakHours: string[]; drains: string[]; currentTank: number }>(),
+    
+    identity: text('identity', { mode: 'json' }).$type<{ current: string[]; target: string[] }>(),
+    domainPriorities: text('domain_priorities', { mode: 'json' }).$type<Record<string, number>>(),
+    
+    focusConstraints: text('focus_constraints', { mode: 'json' }).$type<{ maxActiveGoals: number; maxDailyHighCognitiveTasks: number; currentCognitiveLoad: number }>(),
+    learningEngine: text('learning_engine', { mode: 'json' }).$type<{ historicalFailures: Record<string, number>; lockedStrategies: string[] }>(),
+    
+    permissions: text('permissions', { mode: 'json' }).$type<{ autoReschedule: boolean; autoDropLowImpact: boolean; confidenceThreshold: number }>(),
+    aiPersonality: text('ai_personality', { mode: 'json' }).$type<{ archetype: string; strictness: number; proactiveness: number }>(),
+    
+    createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
+    updatedAt: checkTimestamp('updated_at').notNull().$defaultFn(() => new Date()),
+});
+
+export const aiMemories = sqliteTable('ai_memories', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    content: text('content').notNull(),
+    vector: text('vector'), // Stringified array of floats if using basic SQLite, or handled via separate vector DB
+    importanceWeight: real('importance_weight').notNull().default(0.5), // 0.0 to 1.0
+    decayFactor: real('decay_factor').notNull().default(0.01),
+    lastAccessed: checkTimestamp('last_accessed').notNull().$defaultFn(() => new Date()),
+    createdAt: checkTimestamp('created_at').notNull().$defaultFn(() => new Date()),
+});
+
+export const aiExperiments = sqliteTable('ai_experiments', {
+    id: text('id').primaryKey(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    theory: text('theory').notNull(),
+    status: text('status').notNull().default('running'), // running, valid, invalid
+    daysToRun: integer('days_to_run').notNull(),
+    baselineMetric: real('baseline_metric'),
+    startedAt: checkTimestamp('started_at').notNull().$defaultFn(() => new Date()),
+    completedAt: checkTimestamp('completed_at'),
 });

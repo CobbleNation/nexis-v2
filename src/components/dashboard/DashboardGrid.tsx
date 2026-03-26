@@ -8,7 +8,6 @@ import { LifeBalance } from './LifeBalance';
 import { ActiveProjectsOverview } from './ActiveProjectsOverview';
 import { WeeklyActivity } from './WeeklyActivity';
 import { QuickActions } from './QuickActions';
-import { AIInsight } from './AIInsight';
 import { MetricPickerSheet } from './MetricPickerSheet';
 
 // Import Modals for QuickActions
@@ -52,7 +51,6 @@ export function DashboardGrid() {
                 <div className="lg:col-span-1 flex flex-col gap-6">
                     <WeeklyActivity />
                     <QuickActions onOpenAddModal={handleOpenAddModal} />
-                    <AIInsight />
                 </div>
 
                 {/* SECTION 3 & 8: Life Balance & Active Projects (Bottom Row) */}

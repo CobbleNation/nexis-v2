@@ -2,17 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, History, CheckSquare, Target, Menu, Home, Folder } from 'lucide-react';
+import { LayoutDashboard, History, CheckSquare, Target, Menu, Home, Folder, Brain } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { SidebarContent } from '@/components/layout/Sidebar';
 import { useState } from 'react';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
+import { UnifiedAssistant } from '@/components/ai/UnifiedAssistant';
 
 export function MobileNav() {
     const pathname = usePathname();
     const [open, setOpen] = useState(false);
     const [showQuickAdd, setShowQuickAdd] = useState(false);
+    const [showAssistant, setShowAssistant] = useState(false);
 
     const MOBILE_ITEMS = [
         { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
@@ -50,13 +52,13 @@ export function MobileNav() {
             </Link>
 
             <button
-                onClick={() => setShowQuickAdd(true)}
-                className="flex flex-col items-center justify-center -mt-6 p-1 relative z-10"
+                onClick={() => setShowAssistant(true)}
+                className="flex flex-col items-center justify-center -mt-6 p-1 relative z-10 group"
             >
-                <div className="h-14 w-14 bg-gradient-to-tr from-primary to-primary/80 rounded-full shadow-lg shadow-primary/30 flex items-center justify-center text-primary-foreground active:scale-95 transition-transform">
-                    <CheckSquare className="h-6 w-6" />
+                <div className="h-14 w-14 bg-gradient-to-tr from-indigo-500 to-indigo-700 dark:from-indigo-600 dark:to-indigo-900 rounded-full shadow-xl shadow-indigo-500/30 flex items-center justify-center text-white transition-all transform group-active:scale-95 group-hover:shadow-indigo-500/50 outline outline-4 outline-background">
+                    <Brain className="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-bold mt-1 text-primary">Додати</span>
+                <span className="text-[10px] font-bold mt-1 text-indigo-600 dark:text-indigo-400">Nexis OS</span>
             </button>
 
             <Link
@@ -91,6 +93,7 @@ export function MobileNav() {
             </Sheet>
 
             <QuickAddModal open={showQuickAdd} onOpenChange={setShowQuickAdd} />
+            <UnifiedAssistant open={showAssistant} onClose={() => setShowAssistant(false)} />
         </div>
     );
 }

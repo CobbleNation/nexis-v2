@@ -19,7 +19,6 @@ import { MetricSuggestionResponse, GoalCreatorVariant } from '@/lib/ai/types';
 import { MetricCreationWizard } from '@/components/metrics/MetricCreationWizard';
 import { useSubscription } from '@/hooks/useSubscription';
 import { UpgradeModal } from '@/components/common/UpgradeModal';
-import { AIGoalCreatorModal } from '@/components/goals/AIGoalCreatorModal';
 
 interface GoalCreationWizardProps {
     initialTitle?: string;
@@ -834,74 +833,7 @@ export function GoalCreationWizard({ initialTitle, initialAreaId, initialData, o
                 title={upgradeContext.title}
                 description={upgradeContext.description}
             />
-            <AIGoalCreatorModal
-                open={showAICreator}
-                onOpenChange={setShowAICreator}
-                areas={state.areas.map(a => ({ id: a.id, title: a.title }))}
-                onSelectVariant={(variant: GoalCreatorVariant, matchedAreaId?: string) => {
-                    // 1. Set basic goal fields
-                    setGoalType(variant.type);
-                    setCustomTitle(variant.title);
-                    setDescription(variant.description);
-                    setTemplateId('custom');
-
-                    const resolvedAreaId = matchedAreaId || areaId;
-                    if (matchedAreaId) {
-                        setAreaId(matchedAreaId);
-                    }
-
-                    // 2. Auto-create metrics from AI suggestions
-                    if (variant.metrics && variant.metrics.length > 0 && resolvedAreaId) {
-                        const createdMetricIds: string[] = [];
-
-                        variant.metrics.forEach((m, idx) => {
-                            const newMetricId = uuidv4();
-                            const metricDef: MetricDefinition = {
-                                id: newMetricId,
-                                userId: 'user',
-                                areaId: resolvedAreaId,
-                                name: m.name,
-                                unit: m.unit || '',
-                                direction: 'increase',
-                                frequency: 'weekly',
-                                valueType: 'number',
-                                type: 'number',
-                                baseline: 0,
-                                target: 100,
-                                createdAt: new Date(),
-                            };
-                            dispatch({ type: 'ADD_METRIC_DEF', payload: metricDef });
-                            createdMetricIds.push(newMetricId);
-                        });
-
-                        // Set first metric as primary target
-                        if (createdMetricIds.length > 0) {
-                            setTargetMetricId(createdMetricIds[0]);
-                            setMetricStartValue('0');
-                            setMetricTargetValue('100');
-                            setMetricDirection('increase');
-                        }
-
-                        // Set additional metrics (if more than 1)
-                        if (createdMetricIds.length > 1) {
-                            setAdditionalMetricIds(createdMetricIds.slice(1));
-                        }
-                    }
-
-                    // 3. Auto-create subGoals from AI steps
-                    if (variant.steps && variant.steps.length > 0) {
-                        const newSubGoals = variant.steps.map(stepTitle => ({
-                            id: uuidv4(),
-                            title: stepTitle,
-                            completed: false,
-                        }));
-                        setAiSubGoals(newSubGoals);
-                    }
-
-                    setStep(2);
-                    toast.success('AI заповнив ціль! Переглядайте та правте на кожному кроці.');
-                }}
-            />
+            {/* AIGoalCreatorModal removed */}
         </div >
     );
 }

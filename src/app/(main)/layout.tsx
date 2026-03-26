@@ -7,7 +7,6 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Sparkles, X } from "lucide-react";
-import { AiOnboardingModal } from "@/components/onboarding/AiOnboardingModal";
 import { toast } from "sonner";
 
 function OnboardingResumer({ setShowOnboarding }: { setShowOnboarding: (val: boolean) => void }) {
@@ -104,13 +103,6 @@ export default function MainLayout({
                 </React.Suspense>
             )}
 
-            {showOnboarding && (
-                <AiOnboardingModal 
-                    onSuccess={handleOnboardingSuccess} 
-                    onMinimize={handleMinimize}
-                />
-            )}
-            
             {/* Onboarding Resume Trigger */}
             {isOnboardingMinimized && !showOnboarding && !isResumerDismissed && (
                 <div className="fixed bottom-[100px] md:bottom-6 left-6 z-[8000] animate-in slide-in-from-left-4 duration-300">

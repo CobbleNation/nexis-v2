@@ -13,9 +13,14 @@ const noCacheHeaders = {
     'Expires': '0',
 };
 
-export async function GET() {
+export async function GET(req: Request) {
     const cookieStore = await cookies();
-    const token = cookieStore.get('access_token')?.value;
+    
+    // Support both cookie-based (web) and Bearer token (mobile) auth
+    const authHeader = req.headers.get('authorization');
+    const token = authHeader?.startsWith('Bearer ') 
+        ? authHeader.slice(7) 
+        : cookieStore.get('access_token')?.value;
 
     if (!token) {
         return NextResponse.json({ error: 'Unauthorized-ME' }, { status: 401, headers: noCacheHeaders });
@@ -26,12 +31,11 @@ export async function GET() {
         return NextResponse.json({ error: 'Invalid Token' }, { status: 401, headers: noCacheHeaders });
     }
 
-    // Double-check session in DB if refresh_token exists
+    // Double-check session in DB if refresh_token exists (web clients only)
     const refreshToken = cookieStore.get('refresh_token')?.value;
     if (refreshToken) {
         const [session] = await db.select().from(sessions).where(eq(sessions.refreshTokenHash, await hashToken(refreshToken))).limit(1);
         if (!session || session.expiresAt < new Date()) {
-            // Session revoked or expired - force logout by returning 401
             return NextResponse.json({ error: 'Session Revoked' }, { status: 401, headers: noCacheHeaders });
         }
     }

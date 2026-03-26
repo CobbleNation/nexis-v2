@@ -26,7 +26,7 @@ import { useState, useMemo } from 'react';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import { QuickAddModal } from '@/components/features/QuickAddModal';
 import { DailyReviewDialog } from '@/components/features/DailyReviewDialog';
-import { GoalBreakdownModal } from '@/components/features/ai/GoalBreakdownModal';
+// Removed GoalBreakdownModal
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { useData } from '@/lib/store';
@@ -80,10 +80,9 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             ]
         },
         {
-            title: 'AI Інструменти',
+            title: 'AI інструменти (поки що приховані)',
             items: [
-                { name: 'Аналіз Дня', href: '#ai-daily-review', icon: Lightbulb, isAction: true, actionId: 'daily-review' },
-                { name: 'AI Стратегія', href: '#ai-goal-strategy', icon: Target, isAction: true, actionId: 'goal-breakdown' },
+                { name: 'Аналіз Дня', href: '#ai-daily-review', icon: Lightbulb, isAction: true, actionId: 'daily-review' }
             ]
         },
         {
@@ -219,23 +218,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                         </div>
                                     );
                                 }
-                                if (item.actionId === 'goal-breakdown') {
-                                    return (
-                                        <div key={item.name} className="px-1">
-                                            <GoalBreakdownModal customTrigger={
-                                                <button
-                                                    className={cn(
-                                                        "w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-left rounded-lg transition-all duration-200 group text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/10"
-                                                    )}
-                                                >
-                                                    <item.icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
-                                                    <span className="flex-1 truncate">{item.name}</span>
-                                                    {!HAS_AI_GOAL_BREAKDOWN && <Lock className="w-3.5 h-3.5 shrink-0 text-violet-400/60" />}
-                                                </button>
-                                            } />
-                                        </div>
-                                    );
-                                }
+                                // Removed goal-breakdown action block
                             }
 
                             let isActive = pathname.startsWith(item.href.split('?')[0]);

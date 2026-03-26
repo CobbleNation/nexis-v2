@@ -19,7 +19,6 @@ import { ActionCard } from "@/components/actions/ActionCard";
 import { useState } from "react";
 import { Action } from "@/types";
 import { toast } from "sonner";
-import { ProjectAssistant } from "@/components/projects/ProjectAssistant";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PieChart } from 'lucide-react';
@@ -248,9 +247,6 @@ export default function ProjectPage() {
                                 <p className="text-slate-700 dark:text-foreground leading-relaxed whitespace-pre-wrap text-base">{project.description}</p>
                             </div>
                         )}
-
-                        {/* AI Assistant */}
-                        <ProjectAssistant project={project} areaName={area?.title} />
 
                         {/* Tasks Section */}
                         <div className="bg-white dark:bg-card rounded-3xl border border-slate-100 dark:border-border shadow-sm overflow-hidden flex flex-col min-h-[500px]">
