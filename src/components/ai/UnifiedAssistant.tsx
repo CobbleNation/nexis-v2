@@ -159,7 +159,7 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                     <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="flex gap-2">
                         <Input
                             value={input}
-                            onChange={(e) => handleInputChange(e)}
+                            onChange={(e) => setInput(e.target.value)}
                             placeholder="Накажіть Nexis..."
                             className="bg-muted border-none outline-none focus-visible:ring-1 focus-visible:ring-primary h-12 rounded-xl"
                             disabled={isLoading}
@@ -173,7 +173,7 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                         >
                             <Mic className="w-5 h-5" />
                         </Button>
-                        <Button type="submit" size="icon" disabled={isLoading || !(input || '').trim()} className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
+                        <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
                             <Send className="w-5 h-5" />
                         </Button>
                     </form>
