@@ -17,6 +17,7 @@ interface UnifiedAssistantProps {
 export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
     // @ts-ignore - Vercel AI SDK type bug with Next.js 15
     const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error } = useChat({
+        id: 'nexis-brain',
         // @ts-ignore
         api: '/api/ai/brain',
     });
@@ -155,10 +156,10 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
 
                 {/* Input Area */}
                 <div className="p-4 bg-card border-t border-border z-10">
-                    <form onSubmit={handleSubmit} className="flex gap-2">
+                    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="flex gap-2">
                         <Input
                             value={input}
-                            onChange={handleInputChange}
+                            onChange={(e) => handleInputChange(e)}
                             placeholder="Накажіть Nexis..."
                             className="bg-muted border-none outline-none focus-visible:ring-1 focus-visible:ring-primary h-12 rounded-xl"
                             disabled={isLoading}

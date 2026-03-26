@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/lib/auth-context';
-import { User, Bell, Palette, Trash2, LogOut, Save, Moon, Sun, Smartphone, Upload, Shield, AlertTriangle, ShieldAlert, BarChart, CreditCard } from 'lucide-react';
+import { User, Bell, Palette, Trash2, LogOut, Save, Moon, Sun, Smartphone, Upload, Shield, AlertTriangle, ShieldAlert, BarChart, CreditCard, Brain } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
@@ -33,6 +33,10 @@ export default function SettingsPage() {
     const [avatarUrl, setAvatarUrl] = useState('');
     const [isSaving, setIsSaving] = useState(false);
 
+    // AI Profile State
+    const [aiProfileText, setAiProfileText] = useState('');
+    const [isSavingAi, setIsSavingAi] = useState(false);
+
     // Sync local state with user data on load
     useEffect(() => {
         if (user) {
@@ -41,6 +45,20 @@ export default function SettingsPage() {
             setBio(user.bio || '');
             setAvatarUrl(user.avatar || '');
         }
+
+        // Fetch AI Context
+        const fetchAiContext = async () => {
+            try {
+                const res = await fetch('/api/user/profile');
+                if (res.ok) {
+                    const data = await res.json();
+                    setAiProfileText(data.identityString || '');
+                }
+            } catch (e) {
+                console.error("Failed to load AI profile");
+            }
+        };
+        fetchAiContext();
     }, [user]);
 
     const handleSaveProfile = async () => {
@@ -57,6 +75,30 @@ export default function SettingsPage() {
             toast.error("Не вдалося зберегти зміни");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleSaveAiProfile = async () => {
+        setIsSavingAi(true);
+        try {
+            const res = await fetch('/api/user/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identityString: aiProfileText })
+            });
+
+            if (res.ok) {
+                toast.success("AI контекст успішно оновлено");
+                if (user?.onboardingCompleted === false) {
+                    await updateProfile({ onboardingCompleted: true });
+                }
+            } else {
+                toast.error("Не вдалося оновити AI контекст");
+            }
+        } catch (e) {
+            toast.error("Виникла помилка з'єднання");
+        } finally {
+            setIsSavingAi(false);
         }
     };
 
@@ -125,6 +167,9 @@ export default function SettingsPage() {
                             </TabsTrigger>
                             <TabsTrigger value="appearance" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted text-sm">
                                 <Palette className="mr-2 md:mr-3 h-4 w-4" /> Вигляд
+                            </TabsTrigger>
+                            <TabsTrigger value="ai-profile" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-indigo-50 dark:data-[state=active]:bg-indigo-950/20 data-[state=active]:text-indigo-700 dark:data-[state=active]:text-indigo-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted text-sm whitespace-nowrap">
+                                <Brain className="mr-2 md:mr-3 h-4 w-4" /> Nexis Контекст
                             </TabsTrigger>
                             <TabsTrigger value="notifications" className="shrink-0 md:w-full justify-center md:justify-start px-3 md:px-4 py-2.5 md:py-3 data-[state=active]:bg-orange-50 dark:data-[state=active]:bg-orange-950/20 data-[state=active]:text-orange-700 dark:data-[state=active]:text-orange-400 !shadow-none rounded-xl font-bold transition-all hover:bg-muted text-sm whitespace-nowrap">
                                 <Bell className="mr-2 md:mr-3 h-4 w-4" /> Сповіщення
@@ -312,6 +357,51 @@ export default function SettingsPage() {
                                         </button>
                                     </div>
                                 </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="ai-profile" className="space-y-6 mt-0">
+                            <Card className="border-none shadow-sm bg-white dark:bg-card rounded-3xl">
+                                <CardHeader>
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl">
+                                            <Brain className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                        </div>
+                                        <div>
+                                            <CardTitle>Контекст для Nexis OS</CardTitle>
+                                            <CardDescription>
+                                                Надайте Nexis максимально детальну інформацію про ваше життя, щоб поради були справді індивідуальними.
+                                            </CardDescription>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    <div className="space-y-3">
+                                        <Label className="text-base">Ваш поточний життєвий контекст</Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Ви можете описати свій стан здоров'я (вага, тренування), професію (робочий графік, години максимальної продуктивності) та життєві пріоритети. 
+                                            Будь-яка зміна тут безпосередньо вплине на рішення, які приймає Nexis під час планування вашого дня.
+                                        </p>
+                                        <textarea 
+                                            disabled={isSavingAi}
+                                            value={aiProfileText}
+                                            onChange={(e) => setAiProfileText(e.target.value)}
+                                            placeholder="Наприклад: Моя поточна вага 75 кг, тренуюсь 3 рази на тиждень..."
+                                            className="w-full min-h-[500px] p-4 rounded-xl bg-muted/50 dark:bg-secondary/50 border-transparent focus-visible:bg-background focus-visible:border-indigo-500 outline-none focus-visible:ring-1 focus-visible:ring-indigo-500 text-foreground resize-y leading-relaxed"
+                                        />
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="flex justify-end pt-2 pb-6 px-6">
+                                    <Button 
+                                        onClick={handleSaveAiProfile} 
+                                        disabled={isSavingAi} 
+                                        className="rounded-full shadow-lg shadow-indigo-500/20 dark:shadow-none bg-indigo-600 hover:bg-indigo-700 px-8 text-white gap-2"
+                                    >
+                                        {isSavingAi ? 'Збереження...' : (
+                                            <>Оновити Базу Знань AI <Brain className="w-4 h-4 ml-1"/></>
+                                        )}
+                                    </Button>
+                                </CardFooter>
                             </Card>
                         </TabsContent>
 
