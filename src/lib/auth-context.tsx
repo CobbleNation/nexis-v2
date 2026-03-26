@@ -64,6 +64,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     async function checkSession() {
+        // Circuit breaker: prevent infinite loader if network hangs
+        const fallbackTimer = setTimeout(() => {
+            if (isLoading) {
+                console.warn("Auth session check timeout: forcefully unlocking loader.");
+                setIsLoading(false);
+            }
+        }, 8000);
+
         try {
             // Try to get user with current access token
             const res = await fetch('/api/auth/me', { cache: 'no-store' });
@@ -71,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const data = await res.json();
 
                 setUser(data.user);
+                clearTimeout(fallbackTimer);
                 return;
             }
 
@@ -108,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {
             setUser(null);
         } finally {
+            clearTimeout(fallbackTimer);
             setIsLoading(false);
         }
     }

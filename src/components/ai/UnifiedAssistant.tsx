@@ -17,7 +17,6 @@ interface UnifiedAssistantProps {
 export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
     // @ts-ignore - Vercel AI SDK type bug with Next.js 15
     const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error } = useChat({
-        id: 'nexis-brain',
         // @ts-ignore
         api: '/api/ai/brain',
     });
