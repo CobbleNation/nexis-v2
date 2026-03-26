@@ -16,7 +16,7 @@ interface UnifiedAssistantProps {
 
 export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
     // @ts-ignore - Vercel AI SDK type bug with Next.js 15
-    const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+    const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error } = useChat({
         // @ts-ignore
         api: '/api/ai/brain',
     });
@@ -43,12 +43,8 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
         
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
-            
-            // Override input natively via Vercel AI SDK handler simulation
-            const syntheticEvent = {
-                target: { value: input ? `${input} ${transcript}` : transcript }
-            } as any;
-            handleInputChange(syntheticEvent);
+            // Set input state natively
+            setInput(input ? `${input} ${transcript}` : transcript);
         };
         
         recognition.start();

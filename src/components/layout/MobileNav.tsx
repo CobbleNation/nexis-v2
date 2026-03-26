@@ -53,10 +53,10 @@ export function MobileNav() {
                 onClick={() => window.dispatchEvent(new Event('open-assistant'))}
                 className="flex flex-col items-center justify-center -mt-6 p-1 relative z-10 group"
             >
-                <div className="h-14 w-14 bg-gradient-to-tr from-indigo-500 to-indigo-700 dark:from-indigo-600 dark:to-indigo-900 rounded-full shadow-xl shadow-indigo-500/30 flex items-center justify-center text-white transition-all transform group-active:scale-95 group-hover:shadow-indigo-500/50 outline outline-4 outline-background">
+                <div className="h-14 w-14 bg-gradient-to-tr from-primary/80 to-primary dark:from-primary/90 dark:to-primary rounded-full shadow-xl shadow-primary/30 flex items-center justify-center text-primary-foreground transition-all transform group-active:scale-95 group-hover:shadow-primary/50 outline outline-4 outline-background">
                     <Brain className="h-6 w-6" />
                 </div>
-                <span className="text-[10px] font-bold mt-1 text-indigo-600 dark:text-indigo-400">Nexis OS</span>
+                <span className="text-[10px] font-bold mt-1 text-primary">Nexis OS</span>
             </button>
 
             <Link

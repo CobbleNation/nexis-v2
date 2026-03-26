@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Sparkles, X, Brain } from "lucide-react";
 import { toast } from "sonner";
 import { UnifiedAssistant } from "@/components/ai/UnifiedAssistant";
+import { ProfileOnboardingModal } from "@/components/onboarding/ProfileOnboardingModal";
 
 
 
@@ -31,7 +32,7 @@ export default function MainLayout({
     useEffect(() => {
         if (user && user.onboardingCompleted === false) {
              toast('Заповніть профіль, щоб Nexis міг краще вам допомагати!', {
-                 action: { label: 'Заповнити', onClick: () => setShowAssistant(true) },
+                 action: { label: 'Заповнити', onClick: () => window.dispatchEvent(new Event('open-ai-profile')) },
                  duration: 60000,
              })
         }
@@ -63,8 +64,8 @@ export default function MainLayout({
                     {children}
                 </main>
             </div>
-            
             <UnifiedAssistant open={showAssistant} onClose={() => setShowAssistant(false)} />
+            <ProfileOnboardingModal />
         </div>
     );
 }

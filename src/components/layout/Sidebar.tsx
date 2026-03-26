@@ -179,9 +179,9 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                 </Button>
                 <Button
                     onClick={() => window.dispatchEvent(new Event('open-assistant'))}
-                    className="w-full justify-start gap-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-800 shadow-sm rounded-xl h-10 text-sm font-semibold transition-all group"
+                    className="w-full justify-start gap-2 bg-primary/5 dark:bg-primary/10 text-primary hover:bg-primary/10 dark:hover:bg-primary/20 border border-primary/20 dark:border-primary/30 shadow-sm rounded-xl h-10 text-sm font-semibold transition-all group"
                 >
-                    <Brain className="w-4 h-4 text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                    <Brain className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
                     <span className="truncate">Nexis OS</span>
                 </Button>
             </div>
@@ -220,8 +220,8 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                                     return (
                                         <div key={item.name} className="space-y-0.5">
                                             <button
-                                                onClick={() => window.dispatchEvent(new Event('open-assistant'))}
-                                                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-left rounded-lg transition-all duration-200 group text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+                                                onClick={() => window.dispatchEvent(new Event('open-ai-profile'))}
+                                                className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-left rounded-lg transition-all duration-200 group text-primary hover:bg-primary/5 dark:hover:bg-primary/10"
                                             >
                                                 <item.icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
                                                 <span className="flex-1 truncate">{item.name}</span>
