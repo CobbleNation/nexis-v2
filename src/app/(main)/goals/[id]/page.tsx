@@ -106,62 +106,7 @@ export default function GoalDetailsPage() {
         ? checkAchievement(activeGoal.metricCurrentValue, activeGoal.metricTargetValue, activeGoal.metricDirection)
         : false;
 
-    const handleAIBreakdown = async (isRegeneration: boolean = false) => {
-        if (!HAS_AI_GOAL_BREAKDOWN) {
-            setShowUpgrade(true);
-            return;
-        }
 
-        const activeStepsCount = activeGoal.subGoals?.filter(sg => !sg.completed).length || 0;
-        const requestedCount = Math.max(0, 7 - activeStepsCount);
-
-        if (requestedCount <= 0) {
-            toast.info("Максимальна кількість активних кроків (7). Виконайте або видаліть існуючі, щоб згенерувати нові.");
-            return;
-        }
-
-        let feedback = undefined;
-        if (isRegeneration && previewTasks.length > 0 && regenerationFeedback.trim()) {
-            const currentTitles = previewTasks.map(t => `- ${t.title}`).join('\n');
-            feedback = `Ось поточні запропоновані кроки:\n${currentTitles}\nМої зауваження до них:\n${regenerationFeedback}\nБудь ласка, перегенеруй список кроків враховуючи ці побажання.`;
-        }
-
-        setIsGeneratingBreakdown(true);
-        try {
-            const response = await fetch('/api/ai/goal-breakdown', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    goalTitle: activeGoal.title,
-                    goalDescription: activeGoal.description,
-                    area: area?.title,
-                    requestedCount,
-                    feedback
-                })
-            });
-
-            if (!response.ok) throw new Error('Failed to generate breakdown');
-
-            const data: GoalBreakdownResponse = await response.json();
-
-            if (data.subTasks && data.subTasks.length > 0) {
-                const newPreviewTasks = data.subTasks.slice(0, requestedCount).map((task: { title: string }) => ({
-                    id: uuidv4(),
-                    title: task.title,
-                    hint: ''
-                }));
-                setPreviewTasks(newPreviewTasks);
-            } else {
-                toast.info("AI не знайшов варіантів для цієї цілі.");
-            }
-
-        } catch (error) {
-            console.error(error);
-            toast.error("Не вдалося згенерувати план");
-        } finally {
-            setIsGeneratingBreakdown(false);
-        }
-    };
 
     const removePreviewTask = (id: string) => {
         setPreviewTasks(prev => prev.filter(t => t.id !== id));
@@ -429,26 +374,7 @@ export default function GoalDetailsPage() {
                             Кроки та Підцілі
                         </h4>
                         <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 text-xs gap-1.5 border-amber-200 dark:border-amber-700/50 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-500/20 hover:text-amber-800 dark:hover:text-amber-300"
-                                disabled={isGeneratingBreakdown}
-                                onClick={() => {
-                                    if (!HAS_AI_GOAL_BREAKDOWN) {
-                                        setUpgradeContext({
-                                            title: "Структура - ключ до успіху",
-                                            description: "Більшість цілей не досягаються не через лінь, а через відсутність структури. Zynorvia AI розкладе цю ціль на реальні дії."
-                                        });
-                                        setShowUpgrade(true);
-                                    } else {
-                                        handleAIBreakdown(false);
-                                    }
-                                }}
-                            >
-                                {isGeneratingBreakdown ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                                {isGeneratingBreakdown ? "Думаю..." : "AI План"}
-                            </Button>
+
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -496,53 +422,7 @@ export default function GoalDetailsPage() {
                                     </div>
                                 ))}
 
-                                {/* AI Preview Subgoals */}
-                                {!isGeneratingBreakdown && previewTasks.length > 0 && (
-                                    <div className="border-t-2 border-dashed border-violet-200 dark:border-violet-900/50 bg-violet-50/10 dark:bg-violet-900/5">
-                                        <div className="p-3 text-xs font-semibold text-violet-600 dark:text-violet-400 flex items-center gap-1.5 uppercase tracking-wide bg-violet-50/50 dark:bg-violet-900/20">
-                                            <Sparkles className="w-3.5 h-3.5" /> Запропоновані кроки AI
-                                        </div>
-                                        <div className="divide-y divide-violet-100 dark:divide-violet-900/30">
-                                            {previewTasks.map((task) => (
-                                                <div key={task.id} className="p-3.5 flex items-start gap-3 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-colors group">
-                                                    <Sparkles className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
-                                                    <TextareaAutosize
-                                                        value={task.title}
-                                                        onChange={(e) => updatePreviewTaskTitle(task.id, e.target.value)}
-                                                        className="text-sm flex-1 bg-transparent border-none h-auto p-0 focus-visible:ring-0 shadow-none font-medium text-slate-700 dark:text-slate-200 resize-none outline-none leading-relaxed min-h-0"
-                                                        minRows={1}
-                                                    />
-                                                    <button
-                                                        onClick={() => removePreviewTask(task.id)}
-                                                        className="opacity-0 group-hover:opacity-100 p-1.5 text-slate-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 mt-0.5"
-                                                    >
-                                                        <X className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        {/* Regeneration Context Area */}
-                                        <div className="p-4 bg-violet-50/80 dark:bg-violet-900/20 space-y-3">
-                                            <Input
-                                                placeholder="Вам не подобаються ці кроки? Напишіть коментар для AI..."
-                                                value={regenerationFeedback}
-                                                onChange={(e) => setRegenerationFeedback(e.target.value)}
-                                                className="h-9 text-sm bg-white dark:bg-card border-violet-200 dark:border-violet-800 focus-visible:ring-violet-500"
-                                            />
-                                            <div className="flex flex-wrap items-center justify-end gap-2">
-                                                <Button variant="ghost" size="sm" onClick={() => setPreviewTasks([])} className="h-8 text-xs text-slate-500 hover:text-slate-700">Скасувати</Button>
-                                                <Button size="sm" onClick={() => handleAIBreakdown(true)} disabled={isGeneratingBreakdown} className="h-8 text-xs bg-white dark:bg-slate-800 text-violet-600 dark:text-violet-400 border border-violet-200 dark:border-violet-800 hover:bg-violet-50 shadow-sm">
-                                                    <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                                                    Перегенерувати
-                                                </Button>
-                                                <Button size="sm" onClick={confirmPreviewTasks} disabled={previewTasks.length === 0} className="h-8 text-xs bg-violet-600 hover:bg-violet-700 text-white shadow-sm">
-                                                    <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
-                                                    Зберегти кроки
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+
                             </div>
                         ) : (
                             <div className="p-8 text-center text-slate-400 dark:text-muted-foreground/60 text-sm italic">

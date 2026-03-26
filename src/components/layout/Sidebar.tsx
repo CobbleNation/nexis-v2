@@ -71,18 +71,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         {
             title: 'Головна',
             items: [
-                { name: 'Огляд', href: '/overview', icon: LayoutDashboard },
-                { 
-                    name: 'Налаштування AI', 
-                    href: user?.onboardingCompleted === false ? '/overview?resume_onboarding=true' : '/overview?resume_onboarding=deep_plan', 
-                    icon: Sparkles 
-                }
-            ]
-        },
-        {
-            title: 'AI інструменти (поки що приховані)',
-            items: [
-                { name: 'Аналіз Дня', href: '#ai-daily-review', icon: Lightbulb, isAction: true, actionId: 'daily-review' }
+                { name: 'Огляд', href: '/overview', icon: LayoutDashboard }
             ]
         },
         {
@@ -222,9 +211,6 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                             }
 
                             let isActive = pathname.startsWith(item.href.split('?')[0]);
-                            if (item.name === 'Налаштування AI') {
-                                isActive = false;
-                            }
                             const Icon = item.icon;
 
                             return (

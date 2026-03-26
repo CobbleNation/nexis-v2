@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useState, useEffect, useRef } from 'react';
-import { Brain, Send, X, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Brain, Send, X, Loader2, Sparkles, CheckCircle2, Mic, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -22,8 +22,37 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
     });
 
     const scrollRef = useRef<HTMLDivElement>(null);
-
-    // Auto-scroll to bottom of chat
+    const [isListening, setIsListening] = useState(false);
+    
+    // Voice Support
+    const startListening = () => {
+        // @ts-ignore
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert('Ваш браузер не підтримує розпізнавання голосу.');
+            return;
+        }
+        
+        const recognition = new SpeechRecognition() as any;
+        recognition.lang = 'uk-UA';
+        recognition.interimResults = false;
+        
+        recognition.onstart = () => setIsListening(true);
+        recognition.onend = () => setIsListening(false);
+        recognition.onerror = () => setIsListening(false);
+        
+        recognition.onresult = (event: any) => {
+            const transcript = event.results[0][0].transcript;
+            
+            // Override input natively via Vercel AI SDK handler simulation
+            const syntheticEvent = {
+                target: { value: input ? `${input} ${transcript}` : transcript }
+            } as any;
+            handleInputChange(syntheticEvent);
+        };
+        
+        recognition.start();
+    };
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -138,7 +167,16 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                             className="bg-muted border-none outline-none focus-visible:ring-1 focus-visible:ring-primary h-12 rounded-xl"
                             disabled={isLoading}
                         />
-                        <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90">
+                        <Button 
+                            type="button" 
+                            variant="outline"
+                            size="icon" 
+                            onClick={startListening}
+                            className={cn("h-12 w-12 shrink-0 rounded-xl transition-all", isListening && "bg-red-50 text-red-500 border-red-200 animate-pulse")}
+                        >
+                            <Mic className="w-5 h-5" />
+                        </Button>
+                        <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
                             <Send className="w-5 h-5" />
                         </Button>
                     </form>

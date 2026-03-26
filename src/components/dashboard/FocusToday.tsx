@@ -191,39 +191,7 @@ export function FocusToday() {
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
     }, []);
 
-    const handleAiFocusClick = () => {
-        if (!isPro) {
-            setShowUpgradeModal(true);
-            return;
-        }
 
-        setIsAiAnalyzing(true);
-
-        // Simulate AI thinking time
-        setTimeout(() => {
-            if (autoFocusSuggestion) {
-                // Determine mock reasoning based on type
-                let reason = "AI визначив це як найефективніший крок для вашого дня.";
-                if (autoFocusSuggestion.type === 'task') {
-                    if (autoFocusSuggestion.relatedProjectTitle) {
-                        reason = `Ця задача є найпріоритетнішою у вашому ключовому проєкті "${autoFocusSuggestion.relatedProjectTitle}". Її виконання дасть найбільший прогрес сьогодні.`;
-                    } else {
-                        reason = `Ця задача має найвищий пріоритет на сьогодні згідно з попереднім плануванням.`;
-                    }
-                } else if (autoFocusSuggestion.type === 'project') {
-                    reason = `Цей проєкт містить найбільше активних задач (${autoFocusSuggestion.relatedTasksCount || 0}), що потребують вашої уваги прямо зараз.`;
-                } else if (autoFocusSuggestion.type === 'goal') {
-                    reason = `Ця ціль є активною і визначає ваш довгостроковий стратегічний напрямок, що потребує щоденного фокусу.`;
-                }
-
-                saveFocusToStorage(autoFocusSuggestion, true, reason);
-                setFocusItem(autoFocusSuggestion);
-                setIsAutoFocus(true);
-                setAiReasoning(reason);
-            }
-            setIsAiAnalyzing(false);
-        }, 1200);
-    };
 
     // Related tasks for the focus item (shown in focus mode)
     const relatedTasks = useMemo(() => {
@@ -508,23 +476,7 @@ export function FocusToday() {
                                     <Plus className="w-4 h-4" />
                                     Вручну
                                 </button>
-                                <button
-                                    onClick={handleAiFocusClick}
-                                    disabled={isAiAnalyzing}
-                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-bold text-sm transition shadow-md shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
-                                >
-                                    {isAiAnalyzing ? (
-                                        <>
-                                            <Sparkles className="w-4 h-4 animate-spin" />
-                                            Аналізую...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="w-4 h-4" />
-                                            AI Фокус
-                                        </>
-                                    )}
-                                </button>
+
                             </div>
                         </div>
                     )}
