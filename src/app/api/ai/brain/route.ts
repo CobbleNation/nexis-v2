@@ -35,12 +35,23 @@ export async function POST(req: Request) {
         // Extract messages from client
         const { messages, userState } = await req.json();
 
-        // 1. Fetch cognitive profile and current state
-        const [profile] = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId));
+        // 1. Fetch cognitive profile and current state (defensive - table may be empty)
+        let profile: any = null;
+        try {
+            const [p] = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId));
+            profile = p || null;
+        } catch (e) {
+            console.warn('[AI] userProfiles query failed, using defaults:', e);
+        }
         
         // Fetch recent memories for context
-        const memories = await db.select().from(aiMemories).where(eq(aiMemories.userId, userId)).orderBy(aiMemories.createdAt).limit(10);
-        const memoryStrings = memories.map(m => m.content);
+        let memoryStrings: string[] = [];
+        try {
+            const memories = await db.select().from(aiMemories).where(eq(aiMemories.userId, userId)).orderBy(aiMemories.createdAt).limit(10);
+            memoryStrings = memories.map(m => m.content);
+        } catch (e) {
+            console.warn('[AI] aiMemories query failed:', e);
+        }
 
         // 2. Build the dynamic system prompt
         const systemPrompt = buildBrainSystemPrompt(profile, memoryStrings, userState || {});

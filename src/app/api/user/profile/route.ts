@@ -6,6 +6,8 @@ import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
 import { v4 as uuidv4 } from 'uuid';
 
+const MEMORY_PREFIX = 'USER CONTEXT & IDENTITY:';
+
 export async function GET(req: Request) {
     try {
         const cookieStore = await cookies();
@@ -21,16 +23,23 @@ export async function GET(req: Request) {
         const existingMemory = await db.query.aiMemories.findFirst({
             where: (aiMemories, { eq, and, like }) => and(
                 eq(aiMemories.userId, userId),
-                like(aiMemories.content, 'USER CONTEXT & IDENTITY:%')
+                like(aiMemories.content, `${MEMORY_PREFIX}%`)
             )
         });
 
-        // Strip the prefix to return clean text to the UI
-        const identityString = existingMemory 
-            ? existingMemory.content.replace('USER CONTEXT & IDENTITY:\n', '') 
-            : '';
+        if (!existingMemory) {
+            return NextResponse.json({ profileData: {} });
+        }
 
-        return NextResponse.json({ identityString });
+        // Parse structured JSON from memory content
+        const rawContent = existingMemory.content.replace(`${MEMORY_PREFIX}\n`, '');
+        try {
+            const profileData = JSON.parse(rawContent);
+            return NextResponse.json({ profileData });
+        } catch {
+            // Legacy: plain text format — return as-is for migration
+            return NextResponse.json({ profileData: { _legacy: rawContent } });
+        }
     } catch (e) {
         console.error("Fetch Profile Error:", e);
         return NextResponse.json({ error: 'Fetch failed' }, { status: 500 });
@@ -49,14 +58,16 @@ export async function POST(req: Request) {
 
         const userId = payload.userId as string;
         const body = await req.json();
-        const { identityString } = body;
-        const finalContent = `USER CONTEXT & IDENTITY:\n${identityString}`;
+        const { profileData } = body; // Record<string, string>
+
+        // Serialize to structured JSON
+        const finalContent = `${MEMORY_PREFIX}\n${JSON.stringify(profileData, null, 2)}`;
 
         // Check if memory exists to overwrite it
         const existingMemory = await db.query.aiMemories.findFirst({
             where: (aiMemories, { eq, and, like }) => and(
                 eq(aiMemories.userId, userId),
-                like(aiMemories.content, 'USER CONTEXT & IDENTITY:%')
+                like(aiMemories.content, `${MEMORY_PREFIX}%`)
             )
         });
 
@@ -81,7 +92,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ success: true });
     } catch (e) {
-        console.error("User Profile Update Error:", e);
-        return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+        console.error("POST Profile Error:", e);
+        return NextResponse.json({ error: 'Save failed' }, { status: 500 });
     }
 }

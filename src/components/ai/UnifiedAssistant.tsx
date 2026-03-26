@@ -19,6 +19,7 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
     const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error } = useChat({
         // @ts-ignore
         api: '/api/ai/brain',
+        streamProtocol: 'text',
     });
 
     const scrollRef = useRef<HTMLDivElement>(null);
