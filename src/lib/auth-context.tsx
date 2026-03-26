@@ -175,7 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const updatedUser = { ...user, ...data };
         if (data.firstName || data.lastName) {
-            updatedUser.name = `${data.firstName || user.firstName || ''} ${data.lastName || user.lastName || ''}`.trim();
+            updatedUser.name = `${data.firstName || user.firstName || ''} ${data.lastName || user.lastName || ''}`.trim() || 'User';
         }
         setUser(updatedUser);
 
