@@ -16,7 +16,7 @@ interface UnifiedAssistantProps {
 
 export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
     // @ts-ignore - Vercel AI SDK type bug with Next.js 15
-    const { messages, input, setInput, handleInputChange, handleSubmit, isLoading, error } = useChat({
+    const { messages, input, setInput, append, isLoading, error } = useChat({
         // @ts-ignore
         api: '/api/ai/brain',
         streamProtocol: 'text',
@@ -24,7 +24,14 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isListening, setIsListening] = useState(false);
-    
+
+    const handleSend = () => {
+        const text = (input || '').trim();
+        if (!text || isLoading) return;
+        setInput('');
+        append({ role: 'user', content: text });
+    };
+
     // Voice Support
     const startListening = () => {
         // @ts-ignore
@@ -44,12 +51,12 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
         
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
-            // Set input state natively
             setInput(input ? `${input} ${transcript}` : transcript);
         };
         
         recognition.start();
     };
+
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -156,13 +163,14 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
 
                 {/* Input Area */}
                 <div className="p-4 bg-card border-t border-border z-10">
-                    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="flex gap-2">
+                    <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2">
                         <Input
-                            value={input}
+                            value={input || ''}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Накажіть Nexis..."
                             className="bg-muted border-none outline-none focus-visible:ring-1 focus-visible:ring-primary h-12 rounded-xl"
                             disabled={isLoading}
+                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                         />
                         <Button 
                             type="button" 
@@ -173,7 +181,7 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                         >
                             <Mic className="w-5 h-5" />
                         </Button>
-                        <Button type="submit" size="icon" disabled={isLoading || !(input || '').trim()} className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
+                        <Button type="button" size="icon" onClick={handleSend} disabled={isLoading || !(input || '').trim()} className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
                             <Send className="w-5 h-5" />
                         </Button>
                     </form>
@@ -183,4 +191,3 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
         </AnimatePresence>
     );
 }
-
