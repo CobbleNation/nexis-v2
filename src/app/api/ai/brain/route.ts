@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool } from 'ai';
+import { generateText, tool } from 'ai';
 import { z } from 'zod';
 import { db } from '@/db';
 import { actions, aiMemories, goals, habits, habitLogs, lifeAreas, userProfiles } from '@/db/schema';
@@ -259,107 +259,103 @@ export async function POST(req: Request) {
             console.warn('[AI] Failed to log debug context:', e);
         }
 
-        // ── Invoke the AI with tools ──
-        const result = streamText({
-            model: openai('gpt-4o'),
-            system: systemPrompt,
-            messages,
-            tools: {
-                create_goal: tool({
-                    description: 'Creates a new goal or project for the user. USE THIS ONLY AFTER CHECKING LIMITS.',
-                    parameters: z.object({
-                        title: z.string(),
-                        type: z.enum(['vision', 'strategic', 'tactical']),
-                        areaId: z.string().optional(),
-                        reason: z.string().describe('Why is this goal important?'),
+        // ── Invoke the AI ──
+        let aiText = '';
+        try {
+            const result = await generateText({
+                model: openai('gpt-4o'),
+                system: systemPrompt,
+                messages,
+                tools: {
+                    create_goal: tool({
+                        description: 'Creates a new goal or project for the user.',
+                        parameters: z.object({
+                            title: z.string(),
+                            type: z.enum(['vision', 'strategic', 'tactical']),
+                            areaId: z.string().optional(),
+                            reason: z.string().describe('Why is this goal important?'),
+                        }),
+                        // @ts-ignore
+                        execute: async ({ title, type, areaId, reason }: { title: string, type: 'vision'|'strategic'|'tactical', areaId?: string, reason: string }) => {
+                            const newGoalId = uuidv4();
+                            await db.insert(goals).values({
+                                id: newGoalId,
+                                userId,
+                                title,
+                                type,
+                                areaId,
+                                status: 'active',
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                            });
+                            return { success: true, goalId: newGoalId, message: 'Goal created successfully.' };
+                        },
                     }),
-                    // @ts-ignore
-                    execute: async ({ title, type, areaId, reason }: { title: string, type: 'vision'|'strategic'|'tactical', areaId?: string, reason: string }) => {
-                        const newGoalId = uuidv4();
-                        await db.insert(goals).values({
-                            id: newGoalId,
-                            userId,
-                            title,
-                            type,
-                            areaId,
-                            status: 'active',
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
-                        });
-                        return { success: true, goalId: newGoalId, message: 'Goal created successfully.' };
-                    },
-                }),
 
-                schedule_task: tool({
-                    description: 'Schedules a new task for today or a specific date.',
-                    parameters: z.object({
-                        title: z.string(),
-                        duration: z.number().describe('Estimated duration in minutes (default 30)'),
-                        date: z.string().optional().describe('YYYY-MM-DD. Defaults to today.'),
+                    schedule_task: tool({
+                        description: 'Schedules a new task for today or a specific date.',
+                        parameters: z.object({
+                            title: z.string(),
+                            duration: z.number().describe('Estimated duration in minutes'),
+                            date: z.string().optional().describe('YYYY-MM-DD. Defaults to today.'),
+                        }),
+                        // @ts-ignore
+                        execute: async ({ title, duration, date }: { title: string, duration: number, date?: string }) => {
+                            const newActionId = uuidv4();
+                            await db.insert(actions).values({
+                                id: newActionId,
+                                userId,
+                                title,
+                                type: 'task',
+                                status: 'pending',
+                                date: date || new Date().toISOString().split('T')[0],
+                                duration,
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                            });
+                            return { success: true, actionId: newActionId, message: 'Task scheduled.' };
+                        },
                     }),
-                    // @ts-ignore
-                    execute: async ({ title, duration, date }: { title: string, duration: number, date?: string }) => {
-                        const newActionId = uuidv4();
-                        await db.insert(actions).values({
-                            id: newActionId,
-                            userId,
-                            title,
-                            type: 'task',
-                            status: 'pending',
-                            date: date || new Date().toISOString().split('T')[0],
-                            duration,
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
-                        });
-                        return { success: true, actionId: newActionId, message: 'Task scheduled.' };
-                    },
-                }),
 
-                log_memory: tool({
-                    description: 'Saves important facts, user preferences, or learnings to the user\'s long-term memory vector.',
-                    parameters: z.object({
-                        fact: z.string().describe('The fact or preference to remember'),
-                        importance: z.number().min(0).max(1).describe('How important is this to remember forever (0 to 1)'),
+                    log_memory: tool({
+                        description: 'Saves important facts about the user to long-term memory.',
+                        parameters: z.object({
+                            fact: z.string().describe('The fact to remember'),
+                            importance: z.number().min(0).max(1),
+                        }),
+                        // @ts-ignore
+                        execute: async ({ fact, importance }: { fact: string, importance: number }) => {
+                            await db.insert(aiMemories).values({
+                                id: uuidv4(),
+                                userId,
+                                content: fact,
+                                importanceWeight: importance,
+                                createdAt: new Date(),
+                                lastAccessed: new Date(),
+                            });
+                            return { success: true, message: 'Fact remembered.' };
+                        },
                     }),
-                    // @ts-ignore
-                    execute: async ({ fact, importance }: { fact: string, importance: number }) => {
-                        await db.insert(aiMemories).values({
-                            id: uuidv4(),
-                            userId,
-                            content: fact,
-                            importanceWeight: importance,
-                            createdAt: new Date(),
-                            lastAccessed: new Date()
-                        });
-                        return { success: true, message: 'Fact remembered.' };
-                    },
-                }),
-            },
-        });
+                },
+            });
 
-        // Pipe the text stream as plain UTF-8 text
-        const encoder = new TextEncoder();
-        const textStream = result.textStream;
-        const readable = new ReadableStream({
-            async start(controller) {
-                try {
-                    for await (const chunk of textStream) {
-                        controller.enqueue(encoder.encode(chunk));
-                    }
-                } catch (e) {
-                    console.error('[AI] Stream error:', e);
-                } finally {
-                    controller.close();
-                }
-            },
-        });
+            aiText = result.text || '';
+        } catch (aiError: any) {
+            console.error('[AI] OpenAI/generateText error:', aiError);
+            // Return the actual error message to the client for debugging
+            const errMsg = aiError?.message || 'Unknown AI error';
+            return new Response(
+                `[AI Error] ${errMsg}`,
+                { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
+            );
+        }
 
-        return new Response(readable, {
-            headers: {
-                'Content-Type': 'text/plain; charset=utf-8',
-                'Cache-Control': 'no-cache',
-                'Transfer-Encoding': 'chunked',
-            },
+        if (!aiText.trim()) {
+            aiText = 'Я обробив ваш запит, але не маю текстової відповіді. Можливо, я виконав дію за допомогою інструментів.';
+        }
+
+        return new Response(aiText, {
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         });
 
     } catch (error) {
