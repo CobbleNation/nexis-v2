@@ -267,30 +267,7 @@ export async function POST(req: Request) {
                 system: systemPrompt,
                 messages,
                 tools: {
-                    create_goal: tool({
-                        description: 'Creates a new goal or project for the user.',
-                        parameters: z.object({
-                            title: z.string(),
-                            goalType: z.string().describe('Must be EXACTLY one of: vision, strategic, tactical'),
-                            areaId: z.string().describe('Optional ID of the life area this goal belongs to. Leave empty string if none.'),
-                            reason: z.string().describe('Why is this goal important?'),
-                        }),
-                        // @ts-ignore
-                        execute: async ({ title, goalType, areaId, reason }: { title: string, goalType: 'vision'|'strategic'|'tactical', areaId: string, reason: string }) => {
-                            const newGoalId = uuidv4();
-                            await db.insert(goals).values({
-                                id: newGoalId,
-                                userId,
-                                title,
-                                type: (goalType === 'vision' || goalType === 'strategic' || goalType === 'tactical') ? goalType : 'tactical',
-                                areaId: areaId || undefined,
-                                status: 'active',
-                                createdAt: new Date(),
-                                updatedAt: new Date(),
-                            });
-                            return { success: true, goalId: newGoalId, message: 'Goal created successfully.' };
-                        },
-                    }),
+                    /* create_goal: tool({ ... disabled to isolate schema error ... }), */
 
                     schedule_task: tool({
                         description: 'Schedules a new task for today or a specific date.',
