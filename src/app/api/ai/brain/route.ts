@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { generateText, tool } from 'ai';
+import { streamText, tool } from 'ai';
 import { z } from 'zod';
 import { db } from '@/db';
 import { actions, aiMemories, goals, habits, habitLogs, lifeAreas, userProfiles } from '@/db/schema';
@@ -260,79 +260,115 @@ export async function POST(req: Request) {
         }
 
         // ── Invoke the AI ──
-        let aiText = '';
-        try {
-            const result = await generateText({
-                model: openai('gpt-4o'),
-                system: systemPrompt,
-                messages,
-                tools: {
-                    /* create_goal: tool({ ... disabled to isolate schema error ... }), */
-
-                    schedule_task: tool({
-                        description: 'Schedules a new task for today or a specific date.',
-                        parameters: z.object({
-                            title: z.string(),
-                            duration: z.number().describe('Estimated duration in minutes'),
-                            date: z.string().describe('YYYY-MM-DD format. Use empty string for today.'),
-                        }),
-                        // @ts-ignore
-                        execute: async ({ title, duration, date }: { title: string, duration: number, date: string }) => {
-                            const newActionId = uuidv4();
-                            await db.insert(actions).values({
-                                id: newActionId,
-                                userId,
-                                title,
-                                type: 'task',
-                                status: 'pending',
-                                date: date || new Date().toISOString().split('T')[0],
-                                duration,
-                                createdAt: new Date(),
-                                updatedAt: new Date(),
-                            });
-                            return { success: true, actionId: newActionId, message: 'Task scheduled.' };
+        const result = streamText({
+            model: openai('gpt-4o'),
+            system: systemPrompt,
+            messages,
+            tools: {
+                create_goal: {
+                    description: 'Creates a new goal or project for the user.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            title: { type: 'string' },
+                            goalType: { type: 'string', description: 'Must be EXACTLY one of: vision, strategic, tactical' },
+                            areaId: { type: 'string', description: 'Optional ID of the life area. Leave empty if none.' },
+                            reason: { type: 'string', description: 'Why is this goal important?' },
                         },
-                    }),
-
-                    log_memory: tool({
-                        description: 'Saves important facts about the user to long-term memory.',
-                        parameters: z.object({
-                            fact: z.string().describe('The fact to remember'),
-                            importance: z.number().min(0).max(1),
-                        }),
-                        // @ts-ignore
-                        execute: async ({ fact, importance }: { fact: string, importance: number }) => {
-                            await db.insert(aiMemories).values({
-                                id: uuidv4(),
-                                userId,
-                                content: fact,
-                                importanceWeight: importance,
-                                createdAt: new Date(),
-                                lastAccessed: new Date(),
-                            });
-                            return { success: true, message: 'Fact remembered.' };
-                        },
-                    }),
+                        required: ['title', 'goalType', 'areaId', 'reason'],
+                    },
+                    execute: async ({ title, goalType, areaId, reason }: { title: string, goalType: 'vision'|'strategic'|'tactical', areaId: string, reason: string }) => {
+                        const newGoalId = uuidv4();
+                        await db.insert(goals).values({
+                            id: newGoalId,
+                            userId,
+                            title,
+                            type: (goalType === 'vision' || goalType === 'strategic' || goalType === 'tactical') ? goalType : 'tactical',
+                            areaId: areaId || undefined,
+                            status: 'active',
+                            createdAt: new Date(),
+                            updatedAt: new Date(),
+                        });
+                        return { success: true, goalId: newGoalId, message: 'Goal created successfully.' };
+                    },
                 },
-            });
 
-            aiText = result.text || '';
-        } catch (aiError: any) {
-            console.error('[AI] OpenAI/generateText error:', aiError);
-            // Return the actual error message to the client for debugging
-            const errMsg = aiError?.message || 'Unknown AI error';
-            return new Response(
-                `[AI Error] ${errMsg}`,
-                { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
-            );
-        }
+                schedule_task: {
+                    description: 'Schedules a new task for today or a specific date.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            title: { type: 'string' },
+                            duration: { type: 'number', description: 'Estimated duration in minutes' },
+                            date: { type: 'string', description: 'YYYY-MM-DD format. Use empty string for today.' },
+                        },
+                        required: ['title', 'duration', 'date'],
+                    },
+                    execute: async ({ title, duration, date }: { title: string, duration: number, date: string }) => {
+                        const newActionId = uuidv4();
+                        await db.insert(actions).values({
+                            id: newActionId,
+                            userId,
+                            title,
+                            type: 'task',
+                            status: 'pending',
+                            date: date || new Date().toISOString().split('T')[0],
+                            duration,
+                            createdAt: new Date(),
+                            updatedAt: new Date(),
+                        });
+                        return { success: true, actionId: newActionId, message: 'Task scheduled.' };
+                    },
+                },
 
-        if (!aiText.trim()) {
-            aiText = 'Я обробив ваш запит, але не маю текстової відповіді. Можливо, я виконав дію за допомогою інструментів.';
-        }
+                log_memory: {
+                    description: 'Saves important facts about the user to long-term memory.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            fact: { type: 'string', description: 'The fact to remember' },
+                            importance: { type: 'number', description: 'How important (0 to 1)' },
+                        },
+                        required: ['fact', 'importance'],
+                    },
+                    execute: async ({ fact, importance }: { fact: string, importance: number }) => {
+                        await db.insert(aiMemories).values({
+                            id: uuidv4(),
+                            userId,
+                            content: fact,
+                            importanceWeight: importance,
+                            createdAt: new Date(),
+                            lastAccessed: new Date(),
+                        });
+                        return { success: true, message: 'Fact remembered.' };
+                    },
+                },
+            },
+        } as any); // cast as any to bypass strict Zod tool typing while using plain JSON schema
 
-        return new Response(aiText, {
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        // Pipe the text stream as plain UTF-8 text
+        const encoder = new TextEncoder();
+        const textStream = result.textStream;
+        const readable = new ReadableStream({
+            async start(controller) {
+                try {
+                    for await (const chunk of textStream) {
+                        controller.enqueue(encoder.encode(chunk));
+                    }
+                } catch (e) {
+                    console.error('[AI] Stream error:', e);
+                } finally {
+                    controller.close();
+                }
+            },
+        });
+
+        return new Response(readable, {
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Cache-Control': 'no-cache',
+                'Transfer-Encoding': 'chunked',
+            },
         });
 
     } catch (error) {
@@ -340,3 +376,4 @@ export async function POST(req: Request) {
         return new Response('Internal Server Error', { status: 500 });
     }
 }
+
