@@ -337,7 +337,30 @@ export async function POST(req: Request) {
             },
         });
 
-        return result.toTextStreamResponse();
+        // Pipe the text stream as plain UTF-8 text
+        const encoder = new TextEncoder();
+        const textStream = result.textStream;
+        const readable = new ReadableStream({
+            async start(controller) {
+                try {
+                    for await (const chunk of textStream) {
+                        controller.enqueue(encoder.encode(chunk));
+                    }
+                } catch (e) {
+                    console.error('[AI] Stream error:', e);
+                } finally {
+                    controller.close();
+                }
+            },
+        });
+
+        return new Response(readable, {
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Cache-Control': 'no-cache',
+                'Transfer-Encoding': 'chunked',
+            },
+        });
 
     } catch (error) {
         console.error('[AI] Brain Error:', error);
