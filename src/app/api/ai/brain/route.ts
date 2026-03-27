@@ -271,19 +271,19 @@ export async function POST(req: Request) {
                         description: 'Creates a new goal or project for the user.',
                         parameters: z.object({
                             title: z.string(),
-                            type: z.enum(['vision', 'strategic', 'tactical']),
-                            areaId: z.string().optional(),
+                            type: z.string().describe('Must be EXACTLY one of: vision, strategic, tactical'),
+                            areaId: z.string().describe('Optional ID of the life area this goal belongs to. Leave empty string if none.'),
                             reason: z.string().describe('Why is this goal important?'),
                         }),
                         // @ts-ignore
-                        execute: async ({ title, type, areaId, reason }: { title: string, type: 'vision'|'strategic'|'tactical', areaId?: string, reason: string }) => {
+                        execute: async ({ title, type, areaId, reason }: { title: string, type: 'vision'|'strategic'|'tactical', areaId: string, reason: string }) => {
                             const newGoalId = uuidv4();
                             await db.insert(goals).values({
                                 id: newGoalId,
                                 userId,
                                 title,
-                                type,
-                                areaId,
+                                type: (type === 'vision' || type === 'strategic' || type === 'tactical') ? type : 'tactical',
+                                areaId: areaId || undefined,
                                 status: 'active',
                                 createdAt: new Date(),
                                 updatedAt: new Date(),
@@ -297,10 +297,10 @@ export async function POST(req: Request) {
                         parameters: z.object({
                             title: z.string(),
                             duration: z.number().describe('Estimated duration in minutes'),
-                            date: z.string().optional().describe('YYYY-MM-DD. Defaults to today.'),
+                            date: z.string().describe('YYYY-MM-DD format. Use empty string for today.'),
                         }),
                         // @ts-ignore
-                        execute: async ({ title, duration, date }: { title: string, duration: number, date?: string }) => {
+                        execute: async ({ title, duration, date }: { title: string, duration: number, date: string }) => {
                             const newActionId = uuidv4();
                             await db.insert(actions).values({
                                 id: newActionId,
