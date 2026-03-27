@@ -253,6 +253,7 @@ export async function POST(req: Request) {
                 }, null, 2)}`,
                 importanceWeight: 0.1,
                 decayFactor: 1.0, // high decay = auto-cleanup
+                lastAccessed: new Date(),
             });
         } catch (e) {
             console.warn('[AI] Failed to log debug context:', e);
