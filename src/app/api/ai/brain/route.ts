@@ -1,6 +1,6 @@
 import { openai } from '@ai-sdk/openai';
 // Build ID: 1774639500
-import { streamText, tool } from 'ai';
+import { streamText, generateText, tool } from 'ai';
 import { z } from 'zod';
 import { db } from '@/db';
 import { actions, aiMemories, goals, habits, habitLogs, lifeAreas, userProfiles } from '@/db/schema';
@@ -10,7 +10,6 @@ import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
 import { PROFILE_FIELDS } from '@/lib/ai/profileFields';
 
-export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 const MEMORY_PREFIX = 'USER CONTEXT & IDENTITY:';
@@ -266,9 +265,23 @@ export async function POST(req: Request) {
             return new Response('[AI Error] OpenAI API Key is missing on the server.', { status: 200 });
         }
 
+        // ── DB Ping ──
+        try {
+            await db.insert(aiMemories).values({
+                id: uuidv4(),
+                userId,
+                content: `[LOG] Request received: ${messages[messages.length-1]?.content?.substring(0, 50)}...`,
+                importanceWeight: 0,
+                createdAt: new Date(),
+                lastAccessed: new Date(),
+            });
+        } catch (e) {
+            console.error('[AI] DB Ping failed:', e);
+        }
+
         // ── Invoke the AI ──
         try {
-            const result = streamText({
+            const result = await generateText({
                 model: openai('gpt-4o'),
                 system: systemPrompt,
                 messages,
@@ -279,88 +292,51 @@ export async function POST(req: Request) {
                             type: 'object',
                             properties: {
                                 title: { type: 'string' },
-                                goalType: { type: 'string', description: 'Must be one of: vision, strategic, tactical' },
-                                areaId: { type: 'string', description: 'ID of the life area. Optional.' },
-                                reason: { type: 'string', description: 'Why is this goal important?' },
+                                goalType: { type: 'string', description: 'vision, strategic, tactical' },
+                                areaId: { type: 'string' },
+                                reason: { type: 'string' },
                             },
                             required: ['title', 'goalType', 'areaId', 'reason'],
                         },
-                        execute: async ({ title, goalType, areaId, reason }: { title: string, goalType: 'vision'|'strategic'|'tactical', areaId: string, reason: string }) => {
+                        execute: async ({ title, goalType, areaId, reason }: any) => {
                             const newGoalId = uuidv4();
                             await db.insert(goals).values({
                                 id: newGoalId,
                                 userId,
                                 title,
-                                type: (goalType === 'vision' || goalType === 'strategic' || goalType === 'tactical') ? goalType : 'tactical',
+                                type: goalType as any,
                                 areaId: areaId || undefined,
                                 status: 'active',
                                 createdAt: new Date(),
                                 updatedAt: new Date(),
                             });
-                            return { success: true, goalId: newGoalId, message: 'Goal created successfully.' };
+                            return { success: true, goalId: newGoalId };
                         },
                     },
-
                     schedule_task: {
-                        description: 'Schedules a new task for today or a specific date.',
+                        description: 'Schedules a new task.',
                         parameters: {
                             type: 'object',
                             properties: {
                                 title: { type: 'string' },
-                                duration: { type: 'number', description: 'Estimated duration in minutes' },
-                                date: { type: 'string', description: 'YYYY-MM-DD format. Use empty string for today.' },
+                                duration: { type: 'number' },
+                                date: { type: 'string' },
                             },
                             required: ['title', 'duration', 'date'],
                         },
-                        execute: async ({ title, duration, date }: { title: string, duration: number, date: string }) => {
-                            const newActionId = uuidv4();
+                        execute: async ({ title, duration, date }: any) => {
+                            const id = uuidv4();
                             await db.insert(actions).values({
-                                id: newActionId,
-                                userId,
-                                title,
-                                type: 'task',
-                                status: 'pending',
-                                date: date || new Date().toISOString().split('T')[0],
-                                duration,
-                                createdAt: new Date(),
-                                updatedAt: new Date(),
+                                id, userId, title, type: 'task', status: 'pending', duration, date: date || new Date().toISOString().split('T')[0], createdAt: new Date(), updatedAt: new Date(),
                             });
-                            return { success: true, actionId: newActionId, message: 'Task scheduled.' };
-                        },
-                    },
-
-                    log_memory: {
-                        description: 'Saves important facts about the user to long-term memory.',
-                        parameters: {
-                            type: 'object',
-                            properties: {
-                                fact: { type: 'string', description: 'The fact to remember' },
-                                importance: { type: 'number', description: 'How important (0 to 1)' },
-                            },
-                            required: ['fact', 'importance'],
-                        },
-                        execute: async ({ fact, importance }: { fact: string, importance: number }) => {
-                            await db.insert(aiMemories).values({
-                                id: uuidv4(),
-                                userId,
-                                content: fact,
-                                importanceWeight: importance,
-                                createdAt: new Date(),
-                                lastAccessed: new Date(),
-                            });
-                            return { success: true, message: 'Fact remembered.' };
+                            return { success: true, actionId: id };
                         },
                     },
                 },
             } as any);
 
-            // Use the standard toTextStreamResponse but with explicit headers
-            return result.toTextStreamResponse({
-                headers: {
-                    'Content-Type': 'text/plain; charset=utf-8',
-                    'Cache-Control': 'no-cache',
-                    'Connection': 'keep-alive',
-                }
+            return new Response(result.text || 'AI finished action via tools.', {
+                headers: { 'Content-Type': 'text/plain; charset=utf-8' }
             });
 
         } catch (aiError: any) {
@@ -373,8 +349,11 @@ export async function POST(req: Request) {
 
     } catch (error) {
         console.error('[AI] Brain Error:', error);
-        return new Response('Internal Server Error', { status: 500 });
+        return new Response(`[Internal Error] ${error instanceof Error ? error.message : 'Unknown'}`, { status: 500 });
     }
 }
+
+export const dynamic = 'force-dynamic';
+
 
 
