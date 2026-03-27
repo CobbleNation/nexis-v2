@@ -14,7 +14,8 @@ import {
     Menu,
     Mail,
     BarChart3,
-    Megaphone
+    Megaphone,
+    Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -28,6 +29,7 @@ const adminNavItems = [
     { href: '/admin/payments', label: 'Платежі', icon: Activity },
     { href: '/admin/notifications', label: 'Сповіщення', icon: Megaphone },
     { href: '/admin/mail', label: 'Пошта', icon: Mail },
+    { href: '/admin/ai-debug', label: 'AI Debug', icon: Brain },
     { href: '/admin/content', label: 'Контент', icon: Database },
     { href: '/admin/audit', label: 'Журнал Аудиту', icon: ShieldAlert },
 ];

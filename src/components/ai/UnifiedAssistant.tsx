@@ -2,11 +2,10 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useState, useEffect, useRef } from 'react';
-import { Brain, Send, X, Loader2, Sparkles, CheckCircle2, Mic, Settings } from 'lucide-react';
+import { Brain, Send, X, Loader2, Sparkles, CheckCircle2, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface UnifiedAssistantProps {
@@ -15,20 +14,24 @@ interface UnifiedAssistantProps {
 }
 
 export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
-    // @ts-ignore - Vercel AI SDK type bug with Next.js 15
-    const { messages, input, setInput, append, isLoading, error } = useChat({
+    // Use local state for input to avoid useChat's broken input management
+    const [localInput, setLocalInput] = useState('');
+
+    // @ts-ignore - Vercel AI SDK type quirks
+    const { messages, append, isLoading, error } = useChat({
         // @ts-ignore
         api: '/api/ai/brain',
         streamProtocol: 'text',
     });
 
     const scrollRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const [isListening, setIsListening] = useState(false);
 
     const handleSend = () => {
-        const text = (input || '').trim();
+        const text = localInput.trim();
         if (!text || isLoading) return;
-        setInput('');
+        setLocalInput('');
         append({ role: 'user', content: text });
     };
 
@@ -40,20 +43,20 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
             alert('Ваш браузер не підтримує розпізнавання голосу.');
             return;
         }
-        
+
         const recognition = new SpeechRecognition() as any;
         recognition.lang = 'uk-UA';
         recognition.interimResults = false;
-        
+
         recognition.onstart = () => setIsListening(true);
         recognition.onend = () => setIsListening(false);
         recognition.onerror = () => setIsListening(false);
-        
+
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
-            setInput(input ? `${input} ${transcript}` : transcript);
+            setLocalInput(prev => prev ? `${prev} ${transcript}` : transcript);
         };
-        
+
         recognition.start();
     };
 
@@ -62,6 +65,13 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
             scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
         }
     }, [messages, isLoading]);
+
+    // Auto-focus input when assistant opens
+    useEffect(() => {
+        if (open && inputRef.current) {
+            setTimeout(() => inputRef.current?.focus(), 100);
+        }
+    }, [open]);
 
     if (!open) return null;
 
@@ -82,7 +92,7 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                         <div>
                             <h3 className="font-bold text-base leading-tight">Nexis</h3>
                             <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold flex items-center gap-1">
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                 Life OS
                             </p>
                         </div>
@@ -105,21 +115,20 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                             </div>
                         </div>
                     )}
-                    
+
                     {messages.map((m: any) => (
                         <div key={m.id} className={cn("flex flex-col max-w-[85%]", m.role === 'user' ? "ml-auto" : "mr-auto")}>
                             {m.content && (
                                 <div className={cn(
-                                    "p-3 rounded-2xl text-sm leading-relaxed",
-                                    m.role === 'user' 
-                                        ? "bg-primary text-primary-foreground rounded-tr-sm" 
+                                    "p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
+                                    m.role === 'user'
+                                        ? "bg-primary text-primary-foreground rounded-tr-sm"
                                         : "bg-muted text-foreground border border-border/50 rounded-tl-sm shadow-sm"
                                 )}>
                                     {m.content}
                                 </div>
                             )}
 
-                            {/* Render Tool Invocations Visually */}
                             {m.toolInvocations?.map((tool: any) => (
                                 <div key={tool.toolCallId} className="mt-2 text-xs">
                                     {(tool.state === 'call' || tool.state === 'partial-call') ? (
@@ -149,7 +158,7 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                             ))}
                         </div>
                     ))}
-                    
+
                     {isLoading && messages[messages.length - 1]?.role === 'user' && (
                         <div className="mr-auto bg-muted text-foreground p-3 rounded-2xl rounded-tl-sm w-16 flex items-center justify-center">
                             <span className="flex gap-1">
@@ -163,28 +172,36 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
 
                 {/* Input Area */}
                 <div className="p-4 bg-card border-t border-border z-10">
-                    <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2">
-                        <Input
-                            value={input || ''}
-                            onChange={(e) => setInput(e.target.value)}
-                            placeholder="Накажіть Nexis..."
-                            className="bg-muted border-none outline-none focus-visible:ring-1 focus-visible:ring-primary h-12 rounded-xl"
-                            disabled={isLoading}
+                    <div className="flex gap-2">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={localInput}
+                            onChange={(e) => setLocalInput(e.target.value)}
                             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                            placeholder="Накажіть Nexis..."
+                            disabled={isLoading}
+                            className="flex-1 bg-muted border-none outline-none focus:ring-1 focus:ring-primary h-12 rounded-xl px-4 text-sm text-foreground placeholder:text-muted-foreground disabled:opacity-50"
                         />
-                        <Button 
-                            type="button" 
+                        <Button
+                            type="button"
                             variant="outline"
-                            size="icon" 
+                            size="icon"
                             onClick={startListening}
                             className={cn("h-12 w-12 shrink-0 rounded-xl transition-all", isListening && "bg-red-50 text-red-500 border-red-200 animate-pulse")}
                         >
                             <Mic className="w-5 h-5" />
                         </Button>
-                        <Button type="button" size="icon" onClick={handleSend} disabled={isLoading || !(input || '').trim()} className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground">
+                        <Button
+                            type="button"
+                            size="icon"
+                            onClick={handleSend}
+                            disabled={isLoading || !localInput.trim()}
+                            className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
+                        >
                             <Send className="w-5 h-5" />
                         </Button>
-                    </form>
+                    </div>
                     {error && <p className="text-red-500 text-xs mt-2 text-center">Connection error. Please try again.</p>}
                 </div>
             </motion.div>
