@@ -1,39 +1,132 @@
 'use client';
 
-import { useChat } from '@ai-sdk/react';
-import { useState, useEffect, useRef } from 'react';
-import { Brain, Send, X, Loader2, Sparkles, CheckCircle2, Mic } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Brain, Send, X, Loader2, Sparkles, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+
+interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content: string;
+}
 
 interface UnifiedAssistantProps {
     open: boolean;
     onClose: () => void;
 }
 
-export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
-    // Use local state for input to avoid useChat's broken input management
-    const [localInput, setLocalInput] = useState('');
+let msgCounter = 0;
+function genId() {
+    return `msg_${Date.now()}_${++msgCounter}`;
+}
 
-    // @ts-ignore - Vercel AI SDK type quirks
-    const { messages, append, isLoading, error } = useChat({
-        // @ts-ignore
-        api: '/api/ai/brain',
-        streamProtocol: 'text',
-    });
+export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [isListening, setIsListening] = useState(false);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const [isListening, setIsListening] = useState(false);
+    const abortRef = useRef<AbortController | null>(null);
 
-    const handleSend = () => {
-        const text = localInput.trim();
+    const scrollToBottom = useCallback(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, []);
+
+    const handleSend = useCallback(async () => {
+        const text = input.trim();
         if (!text || isLoading) return;
-        setLocalInput('');
-        append({ role: 'user', content: text });
-    };
+
+        setError(null);
+        setInput('');
+
+        // Add user message
+        const userMsg: Message = { id: genId(), role: 'user', content: text };
+        const currentMessages = [...messages, userMsg];
+        setMessages(currentMessages);
+
+        // Start loading
+        setIsLoading(true);
+
+        // Create assistant placeholder
+        const assistantId = genId();
+        setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+
+        try {
+            // Cancel any previous request
+            if (abortRef.current) abortRef.current.abort();
+            abortRef.current = new AbortController();
+
+            const res = await fetch('/api/ai/brain', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messages: currentMessages.map(m => ({
+                        role: m.role,
+                        content: m.content,
+                    })),
+                }),
+                signal: abortRef.current.signal,
+            });
+
+            if (!res.ok) {
+                const errText = await res.text().catch(() => 'Unknown error');
+                throw new Error(`Server error ${res.status}: ${errText}`);
+            }
+
+            if (!res.body) {
+                throw new Error('No response body');
+            }
+
+            // Read the streaming response
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                fullText += chunk;
+
+                // Update the assistant message progressively
+                const currentText = fullText;
+                setMessages(prev =>
+                    prev.map(m =>
+                        m.id === assistantId
+                            ? { ...m, content: currentText }
+                            : m
+                    )
+                );
+            }
+
+            // If empty response, show fallback
+            if (!fullText.trim()) {
+                setMessages(prev =>
+                    prev.map(m =>
+                        m.id === assistantId
+                            ? { ...m, content: 'Вибач, я не зміг сформувати відповідь. Спробуй ще раз.' }
+                            : m
+                    )
+                );
+            }
+        } catch (err: any) {
+            if (err.name === 'AbortError') return;
+            console.error('[Chat] Error:', err);
+            setError(err.message || 'Connection failed');
+            // Remove empty assistant message on error
+            setMessages(prev => prev.filter(m => m.id !== assistantId));
+        } finally {
+            setIsLoading(false);
+        }
+    }, [input, isLoading, messages]);
 
     // Voice Support
     const startListening = () => {
@@ -54,22 +147,19 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
 
         recognition.onresult = (event: any) => {
             const transcript = event.results[0][0].transcript;
-            setLocalInput(prev => prev ? `${prev} ${transcript}` : transcript);
+            setInput(prev => prev ? `${prev} ${transcript}` : transcript);
         };
 
         recognition.start();
     };
 
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [messages, isLoading]);
+    // Auto-scroll on new messages
+    useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
     // Auto-focus input when assistant opens
     useEffect(() => {
         if (open && inputRef.current) {
-            setTimeout(() => inputRef.current?.focus(), 100);
+            setTimeout(() => inputRef.current?.focus(), 150);
         }
     }, [open]);
 
@@ -116,58 +206,24 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                         </div>
                     )}
 
-                    {messages.map((m: any) => (
+                    {messages.map((m) => (
                         <div key={m.id} className={cn("flex flex-col max-w-[85%]", m.role === 'user' ? "ml-auto" : "mr-auto")}>
-                            {m.content && (
-                                <div className={cn(
-                                    "p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
-                                    m.role === 'user'
-                                        ? "bg-primary text-primary-foreground rounded-tr-sm"
-                                        : "bg-muted text-foreground border border-border/50 rounded-tl-sm shadow-sm"
-                                )}>
-                                    {m.content}
-                                </div>
-                            )}
-
-                            {m.toolInvocations?.map((tool: any) => (
-                                <div key={tool.toolCallId} className="mt-2 text-xs">
-                                    {(tool.state === 'call' || tool.state === 'partial-call') ? (
-                                        <div className="flex items-center gap-2 text-muted-foreground bg-secondary/50 p-2 rounded-lg font-medium border border-border/50">
-                                            <Loader2 className="w-3 h-3 animate-spin" />
-                                            {tool.toolName === 'create_goal' && 'Створення цілі...'}
-                                            {tool.toolName === 'schedule_task' && 'Планування завдання...'}
-                                            {tool.toolName === 'log_memory' && 'Оновлення пам\'яті...'}
-                                            {tool.toolName === 'reschedule_low_impact' && 'Оптимізація розкладу...'}
-                                        </div>
-                                    ) : tool.state === 'result' ? (
-                                        <div className="flex items-start gap-2 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-900 border-l-2 border-l-emerald-500 shadow-sm">
-                                            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                                            <div className="font-medium">
-                                                {tool.toolName === 'create_goal' && 'Ціль збережена у базу'}
-                                                {tool.toolName === 'schedule_task' && (tool.result as any)?.success === false ? (
-                                                    <span className="text-red-500">{(tool.result as any).reason}</span>
-                                                ) : tool.toolName === 'schedule_task' ? (
-                                                    <span>Завдання додано. Impact Score: <span className="font-bold text-amber-600">{(tool.result as any)?.impactScore?.toFixed(2)}</span></span>
-                                                ) : ''}
-                                                {tool.toolName === 'log_memory' && 'Факти додано до пам\'яті'}
-                                                {tool.toolName === 'reschedule_low_impact' && 'Розклад автоматично розвантажено'}
-                                            </div>
-                                        </div>
-                                    ) : null}
-                                </div>
-                            ))}
+                            <div className={cn(
+                                "p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
+                                m.role === 'user'
+                                    ? "bg-primary text-primary-foreground rounded-tr-sm"
+                                    : "bg-muted text-foreground border border-border/50 rounded-tl-sm shadow-sm"
+                            )}>
+                                {m.content || (
+                                    <span className="flex gap-1">
+                                        <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1.5 h-1.5 bg-foreground/50 rounded-full" />
+                                        <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1.5 h-1.5 bg-foreground/50 rounded-full" />
+                                        <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1.5 h-1.5 bg-foreground/50 rounded-full" />
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     ))}
-
-                    {isLoading && messages[messages.length - 1]?.role === 'user' && (
-                        <div className="mr-auto bg-muted text-foreground p-3 rounded-2xl rounded-tl-sm w-16 flex items-center justify-center">
-                            <span className="flex gap-1">
-                                <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-1.5 h-1.5 bg-foreground/50 rounded-full" />
-                                <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-1.5 h-1.5 bg-foreground/50 rounded-full" />
-                                <motion.span animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-1.5 h-1.5 bg-foreground/50 rounded-full" />
-                            </span>
-                        </div>
-                    )}
                 </div>
 
                 {/* Input Area */}
@@ -176,9 +232,14 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                         <input
                             ref={inputRef}
                             type="text"
-                            value={localInput}
-                            onChange={(e) => setLocalInput(e.target.value)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSend();
+                                }
+                            }}
                             placeholder="Накажіть Nexis..."
                             disabled={isLoading}
                             className="flex-1 bg-muted border-none outline-none focus:ring-1 focus:ring-primary h-12 rounded-xl px-4 text-sm text-foreground placeholder:text-muted-foreground disabled:opacity-50"
@@ -196,13 +257,17 @@ export function UnifiedAssistant({ open, onClose }: UnifiedAssistantProps) {
                             type="button"
                             size="icon"
                             onClick={handleSend}
-                            disabled={isLoading || !localInput.trim()}
+                            disabled={isLoading || !input.trim()}
                             className="h-12 w-12 shrink-0 rounded-xl shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
                         >
-                            <Send className="w-5 h-5" />
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                         </Button>
                     </div>
-                    {error && <p className="text-red-500 text-xs mt-2 text-center">Connection error. Please try again.</p>}
+                    {error && (
+                        <p className="text-red-500 text-xs mt-2 text-center">
+                            ⚠️ {error}
+                        </p>
+                    )}
                 </div>
             </motion.div>
         </AnimatePresence>
