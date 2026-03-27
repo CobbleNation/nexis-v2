@@ -271,18 +271,18 @@ export async function POST(req: Request) {
                         description: 'Creates a new goal or project for the user.',
                         parameters: z.object({
                             title: z.string(),
-                            type: z.string().describe('Must be EXACTLY one of: vision, strategic, tactical'),
+                            goalType: z.string().describe('Must be EXACTLY one of: vision, strategic, tactical'),
                             areaId: z.string().describe('Optional ID of the life area this goal belongs to. Leave empty string if none.'),
                             reason: z.string().describe('Why is this goal important?'),
                         }),
                         // @ts-ignore
-                        execute: async ({ title, type, areaId, reason }: { title: string, type: 'vision'|'strategic'|'tactical', areaId: string, reason: string }) => {
+                        execute: async ({ title, goalType, areaId, reason }: { title: string, goalType: 'vision'|'strategic'|'tactical', areaId: string, reason: string }) => {
                             const newGoalId = uuidv4();
                             await db.insert(goals).values({
                                 id: newGoalId,
                                 userId,
                                 title,
-                                type: (type === 'vision' || type === 'strategic' || type === 'tactical') ? type : 'tactical',
+                                type: (goalType === 'vision' || goalType === 'strategic' || goalType === 'tactical') ? goalType : 'tactical',
                                 areaId: areaId || undefined,
                                 status: 'active',
                                 createdAt: new Date(),
