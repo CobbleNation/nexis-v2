@@ -60,7 +60,7 @@ ${tasksBlock}
 - Будь професійним, але дружнім ("ти").
 - Твої відповіді мають бути індивідуальними, базуючись на контексті вище.
 - Якщо користувач просить створити ціль або задачу, використовуй відповідні інструменти.
-- ПІСЛЯ використання інструменту обов'язково підтвердь дію у текстовій відповіді.`;
+- ПІСЛЯ використання інструменту обов'язково підтвердь дію у текстовій відповіді. Опиши що саме було зроблено.`;
 }
 
 export async function POST(req: Request) {
@@ -79,9 +79,9 @@ export async function POST(req: Request) {
         if (!decoded || !decoded.userId) return new Response('Unauthorized', { status: 401 });
 
         const userId = decoded.userId as string;
-        const { messages } = await req.json();
+        const { messages: userMessages } = await req.json();
 
-        if (!messages || !Array.isArray(messages)) return new Response('Bad Request', { status: 400 });
+        if (!userMessages || !Array.isArray(userMessages)) return new Response('Bad Request', { status: 400 });
 
         // Fetch user context
         const [userResult] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
@@ -105,61 +105,66 @@ export async function POST(req: Request) {
             userName: userResult?.name || 'User',
         });
 
-        // Use standard OpenAI Streaming instead of Vercel AI SDK to avoid schema bugs
-        const response = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-                { role: "system", content: systemPrompt },
-                ...messages
-            ],
-            tools: [
-                {
-                    type: "function",
-                    function: {
-                        name: "create_goal",
-                        description: "Creates a new goal in the system.",
-                        parameters: {
-                            type: "object",
-                            properties: {
-                                title: { type: "string", description: "The title of the goal" },
-                                goalType: { type: "string", enum: ["vision", "strategic", "tactical"] },
-                                areaId: { type: "string", description: "Life area ID" },
-                            },
-                            required: ["title", "goalType"]
-                        }
-                    }
-                },
-                {
-                    type: "function",
-                    function: {
-                        name: "schedule_task",
-                        description: "Schedules a task for specific date.",
-                        parameters: {
-                            type: "object",
-                            properties: {
-                                title: { type: "string" },
-                                duration: { type: "number", description: "Duration in minutes" },
-                                date: { type: "string", description: "YYYY-MM-DD" },
-                            },
-                            required: ["title", "duration"]
-                        }
-                    }
-                }
-            ],
-            stream: true,
-        });
+        const allMessages: any[] = [
+            { role: "system", content: systemPrompt },
+            ...userMessages
+        ];
 
         const stream = new ReadableStream({
             async start(controller) {
                 const encoder = new TextEncoder();
-                let toolCalls: any[] = [];
+                let keepRunning = true;
 
-                try {
+                while (keepRunning) {
+                    const response = await openai.chat.completions.create({
+                        model: "gpt-4o",
+                        messages: allMessages,
+                        tools: [
+                            {
+                                type: "function",
+                                function: {
+                                    name: "create_goal",
+                                    description: "Creates a new goal in the system.",
+                                    parameters: {
+                                        type: "object",
+                                        properties: {
+                                            title: { type: "string", description: "The title of the goal" },
+                                            goalType: { type: "string", enum: ["vision", "strategic", "tactical"] },
+                                            areaId: { type: "string", description: "Life area ID" },
+                                        },
+                                        required: ["title", "goalType"]
+                                    }
+                                }
+                            },
+                            {
+                                type: "function",
+                                function: {
+                                    name: "schedule_task",
+                                    description: "Schedules a task for specific date.",
+                                    parameters: {
+                                        type: "object",
+                                        properties: {
+                                            title: { type: "string" },
+                                            duration: { type: "number", description: "Duration in minutes" },
+                                            date: { type: "string", description: "YYYY-MM-DD" },
+                                        },
+                                        required: ["title", "duration"]
+                                    }
+                                }
+                            }
+                        ],
+                        stream: true,
+                    });
+
+                    let currentText = '';
+                    let toolCalls: any[] = [];
+
                     for await (const chunk of response) {
                         const delta = chunk.choices[0]?.delta;
                         
                         if (delta?.content) {
                             controller.enqueue(encoder.encode(delta.content));
+                            currentText += delta.content;
                         }
 
                         if (delta?.tool_calls) {
@@ -178,35 +183,60 @@ export async function POST(req: Request) {
                         }
                     }
 
-                    // Execute tools if any
-                    for (const tc of toolCalls) {
-                        if (tc.function.name === 'create_goal') {
-                            try {
-                                const { title, goalType, areaId } = JSON.parse(tc.function.arguments);
-                                const newGoalId = uuidv4();
-                                await db.insert(goals).values({
-                                    id: newGoalId, userId, title, type: goalType, areaId: areaId || undefined, status: 'active', createdAt: new Date(), updatedAt: new Date(),
-                                } as any);
-                            } catch (e) {
-                                console.error('Tool exec error:', e);
+                    if (toolCalls.length > 0) {
+                        // Execution of the assistant message turn that included tool calls
+                        const assistantMessage = {
+                            role: "assistant",
+                            content: currentText || null,
+                            tool_calls: toolCalls.map(tc => ({
+                                id: tc.id,
+                                type: "function",
+                                function: { name: tc.function.name, arguments: tc.function.arguments }
+                            }))
+                        };
+                        allMessages.push(assistantMessage);
+
+                        // Execute tools and add TOOL messages to history
+                        for (const tc of toolCalls) {
+                            let result = { success: false, message: 'Tool execution failed' };
+                            
+                            if (tc.function.name === 'create_goal') {
+                                try {
+                                    const { title, goalType, areaId } = JSON.parse(tc.function.arguments);
+                                    const newGoalId = uuidv4();
+                                    await db.insert(goals).values({
+                                        id: newGoalId, userId, title, type: goalType, areaId: areaId || undefined, status: 'active', createdAt: new Date(), updatedAt: new Date(),
+                                    } as any);
+                                    result = { success: true, message: `Goal created with ID ${newGoalId}` };
+                                } catch (e: any) {
+                                    result = { success: false, message: e.message };
+                                }
+                            } else if (tc.function.name === 'schedule_task') {
+                                try {
+                                    const { title, duration, date } = JSON.parse(tc.function.arguments);
+                                    const id = uuidv4();
+                                    await db.insert(actions).values({
+                                        id, userId, title, type: 'task', status: 'pending', duration, date: date || new Date().toISOString().split('T')[0], createdAt: new Date(), updatedAt: new Date(),
+                                    } as any);
+                                    result = { success: true, message: `Task scheduled with ID ${id}` };
+                                } catch (e: any) {
+                                    result = { success: false, message: e.message };
+                                }
                             }
-                        } else if (tc.function.name === 'schedule_task') {
-                            try {
-                                const { title, duration, date } = JSON.parse(tc.function.arguments);
-                                const id = uuidv4();
-                                await db.insert(actions).values({
-                                    id, userId, title, type: 'task', status: 'pending', duration, date: date || new Date().toISOString().split('T')[0], createdAt: new Date(), updatedAt: new Date(),
-                                } as any);
-                            } catch (e) {
-                                console.error('Tool exec error:', e);
-                            }
+
+                            allMessages.push({
+                                role: "tool",
+                                tool_call_id: tc.id,
+                                content: JSON.stringify(result)
+                            });
                         }
+                        // Continue to next turn to get final natural language response
+                    } else {
+                        keepRunning = false;
                     }
-                } catch (e) {
-                    console.error('Stream processing error:', e);
-                } finally {
-                    controller.close();
                 }
+
+                controller.close();
             },
         });
 
