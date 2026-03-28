@@ -1,8 +1,7 @@
-import { openai } from '@ai-sdk/openai';
-import { streamText, jsonSchema } from 'ai';
+import OpenAI from 'openai';
 import { db } from '@/db';
 import { actions, aiMemories, goals, habits, habitLogs, lifeAreas, userProfiles, users } from '@/db/schema';
-import { eq, and, gte, desc } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyJWT } from '@/lib/auth-utils';
 import { cookies } from 'next/headers';
@@ -10,21 +9,15 @@ import { cookies } from 'next/headers';
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-// Build a rich, structured system prompt from ALL available user data
 function buildEnrichedSystemPrompt(opts: {
     profile: any;
     memories: string[];
     activeGoals: any[];
     todayTasks: any[];
-    allTasks: any[];
-    activeHabits: any[];
-    recentHabitLogs: any[];
-    lifeAreas: any[];
     userName: string;
 }) {
-    const { profile, memories, activeGoals, todayTasks, allTasks, activeHabits, recentHabitLogs, lifeAreas: areas, userName } = opts;
+    const { profile, memories, activeGoals, todayTasks, userName } = opts;
 
-    // Process structured profile into text
     let profileBlock = '(Користувач ще не заповнив розширений профіль)';
     if (profile) {
         const lines = [];
@@ -38,11 +31,15 @@ function buildEnrichedSystemPrompt(opts: {
     const dayOfWeek = ['Неділя', 'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'П\'ятниця', 'Субота'][new Date().getDay()];
 
     const goalsBlock = activeGoals.length > 0
-        ? activeGoals.map(g => `  - [${g.type || 'goal'}] ${g.title} (статус: ${g.status})`).join('\n')
+        ? activeGoals.map(g => `  - [${g.type || 'goal'}] ${g.title} (ID: ${g.id}, статус: ${g.status})`).join('\n')
         : '  (Немає активних цілей)';
 
-    return `Ти — Nexis AI, персональний асистент користувача на ім'я ${userName}.
-Твоє завдання — допомагати користувачу досягати цілей та планувати день.
+    const tasksBlock = todayTasks.length > 0
+        ? todayTasks.map(t => `  - ${t.title} (${t.status})`).join('\n')
+        : '  (На сьогодні завдань немає)';
+
+    return `Ти — Nexis AI, персональний Life OS асистент користувача на ім'я ${userName}.
+Твоє завдання — допомагати користувачу в управлінні життям, фокусом та енергією.
 
 ПОТОЧНИЙ КОНТЕКСТ КОРИСТУВАЧА (${today}, ${dayOfWeek}):
 
@@ -52,16 +49,25 @@ ${profileBlock}
 2. ДОВГОТРИВАЛА ПАМ'ЯТЬ:
 ${memories.length > 0 ? memories.map(m => `  - ${m}`).join('\n') : '  (Пам\'ять порожня)'}
 
-3. ЦІЛІ:
+3. АКТИВНІ ЦІЛІ:
 ${goalsBlock}
+
+4. ЗАВДАННЯ НА СЬОГОДНІ:
+${tasksBlock}
 
 ІНСТРУКЦІЇ:
 - Спілкуйся українською мовою.
-- Будь лаконічним.
-- Допомагай створювати цілі ('create_goal') або планувати завдання ('schedule_task') за потреби.`;
+- Будь професійним, але дружнім ("ти").
+- Твої відповіді мають бути індивідуальними, базуючись на контексті вище.
+- Якщо користувач просить створити ціль або задачу, використовуй відповідні інструменти.
+- ПІСЛЯ використання інструменту обов'язково підтвердь дію у текстовій відповіді.`;
 }
 
 export async function POST(req: Request) {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+
     try {
         const cookieStore = await cookies();
         const authHeader = req.headers.get('authorization');
@@ -77,23 +83,17 @@ export async function POST(req: Request) {
 
         if (!messages || !Array.isArray(messages)) return new Response('Bad Request', { status: 400 });
 
-        // ── Fetch Data ──
+        // Fetch user context
         const [userResult] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
         const [
             memoriesResult,
             activeGoals,
             todayTasks,
-            activeHabitsResult,
-            recentHabitLogsResult,
-            areasResult,
             profileResult
         ] = await Promise.all([
             db.select().from(aiMemories).where(eq(aiMemories.userId, userId)).orderBy(desc(aiMemories.createdAt)).limit(5),
             db.select().from(goals).where(and(eq(goals.userId, userId), eq(goals.status, 'active'))),
             db.select().from(actions).where(and(eq(actions.userId, userId), eq(actions.type, 'task'), eq(actions.date, new Date().toISOString().split('T')[0]))),
-            db.select().from(habits).where(and(eq(habits.userId, userId), eq(habits.status, 'active'))),
-            db.select().from(habitLogs).where(eq(habitLogs.userId, userId)).orderBy(desc(habitLogs.id)).limit(10), // Use ID if completedAt missing
-            db.select().from(lifeAreas).where(eq(lifeAreas.userId, userId)),
             db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1)
         ]);
 
@@ -102,73 +102,120 @@ export async function POST(req: Request) {
             memories: memoriesResult.map(m => m.content).filter(Boolean) as string[],
             activeGoals,
             todayTasks,
-            allTasks: [],
-            activeHabits: activeHabitsResult as any[],
-            recentHabitLogs: recentHabitLogsResult as any[],
-            lifeAreas: areasResult as any[],
             userName: userResult?.name || 'User',
         });
 
-        // ── Invoke AI ──
-        const result = streamText({
-            model: openai('gpt-4o'),
-            system: systemPrompt,
-            messages,
-            tools: {
-                create_goal: {
-                    description: 'Creates a new goal.',
-                    parameters: jsonSchema({
-                        type: 'object',
-                        properties: {
-                            title: { type: 'string' },
-                            goalType: { type: 'string', enum: ['vision', 'strategic', 'tactical'] },
-                            areaId: { type: 'string' },
-                        },
-                        required: ['title', 'goalType'],
-                    }),
-                    execute: async ({ title, goalType, areaId }: any) => {
-                        const newGoalId = uuidv4();
-                        await db.insert(goals).values({
-                            id: newGoalId,
-                            userId,
-                            title,
-                            type: goalType as any,
-                            areaId: areaId || undefined,
-                            status: 'active',
-                            createdAt: new Date(),
-                            updatedAt: new Date(),
-                        } as any);
-                        return { success: true, goalId: newGoalId };
-                    },
+        // Use standard OpenAI Streaming instead of Vercel AI SDK to avoid schema bugs
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+                { role: "system", content: systemPrompt },
+                ...messages
+            ],
+            tools: [
+                {
+                    type: "function",
+                    function: {
+                        name: "create_goal",
+                        description: "Creates a new goal in the system.",
+                        parameters: {
+                            type: "object",
+                            properties: {
+                                title: { type: "string", description: "The title of the goal" },
+                                goalType: { type: "string", enum: ["vision", "strategic", "tactical"] },
+                                areaId: { type: "string", description: "Life area ID" },
+                            },
+                            required: ["title", "goalType"]
+                        }
+                    }
                 },
-                schedule_task: {
-                    description: 'Schedules a task.',
-                    parameters: jsonSchema({
-                        type: 'object',
-                        properties: {
-                            title: { type: 'string' },
-                            duration: { type: 'number' },
-                            date: { type: 'string' },
-                        },
-                        required: ['title', 'duration'],
-                    }),
-                    execute: async ({ title, duration, date }: any) => {
-                        const id = uuidv4();
-                        await db.insert(actions).values({
-                            id, userId, title, type: 'task', status: 'pending', duration, date: date || new Date().toISOString().split('T')[0], createdAt: new Date(), updatedAt: new Date(),
-                        } as any);
-                        return { success: true, actionId: id };
-                    },
-                },
+                {
+                    type: "function",
+                    function: {
+                        name: "schedule_task",
+                        description: "Schedules a task for specific date.",
+                        parameters: {
+                            type: "object",
+                            properties: {
+                                title: { type: "string" },
+                                duration: { type: "number", description: "Duration in minutes" },
+                                date: { type: "string", description: "YYYY-MM-DD" },
+                            },
+                            required: ["title", "duration"]
+                        }
+                    }
+                }
+            ],
+            stream: true,
+        });
+
+        const stream = new ReadableStream({
+            async start(controller) {
+                const encoder = new TextEncoder();
+                let toolCalls: any[] = [];
+
+                try {
+                    for await (const chunk of response) {
+                        const delta = chunk.choices[0]?.delta;
+                        
+                        if (delta?.content) {
+                            controller.enqueue(encoder.encode(delta.content));
+                        }
+
+                        if (delta?.tool_calls) {
+                            for (const toolCall of delta.tool_calls) {
+                                if (!toolCalls[toolCall.index]) {
+                                    toolCalls[toolCall.index] = { 
+                                        index: toolCall.index,
+                                        id: toolCall.id,
+                                        function: { name: '', arguments: '' } 
+                                    };
+                                }
+                                if (toolCall.id) toolCalls[toolCall.index].id = toolCall.id;
+                                if (toolCall.function?.name) toolCalls[toolCall.index].function.name += toolCall.function.name;
+                                if (toolCall.function?.arguments) toolCalls[toolCall.index].function.arguments += toolCall.function.arguments;
+                            }
+                        }
+                    }
+
+                    // Execute tools if any
+                    for (const tc of toolCalls) {
+                        if (tc.function.name === 'create_goal') {
+                            try {
+                                const { title, goalType, areaId } = JSON.parse(tc.function.arguments);
+                                const newGoalId = uuidv4();
+                                await db.insert(goals).values({
+                                    id: newGoalId, userId, title, type: goalType, areaId: areaId || undefined, status: 'active', createdAt: new Date(), updatedAt: new Date(),
+                                } as any);
+                            } catch (e) {
+                                console.error('Tool exec error:', e);
+                            }
+                        } else if (tc.function.name === 'schedule_task') {
+                            try {
+                                const { title, duration, date } = JSON.parse(tc.function.arguments);
+                                const id = uuidv4();
+                                await db.insert(actions).values({
+                                    id, userId, title, type: 'task', status: 'pending', duration, date: date || new Date().toISOString().split('T')[0], createdAt: new Date(), updatedAt: new Date(),
+                                } as any);
+                            } catch (e) {
+                                console.error('Tool exec error:', e);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error('Stream processing error:', e);
+                } finally {
+                    controller.close();
+                }
             },
         });
 
-        return result.toTextStreamResponse({
+        return new Response(stream, {
             headers: { 'Content-Type': 'text/plain; charset=utf-8' }
         });
 
     } catch (error: any) {
         console.error('[AI] Brain Error:', error);
-        return new Response(`[AI Error] ${error?.message || 'Error'}`, { status: 200 });
+        return new Response(`[AI Error] ${error?.message || 'Error'}`, { status: 500 });
     }
 }
